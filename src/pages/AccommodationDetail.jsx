@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Users, Star, Home, MessageCircle } from 'lucide-react';
+import { MapPin, Users, Home, MessageCircle } from 'lucide-react';
 
 function AccommodationDetail() {
   const { id } = useParams();
@@ -13,27 +13,27 @@ function AccommodationDetail() {
     checkOut: ''
   });
 
-  useEffect(() => {
-    fetchAccommodation();
-  }, [id, fetchAccommodation]);
+  const fetchAccommodation = useCallback(async () => {
+        try {
+                const { data, error } = await supabase
+                  .from('accommodations')
+                  .select('*, users(id, full_name, church_name, phone)')
+                  .eq('id', id)
+                  .single();
 
-  const fetchAccommodation = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('accommodations')
-        .select('*, users(id, full_name, church_name, phone)')
-        .eq('id', id)
-        .single();
+                if (error) throw error;
+                setAccommodation(data);
+                setHost(data.users);
+        } catch (error) {
+                console.error('숙소 로드 오류:', error);
+        } finally {
+                setLoading(false);
+        }
+  }, [id]);
 
-      if (error) throw error;
-      setAccommodation(data);
-      setHost(data.users);
-    } catch (error) {
-      console.error('숙소 로드 오류:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    useEffect(() => {
+          fetchAccommodation();
+    }, [fetchAccommodation]);
 
   const handleBooking = async () => {
     if (!bookingData.checkIn || !bookingData.checkOut) {
