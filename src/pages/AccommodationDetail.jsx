@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Users, Star } from 'lucide-react';
+import { MapPin, Users, Star, Home, MessageCircle } from 'lucide-react';
 
 function AccommodationDetail() {
   const { id } = useParams();
