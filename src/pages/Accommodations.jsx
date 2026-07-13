@@ -20,6 +20,7 @@ function Accommodations() {
 
   useEffect(() => {
     applyFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, accommodations]);
 
   const fetchAccommodations = async () => {

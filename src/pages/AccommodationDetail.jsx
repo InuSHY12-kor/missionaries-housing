@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Users, Home, MessageCircle } from 'lucide-react';
+import { MapPin, Users, Star } from 'lucide-react';
 
 function AccommodationDetail() {
   const { id } = useParams();
@@ -15,7 +15,7 @@ function AccommodationDetail() {
 
   useEffect(() => {
     fetchAccommodation();
-  }, [id]);
+  }, [id, fetchAccommodation]);
 
   const fetchAccommodation = async () => {
     try {
@@ -48,7 +48,7 @@ function AccommodationDetail() {
       const totalPrice = nights * accommodation.price;
 
       // 예약 생성
-      const { data, error } = await supabase
+      const { error } = await supabase  // data 제거
         .from('bookings')
         .insert({
           accommodation_id: id,

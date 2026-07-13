@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../App';
-import { User, Mail, Phone, Building2, Save } from 'lucide-react';
+import { User, Phone, Building2, Save } from 'lucide-react';
 
 function Profile({ userProfile }) {
   const [loading, setLoading] = useState(false);

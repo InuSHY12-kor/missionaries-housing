@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, Home, BookOpen, User, Settings } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 function Navigation({ user, userProfile, onLogout }) {
   return (

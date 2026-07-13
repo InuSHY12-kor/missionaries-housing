@@ -20,6 +20,7 @@ function HostAccommodations({ userProfile }) {
 
   useEffect(() => {
     fetchAccommodations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchAccommodations = async () => {

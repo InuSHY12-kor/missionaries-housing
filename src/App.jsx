@@ -24,8 +24,10 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 현재 로그인된 사용자 확인
-    checkUser();
+    const initAuth = async () => {
+      await checkUser();
+    };
+    initAuth();
     
     // 인증 상태 변경 리스너
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
