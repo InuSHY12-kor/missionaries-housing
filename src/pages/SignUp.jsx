@@ -20,6 +20,12 @@ function SignUp() {
     phone: ''
   });
 
+  const [files, setFiles] = useState([]);
+
+  const handleFileChange = (e) => {
+    setFiles(Array.from(e.target.files));
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -56,6 +62,18 @@ function SignUp() {
 
       const userId = authData.user.id;
 
+      const verificationDocs = [];
+      if (files.length > 0) {
+        for (const file of files) {
+          const filePath = `${userId}/${Date.now()}_${file.name}`;
+          const { error: uploadError } = await supabase.storage
+            .from('verification-docs')
+            .upload(filePath, file);
+          if (uploadError) throw uploadError;
+          verificationDocs.push(filePath);
+        }
+      }
+
       const { error: profileError } = await supabase
         .from('users')
         .insert({
@@ -67,7 +85,7 @@ function SignUp() {
           church_address: formData.churchAddress,
           phone: formData.phone,
           status: 'pending',
-          verification_docs: [],
+          verification_docs: verificationDocs,
           created_at: new Date().toISOString()
         });
 
@@ -192,6 +210,20 @@ function SignUp() {
             </div>
 
             <div className="form-group">
+              <label>증빙 자료 업로드 (선택)</label>
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                accept=".pdf,.jpg,.jpeg,.png"
+              />
+              {files.length > 0 && (
+                <p className="file-list">{files.map(f => f.name).join(', ')}</p>
+              )}
+              <p className="field-hint">선교사 파송 확인서, 숙소 관련 서류 등을 첨부해주세요.</p>
+            </div>
+
+            <div className="form-group">
               <label>비밀번호 *</label>
               <input
                 type="password"
@@ -253,6 +285,18 @@ function SignUp() {
           max-width: 600px;
           width: 100%;
           margin: 0 auto;
+        }
+
+        .file-list {
+          margin-top: 0.5rem;
+          font-size: 0.85rem;
+          color: #555;
+        }
+
+        .field-hint {
+          margin-top: 0.4rem;
+          font-size: 0.8rem;
+          color: #888;
         }
 
         .signup-form h1 {
