@@ -90,6 +90,22 @@ body {
   color: white;
 }
 
+.status-role-admin {
+  background: #8e44ad;
+  color: white;
+}
+
+.status-role-missionary {
+  background: #2980b9;
+  color: white;
+}
+
+.status-role-host {
+  background: #16a085;
+  color: white;
+}
+
+
 /* 컨테이너 */
 .container {
   max-width: 1200px;
