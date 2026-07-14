@@ -8,7 +8,7 @@ function LandingPage() {
       {/* 히어로 섹션 */}
       <section className="hero">
         <div className="hero-content">
-          <h1>선교사 커뮤니티 숙소 공유 플랫폼</h1>
+                    <h1>WEWE STAY</h1>
           <p>믿음의 공동체 속에서 안전하고 신뢰할 수 있는 숙소를 찾으세요</p>
           <Link to="/signup" className="btn btn-primary">지금 시작하기</Link>
         </div>
