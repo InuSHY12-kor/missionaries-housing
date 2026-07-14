@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import Navigation from './components/Navigation';
 import LandingPage from './pages/LandingPage';
 import SignUp from './pages/SignUp';
+import Login from './pages/Login';
 import PendingApproval from './pages/PendingApproval';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -28,7 +29,7 @@ function App() {
       await checkUser();
     };
     initAuth();
-    
+
     // 인증 상태 변경 리스너
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -66,7 +67,7 @@ function App() {
         .select('*')
         .eq('id', userId)
         .single();
-      
+
       if (error) throw error;
       setUserProfile(data);
     } catch (error) {
@@ -93,11 +94,12 @@ function App() {
     <BrowserRouter>
       <div className="App">
         <Navigation user={user} userProfile={userProfile} onLogout={handleLogout} />
-        
+
         <Routes>
           {/* 공개 페이지 */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
 
           {/* 로그인 필요 */}
           {user ? (
