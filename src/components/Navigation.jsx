@@ -9,11 +9,12 @@ function Navigation({ user, userProfile, onLogout }) {
         <Link to="/" className="navbar-brand">
           🏠 선교사 숙소 공유
         </Link>
-        
+
         <ul className="navbar-nav">
           {!user ? (
             <>
               <li><Link to="/">홈</Link></li>
+              <li><Link to="/login">로그인</Link></li>
               <li><Link to="/signup" className="btn btn-primary">가입하기</Link></li>
             </>
           ) : (
@@ -31,7 +32,7 @@ function Navigation({ user, userProfile, onLogout }) {
                   <li><Link to="/profile">프로필</Link></li>
                 </>
               )}
-              
+
               {userProfile?.status === 'pending' && (
                 <li>
                   <span className="status-badge status-pending">
@@ -39,7 +40,7 @@ function Navigation({ user, userProfile, onLogout }) {
                   </span>
                 </li>
               )}
-              
+
               <li>
                 <button onClick={onLogout} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <LogOut size={18} />
