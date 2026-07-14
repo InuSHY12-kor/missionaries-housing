@@ -167,7 +167,7 @@ function SignUp() {
                     checked={formData.role === 'host'}
                     onChange={handleInputChange}
                   />
-                  <span>호스트 (숙소 제공)</span>
+                                    <span>숙소 제공자 (숙소 제공)</span>
                 </label>
               </div>
             </div>
