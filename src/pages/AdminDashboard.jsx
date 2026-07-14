@@ -151,7 +151,7 @@ function AdminDashboard() {
                       <p><strong>교회:</strong> {user.church_name}</p>
                       <p><strong>주소:</strong> {user.church_address || '미입력'}</p>
                       <p><strong>전화:</strong> {user.phone}</p>
-                      <p><strong>역할:</strong> {user.role === 'missionary' ? '선교사' : '호스트'}</p>
+                                            <p><strong>역할:</strong> {user.role === 'admin' ? '관리자' : user.role === 'missionary' ? '선교사' : '숙소 제공자'}</p>
                       <p><strong>가입일:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
                     </div>
 
