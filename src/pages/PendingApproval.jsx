@@ -45,7 +45,7 @@ function PendingApproval({ userProfile }) {
                   <li><strong>성명:</strong> {userProfile?.full_name}</li>
                   <li><strong>이메일:</strong> {userProfile?.email}</li>
                   <li><strong>소속:</strong> {userProfile?.church_name}</li>
-                  <li><strong>역할:</strong> {userProfile?.role === 'missionary' ? '선교사' : '호스트'}</li>
+                                                    <li><strong>역할:</strong> {userProfile?.role === 'admin' ? '관리자' : userProfile?.role === 'missionary' ? '선교사' : '숙소 제공자'}</li>
                   <li><strong>상태:</strong> <span className="badge badge-warning">검토 중</span></li>
                 </ul>
               </div>
