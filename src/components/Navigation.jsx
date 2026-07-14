@@ -2,12 +2,18 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 
+const ROLE_LABELS = {
+  admin: '관리자',
+  missionary: '선교사',
+  host: '숙소 제공자'
+};
+
 function Navigation({ user, userProfile, onLogout }) {
   return (
     <nav className="navbar">
       <div className="container">
         <Link to="/" className="navbar-brand">
-          🏠 선교사 숙소 공유
+          🏠 WEWE STAY
         </Link>
 
         <ul className="navbar-nav">
@@ -30,6 +36,11 @@ function Navigation({ user, userProfile, onLogout }) {
                     <li><Link to="/admin">관리</Link></li>
                   )}
                   <li><Link to="/profile">프로필</Link></li>
+                  <li>
+                    <span className={`status-badge status-role-${userProfile.role}`}>
+                      {ROLE_LABELS[userProfile.role] || userProfile.role}
+                    </span>
+                  </li>
                 </>
               )}
 
