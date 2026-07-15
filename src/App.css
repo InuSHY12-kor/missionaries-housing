@@ -68,6 +68,12 @@ body {
   opacity: 0.8;
 }
 
+. {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
 .status-badge {
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
