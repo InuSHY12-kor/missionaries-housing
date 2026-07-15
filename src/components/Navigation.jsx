@@ -25,6 +25,12 @@ function Navigation({ user, userProfile, onLogout }) {
             </>
           ) : (
             <>
+              {userProfile?.full_name && (
+                <li className="navbar-welcome">
+                  반갑습니다, {userProfile.full_name}님
+                </li>
+              )}
+
               {userProfile?.status === 'approved' && (
                 <>
                   <li><Link to="/dashboard">대시보드</Link></li>
