@@ -68,7 +68,7 @@ body {
   opacity: 0.8;
 }
 
-. {
+.navbar-welcome {
   font-size: 0.95rem;
   opacity: 0.9;
   white-space: nowrap;
