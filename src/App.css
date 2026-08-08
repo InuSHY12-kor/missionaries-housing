@@ -10,7 +10,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #f7f5f0 0%, #eee8dc 100%);
   min-height: 100vh;
 }
 
@@ -22,10 +22,11 @@ body {
 
 /* 네비게이션 */
 .navbar {
-  background: linear-gradient(90deg, #2c3e50 0%, #34495e 100%);
-  color: white;
-  padding: 1rem 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #f8f6f0;
+  color: #2c3e50;
+  padding: 0.75rem 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-bottom: 1px solid #ece7db;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -44,7 +45,15 @@ body {
   font-size: 1.5rem;
   font-weight: bold;
   text-decoration: none;
-  color: white;
+  color: #16808E;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo {
+  height: 42px;
+  width: auto;
+  display: block;
 }
 
 .navbar-nav {
@@ -55,22 +64,27 @@ body {
 }
 
 .navbar-nav a, .navbar-nav button {
-  color: white;
+  color: #2c3e50;
   text-decoration: none;
   cursor: pointer;
   background: none;
   border: none;
   font-size: 1rem;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s, color 0.3s;
 }
 
 .navbar-nav a:hover, .navbar-nav button:hover {
   opacity: 0.8;
+  color: #16808E;
+}
+
+.navbar-nav a.btn-primary, .navbar-nav a.btn-primary:hover {
+  color: white;
 }
 
 .navbar-welcome {
   font-size: 0.95rem;
-  opacity: 0.9;
+  color: #848580;
   white-space: nowrap;
 }
 
@@ -132,7 +146,7 @@ body {
 
 .spinner {
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #3498db;
+  border-top: 4px solid #16808E;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -176,13 +190,13 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(90deg, #3498db 0%, #2980b9 100%);
+  background: linear-gradient(90deg, #16808E 0%, #106570 100%);
   color: white;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+  box-shadow: 0 4px 12px rgba(22, 128, 142, 0.4);
 }
 
 .btn-secondary {
@@ -249,8 +263,8 @@ body {
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  border-color: #16808E;
+  box-shadow: 0 0 0 3px rgba(22, 128, 142, 0.1);
 }
 
 .form-group textarea {
@@ -376,7 +390,7 @@ body {
 }
 
 .toast-info {
-  background: #3498db;
+  background: #16808E;
   color: white;
 }
 
@@ -415,18 +429,18 @@ body {
 
 /* 이미지 업로드 */
 .image-upload {
-  border: 2px dashed #3498db;
+  border: 2px dashed #16808E;
   border-radius: 6px;
   padding: 2rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s;
-  background: #ecf7ff;
+  background: #e6f4f5;
 }
 
 .image-upload:hover {
-  background: #d6f0ff;
-  border-color: #2980b9;
+  background: #cceaec;
+  border-color: #106570;
 }
 
 .image-upload input {
