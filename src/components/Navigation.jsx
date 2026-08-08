@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
+import wewelogo from '../assets/wewe-logo.jpg';
 
 const ROLE_LABELS = {
   admin: '관리자',
@@ -13,7 +14,7 @@ function Navigation({ user, userProfile, onLogout }) {
     <nav className="navbar">
       <div className="container">
         <Link to="/" className="navbar-brand">
-          🏠 WEWE STAY
+          <img src={wewelogo} alt="WEWE STAY" className="navbar-logo" />
         </Link>
 
         <ul className="navbar-nav">
