@@ -172,7 +172,7 @@ function Dashboard({ userProfile }) {
         }
 
         .stat-card svg {
-          color: #667eea;
+          color: #16808E;
           margin-bottom: 1rem;
         }
 
@@ -185,7 +185,7 @@ function Dashboard({ userProfile }) {
         .stat-number {
           font-size: 2rem;
           font-weight: bold;
-          color: #667eea;
+          color: #16808E;
           margin: 0;
         }
 
@@ -217,7 +217,7 @@ function Dashboard({ userProfile }) {
         }
 
         .quick-link-card svg {
-          color: #667eea;
+          color: #16808E;
         }
 
         .quick-link-card h3 {
@@ -267,7 +267,7 @@ function Dashboard({ userProfile }) {
         }
 
         .info-banner {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #16808E 0%, #8ABFC6 100%);
           color: white;
           padding: 2rem;
           border-radius: 8px;

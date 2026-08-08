@@ -192,7 +192,7 @@ function Accommodations() {
         .filter-card span {
           display: block;
           margin-top: 0.5rem;
-          color: #667eea;
+          color: #16808E;
           font-weight: 600;
         }
 
@@ -289,7 +289,7 @@ function Accommodations() {
         .price {
           font-size: 1.3rem;
           font-weight: bold;
-          color: #667eea;
+          color: #16808E;
           margin: 0 0 0.5rem;
         }
 

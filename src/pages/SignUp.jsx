@@ -353,8 +353,8 @@ function SignUp() {
         }
 
         .role-option.active {
-          border-color: #667eea;
-          background: #f0f4ff;
+          border-color: #16808E;
+          background: #e6f4f5;
         }
 
         .checkbox {
@@ -390,8 +390,8 @@ function SignUp() {
 
         .form-group input:focus {
           outline: none;
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+          border-color: #16808E;
+          box-shadow: 0 0 0 3px rgba(22, 128, 142, 0.1);
         }
 
         .login-link {
@@ -401,7 +401,7 @@ function SignUp() {
         }
 
         .login-link a {
-          color: #667eea;
+          color: #16808E;
           text-decoration: none;
           font-weight: 600;
         }

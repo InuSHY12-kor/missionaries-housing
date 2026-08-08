@@ -355,7 +355,7 @@ function Profile({ userProfile }) {
         .form-group input:focus,
         .form-group textarea:focus {
           outline: none;
-          border-color: #667eea;
+          border-color: #16808E;
         }
 
         .stats {
@@ -378,7 +378,7 @@ function Profile({ userProfile }) {
         }
 
         .stat-value {
-          color: #667eea;
+          color: #16808E;
           font-size: 1.5rem;
           font-weight: bold;
           margin: 0.5rem 0 0;

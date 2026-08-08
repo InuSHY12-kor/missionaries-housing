@@ -133,7 +133,7 @@ function LandingPage() {
         }
 
         .hero {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #16808E 0%, #8ABFC6 100%);
           color: white;
           padding: 5rem 2rem;
           text-align: center;
@@ -187,7 +187,7 @@ function LandingPage() {
         .feature-icon {
           width: 80px;
           height: 80px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #16808E 0%, #8ABFC6 100%);
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -207,7 +207,7 @@ function LandingPage() {
 
         .process {
           padding: 4rem 0;
-          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+          background: linear-gradient(135deg, #f7f5f0 0%, #eee8dc 100%);
         }
 
         .process h2 {
@@ -236,7 +236,7 @@ function LandingPage() {
         .step-number {
           width: 50px;
           height: 50px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #16808E 0%, #8ABFC6 100%);
           color: white;
           border-radius: 50%;
           display: flex;
@@ -248,7 +248,7 @@ function LandingPage() {
         }
 
         .step-connector {
-          color: #667eea;
+          color: #16808E;
           font-size: 2rem;
           font-weight: bold;
         }
@@ -272,7 +272,7 @@ function LandingPage() {
         }
 
         .cta {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #16808E 0%, #8ABFC6 100%);
           color: white;
           padding: 4rem 2rem;
           text-align: center;

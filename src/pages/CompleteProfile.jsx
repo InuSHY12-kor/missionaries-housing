@@ -346,8 +346,8 @@ function CompleteProfile() {
         }
 
         .role-option.active {
-          border-color: #667eea;
-          background: #f0f4ff;
+          border-color: #16808E;
+          background: #e6f4f5;
         }
 
         .help-text {
@@ -357,18 +357,18 @@ function CompleteProfile() {
         }
 
         .file-upload {
-          border: 2px dashed #667eea;
+          border: 2px dashed #16808E;
           border-radius: 6px;
           padding: 2rem;
           text-align: center;
           cursor: pointer;
           transition: all 0.3s;
-          background: #f8faff;
+          background: #f0f9fa;
         }
 
         .file-upload:hover {
-          background: #f0f4ff;
-          border-color: #764ba2;
+          background: #e6f4f5;
+          border-color: #106570;
         }
 
         .file-upload input {
@@ -381,7 +381,7 @@ function CompleteProfile() {
           align-items: center;
           gap: 0.5rem;
           cursor: pointer;
-          color: #667eea;
+          color: #16808E;
         }
 
         .file-list {

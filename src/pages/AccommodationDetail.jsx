@@ -324,7 +324,7 @@ function AccommodationDetail() {
         .price {
           font-size: 2rem;
           font-weight: bold;
-          color: #667eea;
+          color: #16808E;
           margin: 0;
         }
 

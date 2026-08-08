@@ -303,8 +303,8 @@ function AdminDashboard() {
         }
 
         .tab.active {
-          color: #667eea;
-          border-bottom-color: #667eea;
+          color: #16808E;
+          border-bottom-color: #16808E;
         }
 
         .review-section {
