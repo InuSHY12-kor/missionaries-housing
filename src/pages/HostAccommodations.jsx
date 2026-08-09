@@ -1,22 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../App';
 import { Trash2, Edit, Plus } from 'lucide-react';
+import LocationPicker from '../components/LocationPicker';
+
+const EMPTY_FORM = {
+  title: '',
+  description: '',
+  location: '',
+  price: '',
+  capacity: '',
+  bedrooms: '',
+  bathrooms: '',
+  amenities: '',
+  latitude: null,
+  longitude: null
+};
 
 function HostAccommodations({ userProfile }) {
   const [accommodations, setAccommodations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    location: '',
-    price: '',
-    capacity: '',
-    bedrooms: '',
-    bathrooms: '',
-    amenities: ''
-  });
+  const [formData, setFormData] = useState(EMPTY_FORM);
 
   useEffect(() => {
     fetchAccommodations();
@@ -48,6 +53,14 @@ function HostAccommodations({ userProfile }) {
     }));
   };
 
+  const handleLocationChange = (coords) => {
+    setFormData(prev => ({
+      ...prev,
+      latitude: coords.lat,
+      longitude: coords.lng
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -70,6 +83,8 @@ function HostAccommodations({ userProfile }) {
             bedrooms: parseInt(formData.bedrooms),
             bathrooms: parseInt(formData.bathrooms),
             amenities: amenitiesArray,
+            latitude: formData.latitude,
+            longitude: formData.longitude,
             status: 'pending'
           })
           .eq('id', editingId);
@@ -89,6 +104,8 @@ function HostAccommodations({ userProfile }) {
             bedrooms: parseInt(formData.bedrooms),
             bathrooms: parseInt(formData.bathrooms),
             amenities: amenitiesArray,
+            latitude: formData.latitude,
+            longitude: formData.longitude,
             status: 'pending'
           });
 
@@ -96,16 +113,7 @@ function HostAccommodations({ userProfile }) {
       }
 
       alert(editingId ? '숙소가 수정되었습니다!' : '숙소가 등록되었습니다! 관리자 승인 후 공개됩니다.');
-      setFormData({
-        title: '',
-        description: '',
-        location: '',
-        price: '',
-        capacity: '',
-        bedrooms: '',
-        bathrooms: '',
-        amenities: ''
-      });
+      setFormData(EMPTY_FORM);
       setShowForm(false);
       setEditingId(null);
       fetchAccommodations();
@@ -123,7 +131,9 @@ function HostAccommodations({ userProfile }) {
       capacity: accommodation.capacity.toString(),
       bedrooms: accommodation.bedrooms?.toString() || '',
       bathrooms: accommodation.bathrooms?.toString() || '',
-      amenities: accommodation.amenities?.join(', ') || ''
+      amenities: accommodation.amenities?.join(', ') || '',
+      latitude: accommodation.latitude ?? null,
+      longitude: accommodation.longitude ?? null
     });
     setEditingId(accommodation.id);
     setShowForm(true);
@@ -173,16 +183,7 @@ function HostAccommodations({ userProfile }) {
             onClick={() => {
               setShowForm(!showForm);
               setEditingId(null);
-              setFormData({
-                title: '',
-                description: '',
-                location: '',
-                price: '',
-                capacity: '',
-                bedrooms: '',
-                bathrooms: '',
-                amenities: ''
-              });
+              setFormData(EMPTY_FORM);
             }}
           >
             <Plus size={18} />
@@ -213,9 +214,20 @@ function HostAccommodations({ userProfile }) {
                     name="location"
                     value={formData.location}
                     onChange={handleInputChange}
+                    placeholder="예: 서울시 강남구 역삼동"
                     required
                   />
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label>지도 위치</label>
+                <LocationPicker
+                  address={formData.location}
+                  lat={formData.latitude}
+                  lng={formData.longitude}
+                  onChange={handleLocationChange}
+                />
               </div>
 
               <div className="form-group">
@@ -330,6 +342,12 @@ function HostAccommodations({ userProfile }) {
                   <p><strong>가격:</strong> ₩{accommodation.price.toLocaleString()}/일</p>
                   <p><strong>수용인원:</strong> {accommodation.capacity}명</p>
                   <p><strong>침실:</strong> {accommodation.bedrooms}, <strong>욕실:</strong> {accommodation.bathrooms}</p>
+                  <p>
+                    <strong>지도 위치:</strong>{' '}
+                    {accommodation.latitude != null && accommodation.longitude != null
+                      ? '등록됨'
+                      : '미등록 (수정에서 추가해주세요)'}
+                  </p>
                 </div>
 
                 {accommodation.rejection_reason && (
