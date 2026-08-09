@@ -1,7 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Users, Home, MessageCircle } from 'lucide-react';
+import { MapPin, Users, Home, MessageCircle, CheckCircle } from 'lucide-react';
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+}
+
+function rangesOverlap(aStart, aEnd, bStart, bEnd) {
+  // 체크아웃일 당일은 겹치지 않는 것으로 처리 (반개구간 비교)
+  return aStart < bEnd && aEnd > bStart;
+}
 
 function AccommodationDetail() {
   const { id } = useParams();
@@ -12,6 +22,10 @@ function AccommodationDetail() {
     checkIn: '',
     checkOut: ''
   });
+  const [bookedRanges, setBookedRanges] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [bookingError, setBookingError] = useState('');
 
   const fetchAccommodation = useCallback(async () => {
         try {
@@ -31,15 +45,55 @@ function AccommodationDetail() {
         }
   }, [id]);
 
+  const fetchBookedRanges = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .rpc('get_accommodation_booked_ranges', { p_accommodation_id: id });
+
+      if (error) throw error;
+      setBookedRanges(data || []);
+    } catch (error) {
+      console.error('예약 현황 로드 오류:', error);
+    }
+  }, [id]);
+
     useEffect(() => {
           fetchAccommodation();
-    }, [fetchAccommodation]);
+          fetchBookedRanges();
+    }, [fetchAccommodation, fetchBookedRanges]);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const findOverlap = (checkInStr, checkOutStr) => {
+    return bookedRanges.find(range =>
+      rangesOverlap(checkInStr, checkOutStr, range.check_in, range.check_out)
+    );
+  };
 
   const handleBooking = async () => {
+    setBookingError('');
+
     if (!bookingData.checkIn || !bookingData.checkOut) {
-      alert('날짜를 선택해주세요.');
+      setBookingError('체크인, 체크아웃 날짜를 모두 선택해주세요.');
       return;
     }
+
+    if (bookingData.checkIn < todayStr) {
+      setBookingError('체크인 날짜는 오늘 이후여야 합니다.');
+      return;
+    }
+
+    if (bookingData.checkOut <= bookingData.checkIn) {
+      setBookingError('체크아웃 날짜는 체크인 날짜 이후여야 합니다.');
+      return;
+    }
+
+    if (findOverlap(bookingData.checkIn, bookingData.checkOut)) {
+      setBookingError('선택하신 날짜는 이미 예약이 있어 선택할 수 없습니다. 다른 날짜를 선택해주세요.');
+      return;
+    }
+
+    setSubmitting(true);
 
     try {
       const checkIn = new Date(bookingData.checkIn);
@@ -47,12 +101,13 @@ function AccommodationDetail() {
       const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
       const totalPrice = nights * accommodation.price;
 
-      // 예약 생성
-      const { error } = await supabase  // data 제거
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+
+      const { error } = await supabase
         .from('bookings')
         .insert({
           accommodation_id: id,
-          guest_id: (await supabase.auth.getUser()).data.user.id,
+          guest_id: authUser.id,
           check_in: bookingData.checkIn,
           check_out: bookingData.checkOut,
           total_price: totalPrice,
@@ -60,12 +115,23 @@ function AccommodationDetail() {
         })
         .select();
 
-      if (error) throw error;
+      if (error) {
+        // 서버(DB)에서 다른 예약과 날짜가 겹치는 것을 감지한 경우 (동시 예약 등)
+        if (error.code === '23P01') {
+          setBookingError('선택하신 날짜는 방금 다른 분이 먼저 예약하셨습니다. 다른 날짜를 선택해주세요.');
+          fetchBookedRanges();
+          return;
+        }
+        throw error;
+      }
 
-      alert('예약이 생성되었습니다! 결제 페이지로 이동합니다.');
-      // 실제로는 Stripe 결제 폼으로 이동해야 함
+      setBookingSuccess(true);
+      setBookingData({ checkIn: '', checkOut: '' });
+      fetchBookedRanges();
     } catch (error) {
-      alert('오류: ' + error.message);
+      setBookingError('오류가 발생했습니다: ' + error.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -88,7 +154,7 @@ function AccommodationDetail() {
           {/* 왼쪽: 정보 */}
           <div className="info-section">
             <h1>{accommodation.title}</h1>
-            
+
             <p className="location">
               <MapPin size={20} />
               {accommodation.location}
@@ -145,42 +211,70 @@ function AccommodationDetail() {
                 <p className="per-night">1박 기준</p>
               </div>
 
-              <div className="form-group">
-                <label>체크인</label>
-                <input
-                  type="date"
-                  value={bookingData.checkIn}
-                  onChange={(e) => setBookingData({ ...bookingData, checkIn: e.target.value })}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>체크아웃</label>
-                <input
-                  type="date"
-                  value={bookingData.checkOut}
-                  onChange={(e) => setBookingData({ ...bookingData, checkOut: e.target.value })}
-                />
-              </div>
-
-              {bookingData.checkIn && bookingData.checkOut && (
-                <div className="price-summary">
-                  <div className="summary-row">
-                    <span>₩{accommodation.price?.toLocaleString()} × {Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))}박</span>
-                    <span>₩{(accommodation.price * Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))).toLocaleString()}</span>
-                  </div>
-                  <div className="summary-total">
-                    <span>합계</span>
-                    <span>₩{(accommodation.price * Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))).toLocaleString()}</span>
-                  </div>
+              {bookingSuccess ? (
+                <div className="booking-success">
+                  <CheckCircle size={36} />
+                  <h4>예약 요청이 접수되었습니다</h4>
+                  <p>호스트님의 확인 후 예약이 확정되며, "내 예약" 페이지에서 진행 상황을 확인하실 수 있습니다.</p>
+                  <button className="btn btn-secondary btn-block" onClick={() => setBookingSuccess(false)}>
+                    다른 날짜 예약하기
+                  </button>
                 </div>
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label>체크인</label>
+                    <input
+                      type="date"
+                      min={todayStr}
+                      value={bookingData.checkIn}
+                      onChange={(e) => setBookingData({ ...bookingData, checkIn: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>체크아웃</label>
+                    <input
+                      type="date"
+                      min={bookingData.checkIn || todayStr}
+                      value={bookingData.checkOut}
+                      onChange={(e) => setBookingData({ ...bookingData, checkOut: e.target.value })}
+                    />
+                  </div>
+
+                  {bookedRanges.length > 0 && (
+                    <p className="booked-note">
+                      예약 불가 날짜: {bookedRanges.map((r, idx) => (
+                        <span key={idx}>
+                          {idx > 0 && ', '}
+                          {formatDate(r.check_in)} ~ {formatDate(r.check_out)}
+                        </span>
+                      ))}
+                    </p>
+                  )}
+
+                  {bookingData.checkIn && bookingData.checkOut && bookingData.checkOut > bookingData.checkIn && (
+                    <div className="price-summary">
+                      <div className="summary-row">
+                        <span>₩{accommodation.price?.toLocaleString()} × {Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))}박</span>
+                        <span>₩{(accommodation.price * Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))).toLocaleString()}</span>
+                      </div>
+                      <div className="summary-total">
+                        <span>합계</span>
+                        <span>₩{(accommodation.price * Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {bookingError && <p className="form-error">{bookingError}</p>}
+
+                  <button className="btn btn-primary btn-block" onClick={handleBooking} disabled={submitting}>
+                    {submitting ? '예약 중...' : '예약하기'}
+                  </button>
+
+                  <p className="note">예약 후 호스트의 승인이 필요합니다.</p>
+                </>
               )}
-
-              <button className="btn btn-primary btn-block" onClick={handleBooking}>
-                예약하기
-              </button>
-
-              <p className="note">예약 후 호스트의 승인이 필요합니다.</p>
             </div>
           </div>
         </div>
@@ -334,6 +428,16 @@ function AccommodationDetail() {
           font-size: 0.9rem;
         }
 
+        .booked-note {
+          font-size: 0.82rem;
+          color: #e74c3c;
+          background: #fdf2f1;
+          padding: 0.6rem 0.75rem;
+          border-radius: 6px;
+          margin: -0.5rem 0 1rem;
+          line-height: 1.6;
+        }
+
         .price-summary {
           background: #f8f9fa;
           padding: 1rem;
@@ -359,6 +463,7 @@ function AccommodationDetail() {
         .btn-block {
           width: 100%;
           margin-top: 1rem;
+          justify-content: center;
         }
 
         .note {
@@ -366,6 +471,28 @@ function AccommodationDetail() {
           color: #7f8c8d;
           text-align: center;
           margin-top: 1rem;
+        }
+
+        .booking-success {
+          text-align: center;
+          padding: 1rem 0;
+        }
+
+        .booking-success svg {
+          color: #16808E;
+          margin-bottom: 0.75rem;
+        }
+
+        .booking-success h4 {
+          color: #2c3e50;
+          margin-bottom: 0.5rem;
+        }
+
+        .booking-success p {
+          color: #7f8c8d;
+          font-size: 0.9rem;
+          line-height: 1.6;
+          margin-bottom: 1rem;
         }
 
         @media (max-width: 768px) {

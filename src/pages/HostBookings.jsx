@@ -1,0 +1,249 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { supabase } from '../App';
+import { MapPin, Calendar, Phone, CheckCircle, XCircle } from 'lucide-react';
+
+const STATUS_LABEL = {
+  pending: '확정 대기',
+  confirmed: '예약 확정',
+  cancelled: '취소됨'
+};
+
+const STATUS_BADGE_CLASS = {
+  pending: 'badge-warning',
+  confirmed: 'badge-success',
+  cancelled: 'badge-danger'
+};
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function HostBookings() {
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchBookings = useCallback(async () => {
+    setLoading(true);
+    try {
+      // RLS 정책("Hosts can view bookings for their accommodations")이
+      // 자동으로 내 숙소에 대한 예약만 반환해줍니다.
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*, accommodations(title, location), users(full_name, phone, church_name)')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setBookings(data || []);
+    } catch (error) {
+      console.error('예약 로드 오류:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
+
+  const updateStatus = async (bookingId, status) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+      setBookings(bookings.map(b => b.id === bookingId ? { ...b, status } : b));
+    } catch (error) {
+      alert('오류: ' + error.message);
+    }
+  };
+
+  return (
+    <div className="host-bookings">
+      <div className="container">
+        <h1>예약 관리</h1>
+        <p className="subtitle">내 숙소에 들어온 예약 요청을 확인하고 확정/거절할 수 있습니다.</p>
+
+        {loading ? (
+          <p>로드 중...</p>
+        ) : bookings.length === 0 ? (
+          <p className="empty-message">아직 들어온 예약이 없습니다.</p>
+        ) : (
+          <div className="bookings-list">
+            {bookings.map(booking => (
+              <div key={booking.id} className="card booking-item">
+                <div className="booking-item-header">
+                  <div>
+                    <h3>{booking.accommodations?.title || '삭제된 숙소'}</h3>
+                    {booking.accommodations?.location && (
+                      <p className="location">
+                        <MapPin size={16} />
+                        {booking.accommodations.location}
+                      </p>
+                    )}
+                  </div>
+                  <span className={`badge ${STATUS_BADGE_CLASS[booking.status] || 'badge-info'}`}>
+                    {STATUS_LABEL[booking.status] || booking.status}
+                  </span>
+                </div>
+
+                <div className="booking-item-body">
+                  <p className="dates">
+                    <Calendar size={16} />
+                    {formatDate(booking.check_in)} ~ {formatDate(booking.check_out)}
+                  </p>
+                  <p className="total-price">₩{booking.total_price?.toLocaleString()}</p>
+                </div>
+
+                <div className="guest-info">
+                  <p><strong>예약자:</strong> {booking.users?.full_name || '알 수 없음'}</p>
+                  {booking.users?.church_name && <p><strong>교회:</strong> {booking.users.church_name}</p>}
+                  {booking.users?.phone && (
+                    <p className="phone">
+                      <Phone size={14} />
+                      {booking.users.phone}
+                    </p>
+                  )}
+                </div>
+
+                {booking.status === 'pending' && (
+                  <div className="booking-item-actions">
+                    <button className="btn btn-success" onClick={() => updateStatus(booking.id, 'confirmed')}>
+                      <CheckCircle size={16} />
+                      예약 확정
+                    </button>
+                    <button className="btn btn-danger" onClick={() => updateStatus(booking.id, 'cancelled')}>
+                      <XCircle size={16} />
+                      예약 거절
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        .host-bookings {
+          flex: 1;
+        }
+
+        .subtitle {
+          color: #7f8c8d;
+          margin-top: -1rem;
+          margin-bottom: 2rem;
+        }
+
+        .empty-message {
+          text-align: center;
+          color: #95a5a6;
+          padding: 2rem;
+        }
+
+        .bookings-list {
+          display: grid;
+          gap: 1.5rem;
+        }
+
+        .booking-item {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .booking-item-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 1rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid #ecf0f1;
+        }
+
+        .booking-item-header h3 {
+          color: #2c3e50;
+          margin-bottom: 0.5rem;
+        }
+
+        .location {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: #7f8c8d;
+          margin: 0;
+          font-size: 0.9rem;
+        }
+
+        .booking-item-body {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem 0;
+        }
+
+        .dates {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: #555;
+          margin: 0;
+        }
+
+        .total-price {
+          font-weight: bold;
+          color: #16808E;
+          margin: 0;
+          font-size: 1.1rem;
+        }
+
+        .guest-info {
+          background: #f8f9fa;
+          padding: 1rem;
+          border-radius: 6px;
+          margin-bottom: 1rem;
+        }
+
+        .guest-info p {
+          margin: 0.35rem 0;
+          font-size: 0.9rem;
+          color: #555;
+        }
+
+        .guest-info .phone {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .booking-item-actions {
+          display: flex;
+          gap: 0.75rem;
+        }
+
+        .booking-item-actions button {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+          .booking-item-body {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+          }
+
+          .booking-item-actions {
+            flex-direction: column;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default HostBookings;
