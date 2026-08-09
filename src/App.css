@@ -80,6 +80,18 @@ body {
 
 .navbar-nav a.btn-primary, .navbar-nav a.btn-primary:hover {
   color: white;
+  background: linear-gradient(90deg, #16808E 0%, #106570 100%);
+}
+
+.navbar-nav a.btn-primary {
+  padding: 0.6rem 1.25rem;
+  border-radius: 6px;
+  opacity: 1;
+}
+
+.navbar-nav a.btn-primary:hover {
+  opacity: 1;
+  box-shadow: 0 4px 12px rgba(22, 128, 142, 0.4);
 }
 
 .navbar-welcome {
