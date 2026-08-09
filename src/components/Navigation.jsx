@@ -49,18 +49,21 @@ function Navigation({ user, userProfile, onLogout }) {
                     <li><Link to="/admin">관리</Link></li>
                   )}
                   <li><Link to="/profile">프로필</Link></li>
-                  <li>
-                    <span className={`status-badge status-role-${userProfile.role}`}>
-                      {ROLE_LABELS[userProfile.role] || userProfile.role}
-                    </span>
-                  </li>
                 </>
+              )}
+
+              {(userProfile?.status === 'approved' || userProfile?.status === 'pending') && userProfile.role && (
+                <li>
+                  <span className={`status-badge status-role-${userProfile.role}`}>
+                    {ROLE_LABELS[userProfile.role] || userProfile.role}
+                  </span>
+                </li>
               )}
 
               {userProfile?.status === 'pending' && (
                 <li>
                   <span className="status-badge status-pending">
-                    ⏳ 승인 대기 중
+                    ⏳ 미승인
                   </span>
                 </li>
               )}
