@@ -4,6 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 import Navigation from './components/Navigation';
 import LandingPage from './pages/LandingPage';
 import SignUp from './pages/SignUp';
+import SignupRoleSelect from './pages/SignupRoleSelect';
+import SignupComplete from './pages/SignupComplete';
 import Login from './pages/Login';
 import CompleteProfile from './pages/CompleteProfile';
 import PendingApproval from './pages/PendingApproval';
@@ -157,7 +159,11 @@ function App() {
           />
           <Route
             path="/accommodations/:id"
-            element={canSearchAccommodations ? <AccommodationDetail /> : <Navigate to="/dashboard" replace />}
+            element={
+              (canSearchAccommodations || canManageAccommodations)
+                ? <AccommodationDetail userProfile={userProfile} />
+                : <Navigate to="/dashboard" replace />
+            }
           />
           <Route path="/my-bookings" element={<MyBookings userProfile={userProfile} />} />
           <Route
@@ -183,7 +189,12 @@ function App() {
         <Routes>
           {/* 공개 페이지 */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/signup" element={<SignupRoleSelect />} />
+          <Route path="/signup/missionary" element={<SignUp role="missionary" />} />
+          <Route path="/signup/host" element={<SignUp role="host" />} />
+          {/* 프로필 등록 직후 안내 화면: 승인 대기 중인 사용자의 catch-all("*") 라우트보다
+              더 구체적인 경로이므로 항상 우선적으로 매칭됩니다. */}
+          <Route path="/signup-complete" element={<SignupComplete />} />
           <Route path="/login" element={<Login />} />
 
           {/* 로그인 필요 */}
