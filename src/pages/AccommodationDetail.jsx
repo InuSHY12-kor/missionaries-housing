@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../App';
 import { MapPin, Users, Home, MessageCircle, CheckCircle } from 'lucide-react';
+import AccommodationMap from '../components/AccommodationMap';
 
 function formatDate(dateStr) {
   const d = new Date(dateStr);
@@ -187,6 +188,16 @@ function AccommodationDetail() {
               </div>
             )}
 
+            {/* 위치 지도 */}
+            <div className="map-section">
+              <h3>위치</h3>
+              <AccommodationMap
+                lat={accommodation.latitude}
+                lng={accommodation.longitude}
+                title={accommodation.title}
+              />
+            </div>
+
             {/* 호스트 정보 */}
             <div className="host-info">
               <h3>호스트 정보</h3>
@@ -349,7 +360,7 @@ function AccommodationDetail() {
           margin-bottom: 2rem;
         }
 
-        .description h3, .amenities h3, .host-info h3 {
+        .description h3, .amenities h3, .host-info h3, .map-section h3 {
           color: #2c3e50;
           margin-bottom: 1rem;
         }
@@ -371,6 +382,12 @@ function AccommodationDetail() {
           background: #f8f9fa;
           border-radius: 4px;
           color: #555;
+        }
+
+        .map-section {
+          margin-top: 2rem;
+          padding-top: 2rem;
+          border-top: 2px solid #ecf0f1;
         }
 
         .host-info {

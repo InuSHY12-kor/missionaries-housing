@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Users, Star } from 'lucide-react';
+import { MapPin, Users, Star, X } from 'lucide-react';
+import SearchMap from '../components/SearchMap';
+import { haversineDistanceKm } from '../utils/geo';
 
 function Accommodations() {
   const [accommodations, setAccommodations] = useState([]);
   const [filteredAccommodations, setFilteredAccommodations] = useState([]);
+  const [visibleAccommodations, setVisibleAccommodations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     location: '',
@@ -13,6 +16,8 @@ function Accommodations() {
     maxPrice: 1000000,
     capacity: 1
   });
+  const [selectedPoint, setSelectedPoint] = useState(null);
+  const [radiusKm, setRadiusKm] = useState(30);
 
   useEffect(() => {
     fetchAccommodations();
@@ -22,6 +27,23 @@ function Accommodations() {
     applyFilters();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, accommodations]);
+
+  useEffect(() => {
+    if (selectedPoint) {
+      setVisibleAccommodations(
+        filteredAccommodations.filter(acc => {
+          if (acc.latitude == null || acc.longitude == null) return false;
+          const distance = haversineDistanceKm(selectedPoint, {
+            lat: Number(acc.latitude),
+            lng: Number(acc.longitude)
+          });
+          return distance <= radiusKm;
+        })
+      );
+    } else {
+      setVisibleAccommodations(filteredAccommodations);
+    }
+  }, [filteredAccommodations, selectedPoint, radiusKm]);
 
   const fetchAccommodations = async () => {
     try {
@@ -124,14 +146,55 @@ function Accommodations() {
           </div>
         </div>
 
+        {/* 지도 검색 */}
+        <div className="map-search-section">
+          <div className="map-search-header">
+            <div>
+              <h2>지도에서 찾기</h2>
+              <p className="map-search-hint">
+                지도를 클릭해서 원하는 위치를 선택하면 그 주변의 숙소만 보여드립니다.
+              </p>
+            </div>
+            {selectedPoint && (
+              <button className="btn btn-secondary" onClick={() => setSelectedPoint(null)}>
+                <X size={16} />
+                위치 선택 해제
+              </button>
+            )}
+          </div>
+
+          {selectedPoint && (
+            <div className="radius-control">
+              <label>반경: {radiusKm}km 이내</label>
+              <input
+                type="range"
+                min="5"
+                max="200"
+                step="5"
+                value={radiusKm}
+                onChange={(e) => setRadiusKm(parseInt(e.target.value))}
+              />
+            </div>
+          )}
+
+          <SearchMap
+            accommodations={filteredAccommodations}
+            selectedPoint={selectedPoint}
+            onSelectPoint={setSelectedPoint}
+            radiusKm={radiusKm}
+          />
+        </div>
+
         {/* 숙소 목록 */}
         {loading ? (
           <p>로드 중...</p>
-        ) : filteredAccommodations.length === 0 ? (
-          <p className="empty-message">해당하는 숙소가 없습니다.</p>
+        ) : visibleAccommodations.length === 0 ? (
+          <p className="empty-message">
+            {selectedPoint ? '선택하신 위치 주변에 등록된 숙소가 없습니다.' : '해당하는 숙소가 없습니다.'}
+          </p>
         ) : (
           <div className="grid grid-2">
-            {filteredAccommodations.map(accommodation => (
+            {visibleAccommodations.map(accommodation => (
               <Link
                 key={accommodation.id}
                 to={`/accommodations/${accommodation.id}`}
@@ -194,6 +257,58 @@ function Accommodations() {
           margin-top: 0.5rem;
           color: #16808E;
           font-weight: 600;
+        }
+
+        .map-search-section {
+          background: white;
+          padding: 2rem;
+          border-radius: 8px;
+          margin-bottom: 2rem;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .map-search-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 1rem;
+          margin-bottom: 1rem;
+          flex-wrap: wrap;
+        }
+
+        .map-search-header h2 {
+          color: #2c3e50;
+          margin-bottom: 0.35rem;
+        }
+
+        .map-search-hint {
+          color: #7f8c8d;
+          font-size: 0.9rem;
+          margin: 0;
+        }
+
+        .map-search-header button {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          white-space: nowrap;
+        }
+
+        .radius-control {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 1rem;
+        }
+
+        .radius-control label {
+          font-weight: 600;
+          color: #16808E;
+          white-space: nowrap;
+        }
+
+        .radius-control input[type="range"] {
+          flex: 1;
         }
 
         .empty-message {
