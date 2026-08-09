@@ -46,6 +46,11 @@ function Dashboard({ userProfile }) {
     }
   };
 
+  const canSearchAccommodations = userProfile?.role === 'admin' || userProfile?.role === 'missionary';
+  const canManageAccommodations = userProfile?.role === 'admin' || userProfile?.role === 'host';
+  const accommodationsLink = canSearchAccommodations ? '/accommodations' : (canManageAccommodations ? '/my-accommodations' : null);
+  const bookingsLink = userProfile?.role === 'host' ? '/host-bookings' : '/my-bookings';
+
   return (
     <div className="dashboard">
       <div className="container">
@@ -54,16 +59,24 @@ function Dashboard({ userProfile }) {
 
         {/* 통계 카드 */}
         <div className="stats-grid">
-          <div className="stat-card">
-            <Home size={32} />
-            <h3>등록된 숙소</h3>
-            <p className="stat-number">{stats.totalAccommodations}</p>
-          </div>
-          <div className="stat-card">
+          {accommodationsLink ? (
+            <Link to={accommodationsLink} className="stat-card stat-card-link">
+              <Home size={32} />
+              <h3>등록된 숙소</h3>
+              <p className="stat-number">{stats.totalAccommodations}</p>
+            </Link>
+          ) : (
+            <div className="stat-card">
+              <Home size={32} />
+              <h3>등록된 숙소</h3>
+              <p className="stat-number">{stats.totalAccommodations}</p>
+            </div>
+          )}
+          <Link to={bookingsLink} className="stat-card stat-card-link">
             <Users size={32} />
             <h3>예약</h3>
             <p className="stat-number">{stats.totalBookings}</p>
-          </div>
+          </Link>
           <div className="stat-card">
             <Star size={32} />
             <h3>리뷰</h3>
@@ -173,6 +186,17 @@ function Dashboard({ userProfile }) {
 
         .stat-card:hover {
           transform: translateY(-4px);
+        }
+
+        .stat-card-link {
+          text-decoration: none;
+          color: inherit;
+          cursor: pointer;
+          display: block;
+        }
+
+        .stat-card-link:hover {
+          box-shadow: 0 4px 16px rgba(22, 128, 142, 0.2);
         }
 
         .stat-card svg {

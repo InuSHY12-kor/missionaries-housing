@@ -1,20 +1,36 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { AlertCircle } from 'lucide-react';
+import { MISSIONARY_TERMS, HOST_TERMS } from '../data/termsOfService';
 
-function SignUp() {
+const ROLE_META = {
+  missionary: {
+    title: '선교사 가입하기',
+    subtitle: '숙소가 필요한 선교사님, 환영합니다',
+    terms: MISSIONARY_TERMS
+  },
+  host: {
+    title: '숙소 제공자 가입하기',
+    subtitle: '선교사님을 위해 숙소를 나눠주셔서 감사합니다',
+    terms: HOST_TERMS
+  }
+};
+
+function SignUp({ role }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [agreed, setAgreed] = useState(false);
 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    passwordConfirm: '',
-    role: 'missionary'
+    passwordConfirm: ''
   });
+
+  const meta = ROLE_META[role] || ROLE_META.missionary;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -43,6 +59,10 @@ function SignUp() {
         throw new Error('비밀번호는 8자 이상이어야 합니다.');
       }
 
+      if (!agreed) {
+        throw new Error('이용약관에 동의해주세요.');
+      }
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -50,7 +70,7 @@ function SignUp() {
           // 이메일 인증 링크를 클릭하면 프로필 등록 페이지로 돌아오도록 설정
           emailRedirectTo: `${window.location.origin}/complete-profile`,
           data: {
-            role: formData.role
+            role
           }
         }
       });
@@ -78,8 +98,8 @@ function SignUp() {
     <div className="signup-container">
       <div className="container">
         <div className="signup-form">
-          <h1>가입하기</h1>
-          <p className="subtitle">선교사 커뮤니티에 참여하세요</p>
+          <h1>{meta.title}</h1>
+          <p className="subtitle">{meta.subtitle}</p>
 
           {error && (
             <div className="alert alert-error">
@@ -96,32 +116,6 @@ function SignUp() {
 
           {!success && (
             <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>회원 유형 *</label>
-                <div className="role-selector">
-                  <label className={`role-option ${formData.role === 'missionary' ? 'active' : ''}`}>
-                    <input
-                      type="radio"
-                      name="role"
-                      value="missionary"
-                      checked={formData.role === 'missionary'}
-                      onChange={handleInputChange}
-                    />
-                    <span>선교사 (숙소 예약)</span>
-                  </label>
-                  <label className={`role-option ${formData.role === 'host' ? 'active' : ''}`}>
-                    <input
-                      type="radio"
-                      name="role"
-                      value="host"
-                      checked={formData.role === 'host'}
-                      onChange={handleInputChange}
-                    />
-                    <span>숙소 제공자 (숙소 제공)</span>
-                  </label>
-                </div>
-              </div>
-
               <div className="form-group">
                 <label>이메일 *</label>
                 <input
@@ -159,9 +153,18 @@ function SignUp() {
               </div>
 
               <div className="form-group">
+                <label>이용약관 *</label>
+                <div className="terms-box" tabIndex={0}>
+                  {meta.terms}
+                </div>
                 <label className="checkbox">
-                  <input type="checkbox" required />
-                  <span>이용약관에 동의합니다</span>
+                  <input
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                    required
+                  />
+                  <span>위 이용약관에 동의합니다</span>
                 </label>
               </div>
 
@@ -180,7 +183,9 @@ function SignUp() {
           )}
 
           <div className="login-link">
-            이미 계정이 있으신가요? <a href="/">로그인</a>
+            <Link to="/signup">← 가입 유형 다시 선택하기</Link>
+            <span className="divider">|</span>
+            이미 계정이 있으신가요? <Link to="/login">로그인</Link>
           </div>
         </div>
       </div>
@@ -242,30 +247,18 @@ function SignUp() {
           border: 1px solid #27ae60;
         }
 
-        .role-selector {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1rem;
-        }
-
-        .role-option {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          padding: 1rem;
-          border: 2px solid #ecf0f1;
+        .terms-box {
+          height: 180px;
+          overflow-y: auto;
+          border: 1px solid #dfe6e9;
           border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-
-        .role-option input {
-          cursor: pointer;
-        }
-
-        .role-option.active {
-          border-color: #16808E;
-          background: #e6f4f5;
+          padding: 1rem;
+          background: #f8f9fa;
+          color: #555;
+          font-size: 0.85rem;
+          line-height: 1.7;
+          white-space: pre-wrap;
+          margin-bottom: 0.75rem;
         }
 
         .checkbox {
@@ -309,6 +302,15 @@ function SignUp() {
           text-align: center;
           margin-top: 1.5rem;
           color: #7f8c8d;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.6rem;
+          flex-wrap: wrap;
+        }
+
+        .login-link .divider {
+          color: #dfe6e9;
         }
 
         .login-link a {
@@ -320,10 +322,6 @@ function SignUp() {
         @media (max-width: 768px) {
           .signup-form {
             padding: 1.5rem;
-          }
-
-          .role-selector {
-            grid-template-columns: 1fr;
           }
         }
       `}</style>
