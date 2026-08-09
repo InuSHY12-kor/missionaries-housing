@@ -11,6 +11,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import Accommodations from './pages/Accommodations';
 import AccommodationDetail from './pages/AccommodationDetail';
 import HostAccommodations from './pages/HostAccommodations';
+import MyBookings from './pages/MyBookings';
+import HostBookings from './pages/HostBookings';
 import Profile from './pages/Profile';
 import './App.css';
 
@@ -134,7 +136,9 @@ function App() {
                   <Route path="/dashboard" element={<Dashboard userProfile={userProfile} />} />
                   <Route path="/accommodations" element={<Accommodations />} />
                   <Route path="/accommodations/:id" element={<AccommodationDetail />} />
+                  <Route path="/my-bookings" element={<MyBookings userProfile={userProfile} />} />
                   <Route path="/my-accommodations" element={<HostAccommodations userProfile={userProfile} />} />
+                  <Route path="/host-bookings" element={<HostBookings userProfile={userProfile} />} />
                   <Route path="/profile" element={<Profile userProfile={userProfile} />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </>

@@ -36,8 +36,12 @@ function Navigation({ user, userProfile, onLogout }) {
                 <>
                   <li><Link to="/dashboard">대시보드</Link></li>
                   <li><Link to="/accommodations">숙소 검색</Link></li>
+                  <li><Link to="/my-bookings">내 예약</Link></li>
                   {userProfile.role === 'host' && (
-                    <li><Link to="/my-accommodations">내 숙소</Link></li>
+                    <>
+                      <li><Link to="/my-accommodations">내 숙소</Link></li>
+                      <li><Link to="/host-bookings">예약 관리</Link></li>
+                    </>
                   )}
                   {userProfile.role === 'admin' && (
                     <li><Link to="/admin">관리</Link></li>
