@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../App';
-import { CheckCircle, XCircle, Eye } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, Mail } from 'lucide-react';
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('users');
   const [users, setUsers] = useState([]);
   const [accommodations, setAccommodations] = useState([]);
+  const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -25,18 +26,37 @@ function AdminDashboard() {
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
         setUsers(data || []);
-      } else {
+      } else if (activeTab === 'accommodations') {
         const { data } = await supabase
           .from('accommodations')
           .select('*, users(full_name, church_name)')
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
         setAccommodations(data || []);
+      } else {
+        const { data } = await supabase
+          .from('inquiries')
+          .select('*')
+          .order('created_at', { ascending: false });
+        setInquiries(data || []);
       }
     } catch (error) {
       console.error('데이터 로드 오류:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const markInquiryContacted = async (inquiryId) => {
+    try {
+      const { error } = await supabase
+        .from('inquiries')
+        .update({ status: 'contacted' })
+        .eq('id', inquiryId);
+      if (error) throw error;
+      setInquiries(inquiries.map(i => i.id === inquiryId ? { ...i, status: 'contacted' } : i));
+    } catch (error) {
+      alert('오류: ' + error.message);
     }
   };
 
@@ -128,6 +148,12 @@ function AdminDashboard() {
             onClick={() => setActiveTab('accommodations')}
           >
             승인 대기 숙소 ({accommodations.length})
+          </button>
+          <button
+            className={`tab ${activeTab === 'inquiries' ? 'active' : ''}`}
+            onClick={() => setActiveTab('inquiries')}
+          >
+            문의 ({inquiries.length})
           </button>
         </div>
 
@@ -235,6 +261,48 @@ function AdminDashboard() {
           </div>
         )}
 
+        {/* 랜딩 페이지 문의 */}
+        {activeTab === 'inquiries' && (
+          <div className="review-section">
+            {loading ? (
+              <p>로드 중...</p>
+            ) : inquiries.length === 0 ? (
+              <p className="empty-message">접수된 문의가 없습니다.</p>
+            ) : (
+              <div className="grid grid-2">
+                {inquiries.map(inquiry => (
+                  <div key={inquiry.id} className="card inquiry-card">
+                    <div className="card-header">
+                      <h3>{inquiry.name}</h3>
+                      <span className={`badge ${inquiry.status === 'contacted' ? 'badge-info' : 'badge-warning'}`}>
+                        {inquiry.status === 'contacted' ? '연락함' : '신규 문의'}
+                      </span>
+                    </div>
+                    <div className="user-info">
+                      <p><strong>이메일:</strong> {inquiry.email}</p>
+                      <p><strong>전화:</strong> {inquiry.phone}</p>
+                      {inquiry.message && <p><strong>메시지:</strong> {inquiry.message}</p>}
+                      <p><strong>접수일:</strong> {new Date(inquiry.created_at).toLocaleDateString()}</p>
+                    </div>
+
+                    {inquiry.status !== 'contacted' && (
+                      <div className="action-buttons">
+                        <button
+                          className="btn btn-success"
+                          onClick={() => markInquiryContacted(inquiry.id)}
+                        >
+                          <Mail size={16} />
+                          연락 완료로 표시
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* 거절 모달 */}
         {selectedItem && (
           <div className="modal-overlay">
@@ -311,7 +379,7 @@ function AdminDashboard() {
           margin-top: 2rem;
         }
 
-        .user-card, .accommodation-card {
+        .user-card, .accommodation-card, .inquiry-card {
           display: flex;
           flex-direction: column;
         }
