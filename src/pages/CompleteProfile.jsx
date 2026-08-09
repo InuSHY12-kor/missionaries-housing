@@ -32,6 +32,12 @@ function CompleteProfile() {
       setUserId(session.user.id);
       setUserEmail(session.user.email);
 
+      // 가입 시 선택한 회원 유형이 있다면 미리 채워둠
+      const metaRole = session.user.user_metadata?.role;
+      if (metaRole === 'missionary' || metaRole === 'host') {
+        setFormData(prev => ({ ...prev, role: metaRole }));
+      }
+
       // 이미 프로필이 있다면 다시 등록할 필요 없음
       const { data: existingProfile } = await supabase
         .from('users')
@@ -144,7 +150,7 @@ function CompleteProfile() {
       <div className="container">
         <div className="signup-form">
           <h1>프로필 등록</h1>
-          <p className="subtitle">이메일 인증이 완료되었습니다. 마지막으로 프로필 정보를 등록해주세요.</p>
+          <p className="subtitle">마지막 단계입니다. 성명·연락처·소속 교회 및 증빙 자료를 등록해주세요.</p>
 
           {error && (
             <div className="alert alert-error">
