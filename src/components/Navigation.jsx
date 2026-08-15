@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import wewelogo from '../assets/wewe-logo.jpg';
+import NotificationBell from './NotificationBell';
 
 const ROLE_LABELS = {
   admin: '관리자',
@@ -68,6 +69,12 @@ function Navigation({ user, userProfile, onLogout }) {
                   <span className="status-badge status-pending">
                     ⏳ 미승인
                   </span>
+                </li>
+              )}
+
+              {userProfile?.status === 'approved' && (
+                <li>
+                  <NotificationBell userProfile={userProfile} />
                 </li>
               )}
 
