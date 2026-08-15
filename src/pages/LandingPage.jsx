@@ -238,15 +238,15 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* 문의/가입 신청 섹션 */}
+      {/* 문의 섹션 */}
       <section className="contact">
         <div className="container">
           <div className="contact-intro">
-            <h2>선교사님이신가요, 아니면 선교사님을 위해 숙소를 나누고 싶으신가요?</h2>
-            <p className="contact-lead">지금 위위 스테이 가족이 되어주세요.</p>
+            <h2>궁금한 점이 있으신가요?</h2>
+            <p className="contact-lead">위위 스테이에 대해 무엇이든 편하게 문의해 주세요.</p>
             <p>
-              선교사님을 정성껏 모시거나 따뜻한 나눔을 실천하고 싶으신가요? 위위 스테이 가족이 되어주시는 모든 분의 안전을 위해 저희는 2단계 승인 절차를 운영합니다.
-              신청서를 남겨주시면 정직한 검수를 거쳐 서로가 깊이 신뢰할 수 있는 만남이 되도록 꼼꼼하게 연결을 도와드리겠습니다.
+              숙소 이용이나 등록 방법, 승인 절차 등 궁금하신 내용을 남겨주시면 위위 스테이 팀이 확인 후 빠르게 안내해 드리겠습니다.
+              정식으로 선교사 또는 숙소 제공자로 가입하시려면 상단의 '가입하기' 메뉴를 이용해 주세요.
             </p>
           </div>
 
@@ -254,7 +254,7 @@ function LandingPage() {
             {submitted ? (
               <div className="contact-success">
                 <CheckCircle size={40} />
-                <h3>신청이 접수되었습니다</h3>
+                <h3>문의가 접수되었습니다</h3>
                 <p>남겨주신 연락처로 위위 스테이 팀이 곧 안내해 드리겠습니다. 감사합니다.</p>
               </div>
             ) : (
@@ -310,7 +310,7 @@ function LandingPage() {
 
                 <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
                   <Send size={18} />
-                  {submitting ? '접수 중...' : '가입 신청하기'}
+                  {submitting ? '접수 중...' : '문의하기'}
                 </button>
               </form>
             )}
