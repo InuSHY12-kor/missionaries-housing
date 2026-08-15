@@ -39,7 +39,13 @@ function Login() {
 
       navigate('/');
     } catch (err) {
-      setError(err.message);
+      if (err.message === 'Email not confirmed') {
+        setError('이메일 인증이 아직 완료되지 않았습니다. 가입 시 받으신 인증 메일의 링크를 먼저 클릭해주세요.');
+      } else if (err.message === 'Invalid login credentials') {
+        setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }

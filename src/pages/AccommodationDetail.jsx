@@ -1,20 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Users, Home, MessageCircle, CheckCircle } from 'lucide-react';
+import { MapPin, Users, Home, MessageCircle, CheckCircle, Edit } from 'lucide-react';
 import AccommodationMap from '../components/AccommodationMap';
-
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
-}
+import ImageCarousel from '../components/ImageCarousel';
+import Calendar from '../components/Calendar';
+import AmenityIcon from '../components/AmenityIcon';
+import { AMENITY_MAP } from '../utils/amenities';
 
 function rangesOverlap(aStart, aEnd, bStart, bEnd) {
   // 체크아웃일 당일은 겹치지 않는 것으로 처리 (반개구간 비교)
   return aStart < bEnd && aEnd > bStart;
 }
 
-function AccommodationDetail() {
+function AccommodationDetail({ userProfile }) {
   const { id } = useParams();
   const [accommodation, setAccommodation] = useState(null);
   const [host, setHost] = useState(null);
@@ -24,6 +23,8 @@ function AccommodationDetail() {
     checkOut: ''
   });
   const [bookedRanges, setBookedRanges] = useState([]);
+  const [bookedDates, setBookedDates] = useState(new Set());
+  const [blockedDates, setBlockedDates] = useState(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingError, setBookingError] = useState('');
@@ -46,13 +47,29 @@ function AccommodationDetail() {
         }
   }, [id]);
 
-  const fetchBookedRanges = useCallback(async () => {
+  const fetchAvailability = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .rpc('get_accommodation_booked_ranges', { p_accommodation_id: id });
+      const [{ data: ranges, error: rangesError }, { data: blocked, error: blockedError }] = await Promise.all([
+        supabase.rpc('get_accommodation_booked_ranges', { p_accommodation_id: id }),
+        supabase.rpc('get_accommodation_blocked_dates', { p_accommodation_id: id })
+      ]);
 
-      if (error) throw error;
-      setBookedRanges(data || []);
+      if (rangesError) throw rangesError;
+      if (blockedError) throw blockedError;
+
+      setBookedRanges(ranges || []);
+
+      const bookedSet = new Set();
+      (ranges || []).forEach(r => {
+        const cursor = new Date(r.check_in);
+        const end = new Date(r.check_out);
+        while (cursor < end) {
+          bookedSet.add(cursor.toISOString().split('T')[0]);
+          cursor.setDate(cursor.getDate() + 1);
+        }
+      });
+      setBookedDates(bookedSet);
+      setBlockedDates(new Set((blocked || []).map(b => b.blocked_date)));
     } catch (error) {
       console.error('예약 현황 로드 오류:', error);
     }
@@ -60,10 +77,54 @@ function AccommodationDetail() {
 
     useEffect(() => {
           fetchAccommodation();
-          fetchBookedRanges();
-    }, [fetchAccommodation, fetchBookedRanges]);
+          fetchAvailability();
+    }, [fetchAccommodation, fetchAvailability]);
 
   const todayStr = new Date().toISOString().split('T')[0];
+
+  const isDateUnavailable = (dateStr) => dateStr < todayStr || bookedDates.has(dateStr) || blockedDates.has(dateStr);
+
+  const hasUnavailableBetween = (startStr, endStr) => {
+    const cursor = new Date(startStr);
+    const end = new Date(endStr);
+    cursor.setDate(cursor.getDate() + 1);
+    while (cursor < end) {
+      const dStr = cursor.toISOString().split('T')[0];
+      if (bookedDates.has(dStr) || blockedDates.has(dStr)) return true;
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return false;
+  };
+
+  const handleDayClick = (dateStr) => {
+    if (bookingSuccess) return;
+    setBookingError('');
+
+    if (!bookingData.checkIn || bookingData.checkOut) {
+      // 새로운 선택 시작 (체크인 다시 선택)
+      setBookingData({ checkIn: dateStr, checkOut: '' });
+      return;
+    }
+
+    // 체크인은 있고 체크아웃은 아직 없는 상태
+    if (dateStr <= bookingData.checkIn) {
+      setBookingData({ checkIn: dateStr, checkOut: '' });
+      return;
+    }
+
+    if (hasUnavailableBetween(bookingData.checkIn, dateStr)) {
+      setBookingError('선택하신 기간 중 예약이 불가능한 날짜가 포함되어 있습니다. 다른 날짜를 선택해주세요.');
+      setBookingData({ checkIn: dateStr, checkOut: '' });
+      return;
+    }
+
+    setBookingData(prev => ({ ...prev, checkOut: dateStr }));
+  };
+
+  const isCalDisabled = (dateStr) => isDateUnavailable(dateStr);
+  const isCalSelected = (dateStr) => dateStr === bookingData.checkIn || dateStr === bookingData.checkOut;
+  const isCalInRange = (dateStr) =>
+    !!(bookingData.checkIn && bookingData.checkOut && dateStr > bookingData.checkIn && dateStr < bookingData.checkOut);
 
   const findOverlap = (checkInStr, checkOutStr) => {
     return bookedRanges.find(range =>
@@ -75,7 +136,7 @@ function AccommodationDetail() {
     setBookingError('');
 
     if (!bookingData.checkIn || !bookingData.checkOut) {
-      setBookingError('체크인, 체크아웃 날짜를 모두 선택해주세요.');
+      setBookingError('달력에서 체크인, 체크아웃 날짜를 모두 선택해주세요.');
       return;
     }
 
@@ -120,7 +181,7 @@ function AccommodationDetail() {
         // 서버(DB)에서 다른 예약과 날짜가 겹치는 것을 감지한 경우 (동시 예약 등)
         if (error.code === '23P01') {
           setBookingError('선택하신 날짜는 방금 다른 분이 먼저 예약하셨습니다. 다른 날짜를 선택해주세요.');
-          fetchBookedRanges();
+          fetchAvailability();
           return;
         }
         throw error;
@@ -128,7 +189,7 @@ function AccommodationDetail() {
 
       setBookingSuccess(true);
       setBookingData({ checkIn: '', checkOut: '' });
-      fetchBookedRanges();
+      fetchAvailability();
     } catch (error) {
       setBookingError('오류가 발생했습니다: ' + error.message);
     } finally {
@@ -139,22 +200,35 @@ function AccommodationDetail() {
   if (loading) return <div className="container"><p>로드 중...</p></div>;
   if (!accommodation) return <div className="container"><p>숙소를 찾을 수 없습니다.</p></div>;
 
+  const nights = bookingData.checkIn && bookingData.checkOut
+    ? Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))
+    : 0;
+
+  const canEdit = userProfile && (userProfile.role === 'admin' || accommodation.host_id === userProfile.id);
+  const matchedAmenities = (accommodation.amenities || [])
+    .map(key => AMENITY_MAP[key])
+    .filter(Boolean);
+
   return (
     <div className="accommodation-detail">
       <div className="container">
         {/* 이미지 갤러리 */}
         <div className="gallery">
-          {accommodation.images && accommodation.images.length > 0 ? (
-            <img src={accommodation.images[0]} alt={accommodation.title} className="main-image" />
-          ) : (
-            <div className="image-placeholder">이미지 없음</div>
-          )}
+          <ImageCarousel images={accommodation.images} alt={accommodation.title} />
         </div>
 
         <div className="detail-content">
           {/* 왼쪽: 정보 */}
           <div className="info-section">
-            <h1>{accommodation.title}</h1>
+            <div className="title-row">
+              <h1>{accommodation.title}</h1>
+              {canEdit && (
+                <Link to={`/my-accommodations?edit=${accommodation.id}`} className="btn btn-secondary edit-btn">
+                  <Edit size={16} />
+                  수정하기
+                </Link>
+              )}
+            </div>
 
             <p className="location">
               <MapPin size={20} />
@@ -177,14 +251,17 @@ function AccommodationDetail() {
               <p>{accommodation.description}</p>
             </div>
 
-            {accommodation.amenities && accommodation.amenities.length > 0 && (
-              <div className="amenities">
+            {matchedAmenities.length > 0 && (
+              <div className="amenities-section">
                 <h3>편의시설</h3>
-                <ul>
-                  {accommodation.amenities.map((amenity, idx) => (
-                    <li key={idx}>{amenity}</li>
+                <div className="amenities-box">
+                  {matchedAmenities.map(item => (
+                    <div key={item.key} className="amenity-chip">
+                      <AmenityIcon name={item.icon} size={16} />
+                      <span>{item.label}</span>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
 
@@ -233,46 +310,37 @@ function AccommodationDetail() {
                 </div>
               ) : (
                 <>
-                  <div className="form-group">
-                    <label>체크인</label>
-                    <input
-                      type="date"
-                      min={todayStr}
-                      value={bookingData.checkIn}
-                      onChange={(e) => setBookingData({ ...bookingData, checkIn: e.target.value })}
-                    />
+                  <div className="date-selection-summary">
+                    <div className="date-box">
+                      <label>체크인</label>
+                      <p>{bookingData.checkIn || '날짜 선택'}</p>
+                    </div>
+                    <div className="date-box">
+                      <label>체크아웃</label>
+                      <p>{bookingData.checkOut || '날짜 선택'}</p>
+                    </div>
                   </div>
 
-                  <div className="form-group">
-                    <label>체크아웃</label>
-                    <input
-                      type="date"
-                      min={bookingData.checkIn || todayStr}
-                      value={bookingData.checkOut}
-                      onChange={(e) => setBookingData({ ...bookingData, checkOut: e.target.value })}
-                    />
-                  </div>
+                  <p className="calendar-hint">
+                    회색으로 표시된 날짜는 예약이 불가능합니다. 달력에서 체크인 날짜를 먼저 선택하고, 이어서 체크아웃 날짜를 선택해주세요.
+                  </p>
 
-                  {bookedRanges.length > 0 && (
-                    <p className="booked-note">
-                      예약 불가 날짜: {bookedRanges.map((r, idx) => (
-                        <span key={idx}>
-                          {idx > 0 && ', '}
-                          {formatDate(r.check_in)} ~ {formatDate(r.check_out)}
-                        </span>
-                      ))}
-                    </p>
-                  )}
+                  <Calendar
+                    isDisabled={isCalDisabled}
+                    isSelected={isCalSelected}
+                    isInRange={isCalInRange}
+                    onDayClick={handleDayClick}
+                  />
 
-                  {bookingData.checkIn && bookingData.checkOut && bookingData.checkOut > bookingData.checkIn && (
+                  {nights > 0 && (
                     <div className="price-summary">
                       <div className="summary-row">
-                        <span>₩{accommodation.price?.toLocaleString()} × {Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))}박</span>
-                        <span>₩{(accommodation.price * Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))).toLocaleString()}</span>
+                        <span>₩{accommodation.price?.toLocaleString()} × {nights}박</span>
+                        <span>₩{(accommodation.price * nights).toLocaleString()}</span>
                       </div>
                       <div className="summary-total">
                         <span>합계</span>
-                        <span>₩{(accommodation.price * Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))).toLocaleString()}</span>
+                        <span>₩{(accommodation.price * nights).toLocaleString()}</span>
                       </div>
                     </div>
                   )}
@@ -304,20 +372,6 @@ function AccommodationDetail() {
           background: #ecf0f1;
         }
 
-        .main-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .image-placeholder {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 100%;
-          color: #95a5a6;
-        }
-
         .detail-content {
           display: grid;
           grid-template-columns: 2fr 1fr;
@@ -325,9 +379,24 @@ function AccommodationDetail() {
           margin-top: 2rem;
         }
 
+        .title-row {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 1rem;
+        }
+
         .info-section h1 {
           color: #2c3e50;
           margin-bottom: 1rem;
+        }
+
+        .edit-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          white-space: nowrap;
+          text-decoration: none;
         }
 
         .location {
@@ -360,7 +429,7 @@ function AccommodationDetail() {
           margin-bottom: 2rem;
         }
 
-        .description h3, .amenities h3, .host-info h3, .map-section h3 {
+        .description h3, .amenities-section h3, .host-info h3, .map-section h3 {
           color: #2c3e50;
           margin-bottom: 1rem;
         }
@@ -370,18 +439,31 @@ function AccommodationDetail() {
           color: #555;
         }
 
-        .amenities ul {
-          list-style: none;
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 0.75rem;
+        .amenities-section {
+          margin-bottom: 2rem;
         }
 
-        .amenities li {
-          padding: 0.75rem;
+        .amenities-box {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem 1.5rem;
           background: #f8f9fa;
-          border-radius: 4px;
-          color: #555;
+          border-radius: 8px;
+          padding: 1.25rem 1.5rem;
+        }
+
+        .amenity-chip {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: #444;
+          font-size: 0.92rem;
+          min-width: 45%;
+        }
+
+        .amenity-chip svg {
+          color: #16808E;
+          flex-shrink: 0;
         }
 
         .map-section {
@@ -415,6 +497,7 @@ function AccommodationDetail() {
         .booking-section {
           position: sticky;
           top: 100px;
+          align-self: start;
         }
 
         .booking-card {
@@ -445,14 +528,38 @@ function AccommodationDetail() {
           font-size: 0.9rem;
         }
 
-        .booked-note {
-          font-size: 0.82rem;
-          color: #e74c3c;
-          background: #fdf2f1;
-          padding: 0.6rem 0.75rem;
+        .date-selection-summary {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.75rem;
+          margin-bottom: 1rem;
+        }
+
+        .date-box {
+          border: 1px solid #dfe6e9;
           border-radius: 6px;
-          margin: -0.5rem 0 1rem;
-          line-height: 1.6;
+          padding: 0.6rem 0.75rem;
+        }
+
+        .date-box label {
+          display: block;
+          font-size: 0.75rem;
+          color: #95a5a6;
+          margin-bottom: 0.2rem;
+        }
+
+        .date-box p {
+          margin: 0;
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 0.9rem;
+        }
+
+        .calendar-hint {
+          font-size: 0.8rem;
+          color: #7f8c8d;
+          margin-bottom: 0.75rem;
+          line-height: 1.5;
         }
 
         .price-summary {
@@ -488,6 +595,12 @@ function AccommodationDetail() {
           color: #7f8c8d;
           text-align: center;
           margin-top: 1rem;
+        }
+
+        .form-error {
+          color: #e74c3c;
+          font-size: 0.85rem;
+          margin: 0.5rem 0 0;
         }
 
         .booking-success {
@@ -527,6 +640,10 @@ function AccommodationDetail() {
 
           .gallery {
             height: 250px;
+          }
+
+          .amenity-chip {
+            min-width: 100%;
           }
         }
       `}</style>

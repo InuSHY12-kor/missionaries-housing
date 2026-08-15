@@ -46,6 +46,11 @@ function Dashboard({ userProfile }) {
     }
   };
 
+  const canSearchAccommodations = userProfile?.role === 'admin' || userProfile?.role === 'missionary';
+  const canManageAccommodations = userProfile?.role === 'admin' || userProfile?.role === 'host';
+  const accommodationsLink = canSearchAccommodations ? '/accommodations' : (canManageAccommodations ? '/my-accommodations' : null);
+  const bookingsLink = userProfile?.role === 'host' ? '/host-bookings' : '/my-bookings';
+
   return (
     <div className="dashboard">
       <div className="container">
@@ -54,16 +59,24 @@ function Dashboard({ userProfile }) {
 
         {/* 통계 카드 */}
         <div className="stats-grid">
-          <div className="stat-card">
-            <Home size={32} />
-            <h3>등록된 숙소</h3>
-            <p className="stat-number">{stats.totalAccommodations}</p>
-          </div>
-          <div className="stat-card">
+          {accommodationsLink ? (
+            <Link to={accommodationsLink} className="stat-card stat-card-link">
+              <Home size={32} />
+              <h3>등록된 숙소</h3>
+              <p className="stat-number">{stats.totalAccommodations}</p>
+            </Link>
+          ) : (
+            <div className="stat-card">
+              <Home size={32} />
+              <h3>등록된 숙소</h3>
+              <p className="stat-number">{stats.totalAccommodations}</p>
+            </div>
+          )}
+          <Link to={bookingsLink} className="stat-card stat-card-link">
             <Users size={32} />
             <h3>예약</h3>
             <p className="stat-number">{stats.totalBookings}</p>
-          </div>
+          </Link>
           <div className="stat-card">
             <Star size={32} />
             <h3>리뷰</h3>
@@ -80,12 +93,14 @@ function Dashboard({ userProfile }) {
         <div className="quick-links">
           <h2>빠른 접근</h2>
           <div className="grid grid-3">
-            <Link to="/accommodations" className="quick-link-card">
-              <Home size={40} />
-              <h3>숙소 검색</h3>
-              <p>승인된 숙소를 검색하고 예약하세요</p>
-            </Link>
-            {userProfile?.role === 'host' && (
+            {(userProfile?.role === 'admin' || userProfile?.role === 'missionary') && (
+              <Link to="/accommodations" className="quick-link-card">
+                <Home size={40} />
+                <h3>숙소 검색</h3>
+                <p>승인된 숙소를 검색하고 예약하세요</p>
+              </Link>
+            )}
+            {(userProfile?.role === 'admin' || userProfile?.role === 'host') && (
               <Link to="/my-accommodations" className="quick-link-card">
                 <Home size={40} />
                 <h3>내 숙소 관리</h3>
@@ -133,9 +148,11 @@ function Dashboard({ userProfile }) {
         <div className="info-banner">
           <h3>💡 팁</h3>
           <p>
-            {userProfile?.role === 'missionary' 
+            {userProfile?.role === 'missionary'
               ? '숙소를 검색하고 예약하려면 "숙소 검색" 메뉴에서 시작하세요. 호스트와 직접 메시지로 소통할 수 있습니다.'
-              : '숙소를 등록하려면 "내 숙소" 메뉴에서 새 숙소를 추가할 수 있습니다. 등록한 숙소는 관리자 승인 후 공개됩니다.'}
+              : userProfile?.role === 'host'
+              ? '숙소를 등록하려면 "내 숙소" 메뉴에서 새 숙소를 추가할 수 있습니다. 등록한 숙소는 관리자 승인 후 공개됩니다.'
+              : '"관리" 메뉴에서 승인 대기 중인 회원과 숙소를 검토할 수 있습니다.'}
           </p>
         </div>
       </div>
@@ -169,6 +186,17 @@ function Dashboard({ userProfile }) {
 
         .stat-card:hover {
           transform: translateY(-4px);
+        }
+
+        .stat-card-link {
+          text-decoration: none;
+          color: inherit;
+          cursor: pointer;
+          display: block;
+        }
+
+        .stat-card-link:hover {
+          box-shadow: 0 4px 16px rgba(22, 128, 142, 0.2);
         }
 
         .stat-card svg {

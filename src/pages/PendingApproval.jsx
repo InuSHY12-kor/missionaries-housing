@@ -1,29 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../App';
+import React, { useState } from 'react';
 import { Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
 function PendingApproval({ userProfile }) {
-  const [status, setStatus] = useState(userProfile?.status || 'pending');
-  const [rejectionReason, setRejectionReason] = useState(userProfile?.rejection_reason || '');
-
-  useEffect(() => {
-    // 상태 변경 리스너
-    const subscription = supabase
-      .from('users')
-      .on('*', payload => {
-        if (payload.new.status !== status) {
-          setStatus(payload.new.status);
-          setRejectionReason(payload.new.rejection_reason || '');
-          // 페이지 새로고침
-          window.location.reload();
-        }
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeSubscription(subscription);
-    };
-  }, [status]);
+  const [status] = useState(userProfile?.status || 'pending');
+  const [rejectionReason] = useState(userProfile?.rejection_reason || '');
 
   return (
     <div className="pending-container">

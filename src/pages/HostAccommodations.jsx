@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../App';
-import { Trash2, Edit, Plus } from 'lucide-react';
+import { Trash2, Edit, Plus, Eye, Upload, X, CalendarClock } from 'lucide-react';
 import LocationPicker from '../components/LocationPicker';
+import Calendar from '../components/Calendar';
+import AmenityIcon from '../components/AmenityIcon';
+import { AMENITY_GROUPS } from '../utils/amenities';
 
 const EMPTY_FORM = {
   title: '',
@@ -11,24 +15,111 @@ const EMPTY_FORM = {
   capacity: '',
   bedrooms: '',
   bathrooms: '',
-  amenities: '',
+  amenities: [],
+  images: [],
   latitude: null,
   longitude: null
 };
 
+// 숙소별 "날짜 관리" 패널: 예약된 날짜는 회색으로 비활성화 표시하고,
+// 호스트가 원하는 날짜를 클릭하면 직접 차단/해제할 수 있습니다.
+function AvailabilityManager({ accommodationId }) {
+  const [bookedDates, setBookedDates] = useState(new Set());
+  const [blockedDates, setBlockedDates] = useState(new Set());
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [{ data: ranges, error: rangesError }, { data: blocked, error: blockedError }] = await Promise.all([
+        supabase.rpc('get_accommodation_booked_ranges', { p_accommodation_id: accommodationId }),
+        supabase.rpc('get_accommodation_blocked_dates', { p_accommodation_id: accommodationId })
+      ]);
+
+      if (rangesError) throw rangesError;
+      if (blockedError) throw blockedError;
+
+      const bookedSet = new Set();
+      (ranges || []).forEach(r => {
+        const cursor = new Date(r.check_in);
+        const end = new Date(r.check_out);
+        while (cursor < end) {
+          bookedSet.add(cursor.toISOString().split('T')[0]);
+          cursor.setDate(cursor.getDate() + 1);
+        }
+      });
+
+      setBookedDates(bookedSet);
+      setBlockedDates(new Set((blocked || []).map(b => b.blocked_date)));
+    } catch (error) {
+      console.error('날짜 정보 로드 오류:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [accommodationId]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const isDisabled = (dateStr) => dateStr < todayStr || bookedDates.has(dateStr);
+  const isSelected = (dateStr) => blockedDates.has(dateStr);
+
+  const handleDayClick = async (dateStr) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (blockedDates.has(dateStr)) {
+        const { error } = await supabase
+          .from('accommodation_blocked_dates')
+          .delete()
+          .eq('accommodation_id', accommodationId)
+          .eq('blocked_date', dateStr);
+        if (error) throw error;
+        setBlockedDates(prev => {
+          const next = new Set(prev);
+          next.delete(dateStr);
+          return next;
+        });
+      } else {
+        const { error } = await supabase
+          .from('accommodation_blocked_dates')
+          .insert({ accommodation_id: accommodationId, blocked_date: dateStr });
+        if (error) throw error;
+        setBlockedDates(prev => new Set(prev).add(dateStr));
+      }
+    } catch (error) {
+      alert('날짜 설정 오류: ' + error.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (loading) return <p className="availability-loading">날짜 정보를 불러오는 중...</p>;
+
+  return (
+    <div className="availability-manager">
+      <p className="availability-hint">
+        회색으로 표시된 날짜는 이미 예약이 있어 선택할 수 없습니다. 예약을 받지 않으실 날짜를 클릭하면 차단되며(파란색), 다시 클릭하면 해제됩니다.
+      </p>
+      <Calendar isDisabled={isDisabled} isSelected={isSelected} onDayClick={handleDayClick} />
+    </div>
+  );
+}
+
 function HostAccommodations({ userProfile }) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [accommodations, setAccommodations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [dateManagerId, setDateManagerId] = useState(null);
 
-  useEffect(() => {
-    fetchAccommodations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const fetchAccommodations = async () => {
+  const fetchAccommodations = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('accommodations')
@@ -43,7 +134,43 @@ function HostAccommodations({ userProfile }) {
     } finally {
       setLoading(false);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userProfile.id]);
+
+  useEffect(() => {
+    fetchAccommodations();
+  }, [fetchAccommodations]);
+
+  const handleEdit = useCallback((accommodation) => {
+    setFormData({
+      title: accommodation.title,
+      description: accommodation.description,
+      location: accommodation.location,
+      price: accommodation.price.toString(),
+      capacity: accommodation.capacity.toString(),
+      bedrooms: accommodation.bedrooms?.toString() || '',
+      bathrooms: accommodation.bathrooms?.toString() || '',
+      amenities: accommodation.amenities || [],
+      images: accommodation.images || [],
+      latitude: accommodation.latitude ?? null,
+      longitude: accommodation.longitude ?? null
+    });
+    setEditingId(accommodation.id);
+    setShowForm(true);
+  }, []);
+
+  // 숙소 상세 페이지의 "수정하기" 버튼에서 ?edit=ID 로 들어온 경우 자동으로 수정 폼을 엽니다.
+  useEffect(() => {
+    const editParam = searchParams.get('edit');
+    if (editParam && accommodations.length > 0) {
+      const target = accommodations.find(a => a.id === editParam);
+      if (target) {
+        handleEdit(target);
+        setSearchParams({}, { replace: true });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, accommodations]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -61,53 +188,87 @@ function HostAccommodations({ userProfile }) {
     }));
   };
 
+  const toggleAmenity = (key) => {
+    setFormData(prev => ({
+      ...prev,
+      amenities: prev.amenities.includes(key)
+        ? prev.amenities.filter(k => k !== key)
+        : [...prev.amenities, key]
+    }));
+  };
+
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    if (formData.images.length + files.length > 10) {
+      alert('사진은 최대 10장까지 등록할 수 있습니다.');
+      e.target.value = '';
+      return;
+    }
+
+    setUploadingImages(true);
+    try {
+      const uploadedUrls = [];
+      for (const file of files) {
+        const ext = file.name.split('.').pop();
+        const path = `${userProfile.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('accommodation-images')
+          .upload(path, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from('accommodation-images')
+          .getPublicUrl(path);
+
+        uploadedUrls.push(urlData.publicUrl);
+      }
+
+      setFormData(prev => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
+    } catch (error) {
+      alert('이미지 업로드 오류: ' + error.message);
+    } finally {
+      setUploadingImages(false);
+      e.target.value = '';
+    }
+  };
+
+  const removeImage = (url) => {
+    setFormData(prev => ({ ...prev, images: prev.images.filter(u => u !== url) }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const amenitiesArray = formData.amenities
-        .split(',')
-        .map(a => a.trim())
-        .filter(a => a);
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        price: parseFloat(formData.price),
+        capacity: parseInt(formData.capacity, 10),
+        bedrooms: parseInt(formData.bedrooms, 10) || null,
+        bathrooms: parseInt(formData.bathrooms, 10) || null,
+        amenities: formData.amenities,
+        images: formData.images,
+        latitude: formData.latitude,
+        longitude: formData.longitude
+      };
 
       if (editingId) {
-        // 수정
         const { error } = await supabase
           .from('accommodations')
-          .update({
-            title: formData.title,
-            description: formData.description,
-            location: formData.location,
-            price: parseFloat(formData.price),
-            capacity: parseInt(formData.capacity),
-            bedrooms: parseInt(formData.bedrooms),
-            bathrooms: parseInt(formData.bathrooms),
-            amenities: amenitiesArray,
-            latitude: formData.latitude,
-            longitude: formData.longitude,
-            status: 'pending'
-          })
+          .update({ ...payload, status: 'pending' })
           .eq('id', editingId);
 
         if (error) throw error;
       } else {
-        // 신규 등록
         const { error } = await supabase
           .from('accommodations')
-          .insert({
-            host_id: userProfile.id,
-            title: formData.title,
-            description: formData.description,
-            location: formData.location,
-            price: parseFloat(formData.price),
-            capacity: parseInt(formData.capacity),
-            bedrooms: parseInt(formData.bedrooms),
-            bathrooms: parseInt(formData.bathrooms),
-            amenities: amenitiesArray,
-            latitude: formData.latitude,
-            longitude: formData.longitude,
-            status: 'pending'
-          });
+          .insert({ ...payload, host_id: userProfile.id, status: 'pending' });
 
         if (error) throw error;
       }
@@ -120,23 +281,6 @@ function HostAccommodations({ userProfile }) {
     } catch (error) {
       alert('오류: ' + error.message);
     }
-  };
-
-  const handleEdit = (accommodation) => {
-    setFormData({
-      title: accommodation.title,
-      description: accommodation.description,
-      location: accommodation.location,
-      price: accommodation.price.toString(),
-      capacity: accommodation.capacity.toString(),
-      bedrooms: accommodation.bedrooms?.toString() || '',
-      bathrooms: accommodation.bathrooms?.toString() || '',
-      amenities: accommodation.amenities?.join(', ') || '',
-      latitude: accommodation.latitude ?? null,
-      longitude: accommodation.longitude ?? null
-    });
-    setEditingId(accommodation.id);
-    setShowForm(true);
   };
 
   const handleDelete = async (id) => {
@@ -191,7 +335,7 @@ function HostAccommodations({ userProfile }) {
           </button>
         </div>
 
-        {/* 등록 폼 */}
+        {/* 등록/수정 폼 */}
         {showForm && (
           <div className="form-section">
             <h2>{editingId ? '숙소 수정' : '새 숙소 등록'}</h2>
@@ -286,14 +430,64 @@ function HostAccommodations({ userProfile }) {
               </div>
 
               <div className="form-group">
-                <label>편의시설 (쉼표로 구분)</label>
-                <input
-                  type="text"
-                  name="amenities"
-                  value={formData.amenities}
-                  onChange={handleInputChange}
-                  placeholder="WiFi, 에어컨, 주방, 세탁기"
-                />
+                <label>숙소 사진</label>
+                <p className="help-text">여러 장 등록하시면 숙소 상세 페이지에서 슬라이드로 보여집니다. (최대 10장)</p>
+
+                {formData.images.length > 0 && (
+                  <div className="image-manager-grid">
+                    {formData.images.map((url) => (
+                      <div key={url} className="image-manager-item">
+                        <img src={url} alt="숙소 사진" />
+                        <button type="button" className="image-remove-btn" onClick={() => removeImage(url)}>
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="image-upload">
+                  <input
+                    type="file"
+                    id="accommodation-image-input"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploadingImages || formData.images.length >= 10}
+                  />
+                  <label htmlFor="accommodation-image-input" className="image-upload-label">
+                    <Upload size={22} />
+                    <span>{uploadingImages ? '업로드 중...' : '사진을 선택하거나 드래그하세요'}</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>편의시설</label>
+                <p className="help-text">체크한 편의시설만 숙소 상세 페이지에 노출됩니다.</p>
+                <div className="amenities-picker">
+                  {AMENITY_GROUPS.map(group => (
+                    <div key={group.group} className="amenities-picker-group">
+                      <h4>{group.group}</h4>
+                      <div className="amenities-picker-items">
+                        {group.items.map(item => (
+                          <label
+                            key={item.key}
+                            className={`amenity-checkbox ${formData.amenities.includes(item.key) ? 'active' : ''}`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.amenities.includes(item.key)}
+                              onChange={() => toggleAmenity(item.key)}
+                            />
+                            <AmenityIcon name={item.icon} size={16} />
+                            <span>{item.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="form-actions">
@@ -342,6 +536,7 @@ function HostAccommodations({ userProfile }) {
                   <p><strong>가격:</strong> ₩{accommodation.price.toLocaleString()}/일</p>
                   <p><strong>수용인원:</strong> {accommodation.capacity}명</p>
                   <p><strong>침실:</strong> {accommodation.bedrooms}, <strong>욕실:</strong> {accommodation.bathrooms}</p>
+                  <p><strong>사진:</strong> {accommodation.images?.length || 0}장</p>
                   <p>
                     <strong>지도 위치:</strong>{' '}
                     {accommodation.latitude != null && accommodation.longitude != null
@@ -357,6 +552,17 @@ function HostAccommodations({ userProfile }) {
                 )}
 
                 <div className="item-actions">
+                  <Link to={`/accommodations/${accommodation.id}`} className="btn btn-secondary">
+                    <Eye size={16} />
+                    보기
+                  </Link>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setDateManagerId(dateManagerId === accommodation.id ? null : accommodation.id)}
+                  >
+                    <CalendarClock size={16} />
+                    날짜 관리
+                  </button>
                   <button
                     className="btn btn-warning"
                     onClick={() => handleEdit(accommodation)}
@@ -372,6 +578,10 @@ function HostAccommodations({ userProfile }) {
                     삭제
                   </button>
                 </div>
+
+                {dateManagerId === accommodation.id && (
+                  <AvailabilityManager accommodationId={accommodation.id} />
+                )}
               </div>
             ))}
           </div>
@@ -408,6 +618,129 @@ function HostAccommodations({ userProfile }) {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 1rem;
+        }
+
+        .help-text {
+          font-size: 0.85rem;
+          color: #7f8c8d;
+          margin: -0.25rem 0 0.75rem;
+        }
+
+        .image-manager-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+          gap: 0.75rem;
+          margin-bottom: 1rem;
+        }
+
+        .image-manager-item {
+          position: relative;
+          border-radius: 6px;
+          overflow: hidden;
+          aspect-ratio: 1;
+        }
+
+        .image-manager-item img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .image-remove-btn {
+          position: absolute;
+          top: 0.35rem;
+          right: 0.35rem;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          border: none;
+          background: rgba(231, 76, 60, 0.9);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+        }
+
+        .image-upload {
+          border: 2px dashed #16808E;
+          border-radius: 6px;
+          padding: 1.5rem;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.3s;
+          background: #f0f9fa;
+        }
+
+        .image-upload:hover {
+          background: #e6f4f5;
+          border-color: #106570;
+        }
+
+        .image-upload input {
+          display: none;
+        }
+
+        .image-upload-label {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+          cursor: pointer;
+          color: #16808E;
+        }
+
+        .amenities-picker {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+          background: #f8f9fa;
+          border-radius: 8px;
+          padding: 1.25rem;
+        }
+
+        .amenities-picker-group h4 {
+          color: #2c3e50;
+          margin-bottom: 0.75rem;
+          font-size: 0.95rem;
+        }
+
+        .amenities-picker-items {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.6rem;
+        }
+
+        .amenity-checkbox {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.5rem 0.75rem;
+          background: white;
+          border: 1px solid #dfe6e9;
+          border-radius: 20px;
+          cursor: pointer;
+          font-size: 0.85rem;
+          color: #555;
+          transition: all 0.2s;
+        }
+
+        .amenity-checkbox input {
+          display: none;
+        }
+
+        .amenity-checkbox svg {
+          color: #16808E;
+        }
+
+        .amenity-checkbox.active {
+          background: #16808E;
+          border-color: #16808E;
+          color: white;
+        }
+
+        .amenity-checkbox.active svg {
+          color: white;
         }
 
         .form-actions {
@@ -486,16 +819,33 @@ function HostAccommodations({ userProfile }) {
 
         .item-actions {
           display: flex;
+          flex-wrap: wrap;
           gap: 0.75rem;
         }
 
-        .item-actions button {
-          flex: 1;
-          max-width: 150px;
+        .item-actions .btn {
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 0.5rem;
+          text-decoration: none;
+        }
+
+        .availability-manager {
+          margin-top: 1.5rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid #ecf0f1;
+        }
+
+        .availability-hint {
+          font-size: 0.85rem;
+          color: #7f8c8d;
+          margin-bottom: 0.75rem;
+        }
+
+        .availability-loading {
+          margin-top: 1.5rem;
+          color: #7f8c8d;
         }
 
         @media (max-width: 768px) {
@@ -518,7 +868,7 @@ function HostAccommodations({ userProfile }) {
             flex-direction: column;
           }
 
-          .item-actions button {
+          .item-actions .btn {
             max-width: none;
           }
         }

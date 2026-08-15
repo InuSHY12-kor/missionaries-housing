@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../App';
-import { CheckCircle, XCircle, Eye, Mail } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, Mail, FileText } from 'lucide-react';
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('users');
@@ -10,6 +10,26 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [docLoadingPath, setDocLoadingPath] = useState(null);
+
+  // 검증 문서 파일명 추출 (저장 경로: {userId}/{timestamp}_{인덱스 또는 원본파일명}.{확장자})
+  const getDocFileName = (path) => path.split('/').pop();
+
+  // 비공개 버킷(verification-docs)의 문서를 서명된 URL로 열람
+  const viewDocument = async (path) => {
+    setDocLoadingPath(path);
+    try {
+      const { data, error } = await supabase.storage
+        .from('verification-docs')
+        .createSignedUrl(path, 60);
+      if (error) throw error;
+      window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      alert('문서를 불러올 수 없습니다: ' + error.message);
+    } finally {
+      setDocLoadingPath(null);
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -181,13 +201,25 @@ function AdminDashboard() {
                       <p><strong>가입일:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
                     </div>
 
-                    {user.verification_docs && (
+                    {user.verification_docs && user.verification_docs.length > 0 && (
                       <div className="verification-docs">
-                        <h4>검증 문서:</h4>
-                        <button className="btn btn-secondary" onClick={() => setSelectedItem(user)}>
-                          <Eye size={16} />
-                          문서 보기
-                        </button>
+                        <h4>검증 문서 ({user.verification_docs.length}개):</h4>
+                        <ul className="doc-list">
+                          {user.verification_docs.map((docPath) => (
+                            <li key={docPath}>
+                              <button
+                                type="button"
+                                className="doc-link"
+                                onClick={() => viewDocument(docPath)}
+                                disabled={docLoadingPath === docPath}
+                              >
+                                <FileText size={15} />
+                                <span>{docLoadingPath === docPath ? '여는 중...' : getDocFileName(docPath)}</span>
+                                <Eye size={14} />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     )}
 
@@ -403,6 +435,47 @@ function AdminDashboard() {
 
         .verification-docs h4 {
           margin-bottom: 0.75rem;
+        }
+
+        .doc-list {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .doc-link {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          width: 100%;
+          background: #f0f9fa;
+          border: 1px solid #cceaec;
+          color: #106570;
+          padding: 0.6rem 0.9rem;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          text-align: left;
+          cursor: pointer;
+          transition: background 0.2s, border-color 0.2s;
+        }
+
+        .doc-link span {
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          text-decoration: underline;
+        }
+
+        .doc-link:hover {
+          background: #e6f4f5;
+          border-color: #16808E;
+        }
+
+        .doc-link:disabled {
+          opacity: 0.6;
+          cursor: default;
         }
 
         .action-buttons {

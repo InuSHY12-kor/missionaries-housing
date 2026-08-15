@@ -1,30 +1,36 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { AlertCircle } from 'lucide-react';
+import { MISSIONARY_TERMS, HOST_TERMS } from '../data/termsOfService';
 
-function SignUp() {
+const ROLE_META = {
+  missionary: {
+    title: '선교사 가입하기',
+    subtitle: '숙소가 필요한 선교사님, 환영합니다',
+    terms: MISSIONARY_TERMS
+  },
+  host: {
+    title: '숙소 제공자 가입하기',
+    subtitle: '선교사님을 위해 숙소를 나눠주셔서 감사합니다',
+    terms: HOST_TERMS
+  }
+};
+
+function SignUp({ role }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [agreed, setAgreed] = useState(false);
 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    passwordConfirm: '',
-    fullName: '',
-    role: 'missionary',
-    churchName: '',
-    churchAddress: '',
-    phone: ''
+    passwordConfirm: ''
   });
 
-  const [files, setFiles] = useState([]);
-
-  const handleFileChange = (e) => {
-    setFiles(Array.from(e.target.files));
-  };
+  const meta = ROLE_META[role] || ROLE_META.missionary;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -49,53 +55,38 @@ function SignUp() {
         throw new Error('비밀번호가 일치하지 않습니다.');
       }
 
-      if (!formData.fullName || !formData.churchName) {
-        throw new Error('필수 정보를 모두 입력해주세요.');
+      if (formData.password.length < 8) {
+        throw new Error('비밀번호는 8자 이상이어야 합니다.');
+      }
+
+      if (!agreed) {
+        throw new Error('이용약관에 동의해주세요.');
       }
 
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        options: {
+          // 이메일 인증 링크를 클릭하면 프로필 등록 페이지로 돌아오도록 설정
+          emailRedirectTo: `${window.location.origin}/complete-profile`,
+          data: {
+            role
+          }
+        }
       });
 
       if (authError) throw authError;
 
-      const userId = authData.user.id;
-
-      const verificationDocs = [];
-      if (files.length > 0) {
-        for (const file of files) {
-          const filePath = `${userId}/${Date.now()}_${file.name}`;
-          const { error: uploadError } = await supabase.storage
-            .from('verification-docs')
-            .upload(filePath, file);
-          if (uploadError) throw uploadError;
-          verificationDocs.push(filePath);
-        }
+      if (authData.session) {
+        // 이메일 인증이 꺼져 있는 등, 가입과 동시에 로그인 세션이 생성된 경우
+        // → 바로 다음 단계(프로필 등록)로 이동
+        navigate('/complete-profile');
+      } else {
+        // 이메일 인증이 필요한 경우 → 인증 안내 메시지 표시, 링크 클릭 후 자동으로 다음 단계 진행됨
+        setSuccess(
+          `${formData.email} 주소로 인증 메일을 보내드렸습니다. 메일함(스팸함 포함)을 확인하고 인증 링크를 클릭해주세요. 인증 후 자동으로 다음 단계(프로필 등록)로 이동합니다.`
+        );
       }
-
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert({
-          id: userId,
-          email: formData.email,
-          full_name: formData.fullName,
-          role: formData.role,
-          church_name: formData.churchName,
-          church_address: formData.churchAddress,
-          phone: formData.phone,
-          status: 'pending',
-          verification_docs: verificationDocs,
-          created_at: new Date().toISOString()
-        });
-
-      if (profileError) throw profileError;
-
-      setSuccess('가입이 완료되었습니다! 관리자 승인 후 이용할 수 있습니다.');
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
-
     } catch (err) {
       setError(err.message);
     } finally {
@@ -107,8 +98,8 @@ function SignUp() {
     <div className="signup-container">
       <div className="container">
         <div className="signup-form">
-          <h1>가입하기</h1>
-          <p className="subtitle">선교사 커뮤니티에 참여하세요</p>
+          <h1>{meta.title}</h1>
+          <p className="subtitle">{meta.subtitle}</p>
 
           {error && (
             <div className="alert alert-error">
@@ -123,148 +114,78 @@ function SignUp() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>회원 유형 *</label>
-              <div className="role-selector">
-                <label className={`role-option ${formData.role === 'missionary' ? 'active' : ''}`}>
+          {!success && (
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label>이메일 *</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="example@email.com"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>비밀번호 *</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="8자 이상"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>비밀번호 확인 *</label>
+                <input
+                  type="password"
+                  name="passwordConfirm"
+                  value={formData.passwordConfirm}
+                  onChange={handleInputChange}
+                  placeholder="비밀번호 재입력"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>이용약관 *</label>
+                <div className="terms-box" tabIndex={0}>
+                  {meta.terms}
+                </div>
+                <label className="checkbox">
                   <input
-                    type="radio"
-                    name="role"
-                    value="missionary"
-                    checked={formData.role === 'missionary'}
-                    onChange={handleInputChange}
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                    required
                   />
-                  <span>선교사 (숙소 예약)</span>
-                </label>
-                <label className={`role-option ${formData.role === 'host' ? 'active' : ''}`}>
-                  <input
-                    type="radio"
-                    name="role"
-                    value="host"
-                    checked={formData.role === 'host'}
-                    onChange={handleInputChange}
-                  />
-                  <span>숙소 제공자 (숙소 제공)</span>
+                  <span>위 이용약관에 동의합니다</span>
                 </label>
               </div>
-            </div>
 
-            <div className="form-group">
-              <label>이메일 *</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="example@email.com"
-                required
-              />
-            </div>
+              <p className="field-hint">
+                이메일과 비밀번호로 먼저 가입하고, 다음 단계에서 성명·연락처·소속 교회·증빙 자료를 등록합니다.
+              </p>
 
-            <div className="form-group">
-              <label>성명 *</label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                placeholder="홍길동"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>전화번호 *</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                placeholder="010-1234-5678"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>소속 교회 *</label>
-              <input
-                type="text"
-                name="churchName"
-                value={formData.churchName}
-                onChange={handleInputChange}
-                placeholder="교회명"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>교회 주소</label>
-              <input
-                type="text"
-                name="churchAddress"
-                value={formData.churchAddress}
-                onChange={handleInputChange}
-                placeholder="서울시 강남구..."
-              />
-            </div>
-
-            <div className="form-group">
-              <label>증빙 자료 업로드 (선택)</label>
-              <input
-                type="file"
-                multiple
-                onChange={handleFileChange}
-                accept=".pdf,.jpg,.jpeg,.png"
-              />
-              {files.length > 0 && (
-                <p className="file-list">{files.map(f => f.name).join(', ')}</p>
-              )}
-              <p className="field-hint">선교사 파송 확인서, 숙소 관련 서류 등을 첨부해주세요.</p>
-            </div>
-
-            <div className="form-group">
-              <label>비밀번호 *</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                placeholder="8자 이상"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>비밀번호 확인 *</label>
-              <input
-                type="password"
-                name="passwordConfirm"
-                value={formData.passwordConfirm}
-                onChange={handleInputChange}
-                placeholder="비밀번호 재입력"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="checkbox">
-                <input type="checkbox" required />
-                <span>이용약관에 동의합니다</span>
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? '가입 중...' : '가입하기'}
-            </button>
-          </form>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                {loading ? '가입 중...' : '가입하기'}
+              </button>
+            </form>
+          )}
 
           <div className="login-link">
-            이미 계정이 있으신가요? <a href="/">로그인</a>
+            <Link to="/signup">← 가입 유형 다시 선택하기</Link>
+            <span className="divider">|</span>
+            이미 계정이 있으신가요? <Link to="/login">로그인</Link>
           </div>
         </div>
       </div>
@@ -287,15 +208,10 @@ function SignUp() {
           margin: 0 auto;
         }
 
-        .file-list {
-          margin-top: 0.5rem;
-          font-size: 0.85rem;
-          color: #555;
-        }
-
         .field-hint {
-          margin-top: 0.4rem;
-          font-size: 0.8rem;
+          margin-top: -0.5rem;
+          margin-bottom: 1.5rem;
+          font-size: 0.85rem;
           color: #888;
         }
 
@@ -331,30 +247,18 @@ function SignUp() {
           border: 1px solid #27ae60;
         }
 
-        .role-selector {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1rem;
-        }
-
-        .role-option {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          padding: 1rem;
-          border: 2px solid #ecf0f1;
+        .terms-box {
+          height: 180px;
+          overflow-y: auto;
+          border: 1px solid #dfe6e9;
           border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-
-        .role-option input {
-          cursor: pointer;
-        }
-
-        .role-option.active {
-          border-color: #16808E;
-          background: #e6f4f5;
+          padding: 1rem;
+          background: #f8f9fa;
+          color: #555;
+          font-size: 0.85rem;
+          line-height: 1.7;
+          white-space: pre-wrap;
+          margin-bottom: 0.75rem;
         }
 
         .checkbox {
@@ -398,6 +302,15 @@ function SignUp() {
           text-align: center;
           margin-top: 1.5rem;
           color: #7f8c8d;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.6rem;
+          flex-wrap: wrap;
+        }
+
+        .login-link .divider {
+          color: #dfe6e9;
         }
 
         .login-link a {
@@ -409,10 +322,6 @@ function SignUp() {
         @media (max-width: 768px) {
           .signup-form {
             padding: 1.5rem;
-          }
-
-          .role-selector {
-            grid-template-columns: 1fr;
           }
         }
       `}</style>

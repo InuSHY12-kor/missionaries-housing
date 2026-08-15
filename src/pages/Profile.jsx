@@ -234,26 +234,6 @@ function Profile({ userProfile }) {
               </form>
             </div>
 
-            {/* 계정 통계 */}
-            <div className="section-card">
-              <h2>계정 활동</h2>
-
-              <div className="stats">
-                <div className="stat">
-                  <p className="stat-label">호스트 등급</p>
-                  <p className="stat-value">★★★★★</p>
-                </div>
-                <div className="stat">
-                  <p className="stat-label">총 예약 수</p>
-                  <p className="stat-value">12</p>
-                </div>
-                <div className="stat">
-                  <p className="stat-label">리뷰 평점</p>
-                  <p className="stat-value">4.8</p>
-                </div>
-              </div>
-            </div>
-
             {/* 위험 구역 */}
             <div className="section-card danger">
               <h2>위험 구역</h2>
@@ -358,32 +338,6 @@ function Profile({ userProfile }) {
           border-color: #16808E;
         }
 
-        .stats {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1rem;
-        }
-
-        .stat {
-          text-align: center;
-          padding: 1rem;
-          background: #f8f9fa;
-          border-radius: 6px;
-        }
-
-        .stat-label {
-          color: #7f8c8d;
-          font-size: 0.85rem;
-          margin: 0;
-        }
-
-        .stat-value {
-          color: #16808E;
-          font-size: 1.5rem;
-          font-weight: bold;
-          margin: 0.5rem 0 0;
-        }
-
         .danger-section {
           background: #fadbd8;
           padding: 1rem;
@@ -402,10 +356,6 @@ function Profile({ userProfile }) {
 
         @media (max-width: 768px) {
           .profile-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .stats {
             grid-template-columns: 1fr;
           }
         }

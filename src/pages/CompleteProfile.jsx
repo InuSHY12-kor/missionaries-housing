@@ -32,6 +32,12 @@ function CompleteProfile() {
       setUserId(session.user.id);
       setUserEmail(session.user.email);
 
+      // 가입 시 선택한 회원 유형이 있다면 미리 채워둠
+      const metaRole = session.user.user_metadata?.role;
+      if (metaRole === 'missionary' || metaRole === 'host') {
+        setFormData(prev => ({ ...prev, role: metaRole }));
+      }
+
       // 이미 프로필이 있다면 다시 등록할 필요 없음
       const { data: existingProfile } = await supabase
         .from('users')
@@ -122,8 +128,8 @@ function CompleteProfile() {
 
       if (profileError) throw profileError;
 
-      // 프로필 상태를 앱 전체에 반영하기 위해 새로고침
-      window.location.href = '/';
+      // 프로필 상태를 앱 전체에 반영하기 위해 새로고침하면서 완료 안내 페이지로 이동
+      window.location.href = '/signup-complete';
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -144,7 +150,7 @@ function CompleteProfile() {
       <div className="container">
         <div className="signup-form">
           <h1>프로필 등록</h1>
-          <p className="subtitle">이메일 인증이 완료되었습니다. 마지막으로 프로필 정보를 등록해주세요.</p>
+          <p className="subtitle">마지막 단계입니다. 성명·연락처·소속 교회 및 증빙 자료를 등록해주세요.</p>
 
           {error && (
             <div className="alert alert-error">
@@ -155,29 +161,13 @@ function CompleteProfile() {
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>회원 유형 *</label>
-              <div className="role-selector">
-                <label className={`role-option ${formData.role === 'missionary' ? 'active' : ''}`}>
-                  <input
-                    type="radio"
-                    name="role"
-                    value="missionary"
-                    checked={formData.role === 'missionary'}
-                    onChange={handleInputChange}
-                  />
-                  <span>선교사 (숙소 예약)</span>
-                </label>
-                <label className={`role-option ${formData.role === 'host' ? 'active' : ''}`}>
-                  <input
-                    type="radio"
-                    name="role"
-                    value="host"
-                    checked={formData.role === 'host'}
-                    onChange={handleInputChange}
-                  />
-                  <span>숙소 제공자 (숙소 제공)</span>
-                </label>
+              <label>회원 유형</label>
+              <div className="role-readonly">
+                {formData.role === 'host' ? '숙소 제공자 (숙소 제공)' : '선교사 (숙소 예약)'}
               </div>
+              <p className="help-text">
+                가입하기에서 선택하신 회원 유형입니다. 변경이 필요하시면 처음부터 다시 가입해주세요.
+              </p>
             </div>
 
             <div className="form-group">
@@ -230,8 +220,10 @@ function CompleteProfile() {
             <div className="form-group">
               <label>검증 문서 (사진) *</label>
               <p className="help-text">
-                선교사증, 목사증, 교회 추천서 등을 촬영하여 업로드해주세요.
-                (최소 1개, 최대 5개)
+                {formData.role === 'host'
+                  ? '신분증, 소속 교회 재직증명서, 숙소 소유·이용 권한을 확인할 수 있는 자료(등기부등본, 임대차계약서 등) 중 가능한 자료를 촬영하여 업로드해주세요.'
+                  : '선교사증, 목사증, 교회 추천서 등을 촬영하여 업로드해주세요.'}
+                {' '}(최소 1개, 최대 5개)
               </p>
               <div className="file-upload">
                 <input
@@ -324,30 +316,13 @@ function CompleteProfile() {
           border: 1px solid #e74c3c;
         }
 
-        .role-selector {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1rem;
-        }
-
-        .role-option {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          padding: 1rem;
+        .role-readonly {
+          padding: 0.85rem 1rem;
           border: 2px solid #ecf0f1;
           border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-
-        .role-option input {
-          cursor: pointer;
-        }
-
-        .role-option.active {
-          border-color: #16808E;
-          background: #e6f4f5;
+          background: #f8f9fa;
+          color: #2c3e50;
+          font-weight: 600;
         }
 
         .help-text {
@@ -423,10 +398,6 @@ function CompleteProfile() {
         @media (max-width: 768px) {
           .signup-form {
             padding: 1.5rem;
-          }
-
-          .role-selector {
-            grid-template-columns: 1fr;
           }
         }
       `}</style>
