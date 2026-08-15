@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../App';
-import { CheckCircle, XCircle, Eye, Mail, FileText } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2 } from 'lucide-react';
+
+// 계정 삭제 유예기간(일). Profile.jsx의 DELETION_GRACE_PERIOD_DAYS와 동일한 값이어야 함.
+const DELETION_GRACE_PERIOD_DAYS = 15;
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('users');
   const [users, setUsers] = useState([]);
   const [accommodations, setAccommodations] = useState([]);
   const [inquiries, setInquiries] = useState([]);
+  const [deletionRequests, setDeletionRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [docLoadingPath, setDocLoadingPath] = useState(null);
+  const [deletionBusyId, setDeletionBusyId] = useState(null);
 
   // 검증 문서 파일명 추출 (저장 경로: {userId}/{timestamp}_{인덱스 또는 원본파일명}.{확장자})
   const getDocFileName = (path) => path.split('/').pop();
@@ -53,12 +58,19 @@ function AdminDashboard() {
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
         setAccommodations(data || []);
-      } else {
+      } else if (activeTab === 'inquiries') {
         const { data } = await supabase
           .from('inquiries')
           .select('*')
           .order('created_at', { ascending: false });
         setInquiries(data || []);
+      } else if (activeTab === 'deletions') {
+        const { data } = await supabase
+          .from('users')
+          .select('*')
+          .not('deletion_requested_at', 'is', null)
+          .order('deletion_requested_at', { ascending: true });
+        setDeletionRequests(data || []);
       }
     } catch (error) {
       console.error('데이터 로드 오류:', error);
@@ -150,6 +162,25 @@ function AdminDashboard() {
     }
   };
 
+  // 계정 삭제 요청을 즉시 승인 — 15일을 기다리지 않고 지금 바로 계정과 관련 데이터를 영구 삭제합니다.
+  const approveAccountDeletion = async (user) => {
+    if (!window.confirm(`${user.full_name}(${user.email}) 계정을 지금 영구 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) {
+      return;
+    }
+    setDeletionBusyId(user.id);
+    try {
+      const { error } = await supabase.rpc('admin_delete_user_account', {
+        target_user_id: user.id
+      });
+      if (error) throw error;
+      setDeletionRequests(deletionRequests.filter(u => u.id !== user.id));
+    } catch (error) {
+      alert('오류: ' + error.message);
+    } finally {
+      setDeletionBusyId(null);
+    }
+  };
+
   return (
     <div className="admin-dashboard">
       <div className="container">
@@ -174,6 +205,12 @@ function AdminDashboard() {
             onClick={() => setActiveTab('inquiries')}
           >
             문의 ({inquiries.length})
+          </button>
+          <button
+            className={`tab ${activeTab === 'deletions' ? 'active' : ''}`}
+            onClick={() => setActiveTab('deletions')}
+          >
+            계정 삭제 요청 ({deletionRequests.length})
           </button>
         </div>
 
@@ -330,6 +367,51 @@ function AdminDashboard() {
                     )}
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 계정 삭제 요청 */}
+        {activeTab === 'deletions' && (
+          <div className="review-section">
+            {loading ? (
+              <p>로드 중...</p>
+            ) : deletionRequests.length === 0 ? (
+              <p className="empty-message">대기 중인 계정 삭제 요청이 없습니다.</p>
+            ) : (
+              <div className="grid grid-2">
+                {deletionRequests.map(user => {
+                  const requestedAt = new Date(user.deletion_requested_at);
+                  const scheduledFor = new Date(
+                    requestedAt.getTime() + DELETION_GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000
+                  );
+                  return (
+                    <div key={user.id} className="card user-card">
+                      <div className="card-header">
+                        <h3>{user.full_name}</h3>
+                        <span className="badge badge-danger">삭제 예정</span>
+                      </div>
+                      <div className="user-info">
+                        <p><strong>이메일:</strong> {user.email}</p>
+                        <p><strong>역할:</strong> {user.role === 'admin' ? '관리자' : user.role === 'missionary' ? '선교사' : '숙소 제공자'}</p>
+                        <p><strong>삭제 요청일:</strong> {requestedAt.toLocaleDateString()}</p>
+                        <p><strong>자동 삭제 예정일:</strong> {scheduledFor.toLocaleDateString()}</p>
+                      </div>
+
+                      <div className="action-buttons">
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => approveAccountDeletion(user)}
+                          disabled={deletionBusyId === user.id}
+                        >
+                          <Trash2 size={16} />
+                          {deletionBusyId === user.id ? '삭제 중...' : '지금 삭제 승인'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
