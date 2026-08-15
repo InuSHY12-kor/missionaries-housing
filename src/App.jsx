@@ -34,7 +34,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
 });
 
 // 활동이 없을 때 자동 로그아웃까지 대기하는 시간 (2시간)
-const IDLE_TIMEOUT_MS = 20 * 1000; // TEMP-QA: 20s (실제 배포 전 2시간으로 원복 예정)
+const IDLE_TIMEOUT_MS = 2 * 60 * 60 * 1000;
 // 활동 감지에 사용할 이벤트 목록
 const ACTIVITY_EVENTS = ['mousedown', 'mousemove', 'keydown', 'wheel', 'scroll', 'touchstart'];
 
@@ -132,7 +132,7 @@ function App() {
     };
 
     // 1분마다 유휴 시간을 확인하고, 탭이 다시 보일 때(예: 절전 모드 복귀)도 즉시 확인
-    const intervalId = setInterval(checkIdle, 5 * 1000); // TEMP-QA: 5s (실제 배포 전 60s로 원복 예정)
+    const intervalId = setInterval(checkIdle, 60 * 1000);
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') checkIdle();
     };
