@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { Home, Users, Star, MessageSquare } from 'lucide-react';
+import { Home, Users, Star, MessageSquare, ChevronRight } from 'lucide-react';
+
+const BOOKING_STATUS_LABEL = { pending: '예약됨', confirmed: '예약 확정됨', cancelled: '취소됨' };
+const BOOKING_STATUS_BADGE = { pending: 'badge-warning', confirmed: 'badge-success', cancelled: 'badge-danger' };
 
 function Dashboard({ userProfile }) {
   const [stats, setStats] = useState({
@@ -23,12 +26,17 @@ function Dashboard({ userProfile }) {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'approved');
 
-      // 예약 수
-      const { data: bookings } = await supabase
+      // 예약 수 (정확한 전체 개수)
+      const { count: bookingCount } = await supabase
+        .from('bookings')
+        .select('*', { count: 'exact', head: true });
+
+      // 최근 예약 1건만 대시보드에 표시 (나머지는 "더보기"로 예약 관리 페이지에서 확인)
+      const { data: recentBookings } = await supabase
         .from('bookings')
         .select('*, accommodations(title), users(full_name)')
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(1);
 
       // 리뷰 수
       const { count: reviewCount } = await supabase
@@ -37,9 +45,9 @@ function Dashboard({ userProfile }) {
 
       setStats({
         totalAccommodations: accCount || 0,
-        totalBookings: bookings?.length || 0,
+        totalBookings: bookingCount || 0,
         totalReviews: reviewCount || 0,
-        recentBookings: bookings || []
+        recentBookings: recentBookings || []
       });
     } catch (error) {
       console.error('통계 로드 오류:', error);
@@ -115,10 +123,15 @@ function Dashboard({ userProfile }) {
           </div>
         </div>
 
-        {/* 최근 예약 */}
+        {/* 최근 예약 (최신 1건만 표시, 나머지는 예약 관리 페이지에서) */}
         {stats.recentBookings.length > 0 && (
           <div className="recent-section">
-            <h2>최근 예약</h2>
+            <div className="recent-section-header">
+              <h2>최근 예약</h2>
+              <Link to={bookingsLink} className="see-more-link">
+                더보기 <ChevronRight size={14} />
+              </Link>
+            </div>
             <div className="table-responsive">
               <table className="booking-table">
                 <thead>
@@ -134,7 +147,11 @@ function Dashboard({ userProfile }) {
                     <tr key={booking.id}>
                       <td>{booking.accommodations?.title}</td>
                       <td>{booking.users?.full_name}</td>
-                      <td><span className="badge badge-info">예약 완료</span></td>
+                      <td>
+                        <span className={`badge ${BOOKING_STATUS_BADGE[booking.status] || 'badge-info'}`}>
+                          {BOOKING_STATUS_LABEL[booking.status] || booking.status}
+                        </span>
+                      </td>
                       <td>{new Date(booking.created_at).toLocaleDateString()}</td>
                     </tr>
                   ))}
@@ -265,6 +282,31 @@ function Dashboard({ userProfile }) {
           border-radius: 8px;
           margin: 2rem 0;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .recent-section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+        }
+
+        .recent-section-header h2 {
+          margin: 0;
+        }
+
+        .see-more-link {
+          display: flex;
+          align-items: center;
+          gap: 0.2rem;
+          font-size: 0.85rem;
+          color: #16808E;
+          text-decoration: none;
+          font-weight: 600;
+        }
+
+        .see-more-link:hover {
+          text-decoration: underline;
         }
 
         .table-responsive {
