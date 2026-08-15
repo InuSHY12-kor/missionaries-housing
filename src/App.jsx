@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
+import { AlertCircle, X } from 'lucide-react';
 import Navigation from './components/Navigation';
 import LandingPage from './pages/LandingPage';
 import SignUp from './pages/SignUp';
@@ -22,13 +23,28 @@ import './App.css';
 // Supabase 초기화
 const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL || 'https://your-project.supabase.co';
 const SUPABASE_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-anon-key';
-export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    // sessionStorage를 사용하면 브라우저(모든 탭)를 완전히 종료하거나 컴퓨터를 재부팅했을 때
+    // 로그인 세션이 유지되지 않고 자동으로 로그아웃됩니다(탭 새로고침에는 영향 없음).
+    storage: window.sessionStorage,
+    persistSession: true,
+    autoRefreshToken: true,
+  },
+});
+
+// 활동이 없을 때 자동 로그아웃까지 대기하는 시간 (2시간)
+const IDLE_TIMEOUT_MS = 2 * 60 * 60 * 1000;
+// 활동 감지에 사용할 이벤트 목록
+const ACTIVITY_EVENTS = ['mousedown', 'mousemove', 'keydown', 'wheel', 'scroll', 'touchstart'];
 
 function App() {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [autoLogoutMessage, setAutoLogoutMessage] = useState(null);
+  const lastActivityRef = useRef(Date.now());
 
   useEffect(() => {
     const initAuth = async () => {
@@ -41,6 +57,7 @@ function App() {
       async (event, session) => {
         setUser(session?.user || null);
         if (session?.user) {
+          setAutoLogoutMessage(null);
           await fetchUserProfile(session.user.id);
         } else {
           setUserProfile(null);
@@ -91,6 +108,42 @@ function App() {
     setUser(null);
     setUserProfile(null);
   };
+
+  // 로그인된 사용자의 활동을 감지해 일정 시간(2시간) 이상 활동이 없으면 자동 로그아웃
+  // 의존성을 user 객체가 아닌 boolean(로그인 여부)으로 둬서, 토큰 자동 갱신 등으로
+  // user 객체 참조만 바뀌는 경우에는 타이머가 리셋되지 않도록 함.
+  const isLoggedIn = !!user;
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    lastActivityRef.current = Date.now();
+    const updateActivity = () => {
+      lastActivityRef.current = Date.now();
+    };
+    ACTIVITY_EVENTS.forEach((evt) => window.addEventListener(evt, updateActivity, { passive: true }));
+
+    const checkIdle = async () => {
+      if (Date.now() - lastActivityRef.current >= IDLE_TIMEOUT_MS) {
+        await supabase.auth.signOut();
+        setUser(null);
+        setUserProfile(null);
+        setAutoLogoutMessage('장시간 활동이 없어 자동으로 로그아웃되었습니다. 다시 로그인해주세요.');
+      }
+    };
+
+    // 1분마다 유휴 시간을 확인하고, 탭이 다시 보일 때(예: 절전 모드 복귀)도 즉시 확인
+    const intervalId = setInterval(checkIdle, 60 * 1000);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') checkIdle();
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      ACTIVITY_EVENTS.forEach((evt) => window.removeEventListener(evt, updateActivity));
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(intervalId);
+    };
+  }, [isLoggedIn]);
 
   if (loading) {
     return (
@@ -184,6 +237,20 @@ function App() {
   return (
     <BrowserRouter>
       <div className="App">
+        {autoLogoutMessage && (
+          <div className="auto-logout-banner">
+            <AlertCircle size={18} />
+            <span>{autoLogoutMessage}</span>
+            <button
+              type="button"
+              className="auto-logout-banner-close"
+              onClick={() => setAutoLogoutMessage(null)}
+              aria-label="닫기"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
         <Navigation user={user} userProfile={userProfile} onLogout={handleLogout} />
 
         <Routes>
