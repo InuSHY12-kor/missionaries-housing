@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Users, Star, X } from 'lucide-react';
+import { MapPin, Users, Star, Calendar } from 'lucide-react';
 import SearchMap from '../components/SearchMap';
-import { haversineDistanceKm } from '../utils/geo';
 
 function Accommodations() {
   const [accommodations, setAccommodations] = useState([]);
   const [filteredAccommodations, setFilteredAccommodations] = useState([]);
-  const [visibleAccommodations, setVisibleAccommodations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     location: '',
@@ -16,8 +14,16 @@ function Accommodations() {
     maxPrice: 1000000,
     capacity: 1
   });
-  const [selectedPoint, setSelectedPoint] = useState(null);
-  const [radiusKm, setRadiusKm] = useState(30);
+
+  // 일정(체크인/체크아웃) — 선택하면 해당 기간에 예약 가능한 숙소만 표시.
+  const [checkIn, setCheckIn] = useState('');
+  const [checkOut, setCheckOut] = useState('');
+  const [availableIds, setAvailableIds] = useState(null); // null = 일정 필터 미적용
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [dateError, setDateError] = useState('');
+
+  // 지도 화면 범위 — 지도를 움직이거나 확대하면 갱신되어, 그 범위 안의 숙소만 아래 목록에 표시.
+  const [mapBounds, setMapBounds] = useState(null);
 
   useEffect(() => {
     fetchAccommodations();
@@ -28,22 +34,42 @@ function Accommodations() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, accommodations]);
 
+  // 일정 선택 시 예약 가능한 숙소 id 목록 조회 (RLS를 우회하는 전용 RPC).
   useEffect(() => {
-    if (selectedPoint) {
-      setVisibleAccommodations(
-        filteredAccommodations.filter(acc => {
-          if (acc.latitude == null || acc.longitude == null) return false;
-          const distance = haversineDistanceKm(selectedPoint, {
-            lat: Number(acc.latitude),
-            lng: Number(acc.longitude)
-          });
-          return distance <= radiusKm;
-        })
-      );
-    } else {
-      setVisibleAccommodations(filteredAccommodations);
+    if (!checkIn || !checkOut) {
+      setAvailableIds(null);
+      setDateError('');
+      return;
     }
-  }, [filteredAccommodations, selectedPoint, radiusKm]);
+    if (checkOut <= checkIn) {
+      setDateError('체크아웃 날짜는 체크인 날짜 이후여야 합니다.');
+      setAvailableIds(null);
+      return;
+    }
+    setDateError('');
+    let cancelled = false;
+    (async () => {
+      setAvailabilityLoading(true);
+      try {
+        const { data, error } = await supabase.rpc('get_available_accommodation_ids', {
+          p_check_in: checkIn,
+          p_check_out: checkOut
+        });
+        if (error) throw error;
+        if (!cancelled) {
+          setAvailableIds(new Set((data || []).map((row) => row.accommodation_id)));
+        }
+      } catch (error) {
+        console.error('예약 가능 숙소 조회 오류:', error);
+        if (!cancelled) setAvailableIds(null);
+      } finally {
+        if (!cancelled) setAvailabilityLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [checkIn, checkOut]);
 
   const fetchAccommodations = async () => {
     try {
@@ -90,6 +116,27 @@ function Accommodations() {
     }));
   };
 
+  // 일정 조건까지 반영한 숙소 목록 (지도 마커에도 사용).
+  const dateFilteredAccommodations = useMemo(() => {
+    if (!availableIds) return filteredAccommodations;
+    return filteredAccommodations.filter(acc => availableIds.has(acc.id));
+  }, [filteredAccommodations, availableIds]);
+
+  // 지도 범위(bounds) 안에 있는 숙소만 최종 목록에 노출.
+  const visibleAccommodations = useMemo(() => {
+    if (!mapBounds) return dateFilteredAccommodations;
+    return dateFilteredAccommodations.filter(acc => {
+      if (acc.latitude == null || acc.longitude == null) return false;
+      return mapBounds.contains({ lat: Number(acc.latitude), lng: Number(acc.longitude) });
+    });
+  }, [dateFilteredAccommodations, mapBounds]);
+
+  const clearDates = () => {
+    setCheckIn('');
+    setCheckOut('');
+    setDateError('');
+  };
+
   return (
     <div className="accommodations">
       <div className="container">
@@ -98,6 +145,30 @@ function Accommodations() {
         {/* 필터 */}
         <div className="filter-section">
           <div className="filter-card">
+            <div className="form-group date-group">
+              <label>
+                <Calendar size={16} />
+                체크인
+              </label>
+              <input
+                type="date"
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group date-group">
+              <label>
+                <Calendar size={16} />
+                체크아웃
+              </label>
+              <input
+                type="date"
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+              />
+            </div>
+
             <div className="form-group">
               <label>지역</label>
               <input
@@ -139,11 +210,23 @@ function Accommodations() {
 
             <button
               className="btn btn-secondary"
-              onClick={() => setFilters({ location: '', minPrice: 0, maxPrice: 1000000, capacity: 1 })}
+              onClick={() => {
+                setFilters({ location: '', minPrice: 0, maxPrice: 1000000, capacity: 1 });
+                clearDates();
+              }}
             >
               초기화
             </button>
           </div>
+
+          {dateError && <p className="form-error date-error">{dateError}</p>}
+          {checkIn && checkOut && !dateError && (
+            <p className="date-hint">
+              {availabilityLoading
+                ? '예약 가능한 숙소를 확인하는 중...'
+                : `${checkIn} ~ ${checkOut} 기간에 예약 가능한 숙소만 표시하고 있습니다.`}
+            </p>
+          )}
         </div>
 
         {/* 지도 검색 */}
@@ -152,36 +235,15 @@ function Accommodations() {
             <div>
               <h2>지도에서 찾기</h2>
               <p className="map-search-hint">
-                지도를 클릭해서 원하는 위치를 선택하면 그 주변의 숙소만 보여드립니다.
+                지도를 확대하면 숙소명과 1박 가격이 바로 보여요. 지도를 움직이거나 확대/축소하면
+                현재 화면에 보이는 지역의 숙소만 아래 목록에 표시됩니다.
               </p>
             </div>
-            {selectedPoint && (
-              <button className="btn btn-secondary" onClick={() => setSelectedPoint(null)}>
-                <X size={16} />
-                위치 선택 해제
-              </button>
-            )}
           </div>
 
-          {selectedPoint && (
-            <div className="radius-control">
-              <label>반경: {radiusKm}km 이내</label>
-              <input
-                type="range"
-                min="5"
-                max="200"
-                step="5"
-                value={radiusKm}
-                onChange={(e) => setRadiusKm(parseInt(e.target.value))}
-              />
-            </div>
-          )}
-
           <SearchMap
-            accommodations={filteredAccommodations}
-            selectedPoint={selectedPoint}
-            onSelectPoint={setSelectedPoint}
-            radiusKm={radiusKm}
+            accommodations={dateFilteredAccommodations}
+            onBoundsChange={setMapBounds}
           />
         </div>
 
@@ -190,7 +252,9 @@ function Accommodations() {
           <p>로드 중...</p>
         ) : visibleAccommodations.length === 0 ? (
           <p className="empty-message">
-            {selectedPoint ? '선택하신 위치 주변에 등록된 숙소가 없습니다.' : '해당하는 숙소가 없습니다.'}
+            {checkIn && checkOut
+              ? '해당 일정에 예약 가능하면서 현재 지도 범위에 있는 숙소가 없습니다. 일정을 바꾸거나 지도를 움직여 보세요.'
+              : '현재 지도 범위에 있는 숙소가 없습니다. 지도를 움직이거나 축소해 보세요.'}
           </p>
         ) : (
           <div className="grid grid-2">
@@ -252,11 +316,32 @@ function Accommodations() {
           margin-bottom: 0;
         }
 
+        .filter-card .form-group.date-group label {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+        }
+
         .filter-card span {
           display: block;
           margin-top: 0.5rem;
           color: #16808E;
           font-weight: 600;
+        }
+
+        .date-error {
+          color: #e74c3c;
+          font-size: 0.85rem;
+          margin: 1rem 0 0;
+        }
+
+        .date-hint {
+          color: #16808E;
+          font-size: 0.85rem;
+          margin: 1rem 0 0;
+          background: #e6f4f5;
+          padding: 0.6rem 0.9rem;
+          border-radius: 6px;
         }
 
         .map-search-section {
@@ -268,12 +353,7 @@ function Accommodations() {
         }
 
         .map-search-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 1rem;
           margin-bottom: 1rem;
-          flex-wrap: wrap;
         }
 
         .map-search-header h2 {
@@ -285,30 +365,6 @@ function Accommodations() {
           color: #7f8c8d;
           font-size: 0.9rem;
           margin: 0;
-        }
-
-        .map-search-header button {
-          display: flex;
-          align-items: center;
-          gap: 0.4rem;
-          white-space: nowrap;
-        }
-
-        .radius-control {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          margin-bottom: 1rem;
-        }
-
-        .radius-control label {
-          font-weight: 600;
-          color: #16808E;
-          white-space: nowrap;
-        }
-
-        .radius-control input[type="range"] {
-          flex: 1;
         }
 
         .empty-message {
