@@ -19,19 +19,27 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-function HostBookings() {
+function HostBookings({ userProfile }) {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
 
   const fetchBookings = useCallback(async () => {
+    if (!userProfile?.id) {
+      setBookings([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
-      // RLS 정책("Hosts can view bookings for their accommodations")이
-      // 자동으로 내 숙소에 대한 예약만 반환해줍니다.
+      // RLS 정책("Hosts can view bookings for their accommodations")뿐 아니라,
+      // 관리자 계정이 이 페이지(내 숙소로 들어온 예약 관리)에 접속했을 때도
+      // "전체 예약"이 아니라 "내가 호스트로 등록한 숙소"의 예약만 보이도록
+      // host_id로 명시적으로 필터링합니다. (전체 예약 현황은 관리 탭 > 전체 예약에서 확인)
       const { data, error } = await supabase
         .from('bookings')
-        .select('*, accommodations(title, location), users(full_name, phone, church_name)')
+        .select('*, accommodations!inner(title, location, host_id), users(full_name, phone, church_name)')
+        .eq('accommodations.host_id', userProfile.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -41,7 +49,7 @@ function HostBookings() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userProfile?.id]);
 
   useEffect(() => {
     fetchBookings();

@@ -28,6 +28,17 @@ function AdminDashboard({ userProfile }) {
   const [allBookings, setAllBookings] = useState([]);
   const [bookingStatusBusyId, setBookingStatusBusyId] = useState(null);
   const [loading, setLoading] = useState(true);
+  // 탭 버튼에 표시되는 "항목 (숫자)" 배지용 카운트. 각 탭의 실제 데이터(users, accommodations 등)는
+  // 해당 탭을 클릭했을 때만 불러오지만, 배지 숫자는 처음 페이지에 들어오자마자 전체 탭에 대해
+  // 한 번에 조회해서 보여줘야 "클릭하기 전엔 0으로 보이는" 문제가 생기지 않습니다.
+  const [counts, setCounts] = useState({
+    users: 0,
+    accommodations: 0,
+    inquiries: 0,
+    deletions: 0,
+    members: 0,
+    bookings: 0
+  });
   const [selectedItem, setSelectedItem] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [docLoadingPath, setDocLoadingPath] = useState(null);
@@ -59,6 +70,34 @@ function AdminDashboard({ userProfile }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
+  // 페이지에 처음 들어올 때 모든 탭의 배지 숫자를 한 번에 조회합니다.
+  useEffect(() => {
+    fetchAllCounts();
+  }, []);
+
+  const fetchAllCounts = async () => {
+    try {
+      const [usersRes, accRes, inqRes, delRes, memRes, bookRes] = await Promise.all([
+        supabase.from('users').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('accommodations').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('inquiries').select('*', { count: 'exact', head: true }),
+        supabase.from('users').select('*', { count: 'exact', head: true }).not('deletion_requested_at', 'is', null),
+        supabase.from('users').select('*', { count: 'exact', head: true }),
+        supabase.from('bookings').select('*', { count: 'exact', head: true })
+      ]);
+      setCounts({
+        users: usersRes.count || 0,
+        accommodations: accRes.count || 0,
+        inquiries: inqRes.count || 0,
+        deletions: delRes.count || 0,
+        members: memRes.count || 0,
+        bookings: bookRes.count || 0
+      });
+    } catch (error) {
+      console.error('카운트 로드 오류:', error);
+    }
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -69,6 +108,7 @@ function AdminDashboard({ userProfile }) {
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
         setUsers(data || []);
+        setCounts(prev => ({ ...prev, users: (data || []).length }));
       } else if (activeTab === 'accommodations') {
         const { data } = await supabase
           .from('accommodations')
@@ -76,12 +116,14 @@ function AdminDashboard({ userProfile }) {
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
         setAccommodations(data || []);
+        setCounts(prev => ({ ...prev, accommodations: (data || []).length }));
       } else if (activeTab === 'inquiries') {
         const { data } = await supabase
           .from('inquiries')
           .select('*')
           .order('created_at', { ascending: false });
         setInquiries(data || []);
+        setCounts(prev => ({ ...prev, inquiries: (data || []).length }));
       } else if (activeTab === 'deletions') {
         const { data } = await supabase
           .from('users')
@@ -89,6 +131,7 @@ function AdminDashboard({ userProfile }) {
           .not('deletion_requested_at', 'is', null)
           .order('deletion_requested_at', { ascending: true });
         setDeletionRequests(data || []);
+        setCounts(prev => ({ ...prev, deletions: (data || []).length }));
       } else if (activeTab === 'members') {
         const { data } = await supabase
           .from('users')
@@ -96,6 +139,7 @@ function AdminDashboard({ userProfile }) {
           .order('role', { ascending: true })
           .order('full_name', { ascending: true });
         setMembers(data || []);
+        setCounts(prev => ({ ...prev, members: (data || []).length }));
       } else if (activeTab === 'bookings') {
         // 문제가 생겼을 때 관리자가 직접 확인/조정할 수 있도록 모든 예약을 조회.
         const { data } = await supabase
@@ -103,6 +147,7 @@ function AdminDashboard({ userProfile }) {
           .select('*, accommodations(id, title, location, host_id, users(full_name, email)), users(full_name, phone, church_name)')
           .order('created_at', { ascending: false });
         setAllBookings(data || []);
+        setCounts(prev => ({ ...prev, bookings: (data || []).length }));
       }
     } catch (error) {
       console.error('데이터 로드 오류:', error);
@@ -132,6 +177,7 @@ function AdminDashboard({ userProfile }) {
         .eq('id', userId);
       if (error) throw error;
       setUsers(users.filter(u => u.id !== userId));
+      setCounts(prev => ({ ...prev, users: Math.max(0, prev.users - 1) }));
     } catch (error) {
       alert('오류: ' + error.message);
     }
@@ -152,6 +198,7 @@ function AdminDashboard({ userProfile }) {
         .eq('id', userId);
       if (error) throw error;
       setUsers(users.filter(u => u.id !== userId));
+      setCounts(prev => ({ ...prev, users: Math.max(0, prev.users - 1) }));
       setSelectedItem(null);
       setRejectionReason('');
     } catch (error) {
@@ -167,6 +214,7 @@ function AdminDashboard({ userProfile }) {
         .eq('id', accommodationId);
       if (error) throw error;
       setAccommodations(accommodations.filter(a => a.id !== accommodationId));
+      setCounts(prev => ({ ...prev, accommodations: Math.max(0, prev.accommodations - 1) }));
     } catch (error) {
       alert('오류: ' + error.message);
     }
@@ -187,6 +235,7 @@ function AdminDashboard({ userProfile }) {
         .eq('id', accommodationId);
       if (error) throw error;
       setAccommodations(accommodations.filter(a => a.id !== accommodationId));
+      setCounts(prev => ({ ...prev, accommodations: Math.max(0, prev.accommodations - 1) }));
       setSelectedItem(null);
       setRejectionReason('');
     } catch (error) {
@@ -206,6 +255,12 @@ function AdminDashboard({ userProfile }) {
       });
       if (error) throw error;
       setDeletionRequests(deletionRequests.filter(u => u.id !== user.id));
+      setMembers(members.filter(m => m.id !== user.id));
+      setCounts(prev => ({
+        ...prev,
+        deletions: Math.max(0, prev.deletions - 1),
+        members: Math.max(0, prev.members - 1)
+      }));
     } catch (error) {
       alert('오류: ' + error.message);
     } finally {
@@ -268,37 +323,37 @@ function AdminDashboard({ userProfile }) {
             className={`tab ${activeTab === 'users' ? 'active' : ''}`}
             onClick={() => setActiveTab('users')}
           >
-            승인 대기 사용자 ({users.length})
+            승인 대기 사용자 ({counts.users})
           </button>
           <button
             className={`tab ${activeTab === 'accommodations' ? 'active' : ''}`}
             onClick={() => setActiveTab('accommodations')}
           >
-            승인 대기 숙소 ({accommodations.length})
+            승인 대기 숙소 ({counts.accommodations})
           </button>
           <button
             className={`tab ${activeTab === 'inquiries' ? 'active' : ''}`}
             onClick={() => setActiveTab('inquiries')}
           >
-            문의 ({inquiries.length})
+            문의 ({counts.inquiries})
           </button>
           <button
             className={`tab ${activeTab === 'deletions' ? 'active' : ''}`}
             onClick={() => setActiveTab('deletions')}
           >
-            계정 삭제 요청 ({deletionRequests.length})
+            계정 삭제 요청 ({counts.deletions})
           </button>
           <button
             className={`tab ${activeTab === 'members' ? 'active' : ''}`}
             onClick={() => setActiveTab('members')}
           >
-            전체 회원 ({members.length})
+            전체 회원 ({counts.members})
           </button>
           <button
             className={`tab ${activeTab === 'bookings' ? 'active' : ''}`}
             onClick={() => setActiveTab('bookings')}
           >
-            전체 예약 ({allBookings.length})
+            전체 예약 ({counts.bookings})
           </button>
         </div>
 
