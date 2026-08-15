@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { supabase } from '../App';
 import { User, Phone, Building2, Save } from 'lucide-react';
 
+const DELETION_GRACE_PERIOD_DAYS = 15;
+
 function Profile({ userProfile }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -17,6 +19,56 @@ function Profile({ userProfile }) {
     newPassword: '',
     confirmPassword: ''
   });
+
+  // 계정 삭제 요청(유예기간) 상태 — null이면 삭제 요청 없음.
+  const [deletionRequestedAt, setDeletionRequestedAt] = useState(
+    userProfile?.deletion_requested_at || null
+  );
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletionBusy, setDeletionBusy] = useState(false);
+
+  const deletionScheduledFor = deletionRequestedAt
+    ? new Date(
+        new Date(deletionRequestedAt).getTime() +
+          DELETION_GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000
+      )
+    : null;
+
+  const requestAccountDeletion = async () => {
+    setDeletionBusy(true);
+    try {
+      const nowIso = new Date().toISOString();
+      const { error } = await supabase
+        .from('users')
+        .update({ deletion_requested_at: nowIso })
+        .eq('id', userProfile.id);
+
+      if (error) throw error;
+      setDeletionRequestedAt(nowIso);
+      setShowDeleteModal(false);
+    } catch (error) {
+      alert('오류: ' + error.message);
+    } finally {
+      setDeletionBusy(false);
+    }
+  };
+
+  const cancelAccountDeletion = async () => {
+    setDeletionBusy(true);
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ deletion_requested_at: null })
+        .eq('id', userProfile.id);
+
+      if (error) throw error;
+      setDeletionRequestedAt(null);
+    } catch (error) {
+      alert('오류: ' + error.message);
+    } finally {
+      setDeletionBusy(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -234,20 +286,68 @@ function Profile({ userProfile }) {
               </form>
             </div>
 
-            {/* 위험 구역 */}
-            <div className="section-card danger">
-              <h2>위험 구역</h2>
+          </div>
+        </div>
 
-              <div className="danger-section">
-                <p>계정을 삭제하면 모든 데이터가 영구적으로 삭제됩니다.</p>
-                <button type="button" className="btn btn-danger">
-                  계정 삭제
-                </button>
-              </div>
+        {/* 계정 삭제 — 눈에 띄지 않도록 페이지 가장 하단에 작게 배치 */}
+        <div className="account-deletion-footer">
+          {deletionRequestedAt ? (
+            <p>
+              계정 삭제가 예정되어 있습니다 ({deletionScheduledFor.toLocaleDateString()}에 자동 삭제,
+              또는 관리자 승인 시 그 전에 삭제될 수 있습니다).{' '}
+              <button
+                type="button"
+                className="link-button"
+                onClick={cancelAccountDeletion}
+                disabled={deletionBusy}
+              >
+                {deletionBusy ? '처리 중...' : '삭제 취소'}
+              </button>
+            </p>
+          ) : (
+            <button
+              type="button"
+              className="link-button"
+              onClick={() => setShowDeleteModal(true)}
+            >
+              계정 삭제
+            </button>
+          )}
+        </div>
+      </div>
+
+      {showDeleteModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h2>계정 삭제를 요청하시겠어요?</h2>
+            </div>
+            <p>
+              삭제를 요청하면 오늘로부터 {DELETION_GRACE_PERIOD_DAYS}일 후 계정과 관련된 모든 데이터가
+              자동으로 영구 삭제됩니다(관리자가 먼저 승인하면 그 전에 삭제될 수도 있습니다). 그 전까지는
+              계정을 정상적으로 계속 이용할 수 있고, 언제든지 이 페이지에서 삭제 요청을 취소할 수 있습니다.
+            </p>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={requestAccountDeletion}
+                disabled={deletionBusy}
+              >
+                {deletionBusy ? '요청 중...' : '삭제 요청'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deletionBusy}
+              >
+                취소
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <style>{`
         .profile-page {
@@ -272,10 +372,6 @@ function Profile({ userProfile }) {
           padding: 2rem;
           border-radius: 8px;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .section-card.danger {
-          border-left: 4px solid #e74c3c;
         }
 
         .section-card h2 {
@@ -338,20 +434,42 @@ function Profile({ userProfile }) {
           border-color: #16808E;
         }
 
-        .danger-section {
-          background: #fadbd8;
-          padding: 1rem;
-          border-radius: 6px;
+        .account-deletion-footer {
+          margin-top: 3rem;
+          padding-top: 1rem;
+          border-top: 1px solid #ecf0f1;
           text-align: center;
         }
 
-        .danger-section p {
-          color: #2c3e50;
-          margin-bottom: 1rem;
+        .account-deletion-footer p {
+          font-size: 0.8rem;
+          color: #adb5bd;
+          margin: 0;
         }
 
-        .danger-section button {
-          width: 100%;
+        .link-button {
+          background: none;
+          border: none;
+          padding: 0;
+          font-size: 0.8rem;
+          color: #adb5bd;
+          text-decoration: underline;
+          cursor: pointer;
+        }
+
+        .link-button:hover {
+          color: #e74c3c;
+        }
+
+        .link-button:disabled {
+          opacity: 0.6;
+          cursor: default;
+        }
+
+        .modal p {
+          color: #555;
+          line-height: 1.6;
+          margin-bottom: 1rem;
         }
 
         @media (max-width: 768px) {
