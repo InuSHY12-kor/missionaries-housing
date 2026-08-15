@@ -4,6 +4,15 @@ import { User, Phone, Building2, Save } from 'lucide-react';
 
 const DELETION_GRACE_PERIOD_DAYS = 15;
 
+function roleLabel(profile) {
+  if (profile?.role === 'admin') {
+    return profile?.is_super_admin ? '최고 관리자' : '관리자';
+  }
+  if (profile?.role === 'missionary') return '선교사';
+  if (profile?.role === 'host') return '호스트';
+  return '알 수 없음';
+}
+
 function Profile({ userProfile }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -156,7 +165,7 @@ function Profile({ userProfile }) {
 
                 <div className="info-item">
                   <label>역할</label>
-                  <p>{userProfile?.role === 'missionary' ? '선교사' : '호스트'}</p>
+                  <p>{roleLabel(userProfile)}</p>
                 </div>
 
                 <div className="info-item">

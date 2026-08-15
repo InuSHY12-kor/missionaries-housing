@@ -4,8 +4,8 @@ import { supabase } from '../App';
 import { MapPin, Calendar as CalendarIcon, XCircle, Filter, X } from 'lucide-react';
 
 const STATUS_LABEL = {
-  pending: '확정 대기',
-  confirmed: '예약 확정',
+  pending: '예약됨',
+  confirmed: '예약 확정됨',
   cancelled: '취소됨'
 };
 
