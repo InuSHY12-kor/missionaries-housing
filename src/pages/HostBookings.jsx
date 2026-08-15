@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../App';
-import { MapPin, Calendar, Phone, CheckCircle, XCircle } from 'lucide-react';
+import { MapPin, Calendar, Phone, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
 
 const STATUS_LABEL = {
-  pending: '확정 대기',
-  confirmed: '예약 확정',
+  pending: '예약됨',
+  confirmed: '예약 확정됨',
   cancelled: '취소됨'
 };
 
@@ -22,6 +22,7 @@ function formatDate(dateStr) {
 function HostBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showHistory, setShowHistory] = useState(false);
 
   const fetchBookings = useCallback(async () => {
     setLoading(true);
@@ -60,6 +61,63 @@ function HostBookings() {
     }
   };
 
+  // 확인이 필요한(대기 중) 예약은 전부 보여주고, 이미 처리된(확정/거절) 지난 예약은
+  // 가장 최근 1건만 기본 노출 — "더보기"를 눌러야 나머지 지난 예약이 펼쳐집니다.
+  const pendingBookings = bookings.filter(b => b.status === 'pending');
+  const historyBookings = bookings.filter(b => b.status !== 'pending');
+  const visibleHistory = showHistory ? historyBookings : historyBookings.slice(0, 1);
+
+  const renderBookingCard = (booking) => (
+    <div key={booking.id} className="card booking-item">
+      <div className="booking-item-header">
+        <div>
+          <h3>{booking.accommodations?.title || '삭제된 숙소'}</h3>
+          {booking.accommodations?.location && (
+            <p className="location">
+              <MapPin size={16} />
+              {booking.accommodations.location}
+            </p>
+          )}
+        </div>
+        <span className={`badge ${STATUS_BADGE_CLASS[booking.status] || 'badge-info'}`}>
+          {STATUS_LABEL[booking.status] || booking.status}
+        </span>
+      </div>
+
+      <div className="booking-item-body">
+        <p className="dates">
+          <Calendar size={16} />
+          {formatDate(booking.check_in)} ~ {formatDate(booking.check_out)}
+        </p>
+        <p className="total-price">₩{booking.total_price?.toLocaleString()}</p>
+      </div>
+
+      <div className="guest-info">
+        <p><strong>예약자:</strong> {booking.users?.full_name || '알 수 없음'}</p>
+        {booking.users?.church_name && <p><strong>교회:</strong> {booking.users.church_name}</p>}
+        {booking.users?.phone && (
+          <p className="phone">
+            <Phone size={14} />
+            {booking.users.phone}
+          </p>
+        )}
+      </div>
+
+      {booking.status === 'pending' && (
+        <div className="booking-item-actions">
+          <button className="btn btn-success" onClick={() => updateStatus(booking.id, 'confirmed')}>
+            <CheckCircle size={16} />
+            예약 확정
+          </button>
+          <button className="btn btn-danger" onClick={() => updateStatus(booking.id, 'cancelled')}>
+            <XCircle size={16} />
+            예약 거절
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="host-bookings">
       <div className="container">
@@ -71,58 +129,39 @@ function HostBookings() {
         ) : bookings.length === 0 ? (
           <p className="empty-message">아직 들어온 예약이 없습니다.</p>
         ) : (
-          <div className="bookings-list">
-            {bookings.map(booking => (
-              <div key={booking.id} className="card booking-item">
-                <div className="booking-item-header">
-                  <div>
-                    <h3>{booking.accommodations?.title || '삭제된 숙소'}</h3>
-                    {booking.accommodations?.location && (
-                      <p className="location">
-                        <MapPin size={16} />
-                        {booking.accommodations.location}
-                      </p>
-                    )}
-                  </div>
-                  <span className={`badge ${STATUS_BADGE_CLASS[booking.status] || 'badge-info'}`}>
-                    {STATUS_LABEL[booking.status] || booking.status}
-                  </span>
+          <>
+            {pendingBookings.length > 0 && (
+              <section className="booking-section">
+                <h2 className="booking-section-title">확인이 필요한 예약 ({pendingBookings.length})</h2>
+                <div className="bookings-list">
+                  {pendingBookings.map(renderBookingCard)}
                 </div>
+              </section>
+            )}
 
-                <div className="booking-item-body">
-                  <p className="dates">
-                    <Calendar size={16} />
-                    {formatDate(booking.check_in)} ~ {formatDate(booking.check_out)}
-                  </p>
-                  <p className="total-price">₩{booking.total_price?.toLocaleString()}</p>
+            {historyBookings.length > 0 && (
+              <section className="booking-section">
+                <h2 className="booking-section-title">지난 예약</h2>
+                <div className="bookings-list">
+                  {visibleHistory.map(renderBookingCard)}
                 </div>
-
-                <div className="guest-info">
-                  <p><strong>예약자:</strong> {booking.users?.full_name || '알 수 없음'}</p>
-                  {booking.users?.church_name && <p><strong>교회:</strong> {booking.users.church_name}</p>}
-                  {booking.users?.phone && (
-                    <p className="phone">
-                      <Phone size={14} />
-                      {booking.users.phone}
-                    </p>
-                  )}
-                </div>
-
-                {booking.status === 'pending' && (
-                  <div className="booking-item-actions">
-                    <button className="btn btn-success" onClick={() => updateStatus(booking.id, 'confirmed')}>
-                      <CheckCircle size={16} />
-                      예약 확정
-                    </button>
-                    <button className="btn btn-danger" onClick={() => updateStatus(booking.id, 'cancelled')}>
-                      <XCircle size={16} />
-                      예약 거절
-                    </button>
-                  </div>
+                {historyBookings.length > visibleHistory.length && (
+                  <button className="see-more-btn" onClick={() => setShowHistory(true)}>
+                    더보기 ({historyBookings.length - visibleHistory.length}건 더) <ChevronDown size={16} />
+                  </button>
                 )}
-              </div>
-            ))}
-          </div>
+                {showHistory && historyBookings.length > 1 && (
+                  <button className="see-more-btn" onClick={() => setShowHistory(false)}>
+                    접기
+                  </button>
+                )}
+              </section>
+            )}
+
+            {pendingBookings.length === 0 && historyBookings.length === 0 && (
+              <p className="empty-message">아직 들어온 예약이 없습니다.</p>
+            )}
+          </>
         )}
       </div>
 
@@ -143,9 +182,42 @@ function HostBookings() {
           padding: 2rem;
         }
 
+        .booking-section {
+          margin-bottom: 2.5rem;
+        }
+
+        .booking-section-title {
+          color: #2c3e50;
+          font-size: 1.1rem;
+          margin-bottom: 1rem;
+        }
+
         .bookings-list {
           display: grid;
           gap: 1.5rem;
+        }
+
+        .see-more-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.4rem;
+          width: 100%;
+          margin-top: 1rem;
+          padding: 0.75rem;
+          background: white;
+          border: 1px dashed #dfe6e9;
+          border-radius: 8px;
+          color: #16808E;
+          font-weight: 600;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: background 0.2s, border-color 0.2s;
+        }
+
+        .see-more-btn:hover {
+          background: #e6f4f5;
+          border-color: #16808E;
         }
 
         .booking-item {
