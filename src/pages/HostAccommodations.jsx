@@ -119,13 +119,22 @@ function HostAccommodations({ userProfile }) {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [dateManagerId, setDateManagerId] = useState(null);
 
+  const isAdmin = userProfile.role === 'admin';
+
+  // 관리자는 문제 발생 시 조정할 수 있도록 모든 호스트의 숙소를 볼 수 있고,
+  // 일반 호스트는 기존처럼 본인 숙소만 봅니다.
   const fetchAccommodations = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('accommodations')
-        .select('*')
-        .eq('host_id', userProfile.id)
+        .select(isAdmin ? '*, users(full_name, email)' : '*')
         .order('created_at', { ascending: false });
+
+      if (!isAdmin) {
+        query = query.eq('host_id', userProfile.id);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setAccommodations(data || []);
@@ -135,7 +144,7 @@ function HostAccommodations({ userProfile }) {
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userProfile.id]);
+  }, [userProfile.id, isAdmin]);
 
   useEffect(() => {
     fetchAccommodations();
@@ -321,7 +330,14 @@ function HostAccommodations({ userProfile }) {
     <div className="host-accommodations">
       <div className="container">
         <div className="header">
-          <h1>내 숙소 관리</h1>
+          <div>
+            <h1>{isAdmin ? '전체 숙소 관리 (관리자)' : '내 숙소 관리'}</h1>
+            {isAdmin && (
+              <p className="admin-scope-hint">
+                관리자 권한으로 모든 호스트의 숙소를 확인/수정/삭제할 수 있습니다.
+              </p>
+            )}
+          </div>
           <button
             className="btn btn-primary"
             onClick={() => {
@@ -522,6 +538,9 @@ function HostAccommodations({ userProfile }) {
                   <div>
                     <h3>{accommodation.title}</h3>
                     <p>{accommodation.location}</p>
+                    {isAdmin && accommodation.users && (
+                      <p className="admin-host-hint">호스트: {accommodation.users.full_name} ({accommodation.users.email})</p>
+                    )}
                   </div>
                   <span
                     className="status-badge"
@@ -604,6 +623,18 @@ function HostAccommodations({ userProfile }) {
           display: flex;
           align-items: center;
           gap: 0.5rem;
+        }
+
+        .admin-scope-hint {
+          color: #7f8c8d;
+          font-size: 0.85rem;
+          margin-top: 0.35rem;
+        }
+
+        .admin-host-hint {
+          color: #16808E;
+          font-size: 0.82rem;
+          margin-top: 0.25rem;
         }
 
         .form-section {

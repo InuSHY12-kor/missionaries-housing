@@ -55,7 +55,9 @@ function Navigation({ user, userProfile, onLogout }) {
               {(userProfile?.status === 'approved' || userProfile?.status === 'pending') && userProfile.role && (
                 <li>
                   <span className={`status-badge status-role-${userProfile.role}`}>
-                    {ROLE_LABELS[userProfile.role] || userProfile.role}
+                    {userProfile.role === 'admin' && userProfile.is_super_admin
+                      ? '최고 관리자'
+                      : (ROLE_LABELS[userProfile.role] || userProfile.role)}
                   </span>
                 </li>
               )}
