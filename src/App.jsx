@@ -17,6 +17,7 @@ import AccommodationDetail from './pages/AccommodationDetail';
 import HostAccommodations from './pages/HostAccommodations';
 import MyBookings from './pages/MyBookings';
 import HostBookings from './pages/HostBookings';
+import Reviews from './pages/Reviews';
 import Profile from './pages/Profile';
 import './App.css';
 
@@ -287,6 +288,10 @@ function App() {
           <Route
             path="/host-bookings"
             element={canManageAccommodations ? <HostBookings userProfile={userProfile} /> : <Navigate to="/dashboard" replace />}
+          />
+          <Route
+            path="/reviews"
+            element={canManageAccommodations ? <Reviews userProfile={userProfile} /> : <Navigate to="/dashboard" replace />}
           />
           <Route path="/profile" element={<Profile userProfile={userProfile} />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

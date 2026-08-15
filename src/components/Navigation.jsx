@@ -43,6 +43,7 @@ function Navigation({ user, userProfile, onLogout }) {
                     <>
                       <li><Link to="/my-accommodations">내 숙소</Link></li>
                       <li><Link to="/host-bookings">예약 관리</Link></li>
+                      <li><Link to="/reviews">리뷰</Link></li>
                     </>
                   )}
                   {userProfile.role === 'admin' && (

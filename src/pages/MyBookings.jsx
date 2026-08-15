@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Calendar as CalendarIcon, XCircle, Filter, X } from 'lucide-react';
+import { MapPin, Calendar as CalendarIcon, XCircle, Filter, X, Heart, MessageCircle } from 'lucide-react';
 
 const STATUS_LABEL = {
   pending: '예약됨',
@@ -26,19 +26,27 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+// 오늘 날짜(YYYY-MM-DD) 문자열. ISO 형식 날짜 문자열끼리는 그대로 비교해도 순서가 맞습니다.
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function MyBookings({ userProfile }) {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('active');
   const [filterFrom, setFilterFrom] = useState('');
   const [filterTo, setFilterTo] = useState('');
+  const [reviewDrafts, setReviewDrafts] = useState({});
+  const [openReviewFormId, setOpenReviewFormId] = useState(null);
+  const [reviewSubmittingId, setReviewSubmittingId] = useState(null);
 
   const fetchBookings = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('bookings')
-        .select('*, accommodations(id, title, location, images)')
+        .select('*, accommodations(id, title, location, images), reviews(id, comment, host_heart, created_at)')
         .eq('guest_id', userProfile.id)
         .order('created_at', { ascending: false });
 
@@ -54,6 +62,36 @@ function MyBookings({ userProfile }) {
   useEffect(() => {
     fetchBookings();
   }, [fetchBookings]);
+
+  // 체크아웃 다음 날부터 "감사 인사(리뷰)"를 남길 수 있습니다 (DB 트리거로도 동일하게 강제됨).
+  const canLeaveReview = (booking) =>
+    booking.status === 'confirmed' &&
+    (!booking.reviews || booking.reviews.length === 0) &&
+    todayStr() > booking.check_out;
+
+  const submitReview = async (booking) => {
+    const comment = (reviewDrafts[booking.id] || '').trim();
+    if (!comment) {
+      alert('감사 인사 내용을 입력해주세요.');
+      return;
+    }
+    setReviewSubmittingId(booking.id);
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .insert({ booking_id: booking.id, comment })
+        .select()
+        .single();
+      if (error) throw error;
+      setBookings(bookings.map(b => b.id === booking.id ? { ...b, reviews: [data] } : b));
+      setOpenReviewFormId(null);
+      setReviewDrafts(prev => ({ ...prev, [booking.id]: '' }));
+    } catch (error) {
+      alert('오류: ' + error.message);
+    } finally {
+      setReviewSubmittingId(null);
+    }
+  };
 
   const handleCancel = async (bookingId) => {
     if (!window.confirm('정말 이 예약을 취소하시겠습니까?')) return;
@@ -180,6 +218,58 @@ function MyBookings({ userProfile }) {
                       <XCircle size={16} />
                       예약 취소
                     </button>
+                  </div>
+                )}
+
+                {booking.reviews && booking.reviews.length > 0 && (
+                  <div className="review-submitted">
+                    <p className="review-submitted-header">
+                      <MessageCircle size={15} />
+                      감사 인사를 남겼습니다
+                      {booking.reviews[0].host_heart && (
+                        <span className="review-heart-badge">
+                          <Heart size={13} fill="currentColor" />
+                          호스트가 확인했어요
+                        </span>
+                      )}
+                    </p>
+                    <p className="review-submitted-comment">{booking.reviews[0].comment}</p>
+                  </div>
+                )}
+
+                {canLeaveReview(booking) && (
+                  <div className="review-form-area">
+                    {openReviewFormId === booking.id ? (
+                      <div className="review-form">
+                        <textarea
+                          rows="3"
+                          placeholder="머물렀던 숙소와 호스트님께 짧은 감사 인사를 남겨주세요."
+                          value={reviewDrafts[booking.id] || ''}
+                          onChange={(e) => setReviewDrafts(prev => ({ ...prev, [booking.id]: e.target.value }))}
+                        />
+                        <div className="review-form-actions">
+                          <button
+                            className="btn btn-primary"
+                            disabled={reviewSubmittingId === booking.id}
+                            onClick={() => submitReview(booking)}
+                          >
+                            {reviewSubmittingId === booking.id ? '등록 중...' : '감사 인사 남기기'}
+                          </button>
+                          <button
+                            className="btn btn-secondary"
+                            onClick={() => setOpenReviewFormId(null)}
+                            disabled={reviewSubmittingId === booking.id}
+                          >
+                            취소
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button className="review-open-btn" onClick={() => setOpenReviewFormId(booking.id)}>
+                        <Heart size={16} />
+                        감사 인사 남기기
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -371,6 +461,85 @@ function MyBookings({ userProfile }) {
           display: flex;
           align-items: center;
           gap: 0.5rem;
+        }
+
+        .review-submitted {
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid #ecf0f1;
+          background: #f0f9fa;
+          border-radius: 6px;
+          padding: 0.85rem 1rem;
+        }
+
+        .review-submitted-header {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          margin: 0 0 0.4rem;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #106570;
+        }
+
+        .review-heart-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.3rem;
+          margin-left: auto;
+          color: #e74c3c;
+          font-weight: 600;
+          font-size: 0.8rem;
+        }
+
+        .review-submitted-comment {
+          margin: 0;
+          color: #2c3e50;
+          font-size: 0.92rem;
+          white-space: pre-wrap;
+        }
+
+        .review-form-area {
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid #ecf0f1;
+        }
+
+        .review-open-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          width: 100%;
+          padding: 0.7rem;
+          background: white;
+          border: 1px dashed #16808E;
+          border-radius: 8px;
+          color: #16808E;
+          font-weight: 600;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+
+        .review-open-btn:hover {
+          background: #e6f4f5;
+        }
+
+        .review-form textarea {
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid #dfe6e9;
+          border-radius: 6px;
+          font-family: inherit;
+          font-size: 0.92rem;
+          resize: vertical;
+        }
+
+        .review-form-actions {
+          display: flex;
+          gap: 0.75rem;
+          margin-top: 0.75rem;
         }
 
         @media (max-width: 768px) {
