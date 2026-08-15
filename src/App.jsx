@@ -262,7 +262,7 @@ function App() {
         <>
           {/* 관리자 */}
           {userProfile.role === 'admin' && (
-            <Route path="/admin/*" element={<AdminDashboard />} />
+            <Route path="/admin/*" element={<AdminDashboard userProfile={userProfile} />} />
           )}
 
           {/* 일반 사용자 */}
