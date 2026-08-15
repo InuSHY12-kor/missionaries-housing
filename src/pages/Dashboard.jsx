@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { Home, Users, Star, MessageSquare, ChevronRight } from 'lucide-react';
+import { Home, Users, MessageSquare, ChevronRight, Heart } from 'lucide-react';
 
 const BOOKING_STATUS_LABEL = { pending: '예약됨', confirmed: '예약 확정됨', cancelled: '취소됨' };
 const BOOKING_STATUS_BADGE = { pending: 'badge-warning', confirmed: 'badge-success', cancelled: 'badge-danger' };
@@ -10,7 +10,6 @@ function Dashboard({ userProfile }) {
   const [stats, setStats] = useState({
     totalAccommodations: 0,
     totalBookings: 0,
-    totalReviews: 0,
     recentBookings: []
   });
 
@@ -38,15 +37,9 @@ function Dashboard({ userProfile }) {
         .order('created_at', { ascending: false })
         .limit(1);
 
-      // 리뷰 수
-      const { count: reviewCount } = await supabase
-        .from('reviews')
-        .select('*', { count: 'exact', head: true });
-
       setStats({
         totalAccommodations: accCount || 0,
         totalBookings: bookingCount || 0,
-        totalReviews: reviewCount || 0,
         recentBookings: recentBookings || []
       });
     } catch (error) {
@@ -86,11 +79,6 @@ function Dashboard({ userProfile }) {
             <p className="stat-number">{stats.totalBookings}</p>
           </Link>
           <div className="stat-card">
-            <Star size={32} />
-            <h3>리뷰</h3>
-            <p className="stat-number">{stats.totalReviews}</p>
-          </div>
-          <div className="stat-card">
             <MessageSquare size={32} />
             <h3>메시지</h3>
             <p className="stat-number">0</p>
@@ -113,6 +101,13 @@ function Dashboard({ userProfile }) {
                 <Home size={40} />
                 <h3>내 숙소 관리</h3>
                 <p>등록하신 숙소를 관리하세요</p>
+              </Link>
+            )}
+            {(userProfile?.role === 'admin' || userProfile?.role === 'host') && (
+              <Link to="/reviews" className="quick-link-card">
+                <Heart size={40} />
+                <h3>리뷰</h3>
+                <p>선교사님들이 남긴 감사 인사를 확인하세요</p>
               </Link>
             )}
             <Link to="/profile" className="quick-link-card">
