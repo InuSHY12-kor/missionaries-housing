@@ -14,6 +14,39 @@ body {
   min-height: 100vh;
 }
 
+/* 자동 로그아웃 안내 배너 */
+.auto-logout-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #fdf3e3;
+  color: #8a5a12;
+  border-bottom: 1px solid #f0dcb0;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.95rem;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+
+.auto-logout-banner span {
+  flex: 1;
+}
+
+.auto-logout-banner-close {
+  background: none;
+  border: none;
+  color: #8a5a12;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0.25rem;
+}
+
+.auto-logout-banner-close:hover {
+  opacity: 0.7;
+}
+
 .App {
   display: flex;
   flex-direction: column;
