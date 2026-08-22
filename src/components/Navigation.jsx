@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import wewelogo from '../assets/wewe-logo.jpg';
 import NotificationBell from './NotificationBell';
+import MessageIcon from './MessageIcon';
 
 const ROLE_LABELS = {
   admin: '관리자',
@@ -11,6 +12,9 @@ const ROLE_LABELS = {
 };
 
 function Navigation({ user, userProfile, onLogout }) {
+  // 관리자 승인과 이메일 인증이 모두 완료되어야 실제 서비스 메뉴가 노출됨
+  const hasFullAccess = userProfile?.status === 'approved' && !!userProfile?.email_verified_at;
+
   return (
     <nav className="navbar">
       <div className="container">
@@ -33,7 +37,7 @@ function Navigation({ user, userProfile, onLogout }) {
                 </li>
               )}
 
-              {userProfile?.status === 'approved' && (
+              {hasFullAccess && (
                 <>
                   <li><Link to="/dashboard">대시보드</Link></li>
                   {(userProfile.role === 'admin' || userProfile.role === 'missionary') && (
@@ -64,18 +68,23 @@ function Navigation({ user, userProfile, onLogout }) {
                 </li>
               )}
 
-              {userProfile?.status === 'pending' && (
+              {(userProfile?.status === 'pending' || (userProfile?.status === 'approved' && !userProfile?.email_verified_at)) && (
                 <li>
                   <span className="status-badge status-pending">
-                    ⏳ 미승인
+                    {!userProfile?.email_verified_at ? '⏳ 이메일 미인증' : '⏳ 승인 대기'}
                   </span>
                 </li>
               )}
 
-              {userProfile?.status === 'approved' && (
-                <li>
-                  <NotificationBell userProfile={userProfile} />
-                </li>
+              {hasFullAccess && (
+                <>
+                  <li>
+                    <NotificationBell userProfile={userProfile} />
+                  </li>
+                  <li>
+                    <MessageIcon userProfile={userProfile} />
+                  </li>
+                </>
               )}
 
               <li>

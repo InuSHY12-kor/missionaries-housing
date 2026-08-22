@@ -10,6 +10,7 @@ import SignupComplete from './pages/SignupComplete';
 import Login from './pages/Login';
 import CompleteProfile from './pages/CompleteProfile';
 import PendingApproval from './pages/PendingApproval';
+import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Accommodations from './pages/Accommodations';
@@ -18,6 +19,7 @@ import HostAccommodations from './pages/HostAccommodations';
 import MyBookings from './pages/MyBookings';
 import HostBookings from './pages/HostBookings';
 import Reviews from './pages/Reviews';
+import Messages from './pages/Messages';
 import Profile from './pages/Profile';
 import './App.css';
 
@@ -242,6 +244,10 @@ function App() {
       // 세션은 있지만(이메일 인증 완료) 아직 프로필(회원 정보)을 등록하지 않은 사용자
       authenticatedRoutes = <Route path="*" element={<CompleteProfile />} />;
     } else if (userProfile.status === 'pending') {
+      // 이메일 인증과 관리자 승인이 모두 필요 — 둘 중 하나라도 안 됐으면 대기 화면 노출
+      authenticatedRoutes = <Route path="*" element={<PendingApproval userProfile={userProfile} />} />;
+    } else if (userProfile.status === 'approved' && !userProfile.email_verified_at) {
+      // 관리자 승인은 완료됐지만 이메일 인증이 아직 안 된 경우 — 마찬가지로 대기 화면(다른 안내 문구) 노출
       authenticatedRoutes = <Route path="*" element={<PendingApproval userProfile={userProfile} />} />;
     } else if (userProfile.status === 'rejected') {
       authenticatedRoutes = (
@@ -258,7 +264,7 @@ function App() {
           }
         />
       );
-    } else if (userProfile.status === 'approved') {
+    } else if (userProfile.status === 'approved' && userProfile.email_verified_at) {
       authenticatedRoutes = (
         <>
           {/* 관리자 */}
@@ -293,6 +299,7 @@ function App() {
             path="/reviews"
             element={canManageAccommodations ? <Reviews userProfile={userProfile} /> : <Navigate to="/dashboard" replace />}
           />
+          <Route path="/messages" element={<Messages userProfile={userProfile} />} />
           <Route path="/profile" element={<Profile userProfile={userProfile} />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </>
@@ -328,6 +335,8 @@ function App() {
           {/* 프로필 등록 직후 안내 화면: 승인 대기 중인 사용자의 catch-all("*") 라우트보다
               더 구체적인 경로이므로 항상 우선적으로 매칭됩니다. */}
           <Route path="/signup-complete" element={<SignupComplete />} />
+          {/* 이메일 인증 링크 도착 페이지: 로그인 여부와 무관하게 항상 접근 가능해야 함 */}
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/login" element={<Login />} />
 
           {/* 로그인 필요 */}

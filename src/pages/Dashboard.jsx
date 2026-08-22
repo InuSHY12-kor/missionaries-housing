@@ -10,11 +10,13 @@ function Dashboard({ userProfile }) {
   const [stats, setStats] = useState({
     totalAccommodations: 0,
     totalBookings: 0,
+    totalMessages: 0,
     recentBookings: []
   });
 
   useEffect(() => {
     fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchStats = async () => {
@@ -37,9 +39,16 @@ function Dashboard({ userProfile }) {
         .order('created_at', { ascending: false })
         .limit(1);
 
+      // 내가 받은 메시지 수
+      const { count: messageCount } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('recipient_id', userProfile.id);
+
       setStats({
         totalAccommodations: accCount || 0,
         totalBookings: bookingCount || 0,
+        totalMessages: messageCount || 0,
         recentBookings: recentBookings || []
       });
     } catch (error) {
@@ -78,11 +87,11 @@ function Dashboard({ userProfile }) {
             <h3>예약</h3>
             <p className="stat-number">{stats.totalBookings}</p>
           </Link>
-          <div className="stat-card">
+          <Link to="/messages" className="stat-card stat-card-link">
             <MessageSquare size={32} />
             <h3>메시지</h3>
-            <p className="stat-number">0</p>
-          </div>
+            <p className="stat-number">{stats.totalMessages}</p>
+          </Link>
         </div>
 
         {/* 빠른 링크 */}
@@ -110,6 +119,11 @@ function Dashboard({ userProfile }) {
                 <p>선교사님들이 남긴 감사 인사를 확인하세요</p>
               </Link>
             )}
+            <Link to="/messages" className="quick-link-card">
+              <MessageSquare size={40} />
+              <h3>메시지함</h3>
+              <p>받은 메시지를 확인하세요</p>
+            </Link>
             <Link to="/profile" className="quick-link-card">
               <Users size={40} />
               <h3>프로필</h3>

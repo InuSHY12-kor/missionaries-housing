@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../App';
-import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning } from 'lucide-react';
 
 // 계정 삭제 유예기간(일). Profile.jsx의 DELETION_GRACE_PERIOD_DAYS와 동일한 값이어야 함.
 const DELETION_GRACE_PERIOD_DAYS = 15;
@@ -43,6 +43,8 @@ function AdminDashboard({ userProfile }) {
   const [rejectionReason, setRejectionReason] = useState('');
   const [docLoadingPath, setDocLoadingPath] = useState(null);
   const [deletionBusyId, setDeletionBusyId] = useState(null);
+  const [resendBusyId, setResendBusyId] = useState(null);
+  const [resendResult, setResendResult] = useState({}); // { [userId]: 'success' | 'error' }
 
   const isSuperAdmin = !!userProfile?.is_super_admin;
 
@@ -203,6 +205,31 @@ function AdminDashboard({ userProfile }) {
       setRejectionReason('');
     } catch (error) {
       alert('오류: ' + error.message);
+    }
+  };
+
+  // 이메일 인증이 오래 지연되는 가입자에게 관리자가 직접 인증 메일을 재발송
+  const resendVerificationEmail = async (user) => {
+    setResendBusyId(user.id);
+    setResendResult(prev => ({ ...prev, [user.id]: null }));
+    try {
+      const { data: token, error: tokenError } = await supabase.rpc('create_email_verification_token', {
+        p_user_id: user.id
+      });
+      if (tokenError) throw tokenError;
+
+      const link = `${window.location.origin}/verify-email?token=${token}`;
+      const { error: emailError } = await supabase.functions.invoke('send-email', {
+        body: { type: 'email_verification', userId: user.id, link }
+      });
+      if (emailError) throw emailError;
+
+      setResendResult(prev => ({ ...prev, [user.id]: 'success' }));
+    } catch (error) {
+      console.error('인증 메일 재발송 오류:', error);
+      setResendResult(prev => ({ ...prev, [user.id]: 'error' }));
+    } finally {
+      setResendBusyId(null);
     }
   };
 
@@ -370,7 +397,12 @@ function AdminDashboard({ userProfile }) {
                   <div key={user.id} className="card user-card">
                     <div className="card-header">
                       <h3>{user.full_name}</h3>
-                      <span className="badge badge-warning">검토 중</span>
+                      <div className="header-badges">
+                        <span className="badge badge-warning">검토 중</span>
+                        <span className={`badge ${user.email_verified_at ? 'badge-success' : 'badge-danger'}`}>
+                          {user.email_verified_at ? '이메일 인증됨' : '이메일 미인증'}
+                        </span>
+                      </div>
                     </div>
                     <div className="user-info">
                       <p><strong>이메일:</strong> {user.email}</p>
@@ -400,6 +432,26 @@ function AdminDashboard({ userProfile }) {
                             </li>
                           ))}
                         </ul>
+                      </div>
+                    )}
+
+                    {!user.email_verified_at && (
+                      <div className="resend-row">
+                        <button
+                          type="button"
+                          className="btn btn-secondary resend-btn"
+                          onClick={() => resendVerificationEmail(user)}
+                          disabled={resendBusyId === user.id}
+                        >
+                          <MailWarning size={16} />
+                          {resendBusyId === user.id ? '발송 중...' : '인증 메일 재발송'}
+                        </button>
+                        {resendResult[user.id] === 'success' && (
+                          <span className="resend-success">인증 안내 메일을 다시 보냈습니다.</span>
+                        )}
+                        {resendResult[user.id] === 'error' && (
+                          <span className="resend-error">발송에 실패했습니다. 잠시 후 다시 시도해주세요.</span>
+                        )}
                       </div>
                     )}
 
@@ -875,6 +927,39 @@ function AdminDashboard({ userProfile }) {
         .doc-link:disabled {
           opacity: 0.6;
           cursor: default;
+        }
+
+        .header-badges {
+          display: flex;
+          gap: 0.4rem;
+          flex-wrap: wrap;
+        }
+
+        .resend-row {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid #ecf0f1;
+        }
+
+        .resend-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          white-space: nowrap;
+        }
+
+        .resend-success {
+          color: #1e8a4c;
+          font-size: 0.85rem;
+        }
+
+        .resend-error {
+          color: #e74c3c;
+          font-size: 0.85rem;
         }
 
         .action-buttons {
