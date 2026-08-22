@@ -89,6 +89,26 @@ body {
   display: block;
 }
 
+.navbar-brand-text {
+  margin-left: 0.55rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #16808E;
+  white-space: nowrap;
+}
+
+.navbar-brand-text b {
+  font-weight: 700;
+  color: #d97b3f;
+}
+
+@media (max-width: 480px) {
+  .navbar-brand-text {
+    display: none;
+  }
+}
+
 .navbar-nav {
   display: flex;
   gap: 2rem;
