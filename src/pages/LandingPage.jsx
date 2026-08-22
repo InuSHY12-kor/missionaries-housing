@@ -50,21 +50,23 @@ function LandingPage() {
     setSubmitError('');
 
     try {
-      const { data, error } = await supabase.from('inquiries').insert({
+      // 비로그인 사용자가 제출하는 문의라 inquiries에는 SELECT 정책이 없습니다(관리자만 열람 가능).
+      // insert().select()를 쓰면 삽입 직후 되읽기 단계에서 RLS에 막히므로, id를 미리 만들어 함께 저장합니다.
+      const inquiryId = window.crypto.randomUUID();
+      const { error } = await supabase.from('inquiries').insert({
+        id: inquiryId,
         name: form.name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
         message: form.message.trim() || null
-      }).select().single();
+      });
 
       if (error) throw error;
 
       // 관리자에게 문의 접수 이메일 발송 (실패해도 사용자 경험에는 영향 없도록 best-effort로 처리)
-      if (data?.id) {
-        supabase.functions
-          .invoke('send-email', { body: { type: 'inquiry', inquiryId: data.id } })
-          .catch((emailErr) => console.error('문의 이메일 발송 오류:', emailErr));
-      }
+      supabase.functions
+        .invoke('send-email', { body: { type: 'inquiry', inquiryId } })
+        .catch((emailErr) => console.error('문의 이메일 발송 오류:', emailErr));
 
       setSubmitted(true);
       setForm({ name: '', email: '', phone: '', message: '' });
