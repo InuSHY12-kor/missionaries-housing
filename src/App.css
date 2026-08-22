@@ -67,6 +67,8 @@ body {
 
 .navbar .container {
   display: flex;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
   justify-content: space-between;
   align-items: center;
   max-width: 1200px;
@@ -109,11 +111,26 @@ body {
   }
 }
 
+/* 로그인된 상태(특히 관리자)는 메뉴 항목이 많아 좁은 화면에서 워드마크를 먼저 숨겨
+   내비게이션 버튼들이 밀리거나 줄바꿈되며 깨지는 것을 방지합니다. */
+@media (max-width: 1180px) {
+  .navbar-authed .navbar-brand-text {
+    display: none;
+  }
+}
+
 .navbar-nav {
   display: flex;
-  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 0.4rem;
+  column-gap: 0.4rem;
   align-items: center;
   list-style: none;
+}
+
+.navbar-nav li {
+  flex-shrink: 0;
 }
 
 .navbar-nav a, .navbar-nav button {
@@ -123,12 +140,46 @@ body {
   background: none;
   border: none;
   font-size: 1rem;
-  transition: opacity 0.3s, color 0.3s;
+  transition: opacity 0.3s, color 0.3s, background-color 0.3s;
 }
 
 .navbar-nav a:hover, .navbar-nav button:hover {
   opacity: 0.8;
   color: #16808E;
+}
+
+/* 일반 메뉴 링크/버튼을 텍스트만 있는 상태가 아니라 버튼처럼 보이도록 필 스타일 적용 */
+.navbar-nav a.nav-btn,
+.navbar-nav button.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 20px;
+  background: #f0eee7;
+  font-size: 0.92rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.navbar-nav a.nav-btn:hover,
+.navbar-nav button.nav-btn:hover {
+  background: rgba(22, 128, 142, 0.12);
+  color: #106570;
+  opacity: 1;
+}
+
+.navbar-nav a.nav-btn-outline,
+.navbar-nav button.nav-btn-outline {
+  background: transparent;
+  border: 1.5px solid #16808E;
+  color: #16808E;
+}
+
+.navbar-nav a.nav-btn-outline:hover,
+.navbar-nav button.nav-btn-outline:hover {
+  background: rgba(22, 128, 142, 0.08);
+  opacity: 1;
 }
 
 .navbar-nav a.btn-primary, .navbar-nav a.btn-primary:hover {
@@ -151,6 +202,7 @@ body {
   font-size: 0.95rem;
   color: #848580;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .status-badge {
@@ -158,6 +210,9 @@ body {
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-block;
 }
 
 .status-pending {
