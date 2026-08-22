@@ -93,7 +93,11 @@ function LandingPage() {
         <div className="hero-content">
           <span className="hero-eyebrow">MISSIONARY REST &amp; STAY</span>
           <h1>선교사의 신뢰의 숙소</h1>
-          <p>WEWE STAY는 선교사가 안전하고 신뢰할 수 있는 숙소를 찾을 수 있도록 전문적인 연결을 제공합니다. 2단계 승인 시스템을 통해 선교사와 숙소 제공자 사이의 신뢰를 확보합니다.</p>
+          <p>
+            WEWE STAY는 선교사가 안전하고 신뢰할 수 있는 숙소를 찾을 수 있도록 전문적인 연결을 제공합니다.
+            <br />
+            2단계 승인 시스템을 통해 선교사와 숙소 제공자 사이의 신뢰를 확보합니다.
+          </p>
           <Link to="/signup" className="btn btn-primary">지금 시작하기</Link>
         </div>
       </section>
