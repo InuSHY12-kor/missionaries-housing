@@ -307,12 +307,12 @@ function MyBookings({ userProfile }) {
         }
 
         .booking-tab:hover {
-          color: #16808E;
+          color: #d97b3f;
         }
 
         .booking-tab.active {
-          color: #16808E;
-          border-bottom-color: #16808E;
+          color: #d97b3f;
+          border-bottom-color: #d97b3f;
         }
 
         .tab-count {
@@ -325,8 +325,8 @@ function MyBookings({ userProfile }) {
         }
 
         .booking-tab.active .tab-count {
-          background: #e6f4f5;
-          color: #16808E;
+          background: #faf1e6;
+          color: #d97b3f;
         }
 
         .date-filter {
@@ -342,7 +342,7 @@ function MyBookings({ userProfile }) {
         }
 
         .date-filter > svg {
-          color: #16808E;
+          color: #d97b3f;
           margin-bottom: 0.6rem;
         }
 
@@ -447,7 +447,7 @@ function MyBookings({ userProfile }) {
 
         .total-price {
           font-weight: bold;
-          color: #16808E;
+          color: #d97b3f;
           margin: 0;
           font-size: 1.1rem;
         }
@@ -467,7 +467,7 @@ function MyBookings({ userProfile }) {
           margin-top: 1rem;
           padding-top: 1rem;
           border-top: 1px solid #ecf0f1;
-          background: #f0f9fa;
+          background: #fdf8f1;
           border-radius: 6px;
           padding: 0.85rem 1rem;
         }
@@ -479,7 +479,7 @@ function MyBookings({ userProfile }) {
           margin: 0 0 0.4rem;
           font-size: 0.85rem;
           font-weight: 600;
-          color: #106570;
+          color: #b8622c;
         }
 
         .review-heart-badge {
@@ -513,9 +513,9 @@ function MyBookings({ userProfile }) {
           width: 100%;
           padding: 0.7rem;
           background: white;
-          border: 1px dashed #16808E;
+          border: 1px dashed #d97b3f;
           border-radius: 8px;
-          color: #16808E;
+          color: #d97b3f;
           font-weight: 600;
           font-size: 0.9rem;
           cursor: pointer;
@@ -523,7 +523,7 @@ function MyBookings({ userProfile }) {
         }
 
         .review-open-btn:hover {
-          background: #e6f4f5;
+          background: #faf1e6;
         }
 
         .review-form textarea {

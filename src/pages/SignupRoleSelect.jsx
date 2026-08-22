@@ -96,17 +96,17 @@ function SignupRoleSelect() {
         }
 
         .role-card:hover {
-          border-color: #16808E;
-          background: #f0f9fa;
+          border-color: #d97b3f;
+          background: #fdf8f1;
           transform: translateY(-4px);
-          box-shadow: 0 6px 16px rgba(22, 128, 142, 0.15);
+          box-shadow: 0 6px 16px rgba(217, 123, 63, 0.15);
         }
 
         .role-card-icon {
           width: 72px;
           height: 72px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #16808E 0%, #8ABFC6 100%);
+          background: linear-gradient(135deg, #d97b3f 0%, #b8622c 100%);
           color: white;
           display: flex;
           align-items: center;
@@ -120,7 +120,7 @@ function SignupRoleSelect() {
         }
 
         .role-card > p:not(.role-card-desc) {
-          color: #16808E;
+          color: #d97b3f;
           font-weight: 600;
           margin: 0;
         }
@@ -137,7 +137,7 @@ function SignupRoleSelect() {
           display: inline-flex;
           align-items: center;
           gap: 0.4rem;
-          color: #16808E;
+          color: #d97b3f;
           font-weight: 600;
           font-size: 0.9rem;
         }
@@ -149,7 +149,7 @@ function SignupRoleSelect() {
         }
 
         .login-link a {
-          color: #16808E;
+          color: #d97b3f;
           text-decoration: none;
           font-weight: 600;
         }

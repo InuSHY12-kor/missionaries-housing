@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { Home, Lock, Users, CheckCircle, Heart, ChevronDown, Send } from 'lucide-react';
@@ -28,15 +28,43 @@ const FAQ_ITEMS = [
 
 // Unsplash 무료 이미지 (숙소/게스트하우스 분위기) — 각 사진작가 크레딧은 하단 참고
 const IMAGES = {
-  hero: 'https://images.unsplash.com/photo-1726090401458-7abb00f7450c?auto=format&fit=crop&w=1800&q=80', // Clay Banks
   aboutLeft: 'https://images.unsplash.com/photo-1763616828336-e7fcd02086f5?auto=format&fit=crop&w=700&q=80', // Rochelle Lee
   aboutCenter: 'https://images.unsplash.com/photo-1749703810919-1f979a9a3982?auto=format&fit=crop&w=800&q=80', // Kailun Zhang
   aboutRight: 'https://images.unsplash.com/photo-1769366316790-dfcb6a546f05?auto=format&fit=crop&w=700&q=80', // Oriol Pascual
   hands: 'https://images.unsplash.com/photo-1604881991575-dfb1003d8811?auto=format&fit=crop&w=900&q=80' // Priscilla Du Preez
 };
 
+// 히어로 슬라이드쇼 (약 3초마다 전환)
+const HERO_IMAGES = [
+  'https://images.unsplash.com/photo-1726090401458-7abb00f7450c?auto=format&fit=crop&w=1800&q=80', // Clay Banks
+  'https://images.unsplash.com/photo-1662514121891-8f3a97e5a2ea?auto=format&fit=crop&w=1800&q=80', // Photos of Korea - 한옥
+  'https://images.unsplash.com/photo-1632518741173-9c2d8e962704?auto=format&fit=crop&w=1800&q=80', // Tom Jur - 창밖 산 풍경
+  'https://images.unsplash.com/photo-1782952438288-7528ca318935?auto=format&fit=crop&w=1800&q=80' // Rebecca Winter - 여행자
+];
+
+// 옆으로 흘러가는 여행/숙소 사진 스트립
+const MARQUEE_IMAGES = [
+  'https://images.unsplash.com/photo-1763616828336-e7fcd02086f5?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1749703810919-1f979a9a3982?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1769366316790-dfcb6a546f05?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1618237600880-fb9d72e98393?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1781781490292-b3897966361c?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1786255454548-b0b71597f9c0?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1771970574223-24e53a0c5a24?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1650476524542-c5cc53306700?auto=format&fit=crop&w=900&q=80'
+];
+
 function LandingPage() {
   const [openFaq, setOpenFaq] = useState(0);
+
+  // 히어로 슬라이드쇼: 약 3초마다 다음 이미지로 자동 전환
+  const [heroSlide, setHeroSlide] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroSlide((prev) => (prev + 1) % HERO_IMAGES.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
 
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -88,8 +116,16 @@ function LandingPage() {
 
   return (
     <div className="landing-page">
-      {/* 히어로 섹션 */}
-      <section className="hero" style={{ backgroundImage: `url(${IMAGES.hero})` }}>
+      {/* 히어로 섹션 — 3초마다 자동 전환되는 슬라이드쇼 */}
+      <section className="hero">
+        {HERO_IMAGES.map((src, idx) => (
+          <div
+            key={idx}
+            className={`hero-slide ${idx === heroSlide ? 'active' : ''}`}
+            style={{ backgroundImage: `url(${src})` }}
+          />
+        ))}
+
         <div className="hero-content">
           <span className="hero-eyebrow">MISSIONARY REST &amp; STAY</span>
           <h1>선교사의 신뢰의 숙소</h1>
@@ -98,7 +134,35 @@ function LandingPage() {
             <br />
             2단계 승인 시스템을 통해 선교사와 숙소 제공자 사이의 신뢰를 확보합니다.
           </p>
-          <Link to="/signup" className="btn btn-primary">지금 시작하기</Link>
+          <Link to="/signup" className="link-cta">지금 시작하기</Link>
+        </div>
+
+        <div className="hero-progress">
+          {HERO_IMAGES.map((_, idx) => (
+            <div className="hero-dot-wrap" key={idx}>
+              <svg className="hero-ring" viewBox="0 0 36 36">
+                <circle className="hero-ring-track" cx="18" cy="18" r="15.5" />
+                {idx === heroSlide && (
+                  <circle
+                    key={`fill-${heroSlide}`}
+                    className="hero-ring-fill"
+                    cx="18"
+                    cy="18"
+                    r="15.5"
+                  />
+                )}
+              </svg>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 여행/숙소 사진이 옆으로 흘러가는 스트립 */}
+      <section className="photo-marquee" aria-hidden="true">
+        <div className="marquee-track">
+          {[...MARQUEE_IMAGES, ...MARQUEE_IMAGES].map((src, idx) => (
+            <div key={idx} className="marquee-item" style={{ backgroundImage: `url(${src})` }} />
+          ))}
         </div>
       </section>
 
@@ -352,7 +416,7 @@ function LandingPage() {
 
                 {submitError && <p className="form-error">{submitError}</p>}
 
-                <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
+                <button type="submit" className="link-cta link-cta-dark link-cta-block" disabled={submitting}>
                   <Send size={18} />
                   {submitting ? '접수 중...' : '문의하기'}
                 </button>
@@ -361,6 +425,27 @@ function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* 하단 푸터 — 사업자 정보는 확인 후 실제 값으로 교체 필요 */}
+      <footer className="site-footer">
+        <div className="container footer-inner">
+          <div className="footer-brand">
+            <span className="footer-logo">WEWE<b>STAY</b></span>
+            <p>위로자의 위로자 — 선교사와 숙소 제공자를 잇는 신뢰의 플랫폼</p>
+          </div>
+
+          <div className="footer-info">
+            <p>비영리단체 WEWE · 대표 [대표자명 입력 필요]</p>
+            <p>사업자(고유번호) [등록번호 입력 필요]</p>
+            <p>주소 [사업장 주소 입력 필요]</p>
+            <p>전화 [연락처 입력 필요] · 이메일 [이메일 주소 입력 필요]</p>
+          </div>
+
+          <div className="footer-copy">
+            <p>&copy; {new Date().getFullYear()} WEWE. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
 
       <style>{`
         :root {
@@ -392,33 +477,162 @@ function LandingPage() {
           text-align: center;
         }
 
-        /* 히어로 섹션 */
+        /* 히어로 섹션 — 슬라이드쇼 */
         .hero {
           position: relative;
-          min-height: 560px;
+          min-height: 720px;
           display: flex;
           align-items: center;
           justify-content: center;
           text-align: center;
           padding: 6rem 2rem;
           background-color: #1c1c1a;
+          overflow: hidden;
+          animation: fadeIn 0.8s ease;
+        }
+
+        .hero-slide {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
           background-size: cover;
           background-position: center;
-          animation: fadeIn 0.8s ease;
+          opacity: 0;
+          transition: opacity 1.4s ease;
+        }
+
+        .hero-slide.active {
+          opacity: 1;
         }
 
         .hero::before {
           content: '';
           position: absolute;
           inset: 0;
+          z-index: 1;
           background: linear-gradient(180deg, rgba(15,15,13,0.55) 0%, rgba(15,15,13,0.45) 45%, rgba(15,15,13,0.85) 100%);
         }
 
         .hero-content {
           position: relative;
-          z-index: 1;
+          z-index: 2;
           max-width: 800px;
           margin: 0 auto;
+        }
+
+        /* 슬라이드 진행 표시 — 원형 링이 3초 동안 채워지는 형태 */
+        .hero-progress {
+          position: absolute;
+          left: 50%;
+          bottom: 2rem;
+          transform: translateX(-50%);
+          z-index: 2;
+          display: flex;
+          gap: 0.85rem;
+        }
+
+        .hero-dot-wrap {
+          width: 20px;
+          height: 20px;
+        }
+
+        .hero-ring {
+          width: 20px;
+          height: 20px;
+          transform: rotate(-90deg);
+        }
+
+        .hero-ring-track {
+          fill: none;
+          stroke: rgba(255, 255, 255, 0.35);
+          stroke-width: 2.5;
+        }
+
+        .hero-ring-fill {
+          fill: none;
+          stroke: #ffffff;
+          stroke-width: 2.5;
+          stroke-linecap: round;
+          stroke-dasharray: 97.4;
+          stroke-dashoffset: 97.4;
+          animation: heroRingFill 3s linear forwards;
+        }
+
+        @keyframes heroRingFill {
+          from { stroke-dashoffset: 97.4; }
+          to { stroke-dashoffset: 0; }
+        }
+
+        /* 사진이 옆으로 흘러가는 마퀴 스트립 */
+        .photo-marquee {
+          overflow: hidden;
+          background: var(--ink);
+          padding: 1.25rem 0;
+        }
+
+        .marquee-track {
+          display: flex;
+          width: max-content;
+          animation: marqueeScroll 38s linear infinite;
+        }
+
+        .marquee-item {
+          flex: 0 0 auto;
+          width: 260px;
+          height: 170px;
+          margin-right: 1rem;
+          border-radius: 6px;
+          background-size: cover;
+          background-position: center;
+          background-color: var(--lp-bg-soft);
+        }
+
+        @keyframes marqueeScroll {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+
+        /* 밑줄 링크 스타일 CTA 버튼 — 히어로(흰색) / 문의 폼(진한 청록, 흰 배경용) */
+        .link-cta {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0 0 0.4rem;
+          font-size: 1.05rem;
+          font-weight: 700;
+          font-family: inherit;
+          text-decoration: none;
+          color: rgba(255, 255, 255, 0.7);
+          border-bottom: 3px solid rgba(255, 255, 255, 0.7);
+          transition: color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .link-cta:hover {
+          color: #ffffff;
+          border-bottom-color: #ffffff;
+        }
+
+        .link-cta-dark {
+          color: rgba(28, 28, 26, 0.55);
+          border-bottom-color: rgba(28, 28, 26, 0.55);
+        }
+
+        .link-cta-dark:hover {
+          color: #1c1c1a;
+          border-bottom-color: #1c1c1a;
+        }
+
+        .link-cta-block {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .link-cta:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
         }
 
         .hero-eyebrow {
@@ -805,11 +1019,68 @@ function LandingPage() {
           color: var(--stone);
         }
 
+        /* 하단 푸터 */
+        .site-footer {
+          background: #141412;
+          padding: 2.5rem 2rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .footer-inner {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          gap: 2rem;
+          padding: 0 1rem;
+        }
+
+        .footer-logo {
+          font-size: 1.05rem;
+          font-weight: 700;
+          color: #fff;
+          letter-spacing: 0.02em;
+        }
+
+        .footer-brand p {
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 0.85rem;
+          margin-top: 0.5rem;
+          max-width: 280px;
+          line-height: 1.6;
+        }
+
+        .footer-info p {
+          color: rgba(255, 255, 255, 0.55);
+          font-size: 0.85rem;
+          margin: 0.2rem 0;
+          line-height: 1.6;
+        }
+
+        .footer-copy {
+          display: flex;
+          align-items: flex-end;
+        }
+
+        .footer-copy p {
+          color: rgba(255, 255, 255, 0.35);
+          font-size: 0.8rem;
+        }
+
         /* ===== 모바일 대응 ===== */
         @media (max-width: 768px) {
           .hero {
-            min-height: 460px;
+            min-height: 560px;
             padding: 4.5rem 1.25rem;
+          }
+
+          .marquee-item {
+            width: 180px;
+            height: 120px;
+          }
+
+          .footer-inner {
+            flex-direction: column;
+            gap: 1.5rem;
           }
 
           .hero h1 {

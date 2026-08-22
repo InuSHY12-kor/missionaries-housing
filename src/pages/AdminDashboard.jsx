@@ -804,8 +804,8 @@ function AdminDashboard({ userProfile }) {
         }
 
         .tab.active {
-          color: #16808E;
-          border-bottom-color: #16808E;
+          color: #b8622c;
+          border-bottom-color: #b8622c;
         }
 
         .review-section {
@@ -850,9 +850,9 @@ function AdminDashboard({ userProfile }) {
           align-items: center;
           gap: 0.5rem;
           width: 100%;
-          background: #f0f9fa;
-          border: 1px solid #cceaec;
-          color: #106570;
+          background: #fdf8f1;
+          border: 1px solid #f0dcc0;
+          color: #b8622c;
           padding: 0.6rem 0.9rem;
           border-radius: 6px;
           font-size: 0.9rem;
@@ -870,8 +870,8 @@ function AdminDashboard({ userProfile }) {
         }
 
         .doc-link:hover {
-          background: #e6f4f5;
-          border-color: #16808E;
+          background: #faf1e6;
+          border-color: #b8622c;
         }
 
         .doc-link:disabled {
@@ -953,13 +953,13 @@ function AdminDashboard({ userProfile }) {
         }
 
         .member-filter:hover {
-          border-color: #16808E;
-          color: #16808E;
+          border-color: #b8622c;
+          color: #b8622c;
         }
 
         .member-filter.active {
-          background: #16808E;
-          border-color: #16808E;
+          background: #b8622c;
+          border-color: #b8622c;
           color: white;
         }
 
@@ -1019,12 +1019,12 @@ function AdminDashboard({ userProfile }) {
         }
 
         .role-badge.role-admin {
-          background: #106570;
+          background: #5c4430;
           color: white;
         }
 
         .role-badge.role-host {
-          background: #16808E;
+          background: #8a6d3f;
           color: white;
         }
 

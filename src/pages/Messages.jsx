@@ -111,8 +111,8 @@ function Messages({ userProfile }) {
         }
 
         .message-card.unread {
-          border-left: 4px solid #16808E;
-          background: #f0f9fa;
+          border-left: 4px solid #d97b3f;
+          background: #fdf8f1;
         }
 
         .message-card:hover {
@@ -134,7 +134,7 @@ function Messages({ userProfile }) {
         }
 
         .message-sender svg {
-          color: #16808E;
+          color: #d97b3f;
           flex-shrink: 0;
         }
 

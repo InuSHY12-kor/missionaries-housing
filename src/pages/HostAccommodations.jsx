@@ -755,8 +755,8 @@ function HostAccommodations({ userProfile }) {
           gap: 0.4rem;
           padding: 0.4rem 0.7rem;
           background: white;
-          border: 1px solid #16808E;
-          color: #16808E;
+          border: 1px solid #d97b3f;
+          color: #d97b3f;
           border-radius: 20px;
           font-size: 0.85rem;
         }
@@ -766,7 +766,7 @@ function HostAccommodations({ userProfile }) {
           align-items: center;
           background: none;
           border: none;
-          color: #16808E;
+          color: #d97b3f;
           cursor: pointer;
           padding: 0;
         }
@@ -795,7 +795,7 @@ function HostAccommodations({ userProfile }) {
         }
 
         .admin-host-hint {
-          color: #16808E;
+          color: #d97b3f;
           font-size: 0.82rem;
           margin-top: 0.25rem;
         }
@@ -857,18 +857,18 @@ function HostAccommodations({ userProfile }) {
         }
 
         .image-upload {
-          border: 2px dashed #16808E;
+          border: 2px dashed #d97b3f;
           border-radius: 6px;
           padding: 1.5rem;
           text-align: center;
           cursor: pointer;
           transition: all 0.3s;
-          background: #f0f9fa;
+          background: #fdf8f1;
         }
 
         .image-upload:hover {
-          background: #e6f4f5;
-          border-color: #106570;
+          background: #faf1e6;
+          border-color: #b8622c;
         }
 
         .image-upload input {
@@ -881,7 +881,7 @@ function HostAccommodations({ userProfile }) {
           align-items: center;
           gap: 0.5rem;
           cursor: pointer;
-          color: #16808E;
+          color: #d97b3f;
         }
 
         .amenities-picker {
@@ -924,12 +924,12 @@ function HostAccommodations({ userProfile }) {
         }
 
         .amenity-checkbox svg {
-          color: #16808E;
+          color: #d97b3f;
         }
 
         .amenity-checkbox.active {
-          background: #16808E;
-          border-color: #16808E;
+          background: #d97b3f;
+          border-color: #d97b3f;
           color: white;
         }
 

@@ -40,8 +40,8 @@ function SignupComplete() {
         .signup-complete-icon {
           width: 96px;
           height: 96px;
-          background: #e6f4f5;
-          color: #16808E;
+          background: #faf1e6;
+          color: #d97b3f;
           border-radius: 50%;
           display: flex;
           align-items: center;

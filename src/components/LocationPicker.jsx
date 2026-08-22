@@ -127,7 +127,7 @@ function LocationPicker({ address, lat, lng, onChange }) {
 
         .location-picker-coords {
           font-size: 0.85rem;
-          color: #16808E;
+          color: #d97b3f;
           margin: 0.25rem 0 0.5rem;
         }
 

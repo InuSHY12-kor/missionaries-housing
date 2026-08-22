@@ -207,7 +207,7 @@ function NotificationBell({ userProfile }) {
         .notification-mark-all {
           background: none;
           border: none;
-          color: #16808E;
+          color: #d97b3f;
           font-size: 0.8rem;
           font-weight: 600;
           cursor: pointer;
@@ -246,11 +246,11 @@ function NotificationBell({ userProfile }) {
         }
 
         .notification-item.unread {
-          background: #f0f9fa;
+          background: #fdf8f1;
         }
 
         .notification-item.unread:hover {
-          background: #e6f4f5;
+          background: #faf1e6;
         }
 
         .notification-item-title {
@@ -266,7 +266,7 @@ function NotificationBell({ userProfile }) {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #16808E;
+          background: #d97b3f;
           margin-right: 0.4rem;
         }
 
