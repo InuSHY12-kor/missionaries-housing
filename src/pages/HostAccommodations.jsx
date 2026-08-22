@@ -6,6 +6,14 @@ import LocationPicker from '../components/LocationPicker';
 import Calendar from '../components/Calendar';
 import AmenityIcon from '../components/AmenityIcon';
 import { AMENITY_GROUPS } from '../utils/amenities';
+import PageHero from '../components/PageHero';
+
+// 내 숙소 관리 페이지 상단 슬라이드 배너 사진
+const HOST_ACCOMMODATIONS_HERO_IMAGES = [
+  'https://images.unsplash.com/photo-1662514121891-8f3a97e5a2ea?auto=format&fit=crop&w=1600&q=80',
+  'https://images.unsplash.com/photo-1650476524542-c5cc53306700?auto=format&fit=crop&w=1600&q=80',
+  'https://images.unsplash.com/photo-1618237600880-fb9d72e98393?auto=format&fit=crop&w=1600&q=80'
+];
 
 const EMPTY_FORM = {
   title: '',
@@ -359,6 +367,12 @@ function HostAccommodations({ userProfile }) {
 
   return (
     <div className="host-accommodations">
+      <PageHero
+        images={HOST_ACCOMMODATIONS_HERO_IMAGES}
+        eyebrow="MY LISTINGS"
+        title="내 숙소를 정성껏 소개해보세요"
+        subtitle="등록한 숙소는 관리자 승인 후 공개됩니다."
+      />
       <div className="container">
         <div className="header">
           <div>

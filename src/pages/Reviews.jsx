@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../App';
 import { Heart, MapPin, Calendar } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+// 리뷰 페이지 상단 슬라이드 배너 사진
+const REVIEWS_HERO_IMAGES = [
+  'https://images.unsplash.com/photo-1604881991575-dfb1003d8811?auto=format&fit=crop&w=1600&q=80',
+  'https://images.unsplash.com/photo-1726090401458-7abb00f7450c?auto=format&fit=crop&w=1600&q=80',
+  'https://images.unsplash.com/photo-1632518741173-9c2d8e962704?auto=format&fit=crop&w=1600&q=80'
+];
 
 function formatDate(dateStr) {
   const d = new Date(dateStr);
@@ -62,6 +70,12 @@ function Reviews({ userProfile }) {
 
   return (
     <div className="reviews-page">
+      <PageHero
+        images={REVIEWS_HERO_IMAGES}
+        eyebrow="THANK YOU"
+        title="선교사님들의 감사 인사"
+        subtitle="따뜻한 마음이 담긴 이야기를 확인해보세요."
+      />
       <div className="container">
         <h1>리뷰</h1>
         <p className="subtitle">

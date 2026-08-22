@@ -2,6 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { Home, Users, MessageSquare, ChevronRight, Heart } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+// 마이페이지 상단 슬라이드 배너 사진
+const DASHBOARD_HERO_IMAGES = [
+  'https://images.unsplash.com/photo-1662514121891-8f3a97e5a2ea?auto=format&fit=crop&w=1600&q=80',
+  'https://images.unsplash.com/photo-1763616828336-e7fcd02086f5?auto=format&fit=crop&w=1600&q=80',
+  'https://images.unsplash.com/photo-1632518741173-9c2d8e962704?auto=format&fit=crop&w=1600&q=80'
+];
 
 const BOOKING_STATUS_LABEL = { pending: '예약됨', confirmed: '예약 확정됨', cancelled: '취소됨' };
 const BOOKING_STATUS_BADGE = { pending: 'badge-warning', confirmed: 'badge-success', cancelled: 'badge-danger' };
@@ -66,6 +74,12 @@ function Dashboard({ userProfile }) {
 
   return (
     <div className="dashboard">
+      <PageHero
+        images={DASHBOARD_HERO_IMAGES}
+        eyebrow="MY PAGE"
+        title="편안한 쉼이 있는 마이페이지"
+        subtitle="예약과 숙소, 메시지를 이곳에서 한눈에 확인하세요."
+      />
       <div className="container">
         <h1>마이페이지</h1>
         <p className="welcome">환영합니다, {userProfile?.full_name}님!</p>

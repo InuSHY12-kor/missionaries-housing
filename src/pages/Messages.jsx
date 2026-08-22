@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../App';
 import { Mail, MailOpen } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+// 메시지함 페이지 상단 슬라이드 배너 사진
+const MESSAGES_HERO_IMAGES = [
+  'https://images.unsplash.com/photo-1749703810919-1f979a9a3982?auto=format&fit=crop&w=1600&q=80',
+  'https://images.unsplash.com/photo-1769366316790-dfcb6a546f05?auto=format&fit=crop&w=1600&q=80',
+  'https://images.unsplash.com/photo-1763616828336-e7fcd02086f5?auto=format&fit=crop&w=1600&q=80'
+];
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleString('ko-KR', {
@@ -48,6 +56,12 @@ function Messages({ userProfile }) {
 
   return (
     <div className="messages-page">
+      <PageHero
+        images={MESSAGES_HERO_IMAGES}
+        eyebrow="MESSAGES"
+        title="주고받은 이야기들"
+        subtitle="받은 메시지를 확인하고 소통해보세요."
+      />
       <div className="container">
         <h1>메시지함</h1>
         <p className="subtitle">받은 메시지를 확인하세요. 답장은 발송된 이메일로 직접 회신해주시면 됩니다.</p>
