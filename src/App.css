@@ -107,11 +107,16 @@ body {
   row-gap: 0.25rem;
 }
 
+/* 역할 배지 + 환영 문구를 하나의 반투명 흰색 카드로 묶어서 보여줌 */
 .navbar-top-right {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 0.45rem 1.1rem;
 }
 
 .navbar-brand {
@@ -283,16 +288,13 @@ body {
   border-color: #d7d7d2;
 }
 
-/* 하단 메뉴 버튼들과는 다른 느낌으로 — 브랜드 그라디언트를 채운 굵은 흰 글씨 */
+/* 카드(.navbar-top-right) 안에 배지와 나란히 놓이는 굵은 글씨 — 자체 배경은 없음 */
 .navbar-welcome {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #fff;
+  color: #106570;
   white-space: nowrap;
   flex-shrink: 0;
-  padding: 0.4rem 0.95rem;
-  border-radius: 20px;
-  background: linear-gradient(90deg, #16808E 0%, #106570 100%);
 }
 
 .status-badge {
@@ -320,19 +322,24 @@ body {
   color: white;
 }
 
-/* 진한 배지 대신, 사이트 전체 톤과 어울리는 반투명 톤으로 은은하게 */
+/* 이제 배지 자체 배경은 없애고, 상위 카드(.navbar-top-right) 안에서 색이 있는 굵은 글씨로만 구분 */
+.status-role-admin,
+.status-role-missionary,
+.status-role-host {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
 .status-role-admin {
-  background: rgba(16, 101, 112, 0.14);
   color: #106570;
 }
 
 .status-role-missionary {
-  background: rgba(217, 123, 63, 0.16);
   color: #b8622c;
 }
 
 .status-role-host {
-  background: rgba(22, 128, 142, 0.14);
   color: #16808E;
 }
 
