@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, CheckCircle, AlertCircle, Mail } from 'lucide-react';
+import { Clock, AlertCircle, Mail } from 'lucide-react';
 import { supabase } from '../App';
 
 // 이 화면은 "이메일 인증"과 "관리자 승인" 둘 다 완료되지 않은 로그인 사용자에게 보여집니다.
