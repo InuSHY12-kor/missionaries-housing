@@ -35,10 +35,22 @@ function Navigation({ user, userProfile, onLogout }) {
             <div className="navbar-top-row">
               {brand}
 
-              {userProfile?.full_name && (
-                <span className="navbar-welcome">
-                  반갑습니다, {userProfile.full_name}님
-                </span>
+              {(userProfile?.full_name || ((userProfile?.status === 'approved' || userProfile?.status === 'pending') && userProfile.role)) && (
+                <div className="navbar-top-right">
+                  {(userProfile?.status === 'approved' || userProfile?.status === 'pending') && userProfile.role && (
+                    <span className={`status-badge status-role-${userProfile.role}`}>
+                      {userProfile.role === 'admin' && userProfile.is_super_admin
+                        ? '최고 관리자'
+                        : (ROLE_LABELS[userProfile.role] || userProfile.role)}
+                    </span>
+                  )}
+
+                  {userProfile?.full_name && (
+                    <span className="navbar-welcome">
+                      반갑습니다, {userProfile.full_name}님
+                    </span>
+                  )}
+                </div>
               )}
             </div>
 
@@ -62,16 +74,6 @@ function Navigation({ user, userProfile, onLogout }) {
                   )}
                   <li><Link to="/profile" className="nav-btn">프로필</Link></li>
                 </>
-              )}
-
-              {(userProfile?.status === 'approved' || userProfile?.status === 'pending') && userProfile.role && (
-                <li>
-                  <span className={`status-badge status-role-${userProfile.role}`}>
-                    {userProfile.role === 'admin' && userProfile.is_super_admin
-                      ? '최고 관리자'
-                      : (ROLE_LABELS[userProfile.role] || userProfile.role)}
-                  </span>
-                </li>
               )}
 
               {(userProfile?.status === 'pending' || (userProfile?.status === 'approved' && !userProfile?.email_verified_at)) && (

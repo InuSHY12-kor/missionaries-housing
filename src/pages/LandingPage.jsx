@@ -423,7 +423,7 @@ function LandingPage() {
 
         .hero-eyebrow {
           display: inline-block;
-          font-size: 0.75rem;
+          font-size: 1.05rem;
           font-weight: 700;
           letter-spacing: 0.22em;
           color: #e7dcc4;
