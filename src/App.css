@@ -284,12 +284,28 @@ body {
   border-color: #d7d7d2;
 }
 
+/* 알림/메시지 아이콘도 투명 상단바에서는 흰색으로 전환 */
+.navbar-transparent .notification-bell-btn,
+.navbar-transparent .message-icon-btn {
+  color: #fff;
+}
+
+.navbar-transparent .notification-bell-btn:hover,
+.navbar-transparent .message-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
 .navbar-welcome {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #fff;
+  color: #2c3e50;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+/* 사진 배너 위에 얹히는 투명 상단바에서만 흰 글씨로 전환 (불투명 상단바에서는 어두운 글씨 유지) */
+.navbar-transparent .navbar-welcome {
+  color: #fff;
 }
 
 .status-badge {
@@ -317,15 +333,21 @@ body {
   color: white;
 }
 
-/* 배경 없이 흰색 굵은 글씨로만 역할을 표시 */
+/* 배경 없이 굵은 글씨로만 역할을 표시 — 불투명 상단바에서는 어두운 글씨, 투명 상단바에서는 흰 글씨 */
 .status-role-admin,
 .status-role-missionary,
 .status-role-host {
   background: transparent;
   padding: 0;
   border-radius: 0;
-  color: #fff;
+  color: #2c3e50;
   font-weight: 700;
+}
+
+.navbar-transparent .status-role-admin,
+.navbar-transparent .status-role-missionary,
+.navbar-transparent .status-role-host {
+  color: #fff;
 }
 
 
