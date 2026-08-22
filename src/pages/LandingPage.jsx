@@ -157,15 +157,6 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* 여행/숙소 사진이 옆으로 흘러가는 스트립 */}
-      <section className="photo-marquee" aria-hidden="true">
-        <div className="marquee-track">
-          {[...MARQUEE_IMAGES, ...MARQUEE_IMAGES].map((src, idx) => (
-            <div key={idx} className="marquee-item" style={{ backgroundImage: `url(${src})` }} />
-          ))}
-        </div>
-      </section>
-
       {/* 우리의 이야기 섹션 */}
       <section className="story">
         <div className="container">
@@ -345,9 +336,18 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* 문의 섹션 */}
+      {/* 문의 섹션 — 바로 위에 여행/숙소 사진이 흘러가는 스트립을 포함 */}
       <section className="contact">
         <div className="container">
+          <div className="contact-marquee" aria-hidden="true">
+            <div className="marquee-track">
+              {[...MARQUEE_IMAGES, ...MARQUEE_IMAGES].map((src, idx) => (
+                <div key={idx} className="marquee-item" style={{ backgroundImage: `url(${src})` }} />
+              ))}
+            </div>
+          </div>
+
+          <div className="contact-grid">
           <div className="contact-intro">
             <span className="eyebrow">CONTACT</span>
             <h2>궁금한 점이 있으신가요?</h2>
@@ -423,10 +423,11 @@ function LandingPage() {
               </form>
             )}
           </div>
+          </div>
         </div>
       </section>
 
-      {/* 하단 푸터 — 사업자 정보는 확인 후 실제 값으로 교체 필요 */}
+      {/* 하단 푸터 — 전화번호만 확인 후 추가 필요 */}
       <footer className="site-footer">
         <div className="container footer-inner">
           <div className="footer-brand">
@@ -435,10 +436,10 @@ function LandingPage() {
           </div>
 
           <div className="footer-info">
-            <p>비영리단체 WEWE · 대표 [대표자명 입력 필요]</p>
-            <p>사업자(고유번호) [등록번호 입력 필요]</p>
-            <p>주소 [사업장 주소 입력 필요]</p>
-            <p>전화 [연락처 입력 필요] · 이메일 [이메일 주소 입력 필요]</p>
+            <p>비영리단체 WEWE · 대표 홍현지</p>
+            <p>사업자(고유번호) 501-82-75164</p>
+            <p>주소 서울특별시 종로구 대학로12길 61, 5층 501-176A호(동승동, 계우빌딩)</p>
+            <p>전화 [연락처 입력 필요] · 이메일 wewe@wewestay.com</p>
           </div>
 
           <div className="footer-copy">
@@ -563,11 +564,11 @@ function LandingPage() {
           to { stroke-dashoffset: 0; }
         }
 
-        /* 사진이 옆으로 흘러가는 마퀴 스트립 */
-        .photo-marquee {
+        /* 사진이 옆으로 흘러가는 마퀴 스트립 — CONTACT 섹션 안, 문의 폼과 같은 폭으로 좁혀서 배치 */
+        .contact-marquee {
           overflow: hidden;
-          background: var(--ink);
-          padding: 1.25rem 0;
+          margin-bottom: 2.5rem;
+          border-radius: 6px;
         }
 
         .marquee-track {
@@ -578,8 +579,8 @@ function LandingPage() {
 
         .marquee-item {
           flex: 0 0 auto;
-          width: 260px;
-          height: 170px;
+          width: 220px;
+          height: 140px;
           margin-right: 1rem;
           border-radius: 6px;
           background-size: cover;
@@ -933,6 +934,9 @@ function LandingPage() {
 
         .contact .container {
           max-width: 980px;
+        }
+
+        .contact-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 3rem;
@@ -1120,7 +1124,7 @@ function LandingPage() {
             font-size: 1.5rem;
           }
 
-          .contact .container {
+          .contact-grid {
             grid-template-columns: 1fr;
             gap: 2rem;
           }
