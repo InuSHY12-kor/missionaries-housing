@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Users, Home, MessageCircle, CheckCircle, Edit, Send } from 'lucide-react';
+import { MapPin, Users, Home, MessageCircle, CheckCircle, Edit, Send, XCircle, AlertTriangle } from 'lucide-react';
 import AccommodationMap from '../components/AccommodationMap';
 import ImageCarousel from '../components/ImageCarousel';
 import Calendar from '../components/Calendar';
@@ -34,6 +34,13 @@ function AccommodationDetail({ userProfile }) {
   const [contactSubmitting, setContactSubmitting] = useState(false);
   const [contactSuccess, setContactSuccess] = useState('');
   const [contactError, setContactError] = useState('');
+
+  // 관리자 승인 검토 — 실제 이 페이지(호스트/선교사에게 보이는 것과 동일한 화면)에서 바로 처리합니다.
+  const [adminActionMode, setAdminActionMode] = useState(null); // 'revision' | 'rejection' | null
+  const [adminReason, setAdminReason] = useState('');
+  const [adminBusy, setAdminBusy] = useState(false);
+  const [adminActionError, setAdminActionError] = useState('');
+  const [adminNotice, setAdminNotice] = useState('');
 
   const fetchAccommodation = useCallback(async () => {
         try {
@@ -264,8 +271,56 @@ function AccommodationDetail({ userProfile }) {
     }
   };
 
+  // 승인 — 승인된 회원에게 즉시 노출됩니다.
+  const handleAdminApprove = async () => {
+    if (!window.confirm('이 숙소를 승인하시겠습니까? 승인 시 승인된 회원에게 바로 노출됩니다.')) return;
+    setAdminBusy(true);
+    setAdminActionError('');
+    try {
+      const { error } = await supabase
+        .from('accommodations')
+        .update({ status: 'approved', rejection_reason: null, admin_feedback_type: null })
+        .eq('id', id);
+      if (error) throw error;
+      setAccommodation(prev => ({ ...prev, status: 'approved', rejection_reason: null, admin_feedback_type: null }));
+      setAdminNotice('숙소가 승인되었습니다.');
+    } catch (error) {
+      setAdminActionError('오류: ' + error.message);
+    } finally {
+      setAdminBusy(false);
+    }
+  };
+
+  // 수정 요청/거절 — 두 경우 모두 상태는 계속 '승인 대기중'으로 유지하고, 사유만 호스트에게 전달합니다.
+  // (호스트의 "내 숙소" 페이지에서 상태 배지는 그대로 대기중으로 보이고, 사유만 함께 표시됩니다.)
+  const handleAdminFeedbackSubmit = async () => {
+    if (!adminReason.trim()) {
+      setAdminActionError('사유를 입력해주세요.');
+      return;
+    }
+    setAdminBusy(true);
+    setAdminActionError('');
+    try {
+      const { error } = await supabase
+        .from('accommodations')
+        .update({ status: 'pending', rejection_reason: adminReason.trim(), admin_feedback_type: adminActionMode })
+        .eq('id', id);
+      if (error) throw error;
+      setAccommodation(prev => ({ ...prev, status: 'pending', rejection_reason: adminReason.trim(), admin_feedback_type: adminActionMode }));
+      setAdminNotice(adminActionMode === 'revision' ? '수정 요청을 호스트에게 전달했습니다.' : '거절 사유를 호스트에게 전달했습니다.');
+      setAdminActionMode(null);
+      setAdminReason('');
+    } catch (error) {
+      setAdminActionError('오류: ' + error.message);
+    } finally {
+      setAdminBusy(false);
+    }
+  };
+
   if (loading) return <div className="container"><p>로드 중...</p></div>;
   if (!accommodation) return <div className="container"><p>숙소를 찾을 수 없습니다.</p></div>;
+
+  const isAdminPendingReview = userProfile?.role === 'admin' && accommodation.status === 'pending';
 
   const nights = bookingData.checkIn && bookingData.checkOut
     ? Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))
@@ -280,6 +335,14 @@ function AccommodationDetail({ userProfile }) {
   return (
     <div className="accommodation-detail">
       <div className="container">
+        {isAdminPendingReview && (
+          <div className="admin-review-banner">
+            <AlertTriangle size={18} />
+            <span>관리자 승인 대기중인 숙소입니다. 선교사/호스트에게 실제로 보이는 화면 그대로이며, 아래 예약 영역 자리에서 승인·수정 요청·거절을 처리할 수 있습니다.</span>
+          </div>
+        )}
+        {adminNotice && <div className="admin-notice-banner">{adminNotice}</div>}
+
         {/* 이미지 갤러리 */}
         <div className="gallery">
           <ImageCarousel images={accommodation.images} alt={accommodation.title} />
@@ -404,8 +467,76 @@ function AccommodationDetail({ userProfile }) {
             </div>
           </div>
 
-          {/* 오른쪽: 예약 양식 */}
+          {/* 오른쪽: 예약 양식 (관리자가 승인 대기중인 숙소를 볼 때는 검토 패널로 대체) */}
           <div className="booking-section">
+            {isAdminPendingReview ? (
+              <div className="booking-card admin-review-card">
+                <h3>관리자 검토</h3>
+
+                {accommodation.rejection_reason && (
+                  <div className={`admin-review-prev-feedback ${accommodation.admin_feedback_type === 'revision' ? 'is-revision' : 'is-rejection'}`}>
+                    <strong>{accommodation.admin_feedback_type === 'revision' ? '이전에 남긴 수정 요청' : '이전에 남긴 거절 사유'}</strong>
+                    <p>{accommodation.rejection_reason}</p>
+                  </div>
+                )}
+
+                {adminActionMode ? (
+                  <div className="admin-reason-form">
+                    <label>{adminActionMode === 'revision' ? '수정 요청 사유 *' : '거절 사유 *'}</label>
+                    <textarea
+                      rows="5"
+                      value={adminReason}
+                      onChange={(e) => setAdminReason(e.target.value)}
+                      placeholder="호스트에게 전달할 내용을 자세히 입력해주세요"
+                    />
+                    {adminActionError && <p className="form-error">{adminActionError}</p>}
+                    <div className="admin-review-actions">
+                      <button className="btn btn-danger" disabled={adminBusy} onClick={handleAdminFeedbackSubmit}>
+                        {adminBusy ? '처리 중...' : (adminActionMode === 'revision' ? '수정 요청 보내기' : '거절 사유 보내기')}
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        disabled={adminBusy}
+                        onClick={() => { setAdminActionMode(null); setAdminReason(''); setAdminActionError(''); }}
+                      >
+                        취소
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="admin-review-hint">
+                      숙소 상태는 승인 전까지 계속 <strong>승인 대기중</strong>으로 유지되며, 수정 요청·거절 사유는 호스트의 "내 숙소" 페이지에서 확인할 수 있습니다.
+                    </p>
+                    {adminActionError && <p className="form-error">{adminActionError}</p>}
+                    <div className="admin-review-actions admin-review-actions-main">
+                      <button className="btn btn-success" disabled={adminBusy} onClick={handleAdminApprove}>
+                        <CheckCircle size={16} />
+                        승인
+                      </button>
+                      <button
+                        className="btn btn-warning"
+                        disabled={adminBusy}
+                        onClick={() => { setAdminActionMode('revision'); setAdminReason(''); setAdminActionError(''); }}
+                      >
+                        <Edit size={16} />
+                        수정 요청
+                      </button>
+                      <button
+                        className="btn btn-danger"
+                        disabled={adminBusy}
+                        onClick={() => { setAdminActionMode('rejection'); setAdminReason(''); setAdminActionError(''); }}
+                      >
+                        <XCircle size={16} />
+                        거절
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                <Link to="/admin" className="admin-review-back">관리자 대시보드로 돌아가기</Link>
+              </div>
+            ) : (
             <div className="booking-card">
               <div className="price-header">
                 <p className="price">₩{accommodation.price?.toLocaleString()}</p>
@@ -468,6 +599,7 @@ function AccommodationDetail({ userProfile }) {
                 </>
               )}
             </div>
+            )}
           </div>
         </div>
       </div>
@@ -475,6 +607,130 @@ function AccommodationDetail({ userProfile }) {
       <style>{`
         .accommodation-detail {
           flex: 1;
+        }
+
+        .admin-review-banner {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          background: #fff8e6;
+          color: #8a5a12;
+          border: 1px solid #f0dcb0;
+          border-radius: 8px;
+          padding: 0.9rem 1.1rem;
+          margin-top: 1.5rem;
+          font-size: 0.92rem;
+          line-height: 1.5;
+        }
+
+        .admin-review-banner svg {
+          flex-shrink: 0;
+        }
+
+        .admin-notice-banner {
+          background: #e6f4f5;
+          color: #106570;
+          border: 1px solid #cceaec;
+          border-radius: 8px;
+          padding: 0.75rem 1.1rem;
+          margin-top: 0.75rem;
+          font-size: 0.9rem;
+          font-weight: 600;
+        }
+
+        .admin-review-card h3 {
+          color: #2c3e50;
+          margin-bottom: 1rem;
+        }
+
+        .admin-review-hint {
+          font-size: 0.85rem;
+          color: #7f8c8d;
+          line-height: 1.6;
+          margin-bottom: 1.25rem;
+        }
+
+        .admin-review-prev-feedback {
+          border-radius: 6px;
+          padding: 0.85rem 1rem;
+          margin-bottom: 1.25rem;
+          font-size: 0.88rem;
+        }
+
+        .admin-review-prev-feedback strong {
+          display: block;
+          margin-bottom: 0.35rem;
+        }
+
+        .admin-review-prev-feedback p {
+          margin: 0;
+          white-space: pre-wrap;
+          line-height: 1.6;
+        }
+
+        .admin-review-prev-feedback.is-revision {
+          background: #fff8e6;
+          color: #8a5a12;
+          border-left: 4px solid #f39c12;
+        }
+
+        .admin-review-prev-feedback.is-rejection {
+          background: #fadbd8;
+          color: #922b21;
+          border-left: 4px solid #e74c3c;
+        }
+
+        .admin-reason-form label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 0.9rem;
+        }
+
+        .admin-reason-form textarea {
+          width: 100%;
+          padding: 0.75rem;
+          border: 2px solid #ecf0f1;
+          border-radius: 6px;
+          font-family: inherit;
+          resize: vertical;
+        }
+
+        .admin-reason-form textarea:focus {
+          outline: none;
+          border-color: #16808E;
+        }
+
+        .admin-review-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.6rem;
+          margin-top: 1rem;
+        }
+
+        .admin-review-actions-main button {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.4rem;
+          white-space: nowrap;
+        }
+
+        .admin-review-back {
+          display: block;
+          text-align: center;
+          margin-top: 1.5rem;
+          padding-top: 1rem;
+          border-top: 1px solid #ecf0f1;
+          color: #16808E;
+          font-size: 0.85rem;
+          text-decoration: none;
+        }
+
+        .admin-review-back:hover {
+          text-decoration: underline;
         }
 
         .gallery {

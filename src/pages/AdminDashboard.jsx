@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning } from 'lucide-react';
 
@@ -41,7 +42,6 @@ function AdminDashboard({ userProfile }) {
   });
   const [selectedItem, setSelectedItem] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
-  const [reviewAccommodation, setReviewAccommodation] = useState(null);
   const [docLoadingPath, setDocLoadingPath] = useState(null);
   const [deletionBusyId, setDeletionBusyId] = useState(null);
   const [resendBusyId, setResendBusyId] = useState(null);
@@ -231,45 +231,6 @@ function AdminDashboard({ userProfile }) {
       setResendResult(prev => ({ ...prev, [user.id]: 'error' }));
     } finally {
       setResendBusyId(null);
-    }
-  };
-
-  const approveAccommodation = async (accommodationId) => {
-    try {
-      const { error } = await supabase
-        .from('accommodations')
-        .update({ status: 'approved' })
-        .eq('id', accommodationId);
-      if (error) throw error;
-      setAccommodations(accommodations.filter(a => a.id !== accommodationId));
-      setCounts(prev => ({ ...prev, accommodations: Math.max(0, prev.accommodations - 1) }));
-      setReviewAccommodation(null);
-    } catch (error) {
-      alert('오류: ' + error.message);
-    }
-  };
-
-  const rejectAccommodation = async (accommodationId) => {
-    if (!rejectionReason.trim()) {
-      alert('거절 사유를 입력해주세요.');
-      return;
-    }
-    try {
-      const { error } = await supabase
-        .from('accommodations')
-        .update({ 
-          status: 'rejected',
-          rejection_reason: rejectionReason
-        })
-        .eq('id', accommodationId);
-      if (error) throw error;
-      setAccommodations(accommodations.filter(a => a.id !== accommodationId));
-      setCounts(prev => ({ ...prev, accommodations: Math.max(0, prev.accommodations - 1) }));
-      setSelectedItem(null);
-      setRejectionReason('');
-      setReviewAccommodation(null);
-    } catch (error) {
-      alert('오류: ' + error.message);
     }
   };
 
@@ -507,13 +468,10 @@ function AdminDashboard({ userProfile }) {
                     </div>
 
                     <div className="action-buttons">
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => setReviewAccommodation(acc)}
-                      >
+                      <Link to={`/accommodations/${acc.id}`} className="btn btn-primary">
                         <Eye size={16} />
-                        상세보기 후 승인/거절
-                      </button>
+                        실제 페이지에서 검토하기
+                      </Link>
                     </div>
                   </div>
                 ))}
@@ -784,72 +742,7 @@ function AdminDashboard({ userProfile }) {
         )}
 
         {/* 숙소 상세 검토 모달 — 승인 전에 전체 내용/사진을 확인합니다 */}
-        {reviewAccommodation && (
-          <div className="modal-overlay">
-            <div className="modal review-modal">
-              <div className="modal-header">
-                <h2>{reviewAccommodation.title}</h2>
-                <span className="badge badge-warning">검토 중</span>
-              </div>
-
-              {reviewAccommodation.images && reviewAccommodation.images.length > 0 ? (
-                <div className="review-image-grid">
-                  {reviewAccommodation.images.map((url, idx) => (
-                    <img key={url} src={url} alt={`${reviewAccommodation.title} 사진 ${idx + 1}`} />
-                  ))}
-                </div>
-              ) : (
-                <p className="review-no-images">등록된 사진이 없습니다.</p>
-              )}
-
-              <div className="review-details">
-                <p><strong>호스트:</strong> {reviewAccommodation.users?.full_name} ({reviewAccommodation.users?.church_name || '소속 미기재'})</p>
-                <p><strong>위치:</strong> {reviewAccommodation.location}</p>
-                <p><strong>1박 가격:</strong> ₩{reviewAccommodation.price?.toLocaleString()}</p>
-                <p><strong>수용인원:</strong> {reviewAccommodation.capacity}명 · <strong>침실:</strong> {reviewAccommodation.bedrooms ?? '-'} · <strong>욕실:</strong> {reviewAccommodation.bathrooms ?? '-'}</p>
-                <p><strong>사진:</strong> {reviewAccommodation.images?.length || 0}장</p>
-                <p><strong>설명</strong></p>
-                <p className="review-description">{reviewAccommodation.description}</p>
-                {(reviewAccommodation.amenities?.length > 0 || reviewAccommodation.amenities_other?.length > 0) && (
-                  <>
-                    <p><strong>편의시설</strong></p>
-                    <p className="review-description">
-                      {[...(reviewAccommodation.amenities || []), ...(reviewAccommodation.amenities_other || [])].join(', ')}
-                    </p>
-                  </>
-                )}
-              </div>
-
-              <div className="modal-actions">
-                <button
-                  className="btn btn-success"
-                  onClick={() => approveAccommodation(reviewAccommodation.id)}
-                >
-                  <CheckCircle size={16} />
-                  승인
-                </button>
-                <button
-                  className="btn btn-danger"
-                  onClick={() => {
-                    setSelectedItem(reviewAccommodation);
-                    setReviewAccommodation(null);
-                  }}
-                >
-                  <XCircle size={16} />
-                  거절
-                </button>
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setReviewAccommodation(null)}
-                >
-                  닫기
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 거절 모달 */}
+        {/* 거절 모달 (사용자 승인 거절용) */}
         {selectedItem && (
           <div className="modal-overlay">
             <div className="modal">
@@ -868,13 +761,7 @@ function AdminDashboard({ userProfile }) {
               <div className="modal-actions">
                 <button
                   className="btn btn-danger"
-                  onClick={() => {
-                    if (activeTab === 'users') {
-                      rejectUser(selectedItem.id);
-                    } else {
-                      rejectAccommodation(selectedItem.id);
-                    }
-                  }}
+                  onClick={() => rejectUser(selectedItem.id)}
                 >
                   거절
                 </button>
@@ -1031,12 +918,14 @@ function AdminDashboard({ userProfile }) {
           margin-top: 1rem;
         }
 
-        .action-buttons button {
+        .action-buttons button,
+        .action-buttons a {
           flex: 1;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 0.5rem;
+          text-decoration: none;
         }
 
         .empty-message {
@@ -1177,52 +1066,6 @@ function AdminDashboard({ userProfile }) {
         .role-change-busy {
           font-size: 0.85rem;
           color: #7f8c8d;
-        }
-
-        .review-modal {
-          max-width: 760px;
-          max-height: 88vh;
-          overflow-y: auto;
-        }
-
-        .review-modal .modal-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 1rem;
-        }
-
-        .review-image-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-          gap: 0.6rem;
-          margin-bottom: 1.25rem;
-        }
-
-        .review-image-grid img {
-          width: 100%;
-          aspect-ratio: 1;
-          object-fit: cover;
-          border-radius: 6px;
-        }
-
-        .review-no-images {
-          color: #e74c3c;
-          font-weight: 600;
-          margin-bottom: 1.25rem;
-        }
-
-        .review-details p {
-          margin: 0.5rem 0;
-          color: #555;
-        }
-
-        .review-description {
-          white-space: pre-wrap;
-          background: #f8f9fa;
-          padding: 0.75rem 1rem;
-          border-radius: 6px;
-          line-height: 1.7;
         }
 
         .modal-actions {

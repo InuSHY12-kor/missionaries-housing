@@ -298,9 +298,10 @@ function HostAccommodations({ userProfile }) {
       };
 
       if (editingId) {
+        // 수정 후 재제출하면 관리자가 이전에 남긴 수정 요청/거절 사유는 지우고 새로 검토를 받습니다.
         const { error } = await supabase
           .from('accommodations')
-          .update({ ...payload, status: 'pending' })
+          .update({ ...payload, status: 'pending', rejection_reason: null, admin_feedback_type: null })
           .eq('id', editingId);
 
         if (error) throw error;
@@ -350,7 +351,7 @@ function HostAccommodations({ userProfile }) {
   const getStatusText = (status) => {
     switch (status) {
       case 'approved': return '승인됨';
-      case 'pending': return '검토 중';
+      case 'pending': return '관리자 승인 대기중';
       case 'rejected': return '거절됨';
       default: return status;
     }
@@ -643,8 +644,12 @@ function HostAccommodations({ userProfile }) {
                 </div>
 
                 {accommodation.rejection_reason && (
-                  <div className="rejection-notice">
-                    <strong>거절 사유:</strong> {accommodation.rejection_reason}
+                  <div className={`rejection-notice ${accommodation.admin_feedback_type === 'revision' ? 'revision-notice' : ''}`}>
+                    <strong>{accommodation.admin_feedback_type === 'revision' ? '관리자 수정 요청' : '관리자 거절 사유'}:</strong>{' '}
+                    {accommodation.rejection_reason}
+                    <p className="rejection-notice-hint">
+                      아래 "수정" 버튼으로 내용을 반영해 다시 제출하시면 검토가 재진행됩니다. 승인 전까지는 계속 승인 대기중 상태로 유지됩니다.
+                    </p>
                   </div>
                 )}
 
@@ -1004,6 +1009,17 @@ function HostAccommodations({ userProfile }) {
           margin: 1rem 0;
           border-radius: 4px;
           color: #2c3e50;
+        }
+
+        .rejection-notice.revision-notice {
+          background: #fff8e6;
+          border-left-color: #f39c12;
+        }
+
+        .rejection-notice-hint {
+          margin: 0.6rem 0 0;
+          font-size: 0.82rem;
+          color: #7f8c8d;
         }
 
         .item-actions {
