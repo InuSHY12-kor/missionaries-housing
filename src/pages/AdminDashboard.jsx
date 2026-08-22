@@ -1019,17 +1019,17 @@ function AdminDashboard({ userProfile }) {
         }
 
         .role-badge.role-admin {
-          background: #16808E;
+          background: #106570;
           color: white;
         }
 
         .role-badge.role-host {
-          background: #f39c12;
+          background: #16808E;
           color: white;
         }
 
         .role-badge.role-missionary {
-          background: #8ABFC6;
+          background: #d97b3f;
           color: white;
         }
 

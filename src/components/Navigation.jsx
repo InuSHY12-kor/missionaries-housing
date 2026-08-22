@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import wewelogo from '../assets/wewe-icon.png';
 import NotificationBell from './NotificationBell';
@@ -15,34 +15,37 @@ function Navigation({ user, userProfile, onLogout }) {
   // 관리자 승인과 이메일 인증이 모두 완료되어야 실제 서비스 메뉴가 노출됨
   const hasFullAccess = userProfile?.status === 'approved' && !!userProfile?.email_verified_at;
 
+  // 랜딩 페이지(히어로 이미지) 위에서는 내비게이션을 투명 배경 + 흰 글씨로 오버레이합니다.
+  // 로그인 상태에서는 '/'가 항상 다른 페이지로 리다이렉트되므로, 실제로는 로그아웃 상태에서만 해당됩니다.
+  const location = useLocation();
+  const isLandingHero = location.pathname === '/';
+
+  const brand = (
+    <Link to="/" className="navbar-brand">
+      <img src={wewelogo} alt="WEWE STAY" className="navbar-logo" />
+      <span className="navbar-brand-text">WEWE<b>STAY</b></span>
+    </Link>
+  );
+
   return (
-    <nav className={`navbar ${user ? 'navbar-authed' : ''}`}>
-      <div className="container navbar-container">
-        <div className="navbar-top-row">
-          <Link to="/" className="navbar-brand">
-            <img src={wewelogo} alt="WEWE STAY" className="navbar-logo" />
-            <span className="navbar-brand-text">WEWE<b>STAY</b></span>
-          </Link>
+    <nav className={`navbar ${user ? 'navbar-authed' : ''} ${isLandingHero ? 'navbar-transparent' : ''}`}>
+      <div className={`container ${user ? 'navbar-container' : 'navbar-container-single'}`}>
+        {user ? (
+          <>
+            <div className="navbar-top-row">
+              {brand}
 
-          {user && userProfile?.full_name && (
-            <span className="navbar-welcome">
-              반갑습니다, {userProfile.full_name}님
-            </span>
-          )}
-        </div>
+              {userProfile?.full_name && (
+                <span className="navbar-welcome">
+                  반갑습니다, {userProfile.full_name}님
+                </span>
+              )}
+            </div>
 
-        <ul className="navbar-nav">
-          {!user ? (
-            <>
-              <li><Link to="/" className="nav-btn">홈</Link></li>
-              <li><Link to="/login" className="nav-btn nav-btn-outline">로그인</Link></li>
-              <li><Link to="/signup" className="btn btn-primary">가입하기</Link></li>
-            </>
-          ) : (
-            <>
+            <ul className="navbar-nav">
               {hasFullAccess && (
                 <>
-                  <li><Link to="/dashboard" className="nav-btn">대시보드</Link></li>
+                  <li><Link to="/dashboard" className="nav-btn">마이페이지</Link></li>
                   {(userProfile.role === 'admin' || userProfile.role === 'missionary') && (
                     <li><Link to="/accommodations" className="nav-btn">숙소 검색</Link></li>
                   )}
@@ -90,15 +93,25 @@ function Navigation({ user, userProfile, onLogout }) {
                 </>
               )}
 
-              <li className="navbar-logout-item">
+              <li>
                 <button onClick={onLogout} className="nav-btn nav-btn-outline">
                   <LogOut size={18} />
                   로그아웃
                 </button>
               </li>
-            </>
-          )}
-        </ul>
+            </ul>
+          </>
+        ) : (
+          <>
+            {brand}
+
+            <ul className="navbar-nav">
+              <li><Link to="/" className="nav-btn">홈</Link></li>
+              <li><Link to="/login" className="nav-btn nav-btn-outline">로그인</Link></li>
+              <li><Link to="/signup" className="btn btn-primary">가입하기</Link></li>
+            </ul>
+          </>
+        )}
       </div>
     </nav>
   );
