@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { supabase } from '../App';
 import { User, Phone, Building2, Save } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+// 프로필 페이지 상단 슬라이드 배너 사진
+const PROFILE_HERO_IMAGES = [
+  'https://images.pexels.com/photos/164645/pexels-photo-164645.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/7235804/pexels-photo-7235804.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/2305123/pexels-photo-2305123.jpeg?auto=compress&cs=tinysrgb&w=1600'
+];
 
 const DELETION_GRACE_PERIOD_DAYS = 15;
 
@@ -145,6 +153,12 @@ function Profile({ userProfile }) {
 
   return (
     <div className="profile-page">
+      <PageHero
+        images={PROFILE_HERO_IMAGES}
+        eyebrow="MY PROFILE"
+        title="나의 정보를 관리하세요"
+        subtitle="계정 정보를 최신 상태로 유지해주세요."
+      />
       <div className="container">
         <h1>프로필</h1>
 

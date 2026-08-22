@@ -2,6 +2,14 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { MapPin, Calendar as CalendarIcon, XCircle, Filter, X, Heart, MessageCircle } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+// 내 예약 페이지 상단 슬라이드 배너 사진
+const MY_BOOKINGS_HERO_IMAGES = [
+  'https://images.pexels.com/photos/6726195/pexels-photo-6726195.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/1008155/pexels-photo-1008155.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/30981181/pexels-photo-30981181.jpeg?auto=compress&cs=tinysrgb&w=1600'
+];
 
 const STATUS_LABEL = {
   pending: '예약됨',
@@ -137,6 +145,12 @@ function MyBookings({ userProfile }) {
 
   return (
     <div className="my-bookings">
+      <PageHero
+        images={MY_BOOKINGS_HERO_IMAGES}
+        eyebrow="MY BOOKINGS"
+        title="다가오는 쉼을 확인하세요"
+        subtitle="예약 현황과 일정을 한눈에 볼 수 있습니다."
+      />
       <div className="container">
         <h1>내 예약</h1>
 

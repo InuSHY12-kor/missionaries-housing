@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../App';
 import { MapPin, Calendar, Phone, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+// 예약 관리(호스트) 페이지 상단 슬라이드 배너 사진
+const HOST_BOOKINGS_HERO_IMAGES = [
+  'https://images.pexels.com/photos/6276201/pexels-photo-6276201.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/5737832/pexels-photo-5737832.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/5737831/pexels-photo-5737831.jpeg?auto=compress&cs=tinysrgb&w=1600'
+];
 
 const STATUS_LABEL = {
   pending: '예약됨',
@@ -128,6 +136,12 @@ function HostBookings({ userProfile }) {
 
   return (
     <div className="host-bookings">
+      <PageHero
+        images={HOST_BOOKINGS_HERO_IMAGES}
+        eyebrow="MANAGE BOOKINGS"
+        title="선교사님을 맞이할 준비를 해주세요"
+        subtitle="예약 요청을 확인하고 확정/거절할 수 있습니다."
+      />
       <div className="container">
         <h1>예약 관리</h1>
         <p className="subtitle">내 숙소에 들어온 예약 요청을 확인하고 확정/거절할 수 있습니다.</p>

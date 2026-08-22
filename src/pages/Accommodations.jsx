@@ -3,6 +3,14 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { MapPin, Users, Star, Calendar } from 'lucide-react';
 import SearchMap from '../components/SearchMap';
+import PageHero from '../components/PageHero';
+
+// 숙소 검색 페이지 상단 슬라이드 배너 사진
+const SEARCH_HERO_IMAGES = [
+  'https://images.pexels.com/photos/33085059/pexels-photo-33085059.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/38333372/pexels-photo-38333372.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/29673494/pexels-photo-29673494.jpeg?auto=compress&cs=tinysrgb&w=1600'
+];
 
 function Accommodations() {
   const [accommodations, setAccommodations] = useState([]);
@@ -139,6 +147,12 @@ function Accommodations() {
 
   return (
     <div className="accommodations">
+      <PageHero
+        images={SEARCH_HERO_IMAGES}
+        eyebrow="FIND A STAY"
+        title="신뢰할 수 있는 숙소를 찾아보세요"
+        subtitle="승인된 숙소만 이곳에 노출됩니다."
+      />
       <div className="container">
         <h1>숙소 검색</h1>
 
