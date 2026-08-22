@@ -59,12 +59,15 @@ function Dashboard({ userProfile }) {
   const canSearchAccommodations = userProfile?.role === 'admin' || userProfile?.role === 'missionary';
   const canManageAccommodations = userProfile?.role === 'admin' || userProfile?.role === 'host';
   const accommodationsLink = canSearchAccommodations ? '/accommodations' : (canManageAccommodations ? '/my-accommodations' : null);
+  // 선교사(및 관리자)는 예약할 수 있는 숙소 목록으로 이동하고, 호스트는 본인이 등록한 숙소 목록으로 이동하므로
+  // 카드 문구도 그에 맞게 다르게 표시합니다.
+  const accommodationsLabel = canSearchAccommodations ? '예약 가능한 숙소' : '등록된 숙소';
   const bookingsLink = userProfile?.role === 'host' ? '/host-bookings' : '/my-bookings';
 
   return (
     <div className="dashboard">
       <div className="container">
-        <h1>대시보드</h1>
+        <h1>마이페이지</h1>
         <p className="welcome">환영합니다, {userProfile?.full_name}님!</p>
 
         {/* 통계 카드 */}
@@ -72,13 +75,13 @@ function Dashboard({ userProfile }) {
           {accommodationsLink ? (
             <Link to={accommodationsLink} className="stat-card stat-card-link">
               <Home size={32} />
-              <h3>등록된 숙소</h3>
+              <h3>{accommodationsLabel}</h3>
               <p className="stat-number">{stats.totalAccommodations}</p>
             </Link>
           ) : (
             <div className="stat-card">
               <Home size={32} />
-              <h3>등록된 숙소</h3>
+              <h3>{accommodationsLabel}</h3>
               <p className="stat-number">{stats.totalAccommodations}</p>
             </div>
           )}

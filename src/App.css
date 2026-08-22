@@ -63,6 +63,18 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
+  transition: background-color 0.3s, box-shadow 0.3s, border-color 0.3s;
+}
+
+/* 랜딩 페이지 히어로 이미지 위에 투명하게 얹히는 내비게이션 (로그아웃 상태의 '/' 페이지 전용) */
+.navbar-transparent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: transparent;
+  box-shadow: none;
+  border-bottom: none;
 }
 
 .navbar .container {
@@ -75,6 +87,15 @@ body {
   display: flex;
   flex-direction: column;
   row-gap: 0.5rem;
+}
+
+/* 로그아웃 상태에서는 로고와 홈/로그인/가입하기 버튼이 다시 한 줄로 나란히 표시됩니다. */
+.navbar-container-single {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .navbar-top-row {
@@ -129,10 +150,11 @@ body {
   }
 }
 
+/* 로그아웃 버튼 쪽(오른쪽)으로 정렬하고, 버튼이 늘어날수록 왼쪽으로 밀려 늘어나는 형태 */
 .navbar-nav {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: flex-end;
   row-gap: 0.4rem;
   column-gap: 0.4rem;
   align-items: center;
@@ -141,11 +163,6 @@ body {
 
 .navbar-nav li {
   flex-shrink: 0;
-}
-
-/* 로그아웃 버튼을 오른쪽 끝(상단 행의 환영 문구와 같은 라인)으로 밀어줌 */
-.navbar-logout-item {
-  margin-left: auto;
 }
 
 .navbar-nav a, .navbar-nav button {
@@ -213,6 +230,52 @@ body {
   box-shadow: 0 4px 12px rgba(22, 128, 142, 0.4);
 }
 
+/* 투명 내비게이션(랜딩 히어로 전용) — 로고/글씨를 모두 흰색으로, 버튼은 배경 없는 순수 텍스트로 */
+.navbar-transparent .navbar-brand,
+.navbar-transparent .navbar-brand-text,
+.navbar-transparent .navbar-brand-text b {
+  color: #fff;
+}
+
+.navbar-transparent .navbar-logo {
+  filter: brightness(0) invert(1);
+}
+
+.navbar-transparent .navbar-nav a,
+.navbar-transparent .navbar-nav button {
+  color: #fff;
+}
+
+.navbar-transparent .navbar-nav a:hover,
+.navbar-transparent .navbar-nav button:hover {
+  color: #d7d7d2;
+  opacity: 1;
+}
+
+.navbar-transparent .navbar-nav a.nav-btn,
+.navbar-transparent .navbar-nav button.nav-btn {
+  background: transparent;
+}
+
+.navbar-transparent .navbar-nav a.nav-btn:hover,
+.navbar-transparent .navbar-nav button.nav-btn:hover {
+  background: transparent;
+  color: #d7d7d2;
+}
+
+.navbar-transparent .navbar-nav a.nav-btn-outline,
+.navbar-transparent .navbar-nav button.nav-btn-outline {
+  border-color: rgba(255, 255, 255, 0.7);
+  color: #fff;
+}
+
+.navbar-transparent .navbar-nav a.nav-btn-outline:hover,
+.navbar-transparent .navbar-nav button.nav-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #d7d7d2;
+  border-color: #d7d7d2;
+}
+
 .navbar-welcome {
   font-size: 0.95rem;
   color: #848580;
@@ -246,17 +309,17 @@ body {
 }
 
 .status-role-admin {
-  background: #8e44ad;
+  background: #106570;
   color: white;
 }
 
 .status-role-missionary {
-  background: #2980b9;
+  background: #d97b3f;
   color: white;
 }
 
 .status-role-host {
-  background: #16a085;
+  background: #16808E;
   color: white;
 }
 
