@@ -62,7 +62,7 @@ function PageHero({ images, eyebrow, title, subtitle }) {
       <style>{`
         .page-hero {
           position: relative;
-          min-height: 300px;
+          min-height: 380px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -98,7 +98,7 @@ function PageHero({ images, eyebrow, title, subtitle }) {
           z-index: 2;
           max-width: 640px;
           margin: 0 auto;
-          padding: 1.5rem 1.5rem;
+          padding: 4rem 1.5rem 1.5rem;
         }
 
         .page-hero-eyebrow {
@@ -169,7 +169,11 @@ function PageHero({ images, eyebrow, title, subtitle }) {
 
         @media (max-width: 768px) {
           .page-hero {
-            min-height: 220px;
+            min-height: 280px;
+          }
+
+          .page-hero-content {
+            padding-top: 5.5rem;
           }
 
           .page-hero-content h2 {

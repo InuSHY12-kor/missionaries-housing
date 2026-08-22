@@ -15,10 +15,15 @@ function Navigation({ user, userProfile, onLogout }) {
   // 관리자 승인과 이메일 인증이 모두 완료되어야 실제 서비스 메뉴가 노출됨
   const hasFullAccess = userProfile?.status === 'approved' && !!userProfile?.email_verified_at;
 
-  // 랜딩 페이지(히어로 이미지) 위에서는 내비게이션을 투명 배경 + 흰 글씨로 오버레이합니다.
-  // 로그인 상태에서는 '/'가 항상 다른 페이지로 리다이렉트되므로, 실제로는 로그아웃 상태에서만 해당됩니다.
+  // 상단에 사진 배너(랜딩 히어로 또는 PageHero)가 있는 페이지에서는 내비게이션을
+  // 투명 배경 + 흰 글씨로 배너 위에 오버레이합니다. 배너가 없는 페이지(관리자, 숙소 상세,
+  // 로그인/가입 등 폼 중심 페이지)에서는 기존의 불투명 상단바를 그대로 사용합니다.
   const location = useLocation();
-  const isLandingHero = location.pathname === '/';
+  const HERO_BANNER_ROUTES = [
+    '/', '/dashboard', '/accommodations', '/my-bookings',
+    '/my-accommodations', '/host-bookings', '/reviews', '/messages', '/profile'
+  ];
+  const hasHeroBanner = HERO_BANNER_ROUTES.includes(location.pathname);
 
   const brand = (
     <Link to="/" className="navbar-brand">
@@ -28,7 +33,7 @@ function Navigation({ user, userProfile, onLogout }) {
   );
 
   return (
-    <nav className={`navbar ${user ? 'navbar-authed' : ''} ${isLandingHero ? 'navbar-transparent' : ''}`}>
+    <nav className={`navbar ${user ? 'navbar-authed' : ''} ${hasHeroBanner ? 'navbar-transparent' : ''}`}>
       <div className={`container ${user ? 'navbar-container' : 'navbar-container-single'}`}>
         {user ? (
           <>
