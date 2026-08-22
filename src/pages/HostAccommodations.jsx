@@ -10,9 +10,9 @@ import PageHero from '../components/PageHero';
 
 // 내 숙소 관리 페이지 상단 슬라이드 배너 사진
 const HOST_ACCOMMODATIONS_HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1662514121891-8f3a97e5a2ea?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1650476524542-c5cc53306700?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1618237600880-fb9d72e98393?auto=format&fit=crop&w=1600&q=80'
+  'https://images.pexels.com/photos/30332492/pexels-photo-30332492.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/14721/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/31015267/pexels-photo-31015267.jpeg?auto=compress&cs=tinysrgb&w=1600'
 ];
 
 const EMPTY_FORM = {

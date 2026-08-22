@@ -5,9 +5,9 @@ import PageHero from '../components/PageHero';
 
 // 예약 관리(호스트) 페이지 상단 슬라이드 배너 사진
 const HOST_BOOKINGS_HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1769366316790-dfcb6a546f05?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1749703810919-1f979a9a3982?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1763616828336-e7fcd02086f5?auto=format&fit=crop&w=1600&q=80'
+  'https://images.pexels.com/photos/6276201/pexels-photo-6276201.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/5737832/pexels-photo-5737832.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/5737831/pexels-photo-5737831.jpeg?auto=compress&cs=tinysrgb&w=1600'
 ];
 
 const STATUS_LABEL = {

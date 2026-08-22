@@ -7,9 +7,9 @@ import PageHero from '../components/PageHero';
 
 // 숙소 검색 페이지 상단 슬라이드 배너 사진
 const SEARCH_HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1618237600880-fb9d72e98393?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1650476524542-c5cc53306700?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1749703810919-1f979a9a3982?auto=format&fit=crop&w=1600&q=80'
+  'https://images.pexels.com/photos/33085059/pexels-photo-33085059.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/38333372/pexels-photo-38333372.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/29673494/pexels-photo-29673494.jpeg?auto=compress&cs=tinysrgb&w=1600'
 ];
 
 function Accommodations() {

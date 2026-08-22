@@ -5,9 +5,9 @@ import PageHero from '../components/PageHero';
 
 // 리뷰 페이지 상단 슬라이드 배너 사진
 const REVIEWS_HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1604881991575-dfb1003d8811?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1726090401458-7abb00f7450c?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1632518741173-9c2d8e962704?auto=format&fit=crop&w=1600&q=80'
+  'https://images.pexels.com/photos/791024/pexels-photo-791024.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/38919122/pexels-photo-38919122.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/7563652/pexels-photo-7563652.jpeg?auto=compress&cs=tinysrgb&w=1600'
 ];
 
 function formatDate(dateStr) {

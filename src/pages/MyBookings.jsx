@@ -6,9 +6,9 @@ import PageHero from '../components/PageHero';
 
 // 내 예약 페이지 상단 슬라이드 배너 사진
 const MY_BOOKINGS_HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1782952438288-7528ca318935?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1786255454548-b0b71597f9c0?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1771970574223-24e53a0c5a24?auto=format&fit=crop&w=1600&q=80'
+  'https://images.pexels.com/photos/6726195/pexels-photo-6726195.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/1008155/pexels-photo-1008155.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/30981181/pexels-photo-30981181.jpeg?auto=compress&cs=tinysrgb&w=1600'
 ];
 
 const STATUS_LABEL = {

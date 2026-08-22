@@ -6,9 +6,9 @@ import PageHero from '../components/PageHero';
 
 // 마이페이지 상단 슬라이드 배너 사진
 const DASHBOARD_HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1662514121891-8f3a97e5a2ea?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1763616828336-e7fcd02086f5?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1632518741173-9c2d8e962704?auto=format&fit=crop&w=1600&q=80'
+  'https://images.pexels.com/photos/8517946/pexels-photo-8517946.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/27817983/pexels-photo-27817983.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/15226810/pexels-photo-15226810.jpeg?auto=compress&cs=tinysrgb&w=1600'
 ];
 
 const BOOKING_STATUS_LABEL = { pending: '예약됨', confirmed: '예약 확정됨', cancelled: '취소됨' };

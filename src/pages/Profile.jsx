@@ -5,9 +5,9 @@ import PageHero from '../components/PageHero';
 
 // 프로필 페이지 상단 슬라이드 배너 사진
 const PROFILE_HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1781781490292-b3897966361c?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1632518741173-9c2d8e962704?auto=format&fit=crop&w=1600&q=80',
-  'https://images.unsplash.com/photo-1662514121891-8f3a97e5a2ea?auto=format&fit=crop&w=1600&q=80'
+  'https://images.pexels.com/photos/164645/pexels-photo-164645.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/7235804/pexels-photo-7235804.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/2305123/pexels-photo-2305123.jpeg?auto=compress&cs=tinysrgb&w=1600'
 ];
 
 const DELETION_GRACE_PERIOD_DAYS = 15;
