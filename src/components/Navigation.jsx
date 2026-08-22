@@ -17,11 +17,19 @@ function Navigation({ user, userProfile, onLogout }) {
 
   return (
     <nav className={`navbar ${user ? 'navbar-authed' : ''}`}>
-      <div className="container">
-        <Link to="/" className="navbar-brand">
-          <img src={wewelogo} alt="WEWE STAY" className="navbar-logo" />
-          <span className="navbar-brand-text">WEWE<b>STAY</b></span>
-        </Link>
+      <div className="container navbar-container">
+        <div className="navbar-top-row">
+          <Link to="/" className="navbar-brand">
+            <img src={wewelogo} alt="WEWE STAY" className="navbar-logo" />
+            <span className="navbar-brand-text">WEWE<b>STAY</b></span>
+          </Link>
+
+          {user && userProfile?.full_name && (
+            <span className="navbar-welcome">
+              반갑습니다, {userProfile.full_name}님
+            </span>
+          )}
+        </div>
 
         <ul className="navbar-nav">
           {!user ? (
@@ -32,12 +40,6 @@ function Navigation({ user, userProfile, onLogout }) {
             </>
           ) : (
             <>
-              {userProfile?.full_name && (
-                <li className="navbar-welcome">
-                  반갑습니다, {userProfile.full_name}님
-                </li>
-              )}
-
               {hasFullAccess && (
                 <>
                   <li><Link to="/dashboard" className="nav-btn">대시보드</Link></li>
@@ -88,7 +90,7 @@ function Navigation({ user, userProfile, onLogout }) {
                 </>
               )}
 
-              <li>
+              <li className="navbar-logout-item">
                 <button onClick={onLogout} className="nav-btn nav-btn-outline">
                   <LogOut size={18} />
                   로그아웃
