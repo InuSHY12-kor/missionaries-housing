@@ -16,7 +16,7 @@ function Navigation({ user, userProfile, onLogout }) {
   const hasFullAccess = userProfile?.status === 'approved' && !!userProfile?.email_verified_at;
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar ${user ? 'navbar-authed' : ''}`}>
       <div className="container">
         <Link to="/" className="navbar-brand">
           <img src={wewelogo} alt="WEWE STAY" className="navbar-logo" />
@@ -26,8 +26,8 @@ function Navigation({ user, userProfile, onLogout }) {
         <ul className="navbar-nav">
           {!user ? (
             <>
-              <li><Link to="/">홈</Link></li>
-              <li><Link to="/login">로그인</Link></li>
+              <li><Link to="/" className="nav-btn">홈</Link></li>
+              <li><Link to="/login" className="nav-btn nav-btn-outline">로그인</Link></li>
               <li><Link to="/signup" className="btn btn-primary">가입하기</Link></li>
             </>
           ) : (
@@ -40,22 +40,22 @@ function Navigation({ user, userProfile, onLogout }) {
 
               {hasFullAccess && (
                 <>
-                  <li><Link to="/dashboard">대시보드</Link></li>
+                  <li><Link to="/dashboard" className="nav-btn">대시보드</Link></li>
                   {(userProfile.role === 'admin' || userProfile.role === 'missionary') && (
-                    <li><Link to="/accommodations">숙소 검색</Link></li>
+                    <li><Link to="/accommodations" className="nav-btn">숙소 검색</Link></li>
                   )}
-                  <li><Link to="/my-bookings">내 예약</Link></li>
+                  <li><Link to="/my-bookings" className="nav-btn">내 예약</Link></li>
                   {(userProfile.role === 'admin' || userProfile.role === 'host') && (
                     <>
-                      <li><Link to="/my-accommodations">내 숙소</Link></li>
-                      <li><Link to="/host-bookings">예약 관리</Link></li>
-                      <li><Link to="/reviews">리뷰</Link></li>
+                      <li><Link to="/my-accommodations" className="nav-btn">내 숙소</Link></li>
+                      <li><Link to="/host-bookings" className="nav-btn">예약 관리</Link></li>
+                      <li><Link to="/reviews" className="nav-btn">리뷰</Link></li>
                     </>
                   )}
                   {userProfile.role === 'admin' && (
-                    <li><Link to="/admin">관리</Link></li>
+                    <li><Link to="/admin" className="nav-btn">관리</Link></li>
                   )}
-                  <li><Link to="/profile">프로필</Link></li>
+                  <li><Link to="/profile" className="nav-btn">프로필</Link></li>
                 </>
               )}
 
@@ -89,7 +89,7 @@ function Navigation({ user, userProfile, onLogout }) {
               )}
 
               <li>
-                <button onClick={onLogout} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button onClick={onLogout} className="nav-btn nav-btn-outline">
                   <LogOut size={18} />
                   로그아웃
                 </button>
