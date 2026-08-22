@@ -107,16 +107,12 @@ body {
   row-gap: 0.25rem;
 }
 
-/* 역할 배지 + 환영 문구를 하나의 반투명 흰색 카드로 묶어서 보여줌 */
+/* 역할 배지 + 환영 문구 — 별도 배경 카드 없이 글씨만 나란히 배치 */
 .navbar-top-right {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
-  background: rgba(255, 255, 255, 0.55);
-  border: 1.5px solid rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  padding: 0.45rem 1.1rem;
 }
 
 .navbar-brand {
@@ -288,11 +284,10 @@ body {
   border-color: #d7d7d2;
 }
 
-/* 카드(.navbar-top-right) 안에 배지와 나란히 놓이는 굵은 글씨 — 자체 배경은 없음 */
 .navbar-welcome {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #106570;
+  color: #fff;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -322,25 +317,15 @@ body {
   color: white;
 }
 
-/* 이제 배지 자체 배경은 없애고, 상위 카드(.navbar-top-right) 안에서 색이 있는 굵은 글씨로만 구분 */
+/* 배경 없이 흰색 굵은 글씨로만 역할을 표시 */
 .status-role-admin,
 .status-role-missionary,
 .status-role-host {
   background: transparent;
   padding: 0;
   border-radius: 0;
-}
-
-.status-role-admin {
-  color: #106570;
-}
-
-.status-role-missionary {
-  color: #b8622c;
-}
-
-.status-role-host {
-  color: #16808E;
+  color: #fff;
+  font-weight: 700;
 }
 
 
