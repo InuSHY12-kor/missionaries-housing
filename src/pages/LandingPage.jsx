@@ -26,6 +26,15 @@ const FAQ_ITEMS = [
   }
 ];
 
+// Unsplash 무료 이미지 (숙소/게스트하우스 분위기) — 각 사진작가 크레딧은 하단 참고
+const IMAGES = {
+  hero: 'https://images.unsplash.com/photo-1726090401458-7abb00f7450c?auto=format&fit=crop&w=1800&q=80', // Clay Banks
+  aboutLeft: 'https://images.unsplash.com/photo-1763616828336-e7fcd02086f5?auto=format&fit=crop&w=700&q=80', // Rochelle Lee
+  aboutCenter: 'https://images.unsplash.com/photo-1749703810919-1f979a9a3982?auto=format&fit=crop&w=800&q=80', // Kailun Zhang
+  aboutRight: 'https://images.unsplash.com/photo-1769366316790-dfcb6a546f05?auto=format&fit=crop&w=700&q=80', // Oriol Pascual
+  hands: 'https://images.unsplash.com/photo-1604881991575-dfb1003d8811?auto=format&fit=crop&w=900&q=80' // Priscilla Du Preez
+};
+
 function LandingPage() {
   const [openFaq, setOpenFaq] = useState(0);
 
@@ -80,8 +89,9 @@ function LandingPage() {
   return (
     <div className="landing-page">
       {/* 히어로 섹션 */}
-      <section className="hero">
+      <section className="hero" style={{ backgroundImage: `url(${IMAGES.hero})` }}>
         <div className="hero-content">
+          <span className="hero-eyebrow">MISSIONARY REST &amp; STAY</span>
           <h1>선교사의 신뢰의 숙소</h1>
           <p>WEWE STAY는 선교사가 안전하고 신뢰할 수 있는 숙소를 찾을 수 있도록 전문적인 연결을 제공합니다. 2단계 승인 시스템을 통해 선교사와 숙소 제공자 사이의 신뢰를 확보합니다.</p>
           <Link to="/signup" className="btn btn-primary">지금 시작하기</Link>
@@ -91,6 +101,7 @@ function LandingPage() {
       {/* 우리의 이야기 섹션 */}
       <section className="story">
         <div className="container">
+          <span className="eyebrow center">OUR STORY</span>
           <h2>우리의 이야기: 위로자의 위로자</h2>
 
           <blockquote className="verse">
@@ -108,12 +119,26 @@ function LandingPage() {
             쉼이 필요한 이들에게 안전하고 따뜻한 보금자리를 연결하는 것이 우리의 사명입니다.
           </p>
 
+          <div className="about-gallery">
+            <div className="side left" style={{ backgroundImage: `url(${IMAGES.aboutLeft})` }} />
+            <div className="arch" style={{ backgroundImage: `url(${IMAGES.aboutCenter})` }} />
+            <div className="side right" style={{ backgroundImage: `url(${IMAGES.aboutRight})` }} />
+          </div>
+
           <div className="brand-symbol">
-            <h3>함께 잡는 손, 브랜드 심볼 'W'의 의미</h3>
-            <p>
-              브랜드 심볼 'W'는 출애굽기에서 모세의 팔이 내려가지 않도록 곁에서 받쳐준 아론과 훌의 손을 상징합니다.
-              먼저 아파본 위로자가 지금 아픈 위로자의 손을 잡아준다는 사랑의 약속을 담고 있습니다.
-            </p>
+            <div
+              className="brand-symbol-visual"
+              style={{ backgroundImage: `url(${IMAGES.hands})` }}
+              role="img"
+              aria-label="함께 맞잡은 손"
+            />
+            <div className="brand-symbol-text">
+              <h3>함께 잡는 손, 브랜드 심볼 'W'의 의미</h3>
+              <p>
+                브랜드 심볼 'W'는 출애굽기에서 모세의 팔이 내려가지 않도록 곁에서 받쳐준 아론과 훌의 손을 상징합니다.
+                먼저 아파본 위로자가 지금 아픈 위로자의 손을 잡아준다는 사랑의 약속을 담고 있습니다.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -121,13 +146,14 @@ function LandingPage() {
       {/* 특징 섹션 */}
       <section className="features">
         <div className="container">
+          <span className="eyebrow center">WHY WEWE STAY</span>
           <h2>왜 우리를 선택해야 할까요?</h2>
 
           <div className="grid grid-3">
             {/* 카드 1 */}
             <div className="card feature-card">
               <div className="feature-icon">
-                <Lock size={40} />
+                <Lock size={32} />
               </div>
               <h3>신뢰할 수 있는 검증</h3>
               <p>모든 회원이 관리자의 승인 과정을 거치기 때문에 안전하고 신뢰할 수 있습니다.</p>
@@ -136,7 +162,7 @@ function LandingPage() {
             {/* 카드 2 */}
             <div className="card feature-card">
               <div className="feature-icon">
-                <Users size={40} />
+                <Users size={32} />
               </div>
               <h3>커뮤니티 중심</h3>
               <p>선교사 커뮤니티의 일원들만 접근할 수 있는 비공개 플랫폼입니다.</p>
@@ -145,7 +171,7 @@ function LandingPage() {
             {/* 카드 3 */}
             <div className="card feature-card">
               <div className="feature-icon">
-                <Heart size={40} />
+                <Heart size={32} />
               </div>
               <h3>함께하는 경험</h3>
               <p>같은 신앙을 가진 사람들과 의미 있는 연결을 만들어보세요.</p>
@@ -154,7 +180,7 @@ function LandingPage() {
             {/* 카드 4 */}
             <div className="card feature-card">
               <div className="feature-icon">
-                <CheckCircle size={40} />
+                <CheckCircle size={32} />
               </div>
               <h3>숙소 품질 보증</h3>
               <p>숙소도 관리자의 검증을 거치므로 일정한 품질을 유지합니다.</p>
@@ -163,7 +189,7 @@ function LandingPage() {
             {/* 카드 5 */}
             <div className="card feature-card">
               <div className="feature-icon">
-                <Home size={40} />
+                <Home size={32} />
               </div>
               <h3>쉬운 예약</h3>
               <p>간단한 예약 시스템으로 편하게 숙소를 예약하세요.</p>
@@ -172,7 +198,7 @@ function LandingPage() {
             {/* 카드 6 */}
             <div className="card feature-card">
               <div className="feature-icon">
-                <Users size={40} />
+                <Users size={32} />
               </div>
               <h3>호스트 지원</h3>
               <p>숙소를 공유하고 싶은 분들도 안전한 환경에서 시작할 수 있습니다.</p>
@@ -184,37 +210,40 @@ function LandingPage() {
       {/* 프로세스 섹션 */}
       <section className="process">
         <div className="container">
+          <span className="eyebrow center">HOW IT WORKS</span>
           <h2>시작하는 방법</h2>
 
-          <div className="process-steps">
-            <div className="step">
-              <div className="step-number">1</div>
-              <h3>가입하기</h3>
-              <p>선교사 또는 호스트로 회원가입하고 검증 문서를 제출하세요.</p>
+          <div className="process-list">
+            <div className="process-row">
+              <div className="process-num">01</div>
+              <div className="process-body">
+                <h3>가입하기</h3>
+                <p>선교사 또는 호스트로 회원가입하고 검증 문서를 제출하세요.</p>
+              </div>
             </div>
 
-            <div className="step-connector">→</div>
-
-            <div className="step">
-              <div className="step-number">2</div>
-              <h3>승인 대기</h3>
-              <p>관리자가 정보를 검토하고 확인합니다. (1-2일 소요)</p>
+            <div className="process-row">
+              <div className="process-num">02</div>
+              <div className="process-body">
+                <h3>승인 대기</h3>
+                <p>관리자가 정보를 검토하고 확인합니다. (1-2일 소요)</p>
+              </div>
             </div>
 
-            <div className="step-connector">→</div>
-
-            <div className="step">
-              <div className="step-number">3</div>
-              <h3>승인 완료</h3>
-              <p>승인 후 플랫폼의 모든 기능을 이용할 수 있습니다.</p>
+            <div className="process-row">
+              <div className="process-num">03</div>
+              <div className="process-body">
+                <h3>승인 완료</h3>
+                <p>승인 후 플랫폼의 모든 기능을 이용할 수 있습니다.</p>
+              </div>
             </div>
 
-            <div className="step-connector">→</div>
-
-            <div className="step">
-              <div className="step-number">4</div>
-              <h3>숙소 검색/공유</h3>
-              <p>숙소를 검색하거나 등록하여 커뮤니티를 활용하세요.</p>
+            <div className="process-row">
+              <div className="process-num">04</div>
+              <div className="process-body">
+                <h3>숙소 검색/공유</h3>
+                <p>숙소를 검색하거나 등록하여 커뮤니티를 활용하세요.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -223,6 +252,7 @@ function LandingPage() {
       {/* FAQ 섹션 */}
       <section className="faq">
         <div className="container">
+          <span className="eyebrow center">FAQ</span>
           <h2>자주 묻는 질문</h2>
 
           <div className="faq-list">
@@ -251,6 +281,7 @@ function LandingPage() {
       <section className="contact">
         <div className="container">
           <div className="contact-intro">
+            <span className="eyebrow">CONTACT</span>
             <h2>궁금한 점이 있으신가요?</h2>
             <p className="contact-lead">위위 스테이에 대해 무엇이든 편하게 문의해 주세요.</p>
             <p>
@@ -328,33 +359,85 @@ function LandingPage() {
       </section>
 
       <style>{`
-        .landing-page {
-          flex: 1;
+        :root {
+          /* 이 페이지 안에서만 쓰는 에디토리얼 톤(디자인 3) 변수 */
         }
 
-        .hero {
-          background: linear-gradient(135deg, #16808E 0%, #8ABFC6 100%);
-          color: white;
-          padding: 5rem 2rem;
+        .landing-page {
+          flex: 1;
+          --ink: #1c1c1a;
+          --ink-soft: #4a4a46;
+          --stone: #8c8880;
+          --line: #e5e2da;
+          --lp-bg: #ffffff;
+          --lp-bg-soft: #faf9f6;
+          --accent: #9c8058;
+        }
+
+        .eyebrow {
+          display: inline-block;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.18em;
+          color: var(--accent);
+          margin-bottom: 0.85rem;
+        }
+
+        .eyebrow.center {
+          display: block;
           text-align: center;
+        }
+
+        /* 히어로 섹션 */
+        .hero {
+          position: relative;
+          min-height: 560px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 6rem 2rem;
+          background-color: #1c1c1a;
+          background-size: cover;
+          background-position: center;
           animation: fadeIn 0.8s ease;
         }
 
+        .hero::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(15,15,13,0.55) 0%, rgba(15,15,13,0.45) 45%, rgba(15,15,13,0.85) 100%);
+        }
+
         .hero-content {
+          position: relative;
+          z-index: 1;
           max-width: 800px;
           margin: 0 auto;
+        }
+
+        .hero-eyebrow {
+          display: inline-block;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.22em;
+          color: #e7dcc4;
+          margin-bottom: 1.1rem;
         }
 
         .hero h1 {
           color: white;
           font-size: 3rem;
           margin-bottom: 1rem;
-          font-weight: bold;
+          font-weight: 700;
+          letter-spacing: -0.01em;
         }
 
         .hero p {
-          color: rgba(255, 255, 255, 0.9);
-          font-size: 1.2rem;
+          color: rgba(255, 255, 255, 0.92);
+          font-size: 1.15rem;
+          line-height: 1.7;
           margin-bottom: 2rem;
         }
 
@@ -369,9 +452,10 @@ function LandingPage() {
           }
         }
 
+        /* 우리의 이야기 섹션 */
         .story {
-          padding: 4rem 0;
-          background: white;
+          padding: 5rem 0;
+          background: var(--lp-bg);
         }
 
         .story .container {
@@ -380,12 +464,13 @@ function LandingPage() {
 
         .story h2 {
           text-align: center;
-          margin-bottom: 2rem;
-          color: #2c3e50;
+          margin-bottom: 2.5rem;
+          color: var(--ink);
+          font-weight: 700;
         }
 
         .story p {
-          color: #555;
+          color: var(--ink-soft);
           line-height: 1.9;
           font-size: 1.02rem;
           margin-bottom: 1.25rem;
@@ -394,10 +479,9 @@ function LandingPage() {
         .verse {
           margin: 0 0 2rem;
           padding: 1.5rem 1.75rem;
-          background: #f7f5f0;
-          border-left: 4px solid #16808E;
-          border-radius: 6px;
-          color: #2c3e50;
+          background: var(--lp-bg-soft);
+          border-left: 3px solid var(--accent);
+          color: var(--ink);
           font-weight: 600;
           line-height: 1.8;
           font-style: italic;
@@ -406,117 +490,157 @@ function LandingPage() {
         .verse cite {
           display: block;
           margin-top: 0.75rem;
-          color: #16808E;
+          color: var(--accent);
           font-style: normal;
           font-weight: 700;
           font-size: 0.9rem;
         }
 
+        /* 어바웃 갤러리 (3분할 이미지, 가운데 아치형) */
+        .about-gallery {
+          display: grid;
+          grid-template-columns: 1fr 1.15fr 1fr;
+          align-items: end;
+          gap: 1rem;
+          margin: 3rem 0 1rem;
+        }
+
+        .about-gallery .side,
+        .about-gallery .arch {
+          background-size: cover;
+          background-position: center;
+          background-color: var(--lp-bg-soft);
+        }
+
+        .about-gallery .side {
+          height: 220px;
+          border-radius: 6px;
+        }
+
+        .about-gallery .arch {
+          height: 300px;
+          border-radius: 200px 200px 6px 6px;
+        }
+
+        /* 브랜드 심볼 섹션 (손 이미지 + 설명) */
         .brand-symbol {
-          margin-top: 2rem;
+          margin-top: 2.5rem;
+          display: grid;
+          grid-template-columns: 220px 1fr;
+          gap: 1.75rem;
+          align-items: center;
           padding: 1.75rem;
-          background: linear-gradient(135deg, rgba(22,128,142,0.08) 0%, rgba(138,191,198,0.15) 100%);
-          border: 1px solid #8ABFC6;
+          background: var(--lp-bg-soft);
+          border: 1px solid var(--line);
           border-radius: 10px;
         }
 
+        .brand-symbol-visual {
+          width: 100%;
+          height: 220px;
+          border-radius: 130px 130px 8px 8px;
+          background-size: cover;
+          background-position: center;
+        }
+
         .brand-symbol h3 {
-          color: #16808E;
+          color: var(--ink);
           margin-bottom: 0.75rem;
         }
 
         .brand-symbol p {
           margin: 0;
-          color: #555;
+          color: var(--ink-soft);
         }
 
+        /* 특징 섹션 */
         .features {
-          padding: 4rem 0;
-          background: white;
+          padding: 5rem 0;
+          background: var(--lp-bg-soft);
         }
 
         .features h2 {
           text-align: center;
           margin-bottom: 3rem;
+          color: var(--ink);
         }
 
         .feature-card {
           text-align: center;
-          padding: 2rem;
+          padding: 2rem 1.5rem;
+          background: var(--lp-bg);
+          border: 1px solid var(--line);
+          border-radius: 4px;
         }
 
         .feature-icon {
-          width: 80px;
-          height: 80px;
-          background: linear-gradient(135deg, #16808E 0%, #8ABFC6 100%);
+          width: 64px;
+          height: 64px;
+          border: 1px solid var(--line);
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin: 0 auto 1rem;
-          color: white;
+          margin: 0 auto 1.25rem;
+          color: var(--accent);
         }
 
         .feature-card h3 {
-          color: #2c3e50;
+          color: var(--ink);
           margin-bottom: 0.75rem;
         }
 
         .feature-card p {
-          color: #7f8c8d;
+          color: var(--stone);
         }
 
+        /* 프로세스 섹션 - 에디토리얼 넘버 리스트 */
         .process {
-          padding: 4rem 0;
-          background: linear-gradient(135deg, #f7f5f0 0%, #eee8dc 100%);
+          padding: 5rem 0;
+          background: var(--lp-bg);
         }
 
         .process h2 {
           text-align: center;
           margin-bottom: 3rem;
+          color: var(--ink);
         }
 
-        .process-steps {
-          display: flex;
+        .process-list {
+          max-width: 640px;
+          margin: 0 auto;
+          border-top: 1px solid var(--line);
+        }
+
+        .process-row {
+          display: grid;
+          grid-template-columns: 90px 1fr;
           align-items: center;
-          justify-content: center;
-          gap: 1rem;
-          flex-wrap: wrap;
-          margin-bottom: 2rem;
+          gap: 1.5rem;
+          padding: 1.75rem 0;
+          border-bottom: 1px solid var(--line);
         }
 
-        .step {
-          background: white;
-          padding: 2rem;
-          border-radius: 8px;
-          text-align: center;
-          min-width: 200px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .step-number {
-          width: 50px;
-          height: 50px;
-          background: linear-gradient(135deg, #16808E 0%, #8ABFC6 100%);
-          color: white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.5rem;
-          font-weight: bold;
-          margin: 0 auto 1rem;
-        }
-
-        .step-connector {
-          color: #16808E;
+        .process-num {
           font-size: 2rem;
-          font-weight: bold;
+          font-weight: 200;
+          color: var(--accent);
         }
 
+        .process-body h3 {
+          color: var(--ink);
+          margin-bottom: 0.35rem;
+        }
+
+        .process-body p {
+          color: var(--stone);
+          margin: 0;
+        }
+
+        /* FAQ 섹션 */
         .faq {
-          padding: 4rem 0;
-          background: white;
+          padding: 5rem 0;
+          background: var(--lp-bg-soft);
         }
 
         .faq .container {
@@ -526,6 +650,7 @@ function LandingPage() {
         .faq h2 {
           text-align: center;
           margin-bottom: 2.5rem;
+          color: var(--ink);
         }
 
         .faq-list {
@@ -535,14 +660,15 @@ function LandingPage() {
         }
 
         .faq-item {
-          border: 1px solid #ecf0f1;
-          border-radius: 8px;
+          border: 1px solid var(--line);
+          border-radius: 4px;
           overflow: hidden;
+          background: var(--lp-bg);
           transition: border-color 0.3s;
         }
 
         .faq-item.open {
-          border-color: #16808E;
+          border-color: var(--accent);
         }
 
         .faq-question {
@@ -552,18 +678,18 @@ function LandingPage() {
           justify-content: space-between;
           gap: 1rem;
           padding: 1.25rem 1.5rem;
-          background: white;
+          background: transparent;
           border: none;
           text-align: left;
           font-size: 1rem;
           font-weight: 600;
-          color: #2c3e50;
+          color: var(--ink);
           cursor: pointer;
         }
 
         .faq-chevron {
           flex-shrink: 0;
-          color: #16808E;
+          color: var(--accent);
           transition: transform 0.3s;
         }
 
@@ -577,46 +703,45 @@ function LandingPage() {
 
         .faq-answer p {
           margin: 0;
-          color: #555;
+          color: var(--ink-soft);
           line-height: 1.8;
         }
 
+        /* 문의 섹션 */
         .contact {
-          padding: 4rem 2rem;
-          background: linear-gradient(135deg, #f7f5f0 0%, #eee8dc 100%);
+          padding: 5rem 2rem;
+          background: var(--ink);
         }
 
         .contact .container {
-          max-width: 700px;
-        }
-
-        .contact-intro {
-          text-align: center;
-          margin-bottom: 2.5rem;
+          max-width: 980px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 3rem;
+          align-items: start;
         }
 
         .contact-intro h2 {
-          color: #2c3e50;
+          color: white;
           margin-bottom: 0.5rem;
         }
 
         .contact-lead {
-          color: #16808E;
-          font-size: 1.15rem;
+          color: #e7dcc4;
+          font-size: 1.1rem;
           font-weight: 700;
           margin-bottom: 1.25rem;
         }
 
         .contact-intro p {
-          color: #7f8c8d;
+          color: rgba(255,255,255,0.72);
           line-height: 1.8;
         }
 
         .contact-form-wrap {
           background: white;
-          border-radius: 10px;
-          padding: 2.5rem;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+          border-radius: 6px;
+          padding: 2.25rem;
         }
 
         .contact-form .form-group {
@@ -627,15 +752,15 @@ function LandingPage() {
           display: block;
           margin-bottom: 0.5rem;
           font-weight: 600;
-          color: #2c3e50;
+          color: var(--ink);
         }
 
         .contact-form input,
         .contact-form textarea {
           width: 100%;
           padding: 0.75rem;
-          border: 2px solid #ecf0f1;
-          border-radius: 6px;
+          border: 1px solid var(--line);
+          border-radius: 4px;
           font-family: inherit;
           transition: border-color 0.3s;
         }
@@ -643,7 +768,7 @@ function LandingPage() {
         .contact-form input:focus,
         .contact-form textarea:focus {
           outline: none;
-          border-color: #16808E;
+          border-color: var(--accent);
         }
 
         .form-error {
@@ -663,26 +788,24 @@ function LandingPage() {
         }
 
         .contact-success svg {
-          color: #16808E;
+          color: var(--accent);
           margin-bottom: 1rem;
         }
 
         .contact-success h3 {
-          color: #2c3e50;
+          color: var(--ink);
           margin-bottom: 0.5rem;
         }
 
         .contact-success p {
-          color: #7f8c8d;
+          color: var(--stone);
         }
 
+        /* ===== 모바일 대응 ===== */
         @media (max-width: 768px) {
-          .process-steps {
-            flex-direction: column;
-          }
-
-          .step-connector {
-            transform: rotate(90deg);
+          .hero {
+            min-height: 460px;
+            padding: 4.5rem 1.25rem;
           }
 
           .hero h1 {
@@ -693,8 +816,59 @@ function LandingPage() {
             font-size: 1rem;
           }
 
+          .about-gallery {
+            grid-template-columns: 1fr;
+          }
+
+          .about-gallery .side {
+            display: none;
+          }
+
+          .about-gallery .arch {
+            height: 260px;
+            border-radius: 160px 160px 8px 8px;
+          }
+
+          .brand-symbol {
+            grid-template-columns: 1fr;
+          }
+
+          .brand-symbol-visual {
+            height: 180px;
+          }
+
+          .process-row {
+            grid-template-columns: 50px 1fr;
+          }
+
+          .process-num {
+            font-size: 1.5rem;
+          }
+
+          .contact .container {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+          }
+
           .contact-form-wrap {
             padding: 1.5rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .hero h1 {
+            font-size: 1.6rem;
+          }
+
+          .story,
+          .features,
+          .process,
+          .faq {
+            padding: 3.5rem 0;
+          }
+
+          .contact {
+            padding: 3.5rem 1.25rem;
           }
         }
       `}</style>

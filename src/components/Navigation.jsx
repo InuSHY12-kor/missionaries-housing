@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
-import wewelogo from '../assets/wewe-logo.jpg';
+import wewelogo from '../assets/wewe-icon.png';
 import NotificationBell from './NotificationBell';
 import MessageIcon from './MessageIcon';
 
@@ -20,6 +20,7 @@ function Navigation({ user, userProfile, onLogout }) {
       <div className="container">
         <Link to="/" className="navbar-brand">
           <img src={wewelogo} alt="WEWE STAY" className="navbar-logo" />
+          <span className="navbar-brand-text">WEWE<b>STAY</b></span>
         </Link>
 
         <ul className="navbar-nav">
