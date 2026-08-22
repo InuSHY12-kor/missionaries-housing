@@ -128,6 +128,26 @@ function CompleteProfile() {
 
       if (profileError) throw profileError;
 
+      // 이메일 인증 메일 발송 + 관리자에게 신규 가입 알림 메일 발송 (베스트 에포트).
+      // 실패하더라도 프로필 등록(가입) 자체는 이미 완료된 것이므로 다음 단계로 계속 진행합니다.
+      // (관리자 대시보드의 "인증 메일 재발송" 버튼으로 언제든 다시 보낼 수 있습니다.)
+      try {
+        const { data: token, error: tokenError } = await supabase.rpc('create_email_verification_token', {
+          p_user_id: userId
+        });
+        if (!tokenError && token) {
+          const link = `${window.location.origin}/verify-email?token=${token}`;
+          await supabase.functions.invoke('send-email', {
+            body: { type: 'email_verification', userId, link }
+          });
+        }
+        await supabase.functions.invoke('send-email', {
+          body: { type: 'admin_new_signup', userId }
+        });
+      } catch (emailErr) {
+        console.error('알림 메일 발송 오류:', emailErr);
+      }
+
       // 프로필 상태를 앱 전체에 반영하기 위해 새로고침하면서 완료 안내 페이지로 이동
       window.location.href = '/signup-complete';
     } catch (err) {

@@ -50,14 +50,21 @@ function LandingPage() {
     setSubmitError('');
 
     try {
-      const { error } = await supabase.from('inquiries').insert({
+      const { data, error } = await supabase.from('inquiries').insert({
         name: form.name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
         message: form.message.trim() || null
-      });
+      }).select().single();
 
       if (error) throw error;
+
+      // 관리자에게 문의 접수 이메일 발송 (실패해도 사용자 경험에는 영향 없도록 best-effort로 처리)
+      if (data?.id) {
+        supabase.functions
+          .invoke('send-email', { body: { type: 'inquiry', inquiryId: data.id } })
+          .catch((emailErr) => console.error('문의 이메일 발송 오류:', emailErr));
+      }
 
       setSubmitted(true);
       setForm({ name: '', email: '', phone: '', message: '' });

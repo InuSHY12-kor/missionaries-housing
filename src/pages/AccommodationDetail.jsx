@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Users, Home, MessageCircle, CheckCircle, Edit } from 'lucide-react';
+import { MapPin, Users, Home, MessageCircle, CheckCircle, Edit, Send } from 'lucide-react';
 import AccommodationMap from '../components/AccommodationMap';
 import ImageCarousel from '../components/ImageCarousel';
 import Calendar from '../components/Calendar';
@@ -28,6 +28,12 @@ function AccommodationDetail({ userProfile }) {
   const [submitting, setSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingError, setBookingError] = useState('');
+
+  const [contactMode, setContactMode] = useState(null); // 'host' | 'admin' | null
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactSubmitting, setContactSubmitting] = useState(false);
+  const [contactSuccess, setContactSuccess] = useState('');
+  const [contactError, setContactError] = useState('');
 
   const fetchAccommodation = useCallback(async () => {
         try {
@@ -197,6 +203,67 @@ function AccommodationDetail({ userProfile }) {
     }
   };
 
+  const openContact = (mode) => {
+    setContactMode(mode);
+    setContactMessage('');
+    setContactError('');
+    setContactSuccess('');
+  };
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    if (!contactMessage.trim()) {
+      setContactError('메시지 내용을 입력해주세요.');
+      return;
+    }
+
+    setContactSubmitting(true);
+    setContactError('');
+
+    try {
+      if (contactMode === 'host') {
+        const { data, error } = await supabase
+          .from('messages')
+          .insert({
+            sender_id: userProfile.id,
+            recipient_id: host.id,
+            accommodation_id: accommodation.id,
+            message: contactMessage.trim()
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // 이메일 발송은 best-effort — 실패해도 메시지 전송 자체는 성공한 것으로 처리
+        supabase.functions
+          .invoke('send-email', { body: { type: 'host_contact', messageId: data.id } })
+          .catch((emailErr) => console.error('호스트 문의 이메일 발송 오류:', emailErr));
+      } else if (contactMode === 'admin') {
+        const { data: messageIds, error } = await supabase.rpc('contact_admins', {
+          p_message: contactMessage.trim(),
+          p_accommodation_id: accommodation.id
+        });
+
+        if (error) throw error;
+
+        if (messageIds && messageIds.length > 0) {
+          supabase.functions
+            .invoke('send-email', { body: { type: 'admin_contact', messageId: messageIds[0] } })
+            .catch((emailErr) => console.error('관리자 문의 이메일 발송 오류:', emailErr));
+        }
+      }
+
+      setContactSuccess('메시지가 전송되었습니다.');
+      setContactMessage('');
+      setContactMode(null);
+    } catch (error) {
+      setContactError('오류가 발생했습니다: ' + error.message);
+    } finally {
+      setContactSubmitting(false);
+    }
+  };
+
   if (loading) return <div className="container"><p>로드 중...</p></div>;
   if (!accommodation) return <div className="container"><p>숙소를 찾을 수 없습니다.</p></div>;
 
@@ -282,10 +349,49 @@ function AccommodationDetail({ userProfile }) {
                 <div className="host-details">
                   <h4>{host?.full_name}</h4>
                   <p>{host?.church_name}</p>
-                  <button className="btn btn-secondary">
-                    <MessageCircle size={16} />
-                    호스트에게 메시지
-                  </button>
+
+                  {contactSuccess && <p className="contact-success-msg">{contactSuccess}</p>}
+
+                  {contactMode ? (
+                    <form className="contact-inline-form" onSubmit={handleContactSubmit}>
+                      <label>
+                        {contactMode === 'host' ? '호스트님께 보낼 메시지' : '위위 관리자에게 보낼 문의 내용'}
+                      </label>
+                      <textarea
+                        rows="4"
+                        value={contactMessage}
+                        onChange={(e) => setContactMessage(e.target.value)}
+                        placeholder="메시지를 입력해주세요"
+                      />
+                      {contactError && <p className="form-error">{contactError}</p>}
+                      <div className="contact-form-actions">
+                        <button type="submit" className="btn btn-primary" disabled={contactSubmitting}>
+                          {contactSubmitting ? '전송 중...' : '보내기'}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => setContactMode(null)}
+                          disabled={contactSubmitting}
+                        >
+                          취소
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="contact-buttons">
+                      {userProfile?.id !== host?.id && (
+                        <button className="btn btn-secondary" onClick={() => openContact('host')}>
+                          <MessageCircle size={16} />
+                          호스트에게 메시지
+                        </button>
+                      )}
+                      <button className="btn btn-secondary" onClick={() => openContact('admin')}>
+                        <Send size={16} />
+                        위위 관리자에게 문의하기
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -492,6 +598,47 @@ function AccommodationDetail({ userProfile }) {
         .host-details p {
           color: #7f8c8d;
           margin-bottom: 1rem;
+        }
+
+        .contact-buttons {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+        }
+
+        .contact-success-msg {
+          color: #16808E;
+          font-weight: 600;
+          margin-bottom: 0.75rem !important;
+        }
+
+        .contact-inline-form label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 0.9rem;
+        }
+
+        .contact-inline-form textarea {
+          width: 100%;
+          padding: 0.75rem;
+          border: 2px solid #ecf0f1;
+          border-radius: 6px;
+          font-family: inherit;
+          resize: vertical;
+          transition: border-color 0.3s;
+        }
+
+        .contact-inline-form textarea:focus {
+          outline: none;
+          border-color: #16808E;
+        }
+
+        .contact-form-actions {
+          display: flex;
+          gap: 0.5rem;
+          margin-top: 0.75rem;
         }
 
         .booking-section {

@@ -10,7 +10,11 @@ function SignupComplete() {
           <MailCheck size={48} />
         </div>
         <h1>회원가입이 완료되었습니다</h1>
-        <p>관리자의 승인 후 모든 서비스를 이용하실 수 있습니다.</p>
+        <p>
+          입력하신 이메일 주소로 인증 메일을 보내드렸습니다. 메일함(스팸함 포함)에서 인증 링크를 클릭해주세요.
+          <br />
+          <strong>이메일 인증</strong>과 <strong>관리자 승인</strong>이 모두 완료되어야 모든 서비스를 이용하실 수 있습니다.
+        </p>
         <Link to="/" className="btn btn-primary">홈으로 이동하기</Link>
       </div>
 
