@@ -440,7 +440,7 @@ function Profile({ userProfile }) {
         .form-group input:focus,
         .form-group textarea:focus {
           outline: none;
-          border-color: #16808E;
+          border-color: #d97b3f;
         }
 
         .account-deletion-footer {

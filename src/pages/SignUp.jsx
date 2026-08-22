@@ -294,8 +294,8 @@ function SignUp({ role }) {
 
         .form-group input:focus {
           outline: none;
-          border-color: #16808E;
-          box-shadow: 0 0 0 3px rgba(22, 128, 142, 0.1);
+          border-color: #d97b3f;
+          box-shadow: 0 0 0 3px rgba(217, 123, 63, 0.1);
         }
 
         .login-link {
@@ -314,7 +314,7 @@ function SignUp({ role }) {
         }
 
         .login-link a {
-          color: #16808E;
+          color: #d97b3f;
           text-decoration: none;
           font-weight: 600;
         }

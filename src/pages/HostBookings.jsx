@@ -216,7 +216,7 @@ function HostBookings({ userProfile }) {
           background: white;
           border: 1px dashed #dfe6e9;
           border-radius: 8px;
-          color: #16808E;
+          color: #d97b3f;
           font-weight: 600;
           font-size: 0.9rem;
           cursor: pointer;
@@ -224,8 +224,8 @@ function HostBookings({ userProfile }) {
         }
 
         .see-more-btn:hover {
-          background: #e6f4f5;
-          border-color: #16808E;
+          background: #faf1e6;
+          border-color: #d97b3f;
         }
 
         .booking-item {
@@ -273,7 +273,7 @@ function HostBookings({ userProfile }) {
 
         .total-price {
           font-weight: bold;
-          color: #16808E;
+          color: #d97b3f;
           margin: 0;
           font-size: 1.1rem;
         }

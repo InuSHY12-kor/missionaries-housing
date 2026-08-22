@@ -134,7 +134,7 @@ function Calendar({ isDisabled, isSelected, isInRange, onDayClick }) {
         }
 
         .cal-nav-btn:hover {
-          background: #f0f9fa;
+          background: #fdf8f1;
         }
 
         .cal-weekdays {
@@ -178,7 +178,7 @@ function Calendar({ isDisabled, isSelected, isInRange, onDayClick }) {
         }
 
         .cal-day:hover:not(.disabled) {
-          background: #e6f4f5;
+          background: #faf1e6;
         }
 
         .cal-day.disabled {
@@ -189,12 +189,12 @@ function Calendar({ isDisabled, isSelected, isInRange, onDayClick }) {
         }
 
         .cal-day.in-range {
-          background: #cceaec;
+          background: #f0dcc0;
           border-radius: 0;
         }
 
         .cal-day.selected {
-          background: #16808E;
+          background: #d97b3f;
           color: white;
           font-weight: 600;
         }

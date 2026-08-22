@@ -325,7 +325,7 @@ function Accommodations() {
         .filter-card span {
           display: block;
           margin-top: 0.5rem;
-          color: #16808E;
+          color: #d97b3f;
           font-weight: 600;
         }
 
@@ -336,10 +336,10 @@ function Accommodations() {
         }
 
         .date-hint {
-          color: #16808E;
+          color: #d97b3f;
           font-size: 0.85rem;
           margin: 1rem 0 0;
-          background: #e6f4f5;
+          background: #faf1e6;
           padding: 0.6rem 0.9rem;
           border-radius: 6px;
         }
@@ -460,7 +460,7 @@ function Accommodations() {
         .price {
           font-size: 1.3rem;
           font-weight: bold;
-          color: #16808E;
+          color: #d97b3f;
           margin: 0 0 0.5rem;
         }
 

@@ -616,13 +616,13 @@ function LandingPage() {
         }
 
         .link-cta-dark {
-          color: rgba(16, 101, 112, 0.5);
-          border-bottom-color: rgba(16, 101, 112, 0.5);
+          color: rgba(28, 28, 26, 0.55);
+          border-bottom-color: rgba(28, 28, 26, 0.55);
         }
 
         .link-cta-dark:hover {
-          color: #106570;
-          border-bottom-color: #106570;
+          color: #1c1c1a;
+          border-bottom-color: #1c1c1a;
         }
 
         .link-cta-block {

@@ -255,8 +255,8 @@ function PendingApproval({ userProfile }) {
         }
 
         .waiting-message {
-          background: #ecf7ff;
-          border-left: 4px solid #3498db;
+          background: #faf1e6;
+          border-left: 4px solid #b8622c;
           padding: 1rem;
           border-radius: 4px;
           margin: 2rem 0;

@@ -352,18 +352,18 @@ function CompleteProfile() {
         }
 
         .file-upload {
-          border: 2px dashed #16808E;
+          border: 2px dashed #d97b3f;
           border-radius: 6px;
           padding: 2rem;
           text-align: center;
           cursor: pointer;
           transition: all 0.3s;
-          background: #f0f9fa;
+          background: #fdf8f1;
         }
 
         .file-upload:hover {
-          background: #e6f4f5;
-          border-color: #106570;
+          background: #faf1e6;
+          border-color: #b8622c;
         }
 
         .file-upload input {
@@ -376,7 +376,7 @@ function CompleteProfile() {
           align-items: center;
           gap: 0.5rem;
           cursor: pointer;
-          color: #16808E;
+          color: #d97b3f;
         }
 
         .file-list {

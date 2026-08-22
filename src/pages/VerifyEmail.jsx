@@ -103,8 +103,8 @@ function VerifyEmail() {
         }
 
         .verify-icon-loading {
-          background: #e6f4f5;
-          color: #16808E;
+          background: #faf1e6;
+          color: #d97b3f;
         }
 
         .verify-icon-loading svg {

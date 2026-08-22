@@ -628,9 +628,9 @@ function AccommodationDetail({ userProfile }) {
         }
 
         .admin-notice-banner {
-          background: #e6f4f5;
-          color: #106570;
-          border: 1px solid #cceaec;
+          background: #faf1e6;
+          color: #b8622c;
+          border: 1px solid #f0dcc0;
           border-radius: 8px;
           padding: 0.75rem 1.1rem;
           margin-top: 0.75rem;
@@ -699,7 +699,7 @@ function AccommodationDetail({ userProfile }) {
 
         .admin-reason-form textarea:focus {
           outline: none;
-          border-color: #16808E;
+          border-color: #d97b3f;
         }
 
         .admin-review-actions {
@@ -724,7 +724,7 @@ function AccommodationDetail({ userProfile }) {
           margin-top: 1.5rem;
           padding-top: 1rem;
           border-top: 1px solid #ecf0f1;
-          color: #16808E;
+          color: #d97b3f;
           font-size: 0.85rem;
           text-decoration: none;
         }
@@ -831,7 +831,7 @@ function AccommodationDetail({ userProfile }) {
         }
 
         .amenity-chip svg {
-          color: #16808E;
+          color: #d97b3f;
           flex-shrink: 0;
         }
 
@@ -870,7 +870,7 @@ function AccommodationDetail({ userProfile }) {
         }
 
         .contact-success-msg {
-          color: #16808E;
+          color: #d97b3f;
           font-weight: 600;
           margin-bottom: 0.75rem !important;
         }
@@ -895,7 +895,7 @@ function AccommodationDetail({ userProfile }) {
 
         .contact-inline-form textarea:focus {
           outline: none;
-          border-color: #16808E;
+          border-color: #d97b3f;
         }
 
         .contact-form-actions {
@@ -928,7 +928,7 @@ function AccommodationDetail({ userProfile }) {
         .price {
           font-size: 2rem;
           font-weight: bold;
-          color: #16808E;
+          color: #d97b3f;
           margin: 0;
         }
 
@@ -1019,7 +1019,7 @@ function AccommodationDetail({ userProfile }) {
         }
 
         .booking-success svg {
-          color: #16808E;
+          color: #d97b3f;
           margin-bottom: 0.75rem;
         }
 

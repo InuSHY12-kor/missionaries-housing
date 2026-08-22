@@ -185,7 +185,7 @@ function SearchMap({ accommodations, onBoundsChange }) {
         .acc-label-pin-inner {
           position: relative;
           background: white;
-          border: 1.5px solid #16808E;
+          border: 1.5px solid #d97b3f;
           border-radius: 18px;
           padding: 0.35rem 0.75rem;
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
@@ -210,13 +210,13 @@ function SearchMap({ accommodations, onBoundsChange }) {
           transform: translateX(-50%);
           border-width: 6px 5px 0 5px;
           border-style: solid;
-          border-color: #16808E transparent transparent transparent;
+          border-color: #d97b3f transparent transparent transparent;
         }
 
         .acc-label-price {
           font-weight: 700;
           font-size: 0.8rem;
-          color: #16808E;
+          color: #d97b3f;
         }
 
         .acc-label-name {

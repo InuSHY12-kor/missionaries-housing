@@ -225,11 +225,11 @@ function Dashboard({ userProfile }) {
         }
 
         .stat-card-link:hover {
-          box-shadow: 0 4px 16px rgba(22, 128, 142, 0.2);
+          box-shadow: 0 4px 16px rgba(217, 123, 63, 0.2);
         }
 
         .stat-card svg {
-          color: #16808E;
+          color: #d97b3f;
           margin-bottom: 1rem;
         }
 
@@ -242,7 +242,7 @@ function Dashboard({ userProfile }) {
         .stat-number {
           font-size: 2rem;
           font-weight: bold;
-          color: #16808E;
+          color: #d97b3f;
           margin: 0;
         }
 
@@ -274,7 +274,7 @@ function Dashboard({ userProfile }) {
         }
 
         .quick-link-card svg {
-          color: #16808E;
+          color: #d97b3f;
         }
 
         .quick-link-card h3 {
@@ -312,7 +312,7 @@ function Dashboard({ userProfile }) {
           align-items: center;
           gap: 0.2rem;
           font-size: 0.85rem;
-          color: #16808E;
+          color: #d97b3f;
           text-decoration: none;
           font-weight: 600;
         }
@@ -349,7 +349,7 @@ function Dashboard({ userProfile }) {
         }
 
         .info-banner {
-          background: linear-gradient(135deg, #16808E 0%, #8ABFC6 100%);
+          background: linear-gradient(135deg, #d97b3f 0%, #b8622c 100%);
           color: white;
           padding: 2rem;
           border-radius: 8px;
