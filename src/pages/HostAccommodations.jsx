@@ -16,6 +16,7 @@ const EMPTY_FORM = {
   bedrooms: '',
   bathrooms: '',
   amenities: [],
+  amenitiesOther: [],
   images: [],
   latitude: null,
   longitude: null
@@ -118,6 +119,7 @@ function HostAccommodations({ userProfile }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [dateManagerId, setDateManagerId] = useState(null);
+  const [customAmenityInput, setCustomAmenityInput] = useState('');
 
   const isAdmin = userProfile.role === 'admin';
 
@@ -160,6 +162,7 @@ function HostAccommodations({ userProfile }) {
       bedrooms: accommodation.bedrooms?.toString() || '',
       bathrooms: accommodation.bathrooms?.toString() || '',
       amenities: accommodation.amenities || [],
+      amenitiesOther: accommodation.amenities_other || [],
       images: accommodation.images || [],
       latitude: accommodation.latitude ?? null,
       longitude: accommodation.longitude ?? null
@@ -206,12 +209,31 @@ function HostAccommodations({ userProfile }) {
     }));
   };
 
+  // 사전 정의 목록에 없는 편의시설을 호스트가 직접 텍스트로 추가
+  const addCustomAmenity = () => {
+    const value = customAmenityInput.trim();
+    if (!value) return;
+    if (formData.amenitiesOther.includes(value)) {
+      setCustomAmenityInput('');
+      return;
+    }
+    setFormData(prev => ({ ...prev, amenitiesOther: [...prev.amenitiesOther, value] }));
+    setCustomAmenityInput('');
+  };
+
+  const removeCustomAmenity = (value) => {
+    setFormData(prev => ({ ...prev, amenitiesOther: prev.amenitiesOther.filter(v => v !== value) }));
+  };
+
+  const MAX_IMAGES = 20;
+  const RECOMMENDED_MIN_IMAGES = 10;
+
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    if (formData.images.length + files.length > 10) {
-      alert('사진은 최대 10장까지 등록할 수 있습니다.');
+    if (formData.images.length + files.length > MAX_IMAGES) {
+      alert(`사진은 최대 ${MAX_IMAGES}장까지 등록할 수 있습니다.`);
       e.target.value = '';
       return;
     }
@@ -252,6 +274,13 @@ function HostAccommodations({ userProfile }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (formData.images.length < RECOMMENDED_MIN_IMAGES) {
+      const proceed = window.confirm(
+        `사진이 ${formData.images.length}장 등록되어 있습니다. 원활한 검토를 위해 최소 ${RECOMMENDED_MIN_IMAGES}장 이상(건물 외부/입구, 화장실, 현관, 방마다 사진 포함)을 권장드립니다.\n\n그래도 지금 상태로 등록하시겠습니까?`
+      );
+      if (!proceed) return;
+    }
+
     try {
       const payload = {
         title: formData.title,
@@ -262,6 +291,7 @@ function HostAccommodations({ userProfile }) {
         bedrooms: parseInt(formData.bedrooms, 10) || null,
         bathrooms: parseInt(formData.bathrooms, 10) || null,
         amenities: formData.amenities,
+        amenities_other: formData.amenitiesOther,
         images: formData.images,
         latitude: formData.latitude,
         longitude: formData.longitude
@@ -355,6 +385,16 @@ function HostAccommodations({ userProfile }) {
         {showForm && (
           <div className="form-section">
             <h2>{editingId ? '숙소 수정' : '새 숙소 등록'}</h2>
+
+            <div className="host-guideline-box">
+              <h4>등록 전에 꼭 확인해주세요</h4>
+              <ul>
+                <li>숙소는 다른 이용자와 완전히 분리된 <strong>독립된 공간</strong>이어야 합니다.</li>
+                <li>1박 가격은 영리 목적의 숙박료가 아니라, <strong>최소한의 관리비·청소비 수준</strong>으로만 책정해 주세요.</li>
+                <li>사진은 <strong>최소 10장 이상</strong> 등록해 주세요. 건물 외부(입구 포함), 화장실, 현관, 그리고 방이 여러 개라면 방마다 사진을 꼭 포함해 주세요.</li>
+              </ul>
+            </div>
+
             <form onSubmit={handleSubmit}>
               <div className="form-row">
                 <div className="form-group">
@@ -411,6 +451,7 @@ function HostAccommodations({ userProfile }) {
                     onChange={handleInputChange}
                     required
                   />
+                  <p className="help-text">시세가 아닌, 관리비·청소비 등 최소한의 실비 수준으로 입력해 주세요.</p>
                 </div>
                 <div className="form-group">
                   <label>수용인원 *</label>
@@ -447,7 +488,10 @@ function HostAccommodations({ userProfile }) {
 
               <div className="form-group">
                 <label>숙소 사진</label>
-                <p className="help-text">여러 장 등록하시면 숙소 상세 페이지에서 슬라이드로 보여집니다. (최대 10장)</p>
+                <p className="help-text">
+                  최소 10장 이상, 최대 {MAX_IMAGES}장까지 등록해 주세요. 건물 외부(입구 포함), 화장실, 현관, 방이 여러 개인 경우 방마다 사진을 꼭 포함해 주세요.
+                  여러 장 등록하시면 숙소 상세 페이지에서 슬라이드로 보여집니다.
+                </p>
 
                 {formData.images.length > 0 && (
                   <div className="image-manager-grid">
@@ -469,7 +513,7 @@ function HostAccommodations({ userProfile }) {
                     multiple
                     accept="image/*"
                     onChange={handleImageUpload}
-                    disabled={uploadingImages || formData.images.length >= 10}
+                    disabled={uploadingImages || formData.images.length >= MAX_IMAGES}
                   />
                   <label htmlFor="accommodation-image-input" className="image-upload-label">
                     <Upload size={22} />
@@ -503,6 +547,40 @@ function HostAccommodations({ userProfile }) {
                       </div>
                     </div>
                   ))}
+                </div>
+
+                <div className="custom-amenity-input">
+                  <label>목록에 없는 편의시설 직접 추가</label>
+                  <div className="custom-amenity-row">
+                    <input
+                      type="text"
+                      value={customAmenityInput}
+                      onChange={(e) => setCustomAmenityInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addCustomAmenity();
+                        }
+                      }}
+                      placeholder="예: 정원 바비큐 시설"
+                    />
+                    <button type="button" className="btn btn-secondary" onClick={addCustomAmenity}>
+                      추가
+                    </button>
+                  </div>
+
+                  {formData.amenitiesOther.length > 0 && (
+                    <div className="custom-amenity-chips">
+                      {formData.amenitiesOther.map((value) => (
+                        <span key={value} className="custom-amenity-chip">
+                          {value}
+                          <button type="button" onClick={() => removeCustomAmenity(value)}>
+                            <X size={12} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -608,6 +686,86 @@ function HostAccommodations({ userProfile }) {
       </div>
 
       <style>{`
+        .host-guideline-box {
+          background: #fff8e6;
+          border: 1px solid #f0dcb0;
+          border-radius: 8px;
+          padding: 1.25rem 1.5rem;
+          margin: 1rem 0 1.5rem;
+        }
+
+        .host-guideline-box h4 {
+          color: #8a5a12;
+          margin-bottom: 0.6rem;
+        }
+
+        .host-guideline-box ul {
+          margin: 0;
+          padding-left: 1.1rem;
+          color: #6b4a15;
+          line-height: 1.7;
+        }
+
+        .host-guideline-box li {
+          margin-bottom: 0.35rem;
+        }
+
+        .custom-amenity-input {
+          margin-top: 1.25rem;
+          padding-top: 1.25rem;
+          border-top: 1px dashed #dfe6e9;
+        }
+
+        .custom-amenity-input label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 0.9rem;
+        }
+
+        .custom-amenity-row {
+          display: flex;
+          gap: 0.6rem;
+        }
+
+        .custom-amenity-row input {
+          flex: 1;
+          padding: 0.6rem 0.75rem;
+          border: 1px solid #dfe6e9;
+          border-radius: 6px;
+          font-family: inherit;
+        }
+
+        .custom-amenity-chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          margin-top: 0.85rem;
+        }
+
+        .custom-amenity-chip {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.4rem 0.7rem;
+          background: white;
+          border: 1px solid #16808E;
+          color: #16808E;
+          border-radius: 20px;
+          font-size: 0.85rem;
+        }
+
+        .custom-amenity-chip button {
+          display: flex;
+          align-items: center;
+          background: none;
+          border: none;
+          color: #16808E;
+          cursor: pointer;
+          padding: 0;
+        }
+
         .host-accommodations {
           flex: 1;
         }
@@ -901,6 +1059,10 @@ function HostAccommodations({ userProfile }) {
 
           .item-actions .btn {
             max-width: none;
+          }
+
+          .custom-amenity-row {
+            flex-direction: column;
           }
         }
       `}</style>

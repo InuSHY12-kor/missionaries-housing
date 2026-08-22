@@ -275,6 +275,7 @@ function AccommodationDetail({ userProfile }) {
   const matchedAmenities = (accommodation.amenities || [])
     .map(key => AMENITY_MAP[key])
     .filter(Boolean);
+  const otherAmenities = accommodation.amenities_other || [];
 
   return (
     <div className="accommodation-detail">
@@ -318,7 +319,7 @@ function AccommodationDetail({ userProfile }) {
               <p>{accommodation.description}</p>
             </div>
 
-            {matchedAmenities.length > 0 && (
+            {(matchedAmenities.length > 0 || otherAmenities.length > 0) && (
               <div className="amenities-section">
                 <h3>편의시설</h3>
                 <div className="amenities-box">
@@ -326,6 +327,12 @@ function AccommodationDetail({ userProfile }) {
                     <div key={item.key} className="amenity-chip">
                       <AmenityIcon name={item.icon} size={16} />
                       <span>{item.label}</span>
+                    </div>
+                  ))}
+                  {otherAmenities.map(value => (
+                    <div key={value} className="amenity-chip">
+                      <AmenityIcon name="CheckCircle" size={16} />
+                      <span>{value}</span>
                     </div>
                   ))}
                 </div>
