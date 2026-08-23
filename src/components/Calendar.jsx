@@ -199,9 +199,58 @@ function Calendar({ isDisabled, isSelected, isInRange, onDayClick }) {
           font-weight: 600;
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
+          .wewe-calendar {
+            padding: 0.85rem;
+          }
+
+          .cal-title {
+            font-size: 0.92rem;
+          }
+
+          .cal-nav-btn {
+            width: 28px;
+            height: 28px;
+          }
+
+          .cal-weekday {
+            font-size: 0.72rem;
+            padding: 0.2rem 0;
+          }
+
+          .cal-grid {
+            gap: 1px;
+          }
+
           .cal-day {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .wewe-calendar {
+            padding: 0.65rem;
+          }
+
+          .cal-header {
+            margin-bottom: 0.5rem;
+          }
+
+          .cal-title {
+            font-size: 0.85rem;
+          }
+
+          .cal-nav-btn {
+            width: 26px;
+            height: 26px;
+          }
+
+          .cal-weekday {
+            font-size: 0.68rem;
+          }
+
+          .cal-day {
+            font-size: 0.78rem;
           }
         }
       `}</style>

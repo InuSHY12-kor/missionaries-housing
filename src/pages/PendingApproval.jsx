@@ -322,6 +322,67 @@ function PendingApproval({ userProfile }) {
             height: 80px;
           }
         }
+
+        @media (max-width: 480px) {
+          .pending-container {
+            padding: 1rem;
+          }
+
+          .pending-card {
+            padding: 1.25rem;
+          }
+
+          .pending-icon, .success-icon, .error-icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1.25rem;
+          }
+
+          .pending-icon svg, .success-icon svg, .error-icon svg {
+            width: 34px;
+            height: 34px;
+          }
+
+          .pending-card h1 {
+            font-size: 1.3rem;
+          }
+
+          .pending-card > p {
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+          }
+
+          .info-box {
+            padding: 1rem;
+            margin: 1.25rem 0;
+          }
+
+          .info-box h3 {
+            font-size: 1rem;
+          }
+
+          .info-box li {
+            font-size: 0.85rem;
+            padding: 0.4rem 0;
+          }
+
+          .waiting-message, .rejection-box {
+            padding: 0.85rem;
+            margin: 1.25rem 0;
+          }
+
+          .waiting-message p, .rejection-box p {
+            font-size: 0.85rem;
+          }
+
+          .resend-success, .resend-error {
+            font-size: 0.85rem;
+          }
+
+          .pending-card .btn {
+            min-height: 44px;
+          }
+        }
       `}</style>
       </div>
     </>

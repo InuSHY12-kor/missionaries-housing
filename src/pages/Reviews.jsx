@@ -248,10 +248,73 @@ function Reviews({ userProfile }) {
         }
 
         @media (max-width: 768px) {
+          .subtitle {
+            font-size: 0.9rem;
+            margin-top: -0.5rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .reviews-list {
+            gap: 1rem;
+          }
+
+          .review-card-header {
+            gap: 0.75rem;
+            padding-bottom: 0.75rem;
+          }
+
+          .review-card-header h3 {
+            font-size: 1.05rem;
+          }
+
+          .location {
+            font-size: 0.82rem;
+          }
+
+          .heart-btn {
+            width: 36px;
+            height: 36px;
+          }
+
+          .stay-dates {
+            font-size: 0.8rem;
+            margin-top: 0.75rem;
+          }
+
+          .review-comment {
+            font-size: 0.92rem;
+            margin: 0.6rem 0;
+          }
+
           .review-footer {
             flex-direction: column;
             align-items: flex-start;
             gap: 0.3rem;
+            padding-top: 0.75rem;
+            font-size: 0.8rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .review-card-header {
+            flex-wrap: wrap;
+          }
+
+          .review-card-header h3 {
+            font-size: 0.98rem;
+          }
+
+          .heart-btn {
+            width: 32px;
+            height: 32px;
+          }
+
+          .review-comment {
+            font-size: 0.88rem;
+          }
+
+          .review-footer {
+            font-size: 0.75rem;
           }
         }
       `}</style>

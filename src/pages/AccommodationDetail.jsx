@@ -1049,24 +1049,216 @@ function AccommodationDetail({ userProfile }) {
         }
 
         @media (max-width: 768px) {
+          .admin-review-banner {
+            gap: 0.5rem;
+            padding: 0.8rem 0.9rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+          }
+
+          .admin-notice-banner {
+            font-size: 0.85rem;
+            padding: 0.7rem 0.9rem;
+          }
+
+          .gallery {
+            margin: 1.25rem 0;
+            height: 260px;
+          }
+
           .detail-content {
             grid-template-columns: 1fr;
+            gap: 1.75rem;
+            margin-top: 1.25rem;
+          }
+
+          .title-row {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.6rem;
+          }
+
+          .info-section h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+          }
+
+          .edit-btn {
+            justify-content: center;
+          }
+
+          .location {
+            font-size: 1rem;
+            margin-bottom: 1.1rem;
+          }
+
+          .basic-info {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            padding: 0.85rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .info-item {
+            font-size: 0.92rem;
+          }
+
+          .description,
+          .amenities-section {
+            margin-bottom: 1.5rem;
+          }
+
+          .description p {
+            font-size: 0.92rem;
+            line-height: 1.65;
+          }
+
+          .amenities-box {
+            padding: 1rem 1.1rem;
+            gap: 0.6rem 1rem;
+          }
+
+          .amenity-chip {
+            min-width: 100%;
+            font-size: 0.88rem;
+          }
+
+          .map-section,
+          .host-info {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+          }
+
+          .host-card {
+            padding: 1.1rem;
+          }
+
+          .contact-buttons {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .contact-buttons .btn {
+            justify-content: center;
           }
 
           .booking-section {
             position: static;
           }
 
-          .basic-info {
-            grid-template-columns: 1fr;
+          .booking-card {
+            padding: 1.1rem;
           }
 
+          .price {
+            font-size: 1.6rem;
+          }
+
+          .price-header {
+            margin-bottom: 1.1rem;
+            padding-bottom: 1.1rem;
+          }
+
+          .calendar-hint {
+            font-size: 0.78rem;
+          }
+
+          .admin-review-actions-main {
+            flex-direction: column;
+          }
+
+          .admin-review-actions-main button {
+            width: 100%;
+          }
+        }
+
+        @media (max-width: 480px) {
           .gallery {
-            height: 250px;
+            height: 220px;
+            margin: 1rem 0;
+            border-radius: 6px;
+          }
+
+          .admin-review-banner {
+            font-size: 0.8rem;
+          }
+
+          .info-section h1 {
+            font-size: 1.4rem;
+          }
+
+          .location {
+            font-size: 0.92rem;
+          }
+
+          .description h3,
+          .amenities-section h3,
+          .host-info h3,
+          .map-section h3,
+          .admin-review-card h3 {
+            font-size: 1.05rem;
+          }
+
+          .description p {
+            font-size: 0.88rem;
           }
 
           .amenity-chip {
-            min-width: 100%;
+            font-size: 0.85rem;
+          }
+
+          .host-details h4 {
+            font-size: 1rem;
+          }
+
+          .host-details p {
+            font-size: 0.88rem;
+          }
+
+          .booking-card {
+            padding: 0.9rem;
+          }
+
+          .price {
+            font-size: 1.45rem;
+          }
+
+          .per-night {
+            font-size: 0.82rem;
+          }
+
+          .date-selection-summary {
+            gap: 0.5rem;
+          }
+
+          .date-box {
+            padding: 0.5rem 0.6rem;
+          }
+
+          .date-box p {
+            font-size: 0.85rem;
+          }
+
+          .price-summary {
+            padding: 0.85rem;
+          }
+
+          .summary-row,
+          .summary-total {
+            font-size: 0.88rem;
+          }
+
+          .note {
+            font-size: 0.8rem;
+          }
+
+          .admin-review-hint {
+            font-size: 0.8rem;
+          }
+
+          .admin-review-prev-feedback {
+            font-size: 0.85rem;
+            padding: 0.75rem 0.85rem;
           }
         }
       `}</style>

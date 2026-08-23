@@ -74,6 +74,45 @@ function SignupComplete() {
           font-size: 1.05rem;
           line-height: 1.6;
         }
+
+        @media (max-width: 768px) {
+          .signup-complete-container {
+            padding: 1.5rem;
+          }
+
+          .signup-complete-card {
+            padding: 2rem 1.5rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .signup-complete-container {
+            padding: 1rem;
+          }
+
+          .signup-complete-card {
+            padding: 1.5rem 1.25rem;
+          }
+
+          .signup-complete-icon {
+            width: 72px;
+            height: 72px;
+            margin-bottom: 1.25rem;
+          }
+
+          .signup-complete-card h1 {
+            font-size: 1.3rem;
+          }
+
+          .signup-complete-card p {
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .signup-complete-card .btn {
+            min-height: 44px;
+          }
+        }
       `}</style>
       </div>
     </>

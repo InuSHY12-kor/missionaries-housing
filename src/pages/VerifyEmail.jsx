@@ -151,6 +151,44 @@ function VerifyEmail() {
           margin-bottom: 1.5rem;
           line-height: 1.6;
         }
+
+        @media (max-width: 768px) {
+          .verify-email-container {
+            padding: 1.5rem;
+          }
+
+          .verify-card {
+            padding: 2rem 1.5rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .verify-email-container {
+            padding: 1rem;
+          }
+
+          .verify-card {
+            padding: 1.5rem 1.25rem;
+          }
+
+          .verify-icon {
+            width: 68px;
+            height: 68px;
+            margin-bottom: 1.25rem;
+          }
+
+          .verify-card h1 {
+            font-size: 1.2rem;
+          }
+
+          .verify-card p {
+            font-size: 0.9rem;
+          }
+
+          .verify-card .btn {
+            min-height: 44px;
+          }
+        }
       `}</style>
       </div>
     </>

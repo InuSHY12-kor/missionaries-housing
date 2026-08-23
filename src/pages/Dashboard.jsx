@@ -381,12 +381,131 @@ function Dashboard({ userProfile }) {
         }
 
         @media (max-width: 768px) {
+          .welcome {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+          }
+
           .stats-grid {
             grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+          }
+
+          .stat-card {
+            padding: 1.25rem 1rem;
+          }
+
+          .stat-card svg {
+            width: 26px;
+            height: 26px;
+            margin-bottom: 0.6rem;
+          }
+
+          .stat-card h3 {
+            font-size: 0.85rem;
+          }
+
+          .stat-number {
+            font-size: 1.6rem;
+          }
+
+          .quick-links {
+            margin: 2rem 0;
+          }
+
+          .quick-links h2 {
+            margin-bottom: 1rem;
           }
 
           .quick-links .grid {
             grid-template-columns: 1fr;
+          }
+
+          .quick-link-card {
+            padding: 1.25rem;
+            flex-direction: row;
+            text-align: left;
+            gap: 1rem;
+          }
+
+          .quick-link-card svg {
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+          }
+
+          .recent-section {
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+          }
+
+          .booking-table th,
+          .booking-table td {
+            padding: 0.65rem;
+            font-size: 0.85rem;
+          }
+
+          .info-banner {
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .welcome {
+            font-size: 0.92rem;
+          }
+
+          .stats-grid {
+            gap: 0.75rem;
+          }
+
+          .stat-card {
+            padding: 1rem 0.75rem;
+          }
+
+          .stat-card h3 {
+            font-size: 0.78rem;
+          }
+
+          .stat-number {
+            font-size: 1.35rem;
+          }
+
+          .quick-link-card {
+            padding: 1rem;
+            gap: 0.75rem;
+          }
+
+          .quick-link-card h3 {
+            font-size: 1rem;
+          }
+
+          .quick-link-card p {
+            font-size: 0.82rem;
+          }
+
+          .recent-section-header h2 {
+            font-size: 1.15rem;
+          }
+
+          .see-more-link {
+            font-size: 0.78rem;
+          }
+
+          .booking-table th,
+          .booking-table td {
+            padding: 0.5rem;
+            font-size: 0.78rem;
+          }
+
+          .info-banner h3 {
+            font-size: 1rem;
+          }
+
+          .info-banner p {
+            font-size: 0.85rem;
           }
         }
       `}</style>

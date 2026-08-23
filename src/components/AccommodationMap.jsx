@@ -78,6 +78,19 @@ function AccommodationMap({ lat, lng, title }) {
           overflow: hidden;
           background: #ecf0f1;
         }
+
+        @media (max-width: 768px) {
+          .accommodation-map {
+            height: 260px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .accommodation-map {
+            height: 220px;
+            border-radius: 6px;
+          }
+        }
       `}</style>
     </>
   );

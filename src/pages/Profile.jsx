@@ -498,6 +498,77 @@ function Profile({ userProfile }) {
         @media (max-width: 768px) {
           .profile-grid {
             grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+          }
+
+          .profile-section {
+            gap: 1.25rem;
+          }
+
+          .section-card {
+            padding: 1.25rem;
+          }
+
+          .section-card h2 {
+            font-size: 1.15rem;
+            margin-bottom: 1.1rem;
+            gap: 0.5rem;
+          }
+
+          .profile-info {
+            gap: 0.85rem;
+          }
+
+          .info-item label {
+            font-size: 0.82rem;
+          }
+
+          .info-item p {
+            font-size: 0.95rem;
+          }
+
+          .form-group {
+            margin-bottom: 1.1rem;
+          }
+
+          .form-group label {
+            font-size: 0.92rem;
+          }
+
+          .account-deletion-footer {
+            margin-top: 2rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .section-card {
+            padding: 1rem;
+          }
+
+          .section-card h2 {
+            font-size: 1.05rem;
+          }
+
+          .info-item label {
+            font-size: 0.78rem;
+          }
+
+          .info-item p {
+            font-size: 0.9rem;
+          }
+
+          .form-group label {
+            font-size: 0.88rem;
+          }
+
+          .account-deletion-footer p,
+          .link-button {
+            font-size: 0.75rem;
+          }
+
+          .modal p {
+            font-size: 0.9rem;
           }
         }
       `}</style>

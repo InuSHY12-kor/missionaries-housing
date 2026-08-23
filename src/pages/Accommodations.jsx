@@ -485,8 +485,121 @@ function Accommodations() {
         }
 
         @media (max-width: 768px) {
+          .filter-section,
+          .map-search-section {
+            padding: 1.25rem;
+            margin: 1.25rem 0;
+          }
+
           .filter-card {
             grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+
+          .map-search-header h2 {
+            font-size: 1.2rem;
+          }
+
+          .map-search-hint {
+            font-size: 0.85rem;
+          }
+
+          .date-hint,
+          .date-error {
+            font-size: 0.8rem;
+          }
+
+          .accommodation-image {
+            height: 180px;
+          }
+
+          .accommodation-details {
+            padding: 1.1rem;
+          }
+
+          .accommodation-details h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+          }
+
+          .location {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+          }
+
+          .description {
+            font-size: 0.88rem;
+            margin-bottom: 0.75rem;
+          }
+
+          .info-row {
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+          }
+
+          .price {
+            font-size: 1.15rem;
+            margin-bottom: 0.35rem;
+          }
+
+          .host {
+            font-size: 0.85rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .filter-section,
+          .map-search-section {
+            padding: 0.9rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+          }
+
+          .filter-card {
+            gap: 0.85rem;
+          }
+
+          .filter-card span {
+            font-size: 0.9rem;
+          }
+
+          .map-search-header h2 {
+            font-size: 1.1rem;
+          }
+
+          .map-search-hint {
+            font-size: 0.8rem;
+          }
+
+          .accommodation-image {
+            height: 160px;
+          }
+
+          .accommodation-details {
+            padding: 0.9rem;
+          }
+
+          .accommodation-details h3 {
+            font-size: 1.02rem;
+          }
+
+          .location,
+          .description,
+          .info-row {
+            font-size: 0.82rem;
+          }
+
+          .price {
+            font-size: 1.05rem;
+          }
+
+          .host {
+            font-size: 0.78rem;
+          }
+
+          .empty-message {
+            padding: 1.25rem;
+            font-size: 0.9rem;
           }
         }
       `}</style>

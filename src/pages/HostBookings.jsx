@@ -334,6 +334,81 @@ function HostBookings({ userProfile }) {
           .booking-item-actions {
             flex-direction: column;
           }
+
+          .host-bookings .subtitle {
+            font-size: 0.9rem;
+            margin-top: -0.5rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .host-bookings .booking-section-title {
+            font-size: 1rem;
+          }
+
+          .host-bookings .booking-item-header {
+            flex-wrap: wrap;
+            gap: 0.6rem;
+          }
+
+          .host-bookings .booking-item-header h3 {
+            font-size: 1.05rem;
+          }
+
+          .host-bookings .location {
+            font-size: 0.85rem;
+          }
+
+          .host-bookings .dates {
+            font-size: 0.9rem;
+          }
+
+          .host-bookings .total-price {
+            font-size: 1.05rem;
+          }
+
+          .host-bookings .guest-info p {
+            font-size: 0.85rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .host-bookings .subtitle {
+            font-size: 0.85rem;
+          }
+
+          .host-bookings .booking-section {
+            margin-bottom: 1.75rem;
+          }
+
+          .host-bookings .booking-section-title {
+            font-size: 0.95rem;
+          }
+
+          .host-bookings .booking-item-header h3 {
+            font-size: 1rem;
+          }
+
+          .host-bookings .location,
+          .host-bookings .dates {
+            font-size: 0.85rem;
+          }
+
+          .host-bookings .total-price {
+            font-size: 1rem;
+          }
+
+          .host-bookings .guest-info {
+            padding: 0.85rem;
+          }
+
+          .host-bookings .guest-info p {
+            font-size: 0.82rem;
+          }
+
+          .host-bookings .see-more-btn {
+            padding: 0.65rem;
+            font-size: 0.85rem;
+          }
         }
       `}</style>
     </div>
