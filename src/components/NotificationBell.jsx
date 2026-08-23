@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { supabase } from '../App';
@@ -21,8 +21,33 @@ function NotificationBell({ userProfile }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState(null);
   const containerRef = useRef(null);
+  const buttonRef = useRef(null);
   const navigate = useNavigate();
+
+  // 모바일 아이콘 그리드에서는 알림 버튼이 화면 오른쪽 끝이 아니라 그리드 안 어느 칸에든
+  // 놓일 수 있습니다. 드롭다운을 버튼 기준 CSS(right: 0)로만 배치하면 버튼 위치에 따라
+  // 화면 밖으로 밀려날 수 있어, 열릴 때마다 버튼의 실제 화면 좌표를 기준으로 뷰포트 안에
+  // 들어오는 위치를 직접 계산해서 고정 배치합니다.
+  const positionDropdown = useCallback(() => {
+    const btn = buttonRef.current;
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const margin = 8;
+    const width = Math.min(320, window.innerWidth - margin * 2);
+    let left = rect.right - width;
+    left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
+    const top = Math.min(rect.bottom + 10, window.innerHeight - margin);
+    setDropdownStyle({ top, left, width });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return undefined;
+    positionDropdown();
+    window.addEventListener('resize', positionDropdown);
+    return () => window.removeEventListener('resize', positionDropdown);
+  }, [open, positionDropdown]);
 
   const fetchNotifications = useCallback(async () => {
     if (!userProfile?.id) return;
@@ -98,6 +123,7 @@ function NotificationBell({ userProfile }) {
     <div className="notification-bell" ref={containerRef}>
       <button
         type="button"
+        ref={buttonRef}
         className="notification-bell-btn"
         onClick={() => setOpen(o => !o)}
         aria-label="알림"
@@ -110,7 +136,14 @@ function NotificationBell({ userProfile }) {
       </button>
 
       {open && (
-        <div className="notification-dropdown">
+        <div
+          className="notification-dropdown"
+          style={dropdownStyle ? {
+            top: `${dropdownStyle.top}px`,
+            left: `${dropdownStyle.left}px`,
+            width: `${dropdownStyle.width}px`
+          } : undefined}
+        >
           <div className="notification-dropdown-header">
             <span>알림</span>
             {unreadCount > 0 && (
@@ -189,12 +222,18 @@ function NotificationBell({ userProfile }) {
           line-height: 1;
         }
 
+        /* position: fixed + JS로 계산한 top/left(위 positionDropdown 참고)를 사용해 버튼이
+           모바일 아이콘 그리드 안 어디에 있든 드롭다운이 항상 화면(뷰포트) 안에 들어오도록
+           합니다. 아래 값은 스크립트가 아직 계산하기 전 첫 프레임에 쓰이는 안전한 기본값입니다.
+           내부 목록(.notification-list)이 이미 자체 스크롤(max-height: 360px)을 가지고 있으므로
+           바깥 상자는 그대로 overflow: hidden(모서리 둥글게 자르는 용도)만 유지합니다. */
         .notification-dropdown {
-          position: absolute;
-          top: calc(100% + 10px);
-          right: 0;
-          width: 320px;
-          max-width: 90vw;
+          position: fixed;
+          top: 64px;
+          right: 8px;
+          left: auto;
+          width: min(320px, calc(100vw - 16px));
+          max-width: calc(100vw - 16px);
           background: white;
           border-radius: 10px;
           box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
