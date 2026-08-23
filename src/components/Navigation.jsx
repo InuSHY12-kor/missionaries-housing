@@ -16,14 +16,31 @@ function Navigation({ user, userProfile, onLogout }) {
   const hasFullAccess = userProfile?.status === 'approved' && !!userProfile?.email_verified_at;
 
   // 상단에 사진 배너(랜딩 히어로 또는 PageHero)가 있는 페이지에서는 내비게이션을
-  // 투명 배경 + 흰 글씨로 배너 위에 오버레이합니다. 배너가 없는 페이지(관리자, 숙소 상세,
-  // 로그인/가입 등 폼 중심 페이지)에서는 기존의 불투명 상단바를 그대로 사용합니다.
+  // 투명 배경 + 흰 글씨로 배너 위에 오버레이합니다. 배너가 없는 페이지(예약 상세 등 배너를
+  // 넣지 않은 일부 하위 페이지)에서는 기존의 불투명 상단바를 그대로 사용합니다.
   const location = useLocation();
   const HERO_BANNER_ROUTES = [
     '/', '/dashboard', '/accommodations', '/my-bookings',
-    '/my-accommodations', '/host-bookings', '/reviews', '/messages', '/profile'
+    '/my-accommodations', '/host-bookings', '/reviews', '/messages', '/profile',
+    '/login', '/signup', '/signup/missionary', '/signup/host',
+    '/signup-complete', '/verify-email', '/complete-profile'
   ];
-  const hasHeroBanner = HERO_BANNER_ROUTES.includes(location.pathname);
+  // 관리자 페이지(/admin/*)와 숙소 상세 페이지(/accommodations/:id)는 하위 경로가
+  // 동적으로 바뀌므로 접두사로 매칭합니다. 예약 상세(/my-bookings/:id)는 별도 배너가
+  // 없으므로 여기에 포함하지 않습니다.
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const isAccommodationDetailRoute = location.pathname.startsWith('/accommodations/');
+  // 승인 대기 화면과 프로필 등록 화면은 고정된 경로 없이 "*" 라우트로 렌더링되므로
+  // (App.jsx 참고) 경로가 아니라 로그인 상태(userProfile)로 판별해야 합니다.
+  const isCompleteProfileScreen = !!user && !userProfile;
+  const isPendingApprovalScreen = !!userProfile
+    && (userProfile.status === 'pending'
+      || (userProfile.status === 'approved' && !userProfile.email_verified_at));
+  const hasHeroBanner = HERO_BANNER_ROUTES.includes(location.pathname)
+    || isAdminRoute
+    || isAccommodationDetailRoute
+    || isCompleteProfileScreen
+    || isPendingApprovalScreen;
 
   const brand = (
     <Link to="/" className="navbar-brand">
