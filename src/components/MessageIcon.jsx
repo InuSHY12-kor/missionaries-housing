@@ -40,6 +40,7 @@ function MessageIcon({ userProfile }) {
       aria-label="메시지함"
     >
       <Mail size={20} />
+      <span className="nav-tile-caption">쪽지</span>
       {unreadCount > 0 && (
         <span className="message-icon-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
       )}
@@ -61,6 +62,13 @@ function MessageIcon({ userProfile }) {
 
         .message-icon-btn:hover {
           background: rgba(0, 0, 0, 0.06);
+        }
+
+        /* 모바일 아이콘 그리드 전용 작은 캡션 — 데스크톱에서는 기존처럼 아이콘만 보이도록 기본값은 숨김.
+           App.css의 @media (max-width: 768px) 안에서 .navbar-nav .nav-tile-caption 규칙(더 높은 명시도)이
+           다시 보이도록 재정의합니다. */
+        .nav-tile-caption {
+          display: none;
         }
 
         .message-icon-badge {

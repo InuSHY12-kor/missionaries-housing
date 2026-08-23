@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
+import { LogOut, Home, MapPin, Calendar, Building2, CalendarClock, Star, Shield, User } from 'lucide-react';
 import wewelogo from '../assets/wewe-icon.png';
 import NotificationBell from './NotificationBell';
 import MessageIcon from './MessageIcon';
@@ -105,22 +105,62 @@ function Navigation({ user, userProfile, onLogout }) {
             <ul className="navbar-nav">
               {hasFullAccess && (
                 <>
-                  <li><Link to="/dashboard" className="nav-btn">마이페이지</Link></li>
+                  <li>
+                    <Link to="/dashboard" className="nav-btn">
+                      <Home className="nav-btn-icon" size={18} />
+                      <span className="nav-btn-label">마이페이지</span>
+                    </Link>
+                  </li>
                   {(userProfile.role === 'admin' || userProfile.role === 'missionary') && (
-                    <li><Link to="/accommodations" className="nav-btn">숙소 검색</Link></li>
+                    <li>
+                      <Link to="/accommodations" className="nav-btn">
+                        <MapPin className="nav-btn-icon" size={18} />
+                        <span className="nav-btn-label">숙소 검색</span>
+                      </Link>
+                    </li>
                   )}
-                  <li><Link to="/my-bookings" className="nav-btn">내 예약</Link></li>
+                  <li>
+                    <Link to="/my-bookings" className="nav-btn">
+                      <Calendar className="nav-btn-icon" size={18} />
+                      <span className="nav-btn-label">내 예약</span>
+                    </Link>
+                  </li>
                   {(userProfile.role === 'admin' || userProfile.role === 'host') && (
                     <>
-                      <li><Link to="/my-accommodations" className="nav-btn">내 숙소</Link></li>
-                      <li><Link to="/host-bookings" className="nav-btn">예약 관리</Link></li>
-                      <li><Link to="/reviews" className="nav-btn">리뷰</Link></li>
+                      <li>
+                        <Link to="/my-accommodations" className="nav-btn">
+                          <Building2 className="nav-btn-icon" size={18} />
+                          <span className="nav-btn-label">내 숙소</span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/host-bookings" className="nav-btn">
+                          <CalendarClock className="nav-btn-icon" size={18} />
+                          <span className="nav-btn-label">예약 관리</span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/reviews" className="nav-btn">
+                          <Star className="nav-btn-icon" size={18} />
+                          <span className="nav-btn-label">리뷰</span>
+                        </Link>
+                      </li>
                     </>
                   )}
                   {userProfile.role === 'admin' && (
-                    <li><Link to="/admin" className="nav-btn">관리</Link></li>
+                    <li>
+                      <Link to="/admin" className="nav-btn">
+                        <Shield className="nav-btn-icon" size={18} />
+                        <span className="nav-btn-label">관리</span>
+                      </Link>
+                    </li>
                   )}
-                  <li><Link to="/profile" className="nav-btn">프로필</Link></li>
+                  <li>
+                    <Link to="/profile" className="nav-btn">
+                      <User className="nav-btn-icon" size={18} />
+                      <span className="nav-btn-label">프로필</span>
+                    </Link>
+                  </li>
                 </>
               )}
 
@@ -146,7 +186,7 @@ function Navigation({ user, userProfile, onLogout }) {
               <li>
                 <button onClick={onLogout} className="nav-btn nav-btn-outline">
                   <LogOut size={18} />
-                  로그아웃
+                  <span className="nav-btn-label">로그아웃</span>
                 </button>
               </li>
             </ul>

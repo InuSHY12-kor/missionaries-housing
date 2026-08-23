@@ -219,6 +219,13 @@ body {
   opacity: 1;
 }
 
+/* 각 메뉴 항목에 추가한 아이콘 — 데스크톱에서는 기존과 동일하게 글씨만 보이도록 기본은 숨김 처리하고,
+   좁은 화면(모바일)에서만 정사각형 아이콘 타일 형태로 전환합니다(아래 @media (max-width: 768px) 참고).
+   로그아웃 버튼의 아이콘(LogOut)은 기존부터 데스크톱에서도 보이던 것이라 별도 클래스 없이 그대로 둡니다. */
+.nav-btn-icon {
+  display: none;
+}
+
 .navbar-nav a.nav-btn-outline,
 .navbar-nav button.nav-btn-outline {
   background: transparent;
@@ -557,15 +564,96 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .navbar-nav {
-    row-gap: 0.4rem;
-    column-gap: 0.4rem;
+  /* 로그인 상태의 메뉴를 텍스트 필이 여러 줄로 늘어나는 대신, 정사각형 흰색 아이콘 타일
+     그리드로 표시합니다. auto-fill/minmax를 사용해 화면 폭에 따라 열 개수가 자동으로
+     조절되므로(약 4~5열) 기기 크기가 달라져도 깨지지 않고, 터치하기 편한 크기(약 64px 이상)를
+     유지합니다. 로그아웃 상태의 메뉴(홈/로그인/가입하기, 3개뿐)는 원래도 문제가 없었으므로
+     .navbar-authed로 범위를 한정해 그대로 둡니다. */
+  .navbar-authed .navbar-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    row-gap: 0.5rem;
+    column-gap: 0.5rem;
   }
 
-  .navbar-nav a.nav-btn,
-  .navbar-nav button.nav-btn {
-    padding: 0.42rem 0.75rem;
+  .navbar-authed .navbar-nav li {
+    display: flex;
+  }
+
+  .navbar-authed .navbar-nav a.nav-btn,
+  .navbar-authed .navbar-nav button.nav-btn {
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    gap: 0.3rem;
+    padding: 0.55rem 0.3rem;
+    border-radius: 14px;
     font-size: 0.85rem;
+  }
+
+  .nav-btn-icon {
+    display: flex;
+  }
+
+  .nav-btn-label {
+    font-size: 0.66rem;
+    font-weight: 600;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  /* 사진 배너 위 투명 상단바에서는 평소 배경 없는 순수 텍스트였지만, 아이콘 타일이 배너
+     사진 위에서 눈에 띄도록 옅은 흰색 반투명 타일 배경을 모바일에서만 추가합니다. */
+  .navbar-transparent.navbar-authed .navbar-nav a.nav-btn,
+  .navbar-transparent.navbar-authed .navbar-nav button.nav-btn {
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .navbar-transparent.navbar-authed .navbar-nav a.nav-btn:hover,
+  .navbar-transparent.navbar-authed .navbar-nav button.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.26);
+  }
+
+  /* 알림 종/쪽지 아이콘도 같은 그리드 안에서 동일한 정사각형 타일 크기로 맞추고,
+     작은 라벨(알림/쪽지)을 추가로 보여줍니다. */
+  .navbar-authed .navbar-nav .notification-bell {
+    display: flex;
+    width: 100%;
+  }
+
+  .navbar-authed .navbar-nav .notification-bell-btn,
+  .navbar-authed .navbar-nav .message-icon-btn {
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.3rem;
+    width: 100%;
+    height: 100%;
+    padding: 0.55rem 0.3rem;
+    border-radius: 14px;
+    background: #f0eee7;
+  }
+
+  .navbar-transparent.navbar-authed .navbar-nav .notification-bell-btn,
+  .navbar-transparent.navbar-authed .navbar-nav .message-icon-btn {
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .navbar-authed .navbar-nav .nav-tile-caption {
+    display: block;
+    font-size: 0.66rem;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+
+  .navbar-authed .navbar-nav .notification-badge,
+  .navbar-authed .navbar-nav .message-icon-badge {
+    top: 2px;
+    right: 2px;
   }
 
   .navbar-welcome {
