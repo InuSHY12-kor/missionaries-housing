@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import wewelogo from '../assets/wewe-icon.png';
@@ -14,6 +14,32 @@ const ROLE_LABELS = {
 function Navigation({ user, userProfile, onLogout }) {
   // 관리자 승인과 이메일 인증이 모두 완료되어야 실제 서비스 메뉴가 노출됨
   const hasFullAccess = userProfile?.status === 'approved' && !!userProfile?.email_verified_at;
+
+  // 로그인한 사용자(특히 관리자)는 메뉴 항목이 많아 좁은 화면에서 상단바가 여러 줄로
+  // 늘어날 수 있습니다. 사진 배너 페이지에서는 상단바가 배너 위에 투명하게 얹히기 때문에
+  // (position: absolute) 배너 쪽에서 상단바 실제 높이만큼 여백을 미리 비워두지 않으면
+  // 글씨가 겹쳐 보입니다. 상단바 자신의 실제 렌더링 높이를 CSS 변수(--navbar-height)로
+  // 계속 갱신해서, PageHero/랜딩 히어로가 몇 줄이 되든 항상 정확한 여백을 확보하도록 합니다.
+  const navRef = useRef(null);
+
+  useEffect(() => {
+    const el = navRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return undefined;
+
+    const updateNavbarHeight = () => {
+      document.documentElement.style.setProperty('--navbar-height', `${el.offsetHeight}px`);
+    };
+
+    updateNavbarHeight();
+    const observer = new ResizeObserver(updateNavbarHeight);
+    observer.observe(el);
+    window.addEventListener('resize', updateNavbarHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateNavbarHeight);
+    };
+  }, []);
 
   // 상단에 사진 배너(랜딩 히어로 또는 PageHero)가 있는 페이지에서는 내비게이션을
   // 투명 배경 + 흰 글씨로 배너 위에 오버레이합니다. 배너가 없는 페이지(예약 상세 등 배너를
@@ -50,7 +76,7 @@ function Navigation({ user, userProfile, onLogout }) {
   );
 
   return (
-    <nav className={`navbar ${user ? 'navbar-authed' : ''} ${hasHeroBanner ? 'navbar-transparent' : ''}`}>
+    <nav ref={navRef} className={`navbar ${user ? 'navbar-authed' : ''} ${hasHeroBanner ? 'navbar-transparent' : ''}`}>
       <div className={`container ${user ? 'navbar-container' : 'navbar-container-single'}`}>
         {user ? (
           <>

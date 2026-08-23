@@ -107,10 +107,12 @@ body {
   row-gap: 0.25rem;
 }
 
-/* 역할 배지 + 환영 문구 — 별도 배경 카드 없이 글씨만 나란히 배치 */
+/* 역할 배지 + 환영 문구 — 별도 배경 카드 없이 글씨만 나란히 배치.
+   두 글씨의 font-size가 서로 달라(배지 0.85rem, 환영 문구 0.9rem) align-items: center로는
+   글자 기준선이 미세하게 어긋나 보였습니다. baseline 정렬로 텍스트 기준선을 맞춥니다. */
 .navbar-top-right {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.6rem;
   flex-wrap: wrap;
 }

@@ -1074,7 +1074,13 @@ function LandingPage() {
         @media (max-width: 768px) {
           .hero {
             min-height: 560px;
-            padding: 4.5rem 1.25rem;
+            /* 로그인한 사용자(특히 관리자)는 상단바가 여러 줄로 늘어날 수 있어, 상단바의
+               실제 렌더링 높이(--navbar-height, Navigation.jsx에서 계속 갱신)만큼 위쪽
+               여백을 확보해 제목 글씨가 상단바와 겹치지 않도록 합니다. */
+            padding-top: calc(var(--navbar-height, 72px) + 1rem);
+            padding-bottom: 4.5rem;
+            padding-left: 1.25rem;
+            padding-right: 1.25rem;
           }
 
           .hero-eyebrow {
@@ -1294,7 +1300,10 @@ function LandingPage() {
         @media (max-width: 480px) {
           .hero {
             min-height: 480px;
-            padding: 3.5rem 1rem;
+            padding-top: calc(var(--navbar-height, 56px) + 0.75rem);
+            padding-bottom: 3.5rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
           }
 
           .hero-eyebrow {
