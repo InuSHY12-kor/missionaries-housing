@@ -208,7 +208,7 @@ function LandingPage() {
           <span className="eyebrow center">WHY WEWE STAY</span>
           <h2>왜 우리를 선택해야 할까요?</h2>
 
-          <div className="grid grid-3">
+          <div className="features-grid">
             {/* 카드 1 */}
             <div className="card feature-card">
               <div className="feature-icon">
@@ -784,6 +784,15 @@ function LandingPage() {
           color: var(--ink);
         }
 
+        /* PC에서는 카드 6개가 3개씩 2줄로 정확히 정리되도록 3열 고정 그리드를 사용합니다.
+           (공용 .grid-3 유틸리티는 auto-fill 방식이라 화면 폭에 따라 4열 등으로 흐트러질 수 있어
+           이 섹션 전용 클래스로 분리했습니다.) */
+        .features-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 2rem;
+        }
+
         .feature-card {
           text-align: center;
           padding: 2rem 1.5rem;
@@ -1200,22 +1209,30 @@ function LandingPage() {
             margin-bottom: 2rem;
           }
 
+          /* 모바일에서는 카드 6개를 2개씩 한 줄로 묶어 좀 더 작은 상자로 표시합니다. */
+          .features-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+          }
+
           .feature-card {
-            padding: 1.75rem 1.25rem;
+            padding: 1.1rem 0.85rem;
           }
 
           .feature-icon {
-            width: 56px;
-            height: 56px;
-            margin-bottom: 1rem;
+            width: 44px;
+            height: 44px;
+            margin-bottom: 0.75rem;
           }
 
           .feature-card h3 {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
           }
 
           .feature-card p {
-            font-size: 0.95rem;
+            font-size: 0.8rem;
+            line-height: 1.5;
           }
 
           .process {
@@ -1353,8 +1370,27 @@ function LandingPage() {
             height: 150px;
           }
 
+          .features-grid {
+            gap: 0.6rem;
+          }
+
           .feature-card {
-            padding: 1.5rem 1rem;
+            padding: 0.85rem 0.6rem;
+          }
+
+          .feature-icon {
+            width: 38px;
+            height: 38px;
+            margin-bottom: 0.6rem;
+          }
+
+          .feature-card h3 {
+            font-size: 0.85rem;
+          }
+
+          .feature-card p {
+            font-size: 0.74rem;
+            line-height: 1.45;
           }
 
           .marquee-item {
