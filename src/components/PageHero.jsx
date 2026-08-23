@@ -177,6 +177,13 @@ function PageHero({ images, eyebrow, title, subtitle }) {
                실제 렌더링 높이(--navbar-height, Navigation.jsx에서 계속 갱신)만큼 위쪽
                여백을 확보해 제목 글씨가 상단바와 겹치지 않도록 합니다. */
             padding-top: calc(var(--navbar-height, 88px) + 1rem);
+            /* 상단바가 여러 줄(아이콘 그리드)로 늘어나 위쪽 여백이 커지면 이 배너 전체가
+               내용물 높이만큼 함께 늘어나는데, 아래쪽 슬라이드 진행 점은 배너 "맨 아래"
+               기준으로 고정 배치되어 있어 문구 바로 아래로 바짝 붙어버립니다(랜딩 페이지
+               히어로는 아래쪽 여백이 원래 넉넉해 이 문제가 없었습니다). 아래쪽 여백을
+               넉넉히 확보해 문구와 진행 점이 상단바 줄 수와 무관하게 항상 충분히
+               떨어지도록 합니다. */
+            padding-bottom: 4rem;
           }
 
           .page-hero-content h2 {
@@ -185,6 +192,10 @@ function PageHero({ images, eyebrow, title, subtitle }) {
 
           .page-hero-content p {
             font-size: 0.9rem;
+          }
+
+          .page-hero-progress {
+            bottom: 1.5rem;
           }
         }
 
@@ -198,7 +209,9 @@ function PageHero({ images, eyebrow, title, subtitle }) {
             padding-top: calc(var(--navbar-height, 76px) + 0.75rem);
             padding-left: 1.1rem;
             padding-right: 1.1rem;
-            padding-bottom: 1.1rem;
+            /* 768px 구간과 동일한 이유로, 좁은 화면에서도 문구와 진행 점 사이 여백을
+               넉넉히 확보합니다. */
+            padding-bottom: 3rem;
           }
 
           .page-hero-eyebrow {
@@ -215,7 +228,7 @@ function PageHero({ images, eyebrow, title, subtitle }) {
           }
 
           .page-hero-progress {
-            bottom: 0.75rem;
+            bottom: 1rem;
           }
 
           .page-hero-dot-wrap,
