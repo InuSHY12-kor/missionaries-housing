@@ -148,6 +148,14 @@ body {
   .navbar-brand-text {
     display: none;
   }
+
+  .navbar {
+    padding: 0.6rem 0;
+  }
+
+  .navbar-logo {
+    height: 34px;
+  }
 }
 
 /* 로그인된 상태(특히 관리자)는 메뉴 항목이 많아 좁은 화면에서 워드마크를 먼저 숨겨
@@ -546,10 +554,36 @@ body {
   .grid-2, .grid-3 {
     grid-template-columns: 1fr;
   }
-  
+
   .navbar-nav {
-    gap: 1rem;
+    row-gap: 0.4rem;
+    column-gap: 0.4rem;
   }
+
+  .navbar-nav a.nav-btn,
+  .navbar-nav button.nav-btn {
+    padding: 0.42rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .navbar-welcome {
+    font-size: 0.82rem;
+  }
+
+  .status-badge,
+  .status-role-admin,
+  .status-role-missionary,
+  .status-role-host {
+    font-size: 0.78rem;
+  }
+}
+
+/* 표(테이블)를 모바일 화면 밖으로 잘리지 않고 가로 스크롤로 볼 수 있게 해주는 공용 래퍼.
+   AdminDashboard 등 표 형태 UI에서 <div className="table-responsive"><table>...</table></div>로 사용합니다. */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* 배지 */
@@ -736,18 +770,90 @@ p {
   .container {
     padding: 1rem;
   }
-  
+
   h1 {
-    font-size: 2rem;
+    font-size: 1.85rem;
   }
-  
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+  }
+
   .modal {
     width: 95%;
+    padding: 1.5rem;
   }
-  
+
   .toast {
     bottom: 1rem;
     right: 1rem;
     left: 1rem;
+  }
+
+  .card {
+    padding: 1.2rem;
+  }
+
+  .btn {
+    padding: 0.7rem 1.25rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* 작은 폰 화면(대부분의 실제 모바일 기기)에서는 한 번 더 여백/글자 크기를 줄여
+   일반적인 모바일 웹페이지 밀도에 가깝게 맞춥니다. */
+@media (max-width: 480px) {
+  body {
+    font-size: 15px;
+  }
+
+  .container {
+    padding: 0.85rem;
+  }
+
+  h1 {
+    font-size: 1.55rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  .navbar .container {
+    padding: 0 0.75rem;
+  }
+
+  .card {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .btn {
+    padding: 0.65rem 1.1rem;
+    font-size: 0.9rem;
+  }
+
+  .modal {
+    padding: 1.15rem;
+    border-radius: 10px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 0.65rem;
+    font-size: 0.95rem;
+  }
+
+  .grid {
+    gap: 1.25rem;
   }
 }
