@@ -203,28 +203,32 @@ function MyBookings({ userProfile }) {
           <div className="bookings-list">
             {visibleBookings.map(booking => (
               <div key={booking.id} className="card booking-item">
-                <div className="booking-item-header">
-                  <div>
-                    <h3>{booking.accommodations?.title || '삭제된 숙소'}</h3>
-                    {booking.accommodations?.location && (
-                      <p className="location">
-                        <MapPin size={16} />
-                        {booking.accommodations.location}
-                      </p>
-                    )}
+                <Link to={`/my-bookings/${booking.id}`} className="booking-item-link">
+                  <div className="booking-item-header">
+                    <div>
+                      <h3>{booking.accommodations?.title || '삭제된 숙소'}</h3>
+                      {booking.accommodations?.location && (
+                        <p className="location">
+                          <MapPin size={16} />
+                          {booking.accommodations.location}
+                        </p>
+                      )}
+                    </div>
+                    <span className={`badge ${STATUS_BADGE_CLASS[booking.status] || 'badge-info'}`}>
+                      {STATUS_LABEL[booking.status] || booking.status}
+                    </span>
                   </div>
-                  <span className={`badge ${STATUS_BADGE_CLASS[booking.status] || 'badge-info'}`}>
-                    {STATUS_LABEL[booking.status] || booking.status}
-                  </span>
-                </div>
 
-                <div className="booking-item-body">
-                  <p className="dates">
-                    <CalendarIcon size={16} />
-                    {formatDate(booking.check_in)} ~ {formatDate(booking.check_out)}
-                  </p>
-                  <p className="total-price">₩{booking.total_price?.toLocaleString()}</p>
-                </div>
+                  <div className="booking-item-body">
+                    <p className="dates">
+                      <CalendarIcon size={16} />
+                      {formatDate(booking.check_in)} ~ {formatDate(booking.check_out)}
+                    </p>
+                    <p className="total-price">₩{booking.total_price?.toLocaleString()}</p>
+                  </div>
+
+                  <p className="booking-item-detail-cta">예약 상세 및 숙소 이용 안내 보기 →</p>
+                </Link>
 
                 {booking.status !== 'cancelled' && (
                   <div className="booking-item-actions">
@@ -419,6 +423,20 @@ function MyBookings({ userProfile }) {
         .booking-item {
           display: flex;
           flex-direction: column;
+        }
+
+        .booking-item-link {
+          display: block;
+          color: inherit;
+          text-decoration: none;
+        }
+
+        .booking-item-detail-cta {
+          margin: 0;
+          padding-top: 0.5rem;
+          color: #d97b3f;
+          font-size: 0.85rem;
+          font-weight: 600;
         }
 
         .booking-item-header {

@@ -1,10 +1,24 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MailCheck } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+const SIGNUP_COMPLETE_HERO_IMAGES = [
+  'https://images.pexels.com/photos/2822647/pexels-photo-2822647.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/928199/pexels-photo-928199.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/6699296/pexels-photo-6699296.jpeg?auto=compress&cs=tinysrgb&w=1600',
+];
 
 function SignupComplete() {
   return (
-    <div className="signup-complete-container">
+    <>
+      <PageHero
+        images={SIGNUP_COMPLETE_HERO_IMAGES}
+        eyebrow="ONE MORE STEP"
+        title="가입 신청이 완료되었습니다"
+        subtitle="메일함에서 인증 링크를 확인해주세요"
+      />
+      <div className="signup-complete-container">
       <div className="signup-complete-card">
         <div className="signup-complete-icon">
           <MailCheck size={48} />
@@ -61,7 +75,8 @@ function SignupComplete() {
           line-height: 1.6;
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }
 

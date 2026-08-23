@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { AlertCircle } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+const LOGIN_HERO_IMAGES = [
+  'https://images.pexels.com/photos/38466430/pexels-photo-38466430.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/31372128/pexels-photo-31372128.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/19227220/pexels-photo-19227220.jpeg?auto=compress&cs=tinysrgb&w=1600',
+];
 
 function Login() {
   const navigate = useNavigate();
@@ -52,7 +59,14 @@ function Login() {
   };
 
   return (
-    <div className="signup-container">
+    <>
+      <PageHero
+        images={LOGIN_HERO_IMAGES}
+        eyebrow="WELCOME BACK"
+        title="다시 만나 반가워요"
+        subtitle="로그인하고 위로자들을 위한 쉼터를 이어가세요"
+      />
+      <div className="signup-container">
       <div className="container">
         <div className="signup-form">
           <h1>로그인</h1>
@@ -98,7 +112,8 @@ function Login() {
           </p>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
