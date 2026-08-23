@@ -275,16 +275,18 @@ function SignUp({ role }) {
           margin-bottom: 0.75rem;
         }
 
-        .checkbox {
+        .form-group .checkbox {
           display: flex;
           align-items: center;
           gap: 0.75rem;
           cursor: pointer;
         }
 
-        .checkbox input {
+        .form-group .checkbox input {
           cursor: pointer;
           width: auto;
+          flex-shrink: 0;
+          margin: 0;
         }
 
         .form-group {
