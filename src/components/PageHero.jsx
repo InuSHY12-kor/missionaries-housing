@@ -173,7 +173,10 @@ function PageHero({ images, eyebrow, title, subtitle }) {
           }
 
           .page-hero-content {
-            padding-top: 5.5rem;
+            /* 로그인한 사용자(특히 관리자)는 상단바가 여러 줄로 늘어날 수 있어, 상단바의
+               실제 렌더링 높이(--navbar-height, Navigation.jsx에서 계속 갱신)만큼 위쪽
+               여백을 확보해 제목 글씨가 상단바와 겹치지 않도록 합니다. */
+            padding-top: calc(var(--navbar-height, 88px) + 1rem);
           }
 
           .page-hero-content h2 {
@@ -192,7 +195,10 @@ function PageHero({ images, eyebrow, title, subtitle }) {
           }
 
           .page-hero-content {
-            padding: 4.75rem 1.1rem 1.1rem;
+            padding-top: calc(var(--navbar-height, 76px) + 0.75rem);
+            padding-left: 1.1rem;
+            padding-right: 1.1rem;
+            padding-bottom: 1.1rem;
           }
 
           .page-hero-eyebrow {
