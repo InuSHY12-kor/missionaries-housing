@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../App';
 import { Upload, AlertCircle } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+const COMPLETE_PROFILE_HERO_IMAGES = [
+  'https://images.pexels.com/photos/30851143/pexels-photo-30851143.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/32081456/pexels-photo-32081456.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/33497885/pexels-photo-33497885.jpeg?auto=compress&cs=tinysrgb&w=1600',
+];
 
 function CompleteProfile() {
   const navigate = useNavigate();
@@ -166,7 +173,14 @@ function CompleteProfile() {
   }
 
   return (
-    <div className="signup-container">
+    <>
+      <PageHero
+        images={COMPLETE_PROFILE_HERO_IMAGES}
+        eyebrow="LAST STEP"
+        title="프로필을 등록해주세요"
+        subtitle="마지막 단계입니다. 성명·연락처·소속 교회 정보를 입력해주세요"
+      />
+      <div className="signup-container">
       <div className="container">
         <div className="signup-form">
           <h1>프로필 등록</h1>
@@ -421,7 +435,8 @@ function CompleteProfile() {
           }
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }
 

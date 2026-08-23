@@ -1,10 +1,24 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Home, ArrowRight } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+const ROLE_SELECT_HERO_IMAGES = [
+  'https://images.pexels.com/photos/9608654/pexels-photo-9608654.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/34787908/pexels-photo-34787908.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/1578750/pexels-photo-1578750.jpeg?auto=compress&cs=tinysrgb&w=1600',
+];
 
 function SignupRoleSelect() {
   return (
-    <div className="role-select-container">
+    <>
+      <PageHero
+        images={ROLE_SELECT_HERO_IMAGES}
+        eyebrow="GET STARTED"
+        title="가입 유형을 선택해주세요"
+        subtitle="회원 유형에 따라 입력하시는 정보가 달라집니다"
+      />
+      <div className="role-select-container">
       <div className="container">
         <div className="role-select-box">
           <h1>가입 유형을 선택해주세요</h1>
@@ -164,7 +178,8 @@ function SignupRoleSelect() {
           }
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }
 

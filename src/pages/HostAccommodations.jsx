@@ -27,7 +27,8 @@ const EMPTY_FORM = {
   amenitiesOther: [],
   images: [],
   latitude: null,
-  longitude: null
+  longitude: null,
+  usageGuide: ''
 };
 
 // 숙소별 "날짜 관리" 패널: 예약된 날짜는 회색으로 비활성화 표시하고,
@@ -173,7 +174,8 @@ function HostAccommodations({ userProfile }) {
       amenitiesOther: accommodation.amenities_other || [],
       images: accommodation.images || [],
       latitude: accommodation.latitude ?? null,
-      longitude: accommodation.longitude ?? null
+      longitude: accommodation.longitude ?? null,
+      usageGuide: accommodation.usage_guide || ''
     });
     setEditingId(accommodation.id);
     setShowForm(true);
@@ -302,7 +304,8 @@ function HostAccommodations({ userProfile }) {
         amenities_other: formData.amenitiesOther,
         images: formData.images,
         latitude: formData.latitude,
-        longitude: formData.longitude
+        longitude: formData.longitude,
+        usage_guide: formData.usageGuide || null
       };
 
       if (editingId) {
@@ -599,6 +602,21 @@ function HostAccommodations({ userProfile }) {
                 </div>
               </div>
 
+              <div className="form-group usage-guide-group">
+                <label>숙소 이용 안내</label>
+                <p className="usage-guide-hint">
+                  체크인/체크아웃 방법, 출입 비밀번호, 대중교통 이용법, 주의사항 등을 자유롭게 적어주세요.
+                  이 내용은 이 숙소를 예약한 선교사님에게 예약 상세 페이지에서만 보여집니다.
+                </p>
+                <textarea
+                  name="usageGuide"
+                  value={formData.usageGuide}
+                  onChange={handleInputChange}
+                  rows="6"
+                  placeholder="예: 오후 3시 이후 체크인 가능하며, 공동현관 비밀번호는 1234입니다. 가까운 지하철역은 OO역 2번 출구로 도보 5분입니다."
+                />
+              </div>
+
               <div className="form-actions">
                 <button type="submit" className="btn btn-success">
                   {editingId ? '수정' : '등록'}
@@ -727,6 +745,19 @@ function HostAccommodations({ userProfile }) {
 
         .host-guideline-box li {
           margin-bottom: 0.35rem;
+        }
+
+        .usage-guide-group {
+          margin-top: 1.5rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid #f0dcc0;
+        }
+
+        .usage-guide-hint {
+          color: #7f8c8d;
+          font-size: 0.85rem;
+          line-height: 1.6;
+          margin: 0.25rem 0 0.75rem;
         }
 
         .custom-amenity-input {

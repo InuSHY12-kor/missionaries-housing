@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { Clock, AlertCircle, Mail } from 'lucide-react';
 import { supabase } from '../App';
+import PageHero from '../components/PageHero';
+
+const PENDING_APPROVAL_HERO_IMAGES = [
+  'https://images.pexels.com/photos/29477084/pexels-photo-29477084.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/37625441/pexels-photo-37625441.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/11285384/pexels-photo-11285384.jpeg?auto=compress&cs=tinysrgb&w=1600',
+];
 
 // 이 화면은 "이메일 인증"과 "관리자 승인" 둘 다 완료되지 않은 로그인 사용자에게 보여집니다.
 // (App.jsx에서 status==='pending' 이거나, status==='approved'인데 email_verified_at이 아직 없는 경우 렌더링)
@@ -39,7 +46,14 @@ function PendingApproval({ userProfile }) {
   };
 
   return (
-    <div className="pending-container">
+    <>
+      <PageHero
+        images={PENDING_APPROVAL_HERO_IMAGES}
+        eyebrow="ALMOST THERE"
+        title="승인을 기다리고 있어요"
+        subtitle="확인이 끝나는 대로 서비스를 이용하실 수 있어요"
+      />
+      <div className="pending-container">
       <div className="container">
         <div className="pending-card">
           {status === 'rejected' ? (
@@ -309,7 +323,8 @@ function PendingApproval({ userProfile }) {
           }
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }
 

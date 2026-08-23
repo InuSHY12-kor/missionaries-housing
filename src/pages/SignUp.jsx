@@ -3,6 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { AlertCircle } from 'lucide-react';
 import { MISSIONARY_TERMS, HOST_TERMS } from '../data/termsOfService';
+import PageHero from '../components/PageHero';
+
+const SIGNUP_HERO_IMAGES = [
+  'https://images.pexels.com/photos/37913935/pexels-photo-37913935.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/30135556/pexels-photo-30135556.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/8532289/pexels-photo-8532289.jpeg?auto=compress&cs=tinysrgb&w=1600',
+];
 
 const ROLE_META = {
   missionary: {
@@ -95,7 +102,14 @@ function SignUp({ role }) {
   };
 
   return (
-    <div className="signup-container">
+    <>
+      <PageHero
+        images={SIGNUP_HERO_IMAGES}
+        eyebrow="JOIN US"
+        title={meta.title}
+        subtitle={meta.subtitle}
+      />
+      <div className="signup-container">
       <div className="container">
         <div className="signup-form">
           <h1>{meta.title}</h1>
@@ -325,7 +339,8 @@ function SignUp({ role }) {
           }
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }
 

@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+const ADMIN_HERO_IMAGES = [
+  'https://images.pexels.com/photos/8353764/pexels-photo-8353764.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/15616259/pexels-photo-15616259.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/8297536/pexels-photo-8297536.jpeg?auto=compress&cs=tinysrgb&w=1600',
+];
 
 // 계정 삭제 유예기간(일). Profile.jsx의 DELETION_GRACE_PERIOD_DAYS와 동일한 값이어야 함.
 const DELETION_GRACE_PERIOD_DAYS = 15;
@@ -305,6 +312,12 @@ function AdminDashboard({ userProfile }) {
 
   return (
     <div className="admin-dashboard">
+      <PageHero
+        images={ADMIN_HERO_IMAGES}
+        eyebrow="ADMIN"
+        title="관리자 대시보드"
+        subtitle="회원과 숙소, 예약 현황을 한눈에 확인하고 관리하세요"
+      />
       <div className="container">
         <h1>관리자 대시보드</h1>
 

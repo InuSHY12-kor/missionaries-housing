@@ -2,6 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { CheckCircle, XCircle, Loader } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+const VERIFY_EMAIL_HERO_IMAGES = [
+  'https://images.pexels.com/photos/7054544/pexels-photo-7054544.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/38023665/pexels-photo-38023665.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/32598664/pexels-photo-32598664.jpeg?auto=compress&cs=tinysrgb&w=1600',
+];
 
 // 이메일 인증 링크(/verify-email?token=...)를 클릭하면 도착하는 공개 페이지.
 // 로그인 여부와 무관하게(다른 기기/브라우저에서 메일을 열었을 수도 있음) 동작해야 하므로
@@ -39,7 +46,14 @@ function VerifyEmail() {
   }, [token]);
 
   return (
-    <div className="verify-email-container">
+    <>
+      <PageHero
+        images={VERIFY_EMAIL_HERO_IMAGES}
+        eyebrow="EMAIL VERIFICATION"
+        title="이메일 인증"
+        subtitle="인증을 완료하고 다음 단계로 넘어가세요"
+      />
+      <div className="verify-email-container">
       <div className="container">
         <div className="verify-card">
           {status === 'checking' && (
@@ -138,7 +152,8 @@ function VerifyEmail() {
           line-height: 1.6;
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }
 
