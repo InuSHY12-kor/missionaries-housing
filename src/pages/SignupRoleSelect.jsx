@@ -177,6 +177,50 @@ function SignupRoleSelect() {
             grid-template-columns: 1fr;
           }
         }
+
+        @media (max-width: 480px) {
+          .role-select-container {
+            padding: 1rem 0;
+          }
+
+          .role-select-box {
+            padding: 1.25rem;
+          }
+
+          .role-select-box .subtitle {
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .role-cards {
+            gap: 1rem;
+          }
+
+          .role-card {
+            padding: 1.5rem 1.25rem;
+          }
+
+          .role-card-icon {
+            width: 56px;
+            height: 56px;
+          }
+
+          .role-card h2 {
+            font-size: 1.2rem;
+          }
+
+          .role-card-desc {
+            font-size: 0.85rem;
+          }
+
+          .role-card-cta {
+            font-size: 0.85rem;
+          }
+
+          .login-link {
+            font-size: 0.85rem;
+          }
+        }
       `}</style>
       </div>
     </>

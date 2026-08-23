@@ -1094,17 +1094,179 @@ function AdminDashboard({ userProfile }) {
         }
 
         @media (max-width: 768px) {
-          .admin-tabs {
+          .admin-dashboard .admin-tabs {
             flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
           }
 
-          .tab {
-            padding: 0.75rem 1rem;
+          .admin-dashboard .tab {
+            flex: 1 1 auto;
+            text-align: center;
+            padding: 0.7rem 0.9rem;
             font-size: 0.9rem;
           }
 
-          .action-buttons {
+          .admin-dashboard .action-buttons {
             flex-direction: column;
+          }
+
+          .admin-dashboard .user-info p,
+          .admin-dashboard .accommodation-info p {
+            font-size: 0.88rem;
+          }
+
+          .admin-dashboard .card-header h3,
+          .admin-dashboard .member-basic h3 {
+            font-size: 1.1rem;
+          }
+
+          .admin-dashboard .header-badges,
+          .admin-dashboard .member-badges {
+            gap: 0.35rem;
+          }
+
+          .admin-dashboard .badge,
+          .admin-dashboard .badge-super-admin,
+          .admin-dashboard .role-badge {
+            font-size: 0.78rem;
+            padding: 0.22rem 0.6rem;
+          }
+
+          .admin-dashboard .member-filters {
+            gap: 0.5rem;
+          }
+
+          .admin-dashboard .member-filter {
+            padding: 0.45rem 0.9rem;
+            font-size: 0.82rem;
+          }
+
+          .admin-dashboard .member-card-header {
+            padding: 1rem 1.1rem;
+            gap: 0.6rem;
+          }
+
+          .admin-dashboard .member-detail {
+            padding: 0 1.1rem 1.1rem;
+          }
+
+          .admin-dashboard .doc-link {
+            font-size: 0.85rem;
+            padding: 0.55rem 0.75rem;
+          }
+
+          .admin-dashboard .resend-row {
+            gap: 0.5rem;
+          }
+
+          .admin-dashboard .resend-btn {
+            font-size: 0.88rem;
+            padding: 0.6rem 1rem;
+          }
+
+          .admin-dashboard .role-change-row {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+          }
+
+          .admin-dashboard .role-change-row select {
+            flex: 1 1 auto;
+            min-width: 0;
+          }
+
+          .admin-dashboard .modal-actions {
+            gap: 0.75rem;
+          }
+
+          .admin-dashboard .modal-actions button {
+            min-width: 0;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .admin-dashboard .container > h1 {
+            margin-bottom: 0.75rem;
+          }
+
+          .admin-dashboard .admin-tabs {
+            gap: 0.4rem;
+            margin: 1.1rem 0;
+          }
+
+          .admin-dashboard .tab {
+            padding: 0.6rem 0.7rem;
+            font-size: 0.82rem;
+          }
+
+          .admin-dashboard .review-section {
+            margin-top: 1.25rem;
+          }
+
+          .admin-dashboard .user-info p,
+          .admin-dashboard .accommodation-info p {
+            font-size: 0.85rem;
+            margin: 0.4rem 0;
+          }
+
+          .admin-dashboard .verification-docs h4 {
+            font-size: 0.9rem;
+          }
+
+          .admin-dashboard .card-header h3,
+          .admin-dashboard .member-basic h3 {
+            font-size: 1.02rem;
+          }
+
+          .admin-dashboard .member-email {
+            font-size: 0.8rem;
+          }
+
+          .admin-dashboard .badge,
+          .admin-dashboard .badge-super-admin,
+          .admin-dashboard .role-badge {
+            font-size: 0.74rem;
+            padding: 0.2rem 0.55rem;
+          }
+
+          .admin-dashboard .member-filter {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.78rem;
+          }
+
+          .admin-dashboard .member-card-header {
+            padding: 0.9rem 1rem;
+          }
+
+          .admin-dashboard .member-notice {
+            font-size: 0.8rem;
+            padding: 0.65rem 0.85rem;
+          }
+
+          .admin-dashboard .doc-link {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.7rem;
+          }
+
+          .admin-dashboard .doc-link span {
+            white-space: normal;
+            overflow-wrap: anywhere;
+          }
+
+          .admin-dashboard .resend-success,
+          .admin-dashboard .resend-error,
+          .admin-dashboard .role-change-busy {
+            font-size: 0.78rem;
+          }
+
+          .admin-dashboard .role-change-row label {
+            font-size: 0.85rem;
+          }
+
+          .admin-dashboard .action-buttons button,
+          .admin-dashboard .action-buttons a {
+            font-size: 0.88rem;
+            padding: 0.65rem 1rem;
           }
         }
       `}</style>

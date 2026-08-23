@@ -112,6 +112,32 @@ function Login() {
           </p>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .signup-form {
+            padding: 1.75rem 1.5rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .signup-container {
+            padding: 1rem 0;
+          }
+
+          .signup-form {
+            padding: 1.5rem 1.25rem;
+          }
+
+          .signup-form .subtitle {
+            font-size: 0.9rem;
+          }
+
+          .signup-form .btn-primary {
+            min-height: 44px;
+          }
+        }
+      `}</style>
       </div>
     </>
   );

@@ -1077,6 +1077,12 @@ function LandingPage() {
             padding: 4.5rem 1.25rem;
           }
 
+          .hero-eyebrow {
+            font-size: 0.85rem;
+            letter-spacing: 0.14em;
+            margin-bottom: 0.85rem;
+          }
+
           .marquee-item {
             width: 180px;
             height: 120px;
@@ -1087,16 +1093,70 @@ function LandingPage() {
             gap: 1.5rem;
           }
 
+          .footer-brand p {
+            max-width: 100%;
+          }
+
           .hero h1 {
-            font-size: 2rem;
+            font-size: 1.75rem;
           }
 
           .hero p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+          }
+
+          /* 히어로 슬라이드 진행 표시가 좁은 화면에서 서로 겹치지 않도록 간격/크기 축소 */
+          .hero-progress {
+            bottom: 1.25rem;
+            gap: 0.6rem;
+          }
+
+          .hero-dot-wrap,
+          .hero-ring {
+            width: 16px;
+            height: 16px;
+          }
+
+          /* 히어로/문의 CTA 버튼은 밑줄 텍스트 스타일이라 탭 영역이 좁으므로
+             상하 여백을 늘려 터치하기 편하도록 보정 */
+          .hero .link-cta {
+            padding: 0.4rem 0 0.55rem;
+          }
+
+          .link-cta-block {
+            padding-top: 0.9rem;
+            padding-bottom: 1.1rem;
             font-size: 1rem;
+          }
+
+          .eyebrow {
+            font-size: 0.7rem;
+          }
+
+          .story {
+            padding: 4rem 0;
+          }
+
+          .story h2 {
+            margin-bottom: 1.75rem;
+          }
+
+          .story p {
+            font-size: 0.95rem;
+            line-height: 1.75;
+          }
+
+          .verse {
+            padding: 1.15rem 1.25rem;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
           }
 
           .about-gallery {
             grid-template-columns: 1fr;
+            margin: 2rem 0 1rem;
           }
 
           .about-gallery .side {
@@ -1110,18 +1170,95 @@ function LandingPage() {
 
           .brand-symbol {
             grid-template-columns: 1fr;
+            padding: 1.25rem;
+            gap: 1.25rem;
           }
 
           .brand-symbol-visual {
             height: 180px;
           }
 
+          .brand-symbol h3 {
+            font-size: 1.1rem;
+          }
+
+          .brand-symbol p {
+            font-size: 0.95rem;
+          }
+
+          .features {
+            padding: 4rem 0;
+          }
+
+          .features h2 {
+            margin-bottom: 2rem;
+          }
+
+          .feature-card {
+            padding: 1.75rem 1.25rem;
+          }
+
+          .feature-icon {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 1rem;
+          }
+
+          .feature-card h3 {
+            font-size: 1.1rem;
+          }
+
+          .feature-card p {
+            font-size: 0.95rem;
+          }
+
+          .process {
+            padding: 4rem 0;
+          }
+
+          .process h2 {
+            margin-bottom: 2rem;
+          }
+
           .process-row {
             grid-template-columns: 50px 1fr;
+            padding: 1.35rem 0;
+            gap: 1rem;
           }
 
           .process-num {
             font-size: 1.5rem;
+          }
+
+          .process-body h3 {
+            font-size: 1.1rem;
+          }
+
+          .process-body p {
+            font-size: 0.95rem;
+          }
+
+          .faq {
+            padding: 4rem 0;
+          }
+
+          .faq h2 {
+            margin-bottom: 1.75rem;
+          }
+
+          .faq-question {
+            padding: 1rem 1.1rem;
+            font-size: 0.95rem;
+            gap: 0.75rem;
+          }
+
+          .faq-answer {
+            padding: 0 1.1rem 1.1rem;
+          }
+
+          .faq-answer p {
+            font-size: 0.9rem;
+            line-height: 1.7;
           }
 
           .contact-grid {
@@ -1129,14 +1266,52 @@ function LandingPage() {
             gap: 2rem;
           }
 
+          .contact-intro h2 {
+            font-size: 1.4rem;
+          }
+
+          .contact-lead {
+            font-size: 1rem;
+          }
+
+          .contact-intro p {
+            font-size: 0.9rem;
+          }
+
           .contact-form-wrap {
             padding: 1.5rem;
+          }
+
+          .contact-form .form-group {
+            margin-bottom: 1rem;
+          }
+
+          .site-footer {
+            padding: 2rem 1.25rem;
           }
         }
 
         @media (max-width: 480px) {
+          .hero {
+            min-height: 480px;
+            padding: 3.5rem 1rem;
+          }
+
+          .hero-eyebrow {
+            font-size: 0.75rem;
+          }
+
           .hero h1 {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
+          }
+
+          .hero p {
+            font-size: 0.9rem;
+          }
+
+          .hero-progress {
+            bottom: 1rem;
+            gap: 0.5rem;
           }
 
           .story,
@@ -1146,8 +1321,53 @@ function LandingPage() {
             padding: 3.5rem 0;
           }
 
+          .story p,
+          .brand-symbol p {
+            font-size: 0.9rem;
+          }
+
+          .verse {
+            padding: 1rem;
+            font-size: 0.9rem;
+          }
+
+          .about-gallery .arch {
+            height: 200px;
+            border-radius: 120px 120px 8px 8px;
+          }
+
+          .brand-symbol {
+            padding: 1rem;
+          }
+
+          .brand-symbol-visual {
+            height: 150px;
+          }
+
+          .feature-card {
+            padding: 1.5rem 1rem;
+          }
+
+          .marquee-item {
+            width: 140px;
+            height: 100px;
+            margin-right: 0.75rem;
+          }
+
           .contact {
             padding: 3.5rem 1.25rem;
+          }
+
+          .contact-form-wrap {
+            padding: 1.25rem;
+          }
+
+          .site-footer {
+            padding: 1.75rem 1rem;
+          }
+
+          .footer-info p {
+            font-size: 0.8rem;
           }
         }
       `}</style>

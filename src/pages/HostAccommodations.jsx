@@ -1125,6 +1125,164 @@ function HostAccommodations({ userProfile }) {
           .custom-amenity-row {
             flex-direction: column;
           }
+
+          .host-accommodations .form-section {
+            padding: 1.25rem;
+          }
+
+          .host-accommodations .host-guideline-box {
+            padding: 1rem 1.1rem;
+          }
+
+          .host-accommodations .host-guideline-box h4 {
+            font-size: 1rem;
+          }
+
+          .host-accommodations .host-guideline-box ul {
+            font-size: 0.9rem;
+          }
+
+          .host-accommodations .image-manager-grid {
+            grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            gap: 0.6rem;
+          }
+
+          .host-accommodations .amenities-picker {
+            padding: 1rem;
+            gap: 1rem;
+          }
+
+          .host-accommodations .amenities-picker-group h4 {
+            font-size: 0.9rem;
+          }
+
+          .host-accommodations .amenity-checkbox {
+            padding: 0.45rem 0.65rem;
+            font-size: 0.82rem;
+          }
+
+          .host-accommodations .custom-amenity-input label {
+            font-size: 0.85rem;
+          }
+
+          .host-accommodations .custom-amenity-chip {
+            font-size: 0.82rem;
+            padding: 0.35rem 0.6rem;
+          }
+
+          .host-accommodations .accommodation-item {
+            padding: 1.1rem;
+          }
+
+          .host-accommodations .item-header {
+            flex-wrap: wrap;
+            gap: 0.75rem;
+          }
+
+          .host-accommodations .item-details p {
+            font-size: 0.9rem;
+          }
+
+          .host-accommodations .form-actions {
+            flex-direction: column;
+          }
+
+          .host-accommodations .form-actions button {
+            max-width: none;
+            width: 100%;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .host-accommodations .form-section {
+            padding: 1rem;
+          }
+
+          .host-accommodations h2 {
+            font-size: 1.4rem;
+          }
+
+          .host-accommodations .host-guideline-box {
+            padding: 0.85rem 1rem;
+            margin: 0.75rem 0 1.25rem;
+          }
+
+          .host-accommodations .host-guideline-box h4 {
+            font-size: 0.95rem;
+          }
+
+          .host-accommodations .host-guideline-box ul {
+            font-size: 0.85rem;
+            line-height: 1.55;
+          }
+
+          .host-accommodations .form-group label {
+            font-size: 0.85rem;
+          }
+
+          .host-accommodations .help-text,
+          .host-accommodations .usage-guide-hint {
+            font-size: 0.8rem;
+          }
+
+          .host-accommodations .image-manager-grid {
+            grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+            gap: 0.5rem;
+          }
+
+          .host-accommodations .image-upload {
+            padding: 1.1rem;
+          }
+
+          .host-accommodations .image-upload-label span {
+            font-size: 0.85rem;
+          }
+
+          .host-accommodations .amenities-picker {
+            padding: 0.85rem;
+            gap: 0.9rem;
+          }
+
+          .host-accommodations .amenity-checkbox {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.78rem;
+          }
+
+          .host-accommodations .accommodation-item {
+            padding: 0.9rem;
+          }
+
+          .host-accommodations .item-header h3 {
+            font-size: 1.05rem;
+          }
+
+          .host-accommodations .item-header p,
+          .host-accommodations .admin-scope-hint,
+          .host-accommodations .admin-host-hint {
+            font-size: 0.8rem;
+          }
+
+          .host-accommodations .item-details p {
+            font-size: 0.85rem;
+            margin: 0.4rem 0;
+          }
+
+          .host-accommodations .status-badge {
+            padding: 0.4rem 0.8rem;
+          }
+
+          .host-accommodations .rejection-notice {
+            padding: 0.85rem;
+            font-size: 0.85rem;
+          }
+
+          .host-accommodations .rejection-notice-hint {
+            font-size: 0.78rem;
+          }
+
+          .host-accommodations .availability-hint {
+            font-size: 0.8rem;
+          }
         }
       `}</style>
     </div>

@@ -585,6 +585,113 @@ function MyBookings({ userProfile }) {
             flex-direction: column;
             align-items: stretch;
           }
+
+          .date-filter-field input {
+            width: 100%;
+          }
+
+          .booking-tabs {
+            gap: 0.25rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            flex-wrap: nowrap;
+          }
+
+          .booking-tab {
+            padding: 0.65rem 0.85rem;
+            font-size: 0.88rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+          }
+
+          .booking-item-header {
+            flex-wrap: wrap;
+          }
+
+          .booking-item-header h3 {
+            font-size: 1.05rem;
+          }
+
+          .total-price {
+            font-size: 1.05rem;
+          }
+
+          .booking-item-actions button,
+          .review-form-actions button {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .review-form-actions {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .my-bookings h1 {
+            font-size: 1.5rem;
+          }
+
+          .booking-tab {
+            padding: 0.55rem 0.7rem;
+            font-size: 0.82rem;
+            gap: 0.3rem;
+          }
+
+          .tab-count {
+            padding: 0.05rem 0.4rem;
+            font-size: 0.72rem;
+          }
+
+          .date-filter {
+            padding: 0.85rem 1rem;
+          }
+
+          .date-filter-field label {
+            font-size: 0.7rem;
+          }
+
+          .date-filter-field input {
+            font-size: 0.85rem;
+            padding: 0.45rem;
+          }
+
+          .booking-item-header h3 {
+            font-size: 1rem;
+          }
+
+          .location,
+          .dates {
+            font-size: 0.85rem;
+          }
+
+          .total-price {
+            font-size: 1rem;
+          }
+
+          .booking-item-detail-cta {
+            font-size: 0.8rem;
+          }
+
+          .booking-item-actions button,
+          .review-open-btn {
+            font-size: 0.85rem;
+            padding: 0.6rem;
+          }
+
+          .review-submitted-header,
+          .review-submitted-comment {
+            font-size: 0.82rem;
+          }
+
+          .review-form textarea {
+            font-size: 0.85rem;
+          }
+
+          .empty-state {
+            padding: 2rem 1.25rem;
+          }
         }
       `}</style>
     </div>

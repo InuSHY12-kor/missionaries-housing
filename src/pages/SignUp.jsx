@@ -339,6 +339,47 @@ function SignUp({ role }) {
           .signup-form {
             padding: 1.5rem;
           }
+
+          .terms-box {
+            height: 150px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .signup-container {
+            padding: 1rem 0;
+          }
+
+          .signup-form {
+            padding: 1.25rem;
+          }
+
+          .signup-form .subtitle {
+            font-size: 0.9rem;
+          }
+
+          .field-hint {
+            font-size: 0.8rem;
+          }
+
+          .terms-box {
+            height: 130px;
+            padding: 0.75rem;
+            font-size: 0.8rem;
+          }
+
+          .form-group input {
+            padding: 0.6rem 0.7rem;
+            font-size: 0.95rem;
+          }
+
+          .signup-form .btn-primary {
+            min-height: 44px;
+          }
+
+          .login-link {
+            font-size: 0.85rem;
+          }
         }
       `}</style>
       </div>

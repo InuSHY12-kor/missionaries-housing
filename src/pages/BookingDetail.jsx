@@ -305,8 +305,86 @@ function BookingDetail({ userProfile }) {
         }
 
         @media (max-width: 768px) {
+          .booking-detail {
+            padding: 1.25rem 0 2rem;
+          }
+
           .booking-detail-grid {
             grid-template-columns: 1fr;
+            gap: 1.25rem;
+          }
+
+          .booking-detail-header {
+            flex-wrap: wrap;
+            gap: 0.75rem;
+          }
+
+          .booking-detail-header h1 {
+            font-size: 1.4rem;
+          }
+
+          .booking-detail-image {
+            max-height: 220px;
+            margin-bottom: 1.25rem;
+          }
+
+          .booking-info-card h2,
+          .usage-guide-card h2,
+          .booking-map-card h2 {
+            font-size: 1rem;
+          }
+
+          .booking-info-row .value {
+            font-size: 0.92rem;
+          }
+
+          .usage-guide-text,
+          .usage-guide-empty {
+            font-size: 0.9rem;
+          }
+
+          .booking-map-card {
+            margin-top: 1.25rem;
+          }
+
+          .booking-map-card .accommodation-map {
+            height: 260px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .back-link {
+            font-size: 0.85rem;
+            margin-bottom: 1.1rem;
+          }
+
+          .booking-detail-header h1 {
+            font-size: 1.3rem;
+          }
+
+          .booking-detail-header .location {
+            font-size: 0.85rem;
+          }
+
+          .booking-detail-image {
+            max-height: 180px;
+          }
+
+          .booking-info-row {
+            padding: 0.6rem 0;
+            gap: 0.6rem;
+          }
+
+          .booking-info-row .label {
+            font-size: 0.72rem;
+          }
+
+          .booking-info-row .value {
+            font-size: 0.88rem;
+          }
+
+          .booking-map-card .accommodation-map {
+            height: 220px;
           }
         }
       `}</style>

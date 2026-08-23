@@ -433,6 +433,63 @@ function CompleteProfile() {
           .signup-form {
             padding: 1.5rem;
           }
+
+          .file-upload {
+            padding: 1.5rem 1rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .signup-container {
+            padding: 1rem 0;
+          }
+
+          .signup-form {
+            padding: 1.25rem;
+          }
+
+          .signup-form .subtitle {
+            font-size: 0.9rem;
+          }
+
+          .role-readonly {
+            padding: 0.7rem 0.85rem;
+            font-size: 0.9rem;
+          }
+
+          .help-text {
+            font-size: 0.8rem;
+          }
+
+          .file-upload {
+            padding: 1.25rem 0.75rem;
+          }
+
+          .file-label {
+            font-size: 0.85rem;
+          }
+
+          .file-label span {
+            font-size: 0.85rem;
+          }
+
+          .file-list h4 {
+            font-size: 0.9rem;
+          }
+
+          .file-list li {
+            padding: 0.6rem 0.75rem;
+            font-size: 0.85rem;
+            gap: 0.5rem;
+          }
+
+          .file-list li span {
+            word-break: break-all;
+          }
+
+          .signup-form .btn-primary {
+            min-height: 44px;
+          }
         }
       `}</style>
       </div>

@@ -180,6 +180,64 @@ function Messages({ userProfile }) {
           font-size: 0.78rem;
           margin: 0;
         }
+
+        @media (max-width: 768px) {
+          .subtitle {
+            font-size: 0.9rem;
+            margin-top: -0.5rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .message-list {
+            gap: 0.85rem;
+          }
+
+          .message-card-header {
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 0.4rem;
+          }
+
+          .message-sender {
+            font-size: 0.92rem;
+          }
+
+          .sender-church {
+            font-size: 0.82rem;
+          }
+
+          .message-context {
+            font-size: 0.8rem;
+          }
+
+          .message-body {
+            font-size: 0.92rem;
+            line-height: 1.5;
+          }
+
+          .message-date {
+            font-size: 0.74rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .message-sender {
+            font-size: 0.88rem;
+          }
+
+          .message-sender span.sender-name {
+            font-size: 0.9rem;
+          }
+
+          .message-body {
+            font-size: 0.88rem;
+          }
+
+          .badge {
+            font-size: 0.72rem;
+            padding: 0.2rem 0.6rem;
+          }
+        }
       `}</style>
     </div>
   );
