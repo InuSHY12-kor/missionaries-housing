@@ -131,8 +131,8 @@ function Navigation({ user, userProfile, onLogout }) {
 
             <ul className="navbar-nav">
               <li><Link to="/" className="nav-btn">홈</Link></li>
-              <li><Link to="/login" className="nav-btn nav-btn-outline">로그인</Link></li>
-              <li><Link to="/signup" className="btn btn-primary">가입하기</Link></li>
+              <li><Link to="/login" className="nav-btn">로그인</Link></li>
+              <li><Link to="/signup" className="nav-btn">가입하기</Link></li>
             </ul>
           </>
         )}

@@ -138,6 +138,48 @@ function LocationPicker({ address, lat, lng, onChange }) {
           overflow: hidden;
           background: #ecf0f1;
         }
+
+        @media (max-width: 768px) {
+          .location-picker-actions {
+            gap: 0.6rem;
+          }
+
+          .location-picker-hint {
+            font-size: 0.82rem;
+          }
+
+          .location-picker-coords {
+            font-size: 0.82rem;
+          }
+
+          .location-picker-map {
+            height: 260px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .location-picker {
+            margin: 0.4rem 0 0.85rem;
+          }
+
+          .location-picker-actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+          }
+
+          .location-picker-hint {
+            font-size: 0.8rem;
+          }
+
+          .location-picker-coords {
+            font-size: 0.8rem;
+          }
+
+          .location-picker-map {
+            height: 220px;
+          }
+        }
       `}</style>
     </div>
   );

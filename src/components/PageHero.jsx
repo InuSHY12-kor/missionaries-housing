@@ -184,6 +184,40 @@ function PageHero({ images, eyebrow, title, subtitle }) {
             font-size: 0.9rem;
           }
         }
+
+        @media (max-width: 480px) {
+          .page-hero {
+            min-height: 220px;
+            margin-bottom: 1.25rem;
+          }
+
+          .page-hero-content {
+            padding: 4.75rem 1.1rem 1.1rem;
+          }
+
+          .page-hero-eyebrow {
+            font-size: 0.7rem;
+          }
+
+          .page-hero-content h2 {
+            font-size: 1.2rem;
+          }
+
+          .page-hero-content p {
+            font-size: 0.85rem;
+            line-height: 1.5;
+          }
+
+          .page-hero-progress {
+            bottom: 0.75rem;
+          }
+
+          .page-hero-dot-wrap,
+          .page-hero-ring {
+            width: 12px;
+            height: 12px;
+          }
+        }
       `}</style>
     </section>
   );

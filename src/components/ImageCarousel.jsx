@@ -142,6 +142,49 @@ const carouselStyles = `
   .carousel-dot.active {
     background: white;
   }
+
+  @media (max-width: 768px) {
+    .carousel-arrow {
+      width: 34px;
+      height: 34px;
+    }
+
+    .carousel-arrow.left {
+      left: 8px;
+    }
+
+    .carousel-arrow.right {
+      right: 8px;
+    }
+
+    .carousel-counter {
+      top: 8px;
+      right: 8px;
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+    }
+
+    .carousel-dots {
+      bottom: 8px;
+      gap: 0.3rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .carousel-arrow {
+      width: 30px;
+      height: 30px;
+    }
+
+    .carousel-placeholder span {
+      font-size: 0.85rem;
+    }
+
+    .carousel-dot {
+      width: 6px;
+      height: 6px;
+    }
+  }
 `;
 
 export default ImageCarousel;

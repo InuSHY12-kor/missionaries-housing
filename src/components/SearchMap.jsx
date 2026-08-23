@@ -226,6 +226,31 @@ function SearchMap({ accommodations, onBoundsChange }) {
           overflow: hidden;
           text-overflow: ellipsis;
         }
+
+        @media (max-width: 768px) {
+          .search-map {
+            height: 300px;
+          }
+
+          .acc-label-pin-inner {
+            padding: 0.3rem 0.6rem;
+          }
+
+          .acc-label-price {
+            font-size: 0.72rem;
+          }
+
+          .acc-label-name {
+            font-size: 0.62rem;
+            max-width: 120px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .search-map {
+            height: 260px;
+          }
+        }
       `}</style>
     </>
   );
