@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Users, Home, MessageCircle, CheckCircle, Edit, Send, XCircle, AlertTriangle } from 'lucide-react';
+import { MapPin, Users, Home, MessageCircle, CheckCircle, Edit, Send, XCircle, AlertTriangle, Trash2 } from 'lucide-react';
 import AccommodationMap from '../components/AccommodationMap';
 import ImageCarousel from '../components/ImageCarousel';
 import Calendar from '../components/Calendar';
@@ -333,7 +333,10 @@ function AccommodationDetail({ userProfile }) {
     ? Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))
     : 0;
 
-  const canEdit = userProfile && (userProfile.role === 'admin' || accommodation.host_id === userProfile.id);
+  const isOwnHost = !!userProfile && accommodation.host_id === userProfile.id;
+  // 관리자는 항상 수정 가능. 호스트 본인은 관리자가 완전히 반려(admin_feedback_type === 'rejection')한
+  // 숙소는 수정할 수 없고, 삭제 후 재등록만 가능합니다 ("내 숙소" 페이지에서 삭제).
+  const canEdit = userProfile && (userProfile.role === 'admin' || (isOwnHost && accommodation.admin_feedback_type !== 'rejection'));
   const matchedAmenities = (accommodation.amenities || [])
     .map(key => AMENITY_MAP[key])
     .filter(Boolean);
@@ -370,6 +373,12 @@ function AccommodationDetail({ userProfile }) {
                 <Link to={`/my-accommodations?edit=${accommodation.id}`} className="btn btn-secondary edit-btn">
                   <Edit size={16} />
                   수정하기
+                </Link>
+              )}
+              {isOwnHost && userProfile?.role !== 'admin' && accommodation.admin_feedback_type === 'rejection' && (
+                <Link to="/my-accommodations" className="btn btn-secondary edit-btn">
+                  <Trash2 size={16} />
+                  반려됨 · 삭제 후 재등록
                 </Link>
               )}
             </div>
@@ -548,6 +557,29 @@ function AccommodationDetail({ userProfile }) {
                 )}
 
                 <Link to="/admin" className="admin-review-back">관리자 대시보드로 돌아가기</Link>
+              </div>
+            ) : isOwnHost ? (
+              // 본인이 등록한 숙소는 예약할 수 없습니다. 승인 전(반려 포함)에는 예약하기 버튼 대신
+              // 안내 문구만 보여줍니다 — "내 숙소"에서 열람했을 때 활성화된 예약 버튼이 보이던 버그 수정.
+              <div className="booking-card owner-notice-card">
+                <h3>예약 안내</h3>
+                {accommodation.status !== 'approved' ? (
+                  <>
+                    <p className="owner-notice-text">관리자 승인 후 이용 가능합니다.</p>
+                    {accommodation.admin_feedback_type === 'rejection' && (
+                      <p className="owner-notice-text owner-notice-sub">
+                        이 숙소는 반려되었습니다. 수정은 불가하며, "내 숙소"에서 삭제 후 다시 등록해주세요.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="owner-notice-text">본인이 등록한 숙소는 예약할 수 없습니다.</p>
+                )}
+              </div>
+            ) : accommodation.status !== 'approved' ? (
+              <div className="booking-card owner-notice-card">
+                <h3>예약 안내</h3>
+                <p className="owner-notice-text">관리자 승인 후 이용 가능합니다.</p>
               </div>
             ) : (
             <div className="booking-card">
@@ -929,6 +961,34 @@ function AccommodationDetail({ userProfile }) {
           border-radius: 8px;
           padding: 1.5rem;
           box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .owner-notice-card {
+          text-align: center;
+        }
+
+        .owner-notice-card h3 {
+          margin: 0 0 1rem;
+          font-size: 1.1rem;
+          color: #2c3e50;
+        }
+
+        .owner-notice-text {
+          background: #fdf8f1;
+          border: 1px solid #f0dcc0;
+          border-radius: 6px;
+          padding: 0.9rem 1rem;
+          color: #b8622c;
+          font-size: 0.9rem;
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        .owner-notice-sub {
+          margin-top: 0.6rem;
+          background: #fadbd8;
+          border-color: #f1b3ac;
+          color: #922b21;
         }
 
         .price-header {
