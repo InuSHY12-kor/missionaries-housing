@@ -70,7 +70,16 @@ function Dashboard({ userProfile }) {
   // 선교사(및 관리자)는 예약할 수 있는 숙소 목록으로 이동하고, 호스트는 본인이 등록한 숙소 목록으로 이동하므로
   // 카드 문구도 그에 맞게 다르게 표시합니다.
   const accommodationsLabel = canSearchAccommodations ? '예약 가능한 숙소' : '등록된 숙소';
-  const bookingsLink = userProfile?.role === 'host' ? '/host-bookings' : '/my-bookings';
+  // "예약" 카드에 표시되는 숫자(totalBookings)는 관리자의 경우 RLS 정책상 플랫폼 전체 예약 수를
+  // 의미합니다. 예전에는 이 카드를 눌러도 관리자 본인이 "게스트"로 등록한 예약만 보여주는
+  // /my-bookings로 이동해 카드에 적힌 숫자와 실제로 보이는 목록의 개수가 서로 달랐습니다(대부분 0건).
+  // 그래서 관리자는 전체 예약을 실제로 확인/조정할 수 있는 관리자 대시보드의 "전체 예약" 탭으로
+  // 보내 숫자와 목록이 항상 일치하도록 합니다.
+  const bookingsLink = userProfile?.role === 'admin'
+    ? '/admin?tab=bookings'
+    : userProfile?.role === 'host'
+      ? '/host-bookings'
+      : '/my-bookings';
 
   return (
     <div className="dashboard">

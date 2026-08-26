@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../App';
 import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning } from 'lucide-react';
 import PageHero from '../components/PageHero';
@@ -25,8 +25,14 @@ const MEMBER_FILTERS = [
   { key: 'admin', label: '관리자' }
 ];
 
+// 다른 페이지(마이페이지 통계 카드 등)에서 /admin?tab=bookings 처럼 특정 탭으로 바로
+// 이동할 수 있도록 지원하는 탭 키 목록.
+const VALID_TABS = ['users', 'accommodations', 'inquiries', 'deletions', 'members', 'bookings'];
+
 function AdminDashboard({ userProfile }) {
-  const [activeTab, setActiveTab] = useState('users');
+  const [searchParams] = useSearchParams();
+  const initialTab = VALID_TABS.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'users';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [users, setUsers] = useState([]);
   const [accommodations, setAccommodations] = useState([]);
   const [inquiries, setInquiries] = useState([]);
@@ -86,6 +92,17 @@ function AdminDashboard({ userProfile }) {
   useEffect(() => {
     fetchAllCounts();
   }, []);
+
+  // 관리자 대시보드는 /admin 경로 하나만 사용하므로, 다른 화면(마이페이지 통계 카드 등)에서
+  // 쿼리스트링(예: /admin?tab=bookings)으로 이동해 오는 경우 이미 관리자 대시보드가 마운트되어
+  // 있어도(예: 같은 페이지에서 다시 이동) 요청한 탭으로 전환되도록 동기화합니다.
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && VALID_TABS.includes(tab)) {
+      setActiveTab(tab);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const fetchAllCounts = async () => {
     try {
