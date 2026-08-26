@@ -51,11 +51,11 @@ function Navigation({ user, userProfile, onLogout }) {
     '/login', '/signup', '/signup/missionary', '/signup/host',
     '/signup-complete', '/verify-email', '/complete-profile'
   ];
-  // 관리자 페이지(/admin/*)와 숙소 상세 페이지(/accommodations/:id)는 하위 경로가
-  // 동적으로 바뀌므로 접두사로 매칭합니다. 예약 상세(/my-bookings/:id)는 별도 배너가
-  // 없으므로 여기에 포함하지 않습니다.
+  // 관리자 페이지(/admin/*), 숙소 상세 페이지(/accommodations/:id), 예약 상세 페이지
+  // (/my-bookings/:id)는 하위 경로가 동적으로 바뀌므로 접두사로 매칭합니다.
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isAccommodationDetailRoute = location.pathname.startsWith('/accommodations/');
+  const isBookingDetailRoute = location.pathname.startsWith('/my-bookings/');
   // 승인 대기 화면과 프로필 등록 화면은 고정된 경로 없이 "*" 라우트로 렌더링되므로
   // (App.jsx 참고) 경로가 아니라 로그인 상태(userProfile)로 판별해야 합니다.
   const isCompleteProfileScreen = !!user && !userProfile;
@@ -65,6 +65,7 @@ function Navigation({ user, userProfile, onLogout }) {
   const hasHeroBanner = HERO_BANNER_ROUTES.includes(location.pathname)
     || isAdminRoute
     || isAccommodationDetailRoute
+    || isBookingDetailRoute
     || isCompleteProfileScreen
     || isPendingApprovalScreen;
 

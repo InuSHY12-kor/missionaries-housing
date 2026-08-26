@@ -3,6 +3,14 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { MapPin, Calendar as CalendarIcon, ArrowLeft, Info, Phone, User } from 'lucide-react';
 import AccommodationMap from '../components/AccommodationMap';
+import PageHero from '../components/PageHero';
+
+// 예약 상세 페이지 상단 슬라이드 배너 사진 (다른 상세 페이지들과 동일한 테마 적용)
+const BOOKING_DETAIL_HERO_IMAGES = [
+  'https://images.pexels.com/photos/7746101/pexels-photo-7746101.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/34287271/pexels-photo-34287271.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/4170056/pexels-photo-4170056.jpeg?auto=compress&cs=tinysrgb&w=1600',
+];
 
 const STATUS_LABEL = {
   pending: '예약됨',
@@ -81,6 +89,12 @@ function BookingDetail({ userProfile }) {
 
   return (
     <div className="booking-detail">
+      <PageHero
+        images={BOOKING_DETAIL_HERO_IMAGES}
+        eyebrow="BOOKING DETAILS"
+        title={accommodation?.title || '예약 상세 정보'}
+        subtitle={accommodation?.location || '체류 일정과 이용 안내를 확인해보세요'}
+      />
       <div className="container">
         <Link to="/my-bookings" className="back-link">
           <ArrowLeft size={16} />
@@ -179,7 +193,6 @@ function BookingDetail({ userProfile }) {
       <style>{`
         .booking-detail {
           flex: 1;
-          padding: 2rem 0 3rem;
         }
 
         .back-link {
@@ -305,10 +318,6 @@ function BookingDetail({ userProfile }) {
         }
 
         @media (max-width: 768px) {
-          .booking-detail {
-            padding: 1.25rem 0 2rem;
-          }
-
           .booking-detail-grid {
             grid-template-columns: 1fr;
             gap: 1.25rem;
