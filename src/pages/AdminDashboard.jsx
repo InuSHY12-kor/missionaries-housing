@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning } from 'lucide-react';
 import PageHero from '../components/PageHero';
+import AmenityIcon from '../components/AmenityIcon';
+import { AMENITY_MAP } from '../utils/amenities';
 
 const ADMIN_HERO_IMAGES = [
   'https://images.pexels.com/photos/8353764/pexels-photo-8353764.jpeg?auto=compress&cs=tinysrgb&w=1600',
@@ -477,7 +479,27 @@ function AdminDashboard({ userProfile }) {
                       <p><strong>설명:</strong> {acc.description?.substring(0, 100)}...</p>
                       <p><strong>수용인원:</strong> {acc.capacity}명</p>
                       <p><strong>사진:</strong> {acc.images?.length || 0}장</p>
-                      <p><strong>편의시설:</strong> {acc.amenities?.join(', ')}</p>
+                      <p className="amenity-line">
+                        <strong>편의시설:</strong>{' '}
+                        {acc.amenities && acc.amenities.length > 0 ? (
+                          <span className="amenity-tags">
+                            {acc.amenities.slice(0, 3).map(key => {
+                              const item = AMENITY_MAP[key];
+                              return (
+                                <span key={key} className="amenity-tag">
+                                  <AmenityIcon name={item?.icon} size={14} />
+                                  {item?.label || key}
+                                </span>
+                              );
+                            })}
+                            {acc.amenities.length > 3 && (
+                              <span className="amenity-tag-more">, ...</span>
+                            )}
+                          </span>
+                        ) : (
+                          <span className="amenity-tags-empty">없음</span>
+                        )}
+                      </p>
                     </div>
 
                     <div className="action-buttons">
@@ -840,6 +862,37 @@ function AdminDashboard({ userProfile }) {
         .user-info p, .accommodation-info p {
           margin: 0.5rem 0;
           font-size: 0.95rem;
+        }
+
+        .amenity-tags {
+          display: inline-flex;
+          flex-wrap: wrap;
+          gap: 0.4rem;
+          vertical-align: middle;
+        }
+
+        .amenity-tag {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.3rem;
+          background: #fdf8f1;
+          border: 1px solid #f0dcc0;
+          color: #b8622c;
+          padding: 0.2rem 0.55rem;
+          border-radius: 999px;
+          font-size: 0.82rem;
+          line-height: 1.4;
+        }
+
+        .amenity-tag-more {
+          color: #95a5a6;
+          font-size: 0.85rem;
+          align-self: center;
+        }
+
+        .amenity-tags-empty {
+          color: #95a5a6;
+          font-size: 0.9rem;
         }
 
         .verification-docs {
