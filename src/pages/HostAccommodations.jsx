@@ -162,6 +162,12 @@ function HostAccommodations({ userProfile }) {
   }, [fetchAccommodations]);
 
   const handleEdit = useCallback((accommodation) => {
+    // 관리자가 완전히 반려(admin_feedback_type === 'rejection')한 숙소는 수정할 수 없습니다.
+    // (DB 정책에서도 동일하게 차단되지만, 사용자에게 즉시 안내하기 위해 프론트에서도 막습니다)
+    if (accommodation.admin_feedback_type === 'rejection') {
+      alert('반려된 숙소는 수정할 수 없습니다. 삭제 후 새로 등록해주세요.');
+      return;
+    }
     setFormData({
       title: accommodation.title,
       description: accommodation.description,
@@ -680,7 +686,9 @@ function HostAccommodations({ userProfile }) {
                     <strong>{accommodation.admin_feedback_type === 'revision' ? '관리자 수정 요청' : '관리자 거절 사유'}:</strong>{' '}
                     {accommodation.rejection_reason}
                     <p className="rejection-notice-hint">
-                      아래 "수정" 버튼으로 내용을 반영해 다시 제출하시면 검토가 재진행됩니다. 승인 전까지는 계속 승인 대기중 상태로 유지됩니다.
+                      {accommodation.admin_feedback_type === 'revision'
+                        ? '아래 "수정" 버튼으로 내용을 반영해 다시 제출하시면 검토가 재진행됩니다. 승인 전까지는 계속 승인 대기중 상태로 유지됩니다.'
+                        : '반려된 숙소는 더 이상 수정할 수 없습니다. 아래 "삭제" 버튼으로 삭제한 뒤, 반려 사유를 반영해 새로 등록해주세요.'}
                     </p>
                   </div>
                 )}
@@ -697,13 +705,15 @@ function HostAccommodations({ userProfile }) {
                     <CalendarClock size={16} />
                     날짜 관리
                   </button>
-                  <button
-                    className="btn btn-warning"
-                    onClick={() => handleEdit(accommodation)}
-                  >
-                    <Edit size={16} />
-                    수정
-                  </button>
+                  {accommodation.admin_feedback_type !== 'rejection' && (
+                    <button
+                      className="btn btn-warning"
+                      onClick={() => handleEdit(accommodation)}
+                    >
+                      <Edit size={16} />
+                      수정
+                    </button>
+                  )}
                   <button
                     className="btn btn-danger"
                     onClick={() => handleDelete(accommodation.id)}
