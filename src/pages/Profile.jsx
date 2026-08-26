@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../App';
 import { User, Phone, Building2, Save } from 'lucide-react';
 import PageHero from '../components/PageHero';
+import { formatPhoneNumber } from '../utils/phone';
 
 // 프로필 페이지 상단 슬라이드 배너 사진
 const PROFILE_HERO_IMAGES = [
@@ -91,7 +92,8 @@ function Profile({ userProfile }) {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      // 전화번호는 입력하는 즉시 010-0000-0000 형태로 자동 하이픈을 넣어줍니다.
+      [name]: name === 'phone' ? formatPhoneNumber(value) : value
     }));
   };
 
@@ -230,6 +232,7 @@ function Profile({ userProfile }) {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
+                    maxLength={13}
                   />
                 </div>
 

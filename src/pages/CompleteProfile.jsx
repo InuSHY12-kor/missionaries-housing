@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../App';
 import { Upload, AlertCircle } from 'lucide-react';
 import PageHero from '../components/PageHero';
+import { formatPhoneNumber } from '../utils/phone';
 
 const COMPLETE_PROFILE_HERO_IMAGES = [
   'https://images.pexels.com/photos/30851143/pexels-photo-30851143.jpeg?auto=compress&cs=tinysrgb&w=1600',
@@ -24,6 +25,7 @@ function CompleteProfile() {
     churchName: '',
     churchAddress: '',
     phone: '',
+    bio: '',
     verificationFiles: []
   });
 
@@ -68,7 +70,8 @@ function CompleteProfile() {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      // 전화번호는 입력하는 즉시 010-0000-0000 형태로 자동 하이픈을 넣어줍니다.
+      [name]: name === 'phone' ? formatPhoneNumber(value) : value
     }));
   };
 
@@ -128,6 +131,7 @@ function CompleteProfile() {
           church_name: formData.churchName,
           church_address: formData.churchAddress,
           phone: formData.phone,
+          bio: formData.bio || null,
           status: 'pending',
           verification_docs: uploadedFileUrls,
           created_at: new Date().toISOString()
@@ -224,6 +228,7 @@ function CompleteProfile() {
                 value={formData.phone}
                 onChange={handleInputChange}
                 placeholder="010-1234-5678"
+                maxLength={13}
                 required
               />
             </div>
@@ -248,6 +253,17 @@ function CompleteProfile() {
                 value={formData.churchAddress}
                 onChange={handleInputChange}
                 placeholder="서울시 강남구..."
+              />
+            </div>
+
+            <div className="form-group">
+              <label>자기소개</label>
+              <textarea
+                name="bio"
+                value={formData.bio}
+                onChange={handleInputChange}
+                rows="4"
+                placeholder="다른 회원들에게 보여질 간단한 자기소개를 입력해주세요 (선택)"
               />
             </div>
 
