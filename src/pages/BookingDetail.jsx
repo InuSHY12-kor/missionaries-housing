@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Calendar as CalendarIcon, ArrowLeft, Info, Phone, User } from 'lucide-react';
+import { MapPin, Calendar as CalendarIcon, ArrowLeft, Info, Phone, User, CreditCard } from 'lucide-react';
 import AccommodationMap from '../components/AccommodationMap';
 import PageHero from '../components/PageHero';
 
@@ -22,6 +22,19 @@ const STATUS_BADGE_CLASS = {
   pending: 'badge-warning',
   confirmed: 'badge-success',
   cancelled: 'badge-danger'
+};
+
+// 예약이 확정(confirmed)된 후, 숙박비 전액 결제가 완료됐는지 여부를 나타내는 배지.
+const PAYMENT_STATUS_LABEL = {
+  unpaid: '미결제',
+  paid: '결제 완료',
+  refunded: '환불됨'
+};
+
+const PAYMENT_STATUS_BADGE_CLASS = {
+  unpaid: 'badge-warning',
+  paid: 'badge-success',
+  refunded: 'badge-info'
 };
 
 function formatDate(dateStr) {
@@ -111,9 +124,16 @@ function BookingDetail({ userProfile }) {
               </p>
             )}
           </div>
-          <span className={`badge ${STATUS_BADGE_CLASS[booking.status] || 'badge-info'}`}>
-            {STATUS_LABEL[booking.status] || booking.status}
-          </span>
+          <div className="booking-detail-badges">
+            <span className={`badge ${STATUS_BADGE_CLASS[booking.status] || 'badge-info'}`}>
+              {STATUS_LABEL[booking.status] || booking.status}
+            </span>
+            {booking.status === 'confirmed' && (
+              <span className={`badge ${PAYMENT_STATUS_BADGE_CLASS[booking.payment_status] || 'badge-info'}`}>
+                {PAYMENT_STATUS_LABEL[booking.payment_status] || booking.payment_status}
+              </span>
+            )}
+          </div>
         </div>
 
         {accommodation?.images?.[0] && (
@@ -154,6 +174,13 @@ function BookingDetail({ userProfile }) {
                   <p className="value">{host.phone}</p>
                 </div>
               </div>
+            )}
+
+            {booking.status === 'confirmed' && booking.payment_status !== 'paid' && booking.guest_id === userProfile?.id && (
+              <Link to={`/my-bookings/${booking.id}/pay`} className="btn btn-primary booking-detail-pay-link">
+                <CreditCard size={16} />
+                숙박비 결제하기
+              </Link>
             )}
 
             {accommodation?.id && (
@@ -229,6 +256,13 @@ function BookingDetail({ userProfile }) {
           margin: 0;
         }
 
+        .booking-detail-badges {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 0.4rem;
+        }
+
         .booking-detail-image {
           width: 100%;
           max-height: 360px;
@@ -293,8 +327,12 @@ function BookingDetail({ userProfile }) {
           font-weight: 600;
         }
 
+        .booking-detail-pay-link,
         .booking-detail-listing-link {
-          display: block;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
           text-align: center;
           margin-top: 1rem;
         }

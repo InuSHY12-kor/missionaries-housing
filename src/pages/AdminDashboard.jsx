@@ -18,6 +18,9 @@ const DELETION_GRACE_PERIOD_DAYS = 15;
 const ROLE_LABEL = { admin: '관리자', host: '호스트', missionary: '선교사' };
 const BOOKING_STATUS_LABEL = { pending: '예약됨', confirmed: '예약 확정됨', cancelled: '취소됨' };
 const BOOKING_STATUS_BADGE = { pending: 'badge-warning', confirmed: 'badge-success', cancelled: 'badge-danger' };
+// 예약이 확정(confirmed)된 후, 게스트의 숙박비 결제가 완료됐는지 여부를 관리자가 확인할 수 있는 배지.
+const PAYMENT_STATUS_LABEL = { unpaid: '미결제', paid: '결제 완료', refunded: '환불됨' };
+const PAYMENT_STATUS_BADGE = { unpaid: 'badge-warning', paid: 'badge-success', refunded: 'badge-info' };
 const MEMBER_FILTERS = [
   { key: 'all', label: '전체' },
   { key: 'missionary', label: '선교사' },
@@ -762,9 +765,16 @@ function AdminDashboard({ userProfile }) {
                   <div key={booking.id} className="card booking-admin-card">
                     <div className="card-header">
                       <h3>{booking.accommodations?.title || '삭제된 숙소'}</h3>
-                      <span className={`badge ${BOOKING_STATUS_BADGE[booking.status] || 'badge-info'}`}>
-                        {BOOKING_STATUS_LABEL[booking.status] || booking.status}
-                      </span>
+                      <div className="booking-admin-badges">
+                        <span className={`badge ${BOOKING_STATUS_BADGE[booking.status] || 'badge-info'}`}>
+                          {BOOKING_STATUS_LABEL[booking.status] || booking.status}
+                        </span>
+                        {booking.status === 'confirmed' && (
+                          <span className={`badge ${PAYMENT_STATUS_BADGE[booking.payment_status] || 'badge-info'}`}>
+                            {PAYMENT_STATUS_LABEL[booking.payment_status] || booking.payment_status}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="user-info">
                       <p><strong>위치:</strong> {booking.accommodations?.location || '-'}</p>
@@ -867,6 +877,13 @@ function AdminDashboard({ userProfile }) {
         .user-card, .accommodation-card, .inquiry-card, .booking-admin-card {
           display: flex;
           flex-direction: column;
+        }
+
+        .booking-admin-badges {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.4rem;
+          margin-top: 0.5rem;
         }
 
         .user-info, .accommodation-info {
