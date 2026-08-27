@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Calendar as CalendarIcon, XCircle, Filter, X, Heart, MessageCircle } from 'lucide-react';
+import { MapPin, Calendar as CalendarIcon, XCircle, Filter, X, Heart, MessageCircle, CreditCard } from 'lucide-react';
 import PageHero from '../components/PageHero';
 
 // 내 예약 페이지 상단 슬라이드 배너 사진
@@ -21,6 +21,19 @@ const STATUS_BADGE_CLASS = {
   pending: 'badge-warning',
   confirmed: 'badge-success',
   cancelled: 'badge-danger'
+};
+
+// 예약이 확정(confirmed)된 후, 숙박비 전액 결제가 완료됐는지 여부를 나타내는 배지.
+const PAYMENT_STATUS_LABEL = {
+  unpaid: '미결제',
+  paid: '결제 완료',
+  refunded: '환불됨'
+};
+
+const PAYMENT_STATUS_BADGE_CLASS = {
+  unpaid: 'badge-warning',
+  paid: 'badge-success',
+  refunded: 'badge-info'
 };
 
 const TABS = [
@@ -214,9 +227,16 @@ function MyBookings({ userProfile }) {
                         </p>
                       )}
                     </div>
-                    <span className={`badge ${STATUS_BADGE_CLASS[booking.status] || 'badge-info'}`}>
-                      {STATUS_LABEL[booking.status] || booking.status}
-                    </span>
+                    <div className="booking-item-badges">
+                      <span className={`badge ${STATUS_BADGE_CLASS[booking.status] || 'badge-info'}`}>
+                        {STATUS_LABEL[booking.status] || booking.status}
+                      </span>
+                      {booking.status === 'confirmed' && (
+                        <span className={`badge ${PAYMENT_STATUS_BADGE_CLASS[booking.payment_status] || 'badge-info'}`}>
+                          {PAYMENT_STATUS_LABEL[booking.payment_status] || booking.payment_status}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="booking-item-body">
@@ -232,6 +252,12 @@ function MyBookings({ userProfile }) {
 
                 {booking.status !== 'cancelled' && (
                   <div className="booking-item-actions">
+                    {booking.status === 'confirmed' && booking.payment_status !== 'paid' && (
+                      <Link to={`/my-bookings/${booking.id}/pay`} className="btn btn-primary">
+                        <CreditCard size={16} />
+                        결제하기
+                      </Link>
+                    )}
                     <button className="btn btn-danger" onClick={() => handleCancel(booking.id)}>
                       <XCircle size={16} />
                       예약 취소
@@ -453,6 +479,13 @@ function MyBookings({ userProfile }) {
           margin-bottom: 0.5rem;
         }
 
+        .booking-item-badges {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 0.4rem;
+        }
+
         .location {
           display: flex;
           align-items: center;
@@ -487,11 +520,15 @@ function MyBookings({ userProfile }) {
         .booking-item-actions {
           border-top: 1px solid #ecf0f1;
           padding-top: 1rem;
+          display: flex;
+          gap: 0.75rem;
         }
 
-        .booking-item-actions button {
+        .booking-item-actions button,
+        .booking-item-actions a {
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 0.5rem;
         }
 
@@ -616,7 +653,12 @@ function MyBookings({ userProfile }) {
             font-size: 1.05rem;
           }
 
+          .booking-item-actions {
+            flex-direction: column;
+          }
+
           .booking-item-actions button,
+          .booking-item-actions a,
           .review-form-actions button {
             width: 100%;
             justify-content: center;
@@ -675,6 +717,7 @@ function MyBookings({ userProfile }) {
           }
 
           .booking-item-actions button,
+          .booking-item-actions a,
           .review-open-btn {
             font-size: 0.85rem;
             padding: 0.6rem;
