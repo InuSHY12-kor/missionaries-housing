@@ -18,6 +18,9 @@ import AccommodationDetail from './pages/AccommodationDetail';
 import HostAccommodations from './pages/HostAccommodations';
 import MyBookings from './pages/MyBookings';
 import BookingDetail from './pages/BookingDetail';
+import BookingCheckout from './pages/BookingCheckout';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentFail from './pages/PaymentFail';
 import HostBookings from './pages/HostBookings';
 import Reviews from './pages/Reviews';
 import Messages from './pages/Messages';
@@ -289,6 +292,9 @@ function App() {
           />
           <Route path="/my-bookings" element={<MyBookings userProfile={userProfile} />} />
           <Route path="/my-bookings/:id" element={<BookingDetail userProfile={userProfile} />} />
+          <Route path="/my-bookings/:id/pay" element={<BookingCheckout userProfile={userProfile} />} />
+          <Route path="/payment/success" element={<PaymentSuccess userProfile={userProfile} />} />
+          <Route path="/payment/fail" element={<PaymentFail userProfile={userProfile} />} />
           <Route
             path="/my-accommodations"
             element={canManageAccommodations ? <HostAccommodations userProfile={userProfile} /> : <Navigate to="/dashboard" replace />}
