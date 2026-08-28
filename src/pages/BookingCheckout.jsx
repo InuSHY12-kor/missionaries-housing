@@ -2,6 +2,14 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { ArrowLeft, ShieldCheck } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+// 결제 페이지 상단 슬라이드 배너 사진 (다른 상세 페이지들과 동일한 테마 적용)
+const BOOKING_CHECKOUT_HERO_IMAGES = [
+  'https://images.pexels.com/photos/7746101/pexels-photo-7746101.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/34287271/pexels-photo-34287271.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/4170056/pexels-photo-4170056.jpeg?auto=compress&cs=tinysrgb&w=1600',
+];
 
 // 토스페이먼츠 결제위젯(v1) SDK. 이미 로드되어 있으면 재사용하고, 아니면 한 번만 로드합니다.
 const TOSS_WIDGET_SCRIPT_SRC = 'https://js.tosspayments.com/v1/payment-widget';
@@ -139,6 +147,12 @@ function BookingCheckout({ userProfile }) {
 
   return (
     <div className="booking-checkout">
+      <PageHero
+        images={BOOKING_CHECKOUT_HERO_IMAGES}
+        eyebrow="PAYMENT"
+        title={booking.accommodations?.title || '숙박비 결제'}
+        subtitle="예약이 확정된 숙소의 숙박비 전액을 결제합니다"
+      />
       <div className="container">
         <Link to={`/my-bookings/${booking.id}`} className="back-link">
           <ArrowLeft size={16} />
@@ -176,6 +190,7 @@ function BookingCheckout({ userProfile }) {
         ) : widgetError ? (
           <div className="card checkout-notice">
             <p>{widgetError}</p>
+            <Link to={`/my-bookings/${booking.id}`} className="btn btn-secondary">예약 상세로 돌아가기</Link>
           </div>
         ) : (
           <div className="card checkout-widget-card">
@@ -197,7 +212,6 @@ function BookingCheckout({ userProfile }) {
       <style>{`
         .booking-checkout {
           flex: 1;
-          padding: 2rem 0 4rem;
         }
 
         .back-link {
@@ -284,10 +298,6 @@ function BookingCheckout({ userProfile }) {
         }
 
         @media (max-width: 480px) {
-          .booking-checkout {
-            padding: 1.5rem 0 3rem;
-          }
-
           .booking-checkout h1 {
             font-size: 1.4rem;
           }
