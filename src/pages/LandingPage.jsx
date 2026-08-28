@@ -436,7 +436,7 @@ function LandingPage() {
           </div>
 
           <div className="footer-info">
-            <p>비영리단체 WEWE · 대표 홍현지</p>
+            <p>비영리단체 WEWE (위로자의 위로자) · 대표 홍현지</p>
             <p>사업자(고유번호) 501-82-75164</p>
             <p>주소 서울특별시 종로구 대학로12길 61, 5층 501-176A호(동승동, 계우빌딩)</p>
             <p>전화 [연락처 입력 필요] · 이메일 wewe@wewestay.com</p>
