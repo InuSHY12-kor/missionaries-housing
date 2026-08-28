@@ -10,6 +10,7 @@ import SignupComplete from './pages/SignupComplete';
 import Login from './pages/Login';
 import CompleteProfile from './pages/CompleteProfile';
 import PendingApproval from './pages/PendingApproval';
+import AccountStatus from './pages/AccountStatus';
 import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -268,6 +269,10 @@ function App() {
           }
         />
       );
+    } else if (userProfile.status === 'withdrawn' || userProfile.status === 'deletion_pending') {
+      // withdrawn: 탈퇴 처리 완료(5년 보관 후 자동 삭제) / deletion_pending: 관리자가 사유를
+      // 입력해 삭제 처리 — 본인이 사유를 확인해야 계정이 완전히 삭제됨
+      authenticatedRoutes = <Route path="*" element={<AccountStatus userProfile={userProfile} onLogout={handleLogout} />} />;
     } else if (userProfile.status === 'approved' && userProfile.email_verified_at) {
       authenticatedRoutes = (
         <>
