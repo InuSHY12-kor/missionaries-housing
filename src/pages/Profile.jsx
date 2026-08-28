@@ -12,6 +12,8 @@ const PROFILE_HERO_IMAGES = [
 ];
 
 const DELETION_GRACE_PERIOD_DAYS = 15;
+// 탈퇴 처리 완료 후 개인정보를 보관하는 기간(년). 이용약관 개인정보 보호 조항과 동일한 값이어야 함.
+const WITHDRAWAL_RETENTION_YEARS = 5;
 
 function roleLabel(profile) {
   if (profile?.role === 'admin') {
@@ -49,6 +51,16 @@ function Profile({ userProfile }) {
     ? new Date(
         new Date(deletionRequestedAt).getTime() +
           DELETION_GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000
+      )
+    : null;
+
+  // 유예기간이 끝나 탈퇴 처리(withdrawn)된 시점부터 개인정보가 보관되는 기간이 지나면
+  // 자동으로 완전히 삭제됩니다. 실제 탈퇴 처리 시점은 유예기간이 끝나야 확정되므로,
+  // 여기서는 예정일을 기준으로 한 예상 완전 삭제일을 안내용으로 미리 보여줍니다.
+  const deletionPurgeProjectedFor = deletionScheduledFor
+    ? new Date(
+        deletionScheduledFor.getTime() +
+          WITHDRAWAL_RETENTION_YEARS * 365 * 24 * 60 * 60 * 1000
       )
     : null;
 
@@ -319,8 +331,10 @@ function Profile({ userProfile }) {
         <div className="account-deletion-footer">
           {deletionRequestedAt ? (
             <p>
-              계정 삭제가 예정되어 있습니다 ({deletionScheduledFor.toLocaleDateString()}에 자동 삭제,
-              또는 관리자 승인 시 그 전에 삭제될 수 있습니다).{' '}
+              계정 탈퇴가 예정되어 있습니다 ({deletionScheduledFor.toLocaleDateString()}에 탈퇴 처리,
+              또는 관리자 승인 시 그 전에 처리될 수 있습니다). 탈퇴 처리 후에는 개인정보가{' '}
+              {WITHDRAWAL_RETENTION_YEARS}년간 보관되며(약 {deletionPurgeProjectedFor.toLocaleDateString()}
+              경 완전 삭제 예정), 그 전까지는 계정을 정상적으로 계속 이용할 수 있습니다.{' '}
               <button
                 type="button"
                 className="link-button"
@@ -336,7 +350,7 @@ function Profile({ userProfile }) {
               className="link-button"
               onClick={() => setShowDeleteModal(true)}
             >
-              계정 삭제
+              계정 탈퇴
             </button>
           )}
         </div>
@@ -346,12 +360,17 @@ function Profile({ userProfile }) {
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <h2>계정 삭제를 요청하시겠어요?</h2>
+              <h2>계정 탈퇴를 요청하시겠어요?</h2>
             </div>
             <p>
-              삭제를 요청하면 오늘로부터 {DELETION_GRACE_PERIOD_DAYS}일 후 계정과 관련된 모든 데이터가
-              자동으로 영구 삭제됩니다(관리자가 먼저 승인하면 그 전에 삭제될 수도 있습니다). 그 전까지는
-              계정을 정상적으로 계속 이용할 수 있고, 언제든지 이 페이지에서 삭제 요청을 취소할 수 있습니다.
+              탈퇴를 요청하면 오늘로부터 {DELETION_GRACE_PERIOD_DAYS}일 후 탈퇴 처리가 완료됩니다(관리자가
+              먼저 승인하면 그 전에 처리될 수도 있습니다). 그 전까지는 계정을 정상적으로 계속 이용할 수 있고,
+              언제든지 이 페이지에서 탈퇴 요청을 취소할 수 있습니다.
+            </p>
+            <p>
+              탈퇴가 처리된 이후에는 서비스를 이용하실 수 없으며, 관련 법령 및 위위 이용약관에 따라
+              회원님의 개인정보는 탈퇴일로부터 {WITHDRAWAL_RETENTION_YEARS}년간 보관된 후 자동으로
+              완전히 삭제됩니다.
             </p>
             <div className="modal-actions">
               <button
@@ -360,7 +379,7 @@ function Profile({ userProfile }) {
                 onClick={requestAccountDeletion}
                 disabled={deletionBusy}
               >
-                {deletionBusy ? '요청 중...' : '삭제 요청'}
+                {deletionBusy ? '요청 중...' : '탈퇴 요청'}
               </button>
               <button
                 type="button"

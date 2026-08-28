@@ -22,10 +22,12 @@ const BOOKING_STATUS_BADGE = { pending: 'badge-warning', confirmed: 'badge-succe
 const PAYMENT_STATUS_LABEL = { unpaid: '미결제', paid: '결제 완료', refunded: '환불됨' };
 const PAYMENT_STATUS_BADGE = { unpaid: 'badge-warning', paid: 'badge-success', refunded: 'badge-info' };
 const MEMBER_FILTERS = [
-  { key: 'all', label: '전체' },
-  { key: 'missionary', label: '선교사' },
-  { key: 'host', label: '호스트' },
-  { key: 'admin', label: '관리자' }
+  { key: 'all', label: '전체', test: () => true },
+  { key: 'missionary', label: '선교사', test: (m) => m.role === 'missionary' },
+  { key: 'host', label: '호스트', test: (m) => m.role === 'host' },
+  { key: 'admin', label: '관리자', test: (m) => m.role === 'admin' },
+  { key: 'withdrawn', label: '탈퇴 회원', test: (m) => m.status === 'withdrawn' },
+  { key: 'deletion_pending', label: '삭제 대기', test: (m) => m.status === 'deletion_pending' }
 ];
 
 // 다른 페이지(마이페이지 통계 카드 등)에서 /admin?tab=bookings 처럼 특정 탭으로 바로
@@ -64,6 +66,10 @@ function AdminDashboard({ userProfile }) {
   const [deletionBusyId, setDeletionBusyId] = useState(null);
   const [resendBusyId, setResendBusyId] = useState(null);
   const [resendResult, setResendResult] = useState({}); // { [userId]: 'success' | 'error' }
+  // 관리자가 사유를 입력해 회원을 직접 삭제 처리하는 모달 상태
+  const [deleteReasonMember, setDeleteReasonMember] = useState(null);
+  const [deleteReasonText, setDeleteReasonText] = useState('');
+  const [deleteFlagBusyId, setDeleteFlagBusyId] = useState(null);
 
   const isSuperAdmin = !!userProfile?.is_super_admin;
 
@@ -113,7 +119,7 @@ function AdminDashboard({ userProfile }) {
         supabase.from('users').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('accommodations').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('inquiries').select('*', { count: 'exact', head: true }),
-        supabase.from('users').select('*', { count: 'exact', head: true }).not('deletion_requested_at', 'is', null),
+        supabase.from('users').select('*', { count: 'exact', head: true }).not('deletion_requested_at', 'is', null).not('status', 'in', '(withdrawn,deletion_pending)'),
         supabase.from('users').select('*', { count: 'exact', head: true }),
         supabase.from('bookings').select('*', { count: 'exact', head: true })
       ]);
@@ -157,10 +163,14 @@ function AdminDashboard({ userProfile }) {
         setInquiries(data || []);
         setCounts(prev => ({ ...prev, inquiries: (data || []).length }));
       } else if (activeTab === 'deletions') {
+        // 아직 유예기간이 지나지 않은 "탈퇴 요청" 건만 표시합니다. 유예기간이 지나거나
+        // 관리자가 승인해 이미 탈퇴(withdrawn) 처리된 회원은 "전체 회원" 탭의 '탈퇴 회원'
+        // 필터에서 확인할 수 있습니다.
         const { data } = await supabase
           .from('users')
           .select('*')
           .not('deletion_requested_at', 'is', null)
+          .not('status', 'in', '(withdrawn,deletion_pending)')
           .order('deletion_requested_at', { ascending: true });
         setDeletionRequests(data || []);
         setCounts(prev => ({ ...prev, deletions: (data || []).length }));
@@ -263,9 +273,11 @@ function AdminDashboard({ userProfile }) {
     }
   };
 
-  // 계정 삭제 요청을 즉시 승인 — 15일을 기다리지 않고 지금 바로 계정과 관련 데이터를 영구 삭제합니다.
+  // 계정 삭제 요청을 즉시 승인 — 15일 유예기간을 기다리지 않고 지금 바로 탈퇴(withdrawn) 처리합니다.
+  // 탈퇴 처리된 계정은 즉시 삭제되지 않고, 그 시점부터 5년간 개인정보가 보관된 뒤 자동으로
+  // 완전히 삭제됩니다(process_expired_account_deletions 배치가 매일 처리).
   const approveAccountDeletion = async (user) => {
-    if (!window.confirm(`${user.full_name}(${user.email}) 계정을 지금 영구 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) {
+    if (!window.confirm(`${user.full_name}(${user.email}) 계정을 지금 탈퇴 처리하시겠습니까? 탈퇴 처리 후에는 5년간 개인정보가 보관된 뒤 자동으로 완전히 삭제됩니다.`)) {
       return;
     }
     setDeletionBusyId(user.id);
@@ -274,17 +286,51 @@ function AdminDashboard({ userProfile }) {
         target_user_id: user.id
       });
       if (error) throw error;
+      const withdrawnAt = new Date().toISOString();
+      const scheduledPurgeAt = new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000).toISOString();
       setDeletionRequests(deletionRequests.filter(u => u.id !== user.id));
-      setMembers(members.filter(m => m.id !== user.id));
-      setCounts(prev => ({
-        ...prev,
-        deletions: Math.max(0, prev.deletions - 1),
-        members: Math.max(0, prev.members - 1)
-      }));
+      setMembers(members.map(m => (
+        m.id === user.id
+          ? { ...m, status: 'withdrawn', withdrawn_at: withdrawnAt, scheduled_purge_at: scheduledPurgeAt }
+          : m
+      )));
+      setCounts(prev => ({ ...prev, deletions: Math.max(0, prev.deletions - 1) }));
     } catch (error) {
       alert('오류: ' + error.message);
     } finally {
       setDeletionBusyId(null);
+    }
+  };
+
+  // 관리자가 사유를 입력해 회원을 직접 삭제 처리 — 즉시 삭제되지는 않고 'deletion_pending'
+  // 상태로 전환되며, 해당 회원이 다음 로그인 시 사유를 확인하고 동의해야 완전히 삭제됩니다.
+  const flagMemberForDeletion = async () => {
+    if (!deleteReasonMember) return;
+    if (!deleteReasonText.trim()) {
+      alert('삭제 사유를 입력해주세요.');
+      return;
+    }
+    if (!window.confirm(`${deleteReasonMember.full_name}(${deleteReasonMember.email}) 계정을 삭제 처리하시겠습니까? 해당 회원이 다음 로그인 시 입력하신 사유를 확인하고 동의해야 계정이 완전히 삭제됩니다.`)) {
+      return;
+    }
+    setDeleteFlagBusyId(deleteReasonMember.id);
+    try {
+      const { error } = await supabase.rpc('admin_flag_user_for_deletion', {
+        target_user_id: deleteReasonMember.id,
+        reason: deleteReasonText.trim()
+      });
+      if (error) throw error;
+      setMembers(members.map(m => (
+        m.id === deleteReasonMember.id
+          ? { ...m, status: 'deletion_pending', admin_deletion_reason: deleteReasonText.trim() }
+          : m
+      )));
+      setDeleteReasonMember(null);
+      setDeleteReasonText('');
+    } catch (error) {
+      alert('오류: ' + error.message);
+    } finally {
+      setDeleteFlagBusyId(null);
     }
   };
 
@@ -311,7 +357,8 @@ function AdminDashboard({ userProfile }) {
     }
   };
 
-  const visibleMembers = members.filter(m => memberFilter === 'all' || m.role === memberFilter);
+  const activeMemberFilter = MEMBER_FILTERS.find(f => f.key === memberFilter) || MEMBER_FILTERS[0];
+  const visibleMembers = members.filter(activeMemberFilter.test);
 
   // 관리자가 문제가 생긴 예약을 직접 확정/취소/되돌리기 할 수 있도록 하는 조정 기능.
   const changeBookingStatus = async (booking, newStatus) => {
@@ -595,13 +642,14 @@ function AdminDashboard({ userProfile }) {
                     <div key={user.id} className="card user-card">
                       <div className="card-header">
                         <h3>{user.full_name}</h3>
-                        <span className="badge badge-danger">삭제 예정</span>
+                        <span className="badge badge-danger">탈퇴 예정</span>
                       </div>
                       <div className="user-info">
                         <p><strong>이메일:</strong> {user.email}</p>
                         <p><strong>역할:</strong> {user.role === 'admin' ? '관리자' : user.role === 'missionary' ? '선교사' : '숙소 제공자'}</p>
-                        <p><strong>삭제 요청일:</strong> {requestedAt.toLocaleDateString()}</p>
-                        <p><strong>자동 삭제 예정일:</strong> {scheduledFor.toLocaleDateString()}</p>
+                        <p><strong>탈퇴 요청일:</strong> {requestedAt.toLocaleDateString()}</p>
+                        <p><strong>자동 탈퇴 처리 예정일:</strong> {scheduledFor.toLocaleDateString()}</p>
+                        <p className="member-notice">탈퇴 처리 후에는 5년간 보관되다가 자동으로 완전히 삭제됩니다.</p>
                       </div>
 
                       <div className="action-buttons">
@@ -611,7 +659,7 @@ function AdminDashboard({ userProfile }) {
                           disabled={deletionBusyId === user.id}
                         >
                           <Trash2 size={16} />
-                          {deletionBusyId === user.id ? '삭제 중...' : '지금 삭제 승인'}
+                          {deletionBusyId === user.id ? '처리 중...' : '지금 탈퇴 승인'}
                         </button>
                       </div>
                     </div>
@@ -632,7 +680,7 @@ function AdminDashboard({ userProfile }) {
                   className={`member-filter ${memberFilter === f.key ? 'active' : ''}`}
                   onClick={() => setMemberFilter(f.key)}
                 >
-                  {f.label} ({f.key === 'all' ? members.length : members.filter(m => m.role === f.key).length})
+                  {f.label} ({members.filter(f.test).length})
                 </button>
               ))}
             </div>
@@ -673,9 +721,14 @@ function AdminDashboard({ userProfile }) {
                           </span>
                           <span className={`badge ${
                             member.status === 'approved' ? 'badge-success' :
-                            member.status === 'pending' ? 'badge-warning' : 'badge-danger'
+                            member.status === 'pending' ? 'badge-warning' :
+                            member.status === 'withdrawn' ? 'badge-neutral' :
+                            member.status === 'deletion_pending' ? 'badge-danger' : 'badge-danger'
                           }`}>
-                            {member.status === 'approved' ? '승인됨' : member.status === 'pending' ? '검토 중' : '거절됨'}
+                            {member.status === 'approved' ? '승인됨' :
+                              member.status === 'pending' ? '검토 중' :
+                              member.status === 'withdrawn' ? '탈퇴 회원' :
+                              member.status === 'deletion_pending' ? '삭제 대기' : '거절됨'}
                           </span>
                           {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                         </div>
@@ -689,9 +742,24 @@ function AdminDashboard({ userProfile }) {
                             <p><strong>전화:</strong> {member.phone || '미입력'}</p>
                             <p><strong>소개:</strong> {member.bio || '미입력'}</p>
                             <p><strong>가입일:</strong> {new Date(member.created_at).toLocaleDateString()}</p>
-                            {member.deletion_requested_at && (
+                            {member.deletion_requested_at && member.status !== 'withdrawn' && member.status !== 'deletion_pending' && (
                               <p className="member-deletion-notice">
-                                <strong>⚠️ 계정 삭제 요청됨:</strong> {new Date(member.deletion_requested_at).toLocaleDateString()}
+                                <strong>⚠️ 탈퇴 요청됨(유예기간 중):</strong> {new Date(member.deletion_requested_at).toLocaleDateString()}
+                              </p>
+                            )}
+                            {member.status === 'withdrawn' && (
+                              <p className="member-deletion-notice">
+                                <strong>🚪 탈퇴 처리됨:</strong>{' '}
+                                {member.withdrawn_at ? new Date(member.withdrawn_at).toLocaleDateString() : '-'}
+                                {member.scheduled_purge_at && (
+                                  <> (완전 삭제 예정일: {new Date(member.scheduled_purge_at).toLocaleDateString()})</>
+                                )}
+                              </p>
+                            )}
+                            {member.status === 'deletion_pending' && (
+                              <p className="member-deletion-notice member-deletion-notice-danger">
+                                <strong>⛔ 관리자 삭제 처리 대기 중</strong> — 사유: {member.admin_deletion_reason || '미입력'}
+                                <br />본인이 다음 로그인 시 사유를 확인하고 동의하면 계정이 완전히 삭제됩니다.
                               </p>
                             )}
                           </div>
@@ -738,6 +806,19 @@ function AdminDashboard({ userProfile }) {
                           )}
                           {isSelf && !member.is_super_admin && (
                             <p className="member-notice">본인 계정입니다.</p>
+                          )}
+
+                          {!isSelf && !member.is_super_admin && member.status !== 'withdrawn' && member.status !== 'deletion_pending' && (
+                            <div className="member-delete-row">
+                              <button
+                                type="button"
+                                className="btn btn-danger btn-small"
+                                onClick={() => { setDeleteReasonMember(member); setDeleteReasonText(''); }}
+                              >
+                                <Trash2 size={14} />
+                                회원 삭제 처리
+                              </button>
+                            </div>
                           )}
                         </div>
                       )}
@@ -833,6 +914,50 @@ function AdminDashboard({ userProfile }) {
                     setSelectedItem(null);
                     setRejectionReason('');
                   }}
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 관리자 회원 삭제 처리 모달 — 입력한 사유는 해당 회원이 다음 로그인 시 확인해야 함 */}
+        {deleteReasonMember && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <div className="modal-header">
+                <h2>회원 삭제 처리</h2>
+              </div>
+              <p className="member-notice">
+                {deleteReasonMember.full_name}({deleteReasonMember.email}) 계정을 삭제 처리합니다. 즉시
+                삭제되지는 않으며, 입력하신 사유가 해당 회원의 다음 로그인 시 안내되고, 본인이 확인 후
+                동의해야 계정과 모든 데이터가 완전히 영구 삭제됩니다.
+              </p>
+              <div className="form-group">
+                <label>삭제 사유 *</label>
+                <textarea
+                  value={deleteReasonText}
+                  onChange={(e) => setDeleteReasonText(e.target.value)}
+                  placeholder="회원에게 안내될 삭제 사유를 자세히 입력해주세요..."
+                  rows="4"
+                />
+              </div>
+              <div className="modal-actions">
+                <button
+                  className="btn btn-danger"
+                  onClick={flagMemberForDeletion}
+                  disabled={deleteFlagBusyId === deleteReasonMember.id}
+                >
+                  {deleteFlagBusyId === deleteReasonMember.id ? '처리 중...' : '삭제 처리'}
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setDeleteReasonMember(null);
+                    setDeleteReasonText('');
+                  }}
+                  disabled={deleteFlagBusyId === deleteReasonMember.id}
                 >
                   취소
                 </button>
@@ -1140,6 +1265,21 @@ function AdminDashboard({ userProfile }) {
 
         .member-deletion-notice {
           color: #e74c3c;
+          line-height: 1.5;
+        }
+
+        .member-deletion-notice-danger {
+          background: #fdf0ee;
+          border-left: 3px solid #e74c3c;
+          padding: 0.6rem 0.8rem;
+          border-radius: 4px;
+          margin-top: 0.5rem;
+        }
+
+        .member-delete-row {
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid #ecf0f1;
         }
 
         .role-change-row {

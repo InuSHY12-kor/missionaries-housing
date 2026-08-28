@@ -62,12 +62,17 @@ function Navigation({ user, userProfile, onLogout }) {
   const isPendingApprovalScreen = !!userProfile
     && (userProfile.status === 'pending'
       || (userProfile.status === 'approved' && !userProfile.email_verified_at));
+  // 탈퇴 처리 완료(withdrawn) / 관리자 삭제 처리 대기(deletion_pending) 화면도 PendingApproval과
+  // 마찬가지로 "*" 라우트 + PageHero 배너로 렌더링되므로 동일하게 처리합니다.
+  const isAccountStatusScreen = !!userProfile
+    && (userProfile.status === 'withdrawn' || userProfile.status === 'deletion_pending');
   const hasHeroBanner = HERO_BANNER_ROUTES.includes(location.pathname)
     || isAdminRoute
     || isAccommodationDetailRoute
     || isBookingDetailRoute
     || isCompleteProfileScreen
-    || isPendingApprovalScreen;
+    || isPendingApprovalScreen
+    || isAccountStatusScreen;
 
   const brand = (
     <Link to="/" className="navbar-brand">

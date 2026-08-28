@@ -468,6 +468,15 @@ body {
   background: #c0392b;
 }
 
+/* 작은 버튼 — 카드 내부 등 좁은 공간에서 아이콘 버튼과 함께 사용 */
+.btn-small {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .btn-warning {
   background: #f39c12;
   color: white;
@@ -703,6 +712,11 @@ body {
 .badge-info {
   background: #d1ecf1;
   color: #0c5460;
+}
+
+.badge-neutral {
+  background: #e2e3e5;
+  color: #495057;
 }
 
 /* 토스트 메시지 */
