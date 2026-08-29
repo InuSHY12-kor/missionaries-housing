@@ -297,13 +297,69 @@ function BookingCheckout({ userProfile }) {
           cursor: not-allowed;
         }
 
-        @media (max-width: 480px) {
-          .booking-checkout h1 {
-            font-size: 1.4rem;
+        @media (max-width: 768px) {
+          .checkout-summary-row {
+            font-size: 0.9rem;
           }
 
           .checkout-widget-card {
+            padding: 1.25rem;
+          }
+
+          .checkout-pay-btn {
+            font-size: 1rem;
+          }
+
+          .checkout-summary-total {
+            font-size: 1rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .booking-checkout h1 {
+            font-size: 1.3rem;
+          }
+
+          .subtitle {
+            font-size: 0.9rem;
+          }
+
+          .checkout-summary-card {
             padding: 1rem;
+          }
+
+          .checkout-summary-card h2 {
+            font-size: 1.05rem;
+          }
+
+          .checkout-summary-row {
+            flex-direction: column;
+            gap: 0.15rem;
+            font-size: 0.85rem;
+            padding: 0.5rem 0;
+          }
+
+          .checkout-summary-row span:last-child {
+            font-weight: 600;
+          }
+
+          .checkout-summary-total {
+            flex-direction: row;
+            justify-content: space-between;
+            font-size: 1rem;
+          }
+
+          .checkout-widget-card {
+            padding: 0.875rem;
+          }
+
+          .checkout-pay-btn {
+            font-size: 0.95rem;
+            padding: 0.85rem;
+          }
+
+          .back-link {
+            font-size: 0.85rem;
           }
         }
       `}</style>

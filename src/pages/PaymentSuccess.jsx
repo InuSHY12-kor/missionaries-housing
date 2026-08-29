@@ -150,6 +150,42 @@ function PaymentSuccess() {
           gap: 0.75rem;
         }
 
+        @media (max-width: 768px) {
+          .payment-result-card {
+            padding: 2rem 1.5rem;
+          }
+
+          .payment-result-icon {
+            width: 40px;
+            height: 40px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .payment-result {
+            padding: 1.5rem 0;
+            align-items: flex-start;
+          }
+
+          .payment-result-card {
+            padding: 1.5rem 1rem;
+            max-width: 100%;
+          }
+
+          .payment-result-card h1 {
+            font-size: 1.1rem;
+          }
+
+          .payment-result-card p {
+            font-size: 0.9rem;
+          }
+
+          .payment-result-actions .btn {
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .payment-result-icon.spin {
             animation: none;
