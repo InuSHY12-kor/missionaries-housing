@@ -1,9 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Users, Star } from 'lucide-react';
+import { MapPin, Users, Home, MessageCircle, CheckCircle, Edit, Send, XCircle, AlertTriangle, Trash2 } from 'lucide-react';
+import AccommodationMap from '../components/AccommodationMap';
+import ImageCarousel from '../components/ImageCarousel';
+import Calendar from '../components/Calendar';
+import AmenityIcon from '../components/AmenityIcon';
+import { AMENITY_MAP } from '../utils/amenities';
+import PageHero from '../components/PageHero';
 
-function AccommodationDetail() {
+const ACCOMMODATION_DETAIL_HERO_IMAGES = [
+  'https://images.pexels.com/photos/7746101/pexels-photo-7746101.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/34287271/pexels-photo-34287271.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/4170056/pexels-photo-4170056.jpeg?auto=compress&cs=tinysrgb&w=1600',
+];
+
+function rangesOverlap(aStart, aEnd, bStart, bEnd) {
+  // 체크아웃일 당일은 겹치지 않는 것으로 처리 (반개구간 비교)
+  return aStart < bEnd && aEnd > bStart;
+}
+
+function AccommodationDetail({ userProfile }) {
   const { id } = useParams();
   const [accommodation, setAccommodation] = useState(null);
   const [host, setHost] = useState(null);
@@ -12,34 +29,153 @@ function AccommodationDetail() {
     checkIn: '',
     checkOut: ''
   });
+  const [bookedRanges, setBookedRanges] = useState([]);
+  const [bookedDates, setBookedDates] = useState(new Set());
+  const [blockedDates, setBlockedDates] = useState(new Set());
+  const [submitting, setSubmitting] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [bookingError, setBookingError] = useState('');
 
-  useEffect(() => {
-    fetchAccommodation();
-  }, [id, fetchAccommodation]);
+  const [contactMode, setContactMode] = useState(null); // 'host' | 'admin' | null
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactSubmitting, setContactSubmitting] = useState(false);
+  const [contactSuccess, setContactSuccess] = useState('');
+  const [contactError, setContactError] = useState('');
 
-  const fetchAccommodation = async () => {
+  // 관리자 승인 검토 — 실제 이 페이지(호스트/선교사에게 보이는 것과 동일한 화면)에서 바로 처리합니다.
+  const [adminActionMode, setAdminActionMode] = useState(null); // 'revision' | 'rejection' | null
+  const [adminReason, setAdminReason] = useState('');
+  const [adminBusy, setAdminBusy] = useState(false);
+  const [adminActionError, setAdminActionError] = useState('');
+  const [adminNotice, setAdminNotice] = useState('');
+
+  const fetchAccommodation = useCallback(async () => {
+        try {
+                const { data, error } = await supabase
+                  .from('accommodations')
+                  .select('*, users(id, full_name, church_name, phone)')
+                  .eq('id', id)
+                  .single();
+
+                if (error) throw error;
+                setAccommodation(data);
+                setHost(data.users);
+        } catch (error) {
+                console.error('숙소 로드 오류:', error);
+        } finally {
+                setLoading(false);
+        }
+  }, [id]);
+
+  const fetchAvailability = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('accommodations')
-        .select('*, users(id, full_name, church_name, phone)')
-        .eq('id', id)
-        .single();
+      const [{ data: ranges, error: rangesError }, { data: blocked, error: blockedError }] = await Promise.all([
+        supabase.rpc('get_accommodation_booked_ranges', { p_accommodation_id: id }),
+        supabase.rpc('get_accommodation_blocked_dates', { p_accommodation_id: id })
+      ]);
 
-      if (error) throw error;
-      setAccommodation(data);
-      setHost(data.users);
+      if (rangesError) throw rangesError;
+      if (blockedError) throw blockedError;
+
+      setBookedRanges(ranges || []);
+
+      const bookedSet = new Set();
+      (ranges || []).forEach(r => {
+        const cursor = new Date(r.check_in);
+        const end = new Date(r.check_out);
+        while (cursor < end) {
+          bookedSet.add(cursor.toISOString().split('T')[0]);
+          cursor.setDate(cursor.getDate() + 1);
+        }
+      });
+      setBookedDates(bookedSet);
+      setBlockedDates(new Set((blocked || []).map(b => b.blocked_date)));
     } catch (error) {
-      console.error('숙소 로드 오류:', error);
-    } finally {
-      setLoading(false);
+      console.error('예약 현황 로드 오류:', error);
     }
+  }, [id]);
+
+    useEffect(() => {
+          fetchAccommodation();
+          fetchAvailability();
+    }, [fetchAccommodation, fetchAvailability]);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const isDateUnavailable = (dateStr) => dateStr < todayStr || bookedDates.has(dateStr) || blockedDates.has(dateStr);
+
+  const hasUnavailableBetween = (startStr, endStr) => {
+    const cursor = new Date(startStr);
+    const end = new Date(endStr);
+    cursor.setDate(cursor.getDate() + 1);
+    while (cursor < end) {
+      const dStr = cursor.toISOString().split('T')[0];
+      if (bookedDates.has(dStr) || blockedDates.has(dStr)) return true;
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return false;
+  };
+
+  const handleDayClick = (dateStr) => {
+    if (bookingSuccess) return;
+    setBookingError('');
+
+    if (!bookingData.checkIn || bookingData.checkOut) {
+      // 새로운 선택 시작 (체크인 다시 선택)
+      setBookingData({ checkIn: dateStr, checkOut: '' });
+      return;
+    }
+
+    // 체크인은 있고 체크아웃은 아직 없는 상태
+    if (dateStr <= bookingData.checkIn) {
+      setBookingData({ checkIn: dateStr, checkOut: '' });
+      return;
+    }
+
+    if (hasUnavailableBetween(bookingData.checkIn, dateStr)) {
+      setBookingError('선택하신 기간 중 예약이 불가능한 날짜가 포함되어 있습니다. 다른 날짜를 선택해주세요.');
+      setBookingData({ checkIn: dateStr, checkOut: '' });
+      return;
+    }
+
+    setBookingData(prev => ({ ...prev, checkOut: dateStr }));
+  };
+
+  const isCalDisabled = (dateStr) => isDateUnavailable(dateStr);
+  const isCalSelected = (dateStr) => dateStr === bookingData.checkIn || dateStr === bookingData.checkOut;
+  const isCalInRange = (dateStr) =>
+    !!(bookingData.checkIn && bookingData.checkOut && dateStr > bookingData.checkIn && dateStr < bookingData.checkOut);
+
+  const findOverlap = (checkInStr, checkOutStr) => {
+    return bookedRanges.find(range =>
+      rangesOverlap(checkInStr, checkOutStr, range.check_in, range.check_out)
+    );
   };
 
   const handleBooking = async () => {
+    setBookingError('');
+
     if (!bookingData.checkIn || !bookingData.checkOut) {
-      alert('날짜를 선택해주세요.');
+      setBookingError('달력에서 체크인, 체크아웃 날짜를 모두 선택해주세요.');
       return;
     }
+
+    if (bookingData.checkIn < todayStr) {
+      setBookingError('체크인 날짜는 오늘 이후여야 합니다.');
+      return;
+    }
+
+    if (bookingData.checkOut <= bookingData.checkIn) {
+      setBookingError('체크아웃 날짜는 체크인 날짜 이후여야 합니다.');
+      return;
+    }
+
+    if (findOverlap(bookingData.checkIn, bookingData.checkOut)) {
+      setBookingError('선택하신 날짜는 이미 예약이 있어 선택할 수 없습니다. 다른 날짜를 선택해주세요.');
+      return;
+    }
+
+    setSubmitting(true);
 
     try {
       const checkIn = new Date(bookingData.checkIn);
@@ -47,12 +183,13 @@ function AccommodationDetail() {
       const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
       const totalPrice = nights * accommodation.price;
 
-      // 예약 생성
-      const { error } = await supabase  // data 제거
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+
+      const { error } = await supabase
         .from('bookings')
         .insert({
           accommodation_id: id,
-          guest_id: (await supabase.auth.getUser()).data.user.id,
+          guest_id: authUser.id,
           check_in: bookingData.checkIn,
           check_out: bookingData.checkOut,
           total_price: totalPrice,
@@ -60,35 +197,192 @@ function AccommodationDetail() {
         })
         .select();
 
-      if (error) throw error;
+      if (error) {
+        // 서버(DB)에서 다른 예약과 날짜가 겹치는 것을 감지한 경우 (동시 예약 등)
+        if (error.code === '23P01') {
+          setBookingError('선택하신 날짜는 방금 다른 분이 먼저 예약하셨습니다. 다른 날짜를 선택해주세요.');
+          fetchAvailability();
+          return;
+        }
+        throw error;
+      }
 
-      alert('예약이 생성되었습니다! 결제 페이지로 이동합니다.');
-      // 실제로는 Stripe 결제 폼으로 이동해야 함
+      setBookingSuccess(true);
+      setBookingData({ checkIn: '', checkOut: '' });
+      fetchAvailability();
     } catch (error) {
-      alert('오류: ' + error.message);
+      setBookingError('오류가 발생했습니다: ' + error.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openContact = (mode) => {
+    setContactMode(mode);
+    setContactMessage('');
+    setContactError('');
+    setContactSuccess('');
+  };
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    if (!contactMessage.trim()) {
+      setContactError('메시지 내용을 입력해주세요.');
+      return;
+    }
+
+    setContactSubmitting(true);
+    setContactError('');
+
+    try {
+      if (contactMode === 'host') {
+        const { data, error } = await supabase
+          .from('messages')
+          .insert({
+            sender_id: userProfile.id,
+            recipient_id: host.id,
+            accommodation_id: accommodation.id,
+            message: contactMessage.trim()
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // 이메일 발송은 best-effort — 실패해도 메시지 전송 자체는 성공한 것으로 처리
+        supabase.functions
+          .invoke('send-email', { body: { type: 'host_contact', messageId: data.id } })
+          .catch((emailErr) => console.error('호스트 문의 이메일 발송 오류:', emailErr));
+      } else if (contactMode === 'admin') {
+        const { data: messageIds, error } = await supabase.rpc('contact_admins', {
+          p_message: contactMessage.trim(),
+          p_accommodation_id: accommodation.id
+        });
+
+        if (error) throw error;
+
+        if (messageIds && messageIds.length > 0) {
+          supabase.functions
+            .invoke('send-email', { body: { type: 'admin_contact', messageId: messageIds[0] } })
+            .catch((emailErr) => console.error('관리자 문의 이메일 발송 오류:', emailErr));
+        }
+      }
+
+      setContactSuccess('메시지가 전송되었습니다.');
+      setContactMessage('');
+      setContactMode(null);
+    } catch (error) {
+      setContactError('오류가 발생했습니다: ' + error.message);
+    } finally {
+      setContactSubmitting(false);
+    }
+  };
+
+  // 승인 — 승인된 회원에게 즉시 노출됩니다.
+  const handleAdminApprove = async () => {
+    if (!window.confirm('이 숙소를 승인하시겠습니까? 승인 시 승인된 회원에게 바로 노출됩니다.')) return;
+    setAdminBusy(true);
+    setAdminActionError('');
+    try {
+      const { error } = await supabase
+        .from('accommodations')
+        .update({ status: 'approved', rejection_reason: null, admin_feedback_type: null })
+        .eq('id', id);
+      if (error) throw error;
+      setAccommodation(prev => ({ ...prev, status: 'approved', rejection_reason: null, admin_feedback_type: null }));
+      setAdminNotice('숙소가 승인되었습니다.');
+    } catch (error) {
+      setAdminActionError('오류: ' + error.message);
+    } finally {
+      setAdminBusy(false);
+    }
+  };
+
+  // 수정 요청/거절 — 두 경우 모두 상태는 계속 '승인 대기중'으로 유지하고, 사유만 호스트에게 전달합니다.
+  // (호스트의 "내 숙소" 페이지에서 상태 배지는 그대로 대기중으로 보이고, 사유만 함께 표시됩니다.)
+  const handleAdminFeedbackSubmit = async () => {
+    if (!adminReason.trim()) {
+      setAdminActionError('사유를 입력해주세요.');
+      return;
+    }
+    setAdminBusy(true);
+    setAdminActionError('');
+    try {
+      const { error } = await supabase
+        .from('accommodations')
+        .update({ status: 'pending', rejection_reason: adminReason.trim(), admin_feedback_type: adminActionMode })
+        .eq('id', id);
+      if (error) throw error;
+      setAccommodation(prev => ({ ...prev, status: 'pending', rejection_reason: adminReason.trim(), admin_feedback_type: adminActionMode }));
+      setAdminNotice(adminActionMode === 'revision' ? '수정 요청을 호스트에게 전달했습니다.' : '거절 사유를 호스트에게 전달했습니다.');
+      setAdminActionMode(null);
+      setAdminReason('');
+    } catch (error) {
+      setAdminActionError('오류: ' + error.message);
+    } finally {
+      setAdminBusy(false);
     }
   };
 
   if (loading) return <div className="container"><p>로드 중...</p></div>;
   if (!accommodation) return <div className="container"><p>숙소를 찾을 수 없습니다.</p></div>;
 
+  const isAdminPendingReview = userProfile?.role === 'admin' && accommodation.status === 'pending';
+
+  const nights = bookingData.checkIn && bookingData.checkOut
+    ? Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))
+    : 0;
+
+  const isOwnHost = !!userProfile && accommodation.host_id === userProfile.id;
+  // 관리자는 항상 수정 가능. 호스트 본인은 관리자가 완전히 반려(admin_feedback_type === 'rejection')한
+  // 숙소는 수정할 수 없고, 삭제 후 재등록만 가능합니다 ("내 숙소" 페이지에서 삭제).
+  const canEdit = userProfile && (userProfile.role === 'admin' || (isOwnHost && accommodation.admin_feedback_type !== 'rejection'));
+  const matchedAmenities = (accommodation.amenities || [])
+    .map(key => AMENITY_MAP[key])
+    .filter(Boolean);
+  const otherAmenities = accommodation.amenities_other || [];
+
   return (
     <div className="accommodation-detail">
+      <PageHero
+        images={ACCOMMODATION_DETAIL_HERO_IMAGES}
+        eyebrow="STAY DETAILS"
+        title={accommodation?.title || '숙소 상세 정보'}
+        subtitle={accommodation?.location || '위치와 이용 안내, 예약 가능 여부를 확인해보세요'}
+      />
       <div className="container">
+        {isAdminPendingReview && (
+          <div className="admin-review-banner">
+            <AlertTriangle size={18} />
+            <span>관리자 승인 대기중인 숙소입니다. 선교사/호스트에게 실제로 보이는 화면 그대로이며, 아래 예약 영역 자리에서 승인·수정 요청·거절을 처리할 수 있습니다.</span>
+          </div>
+        )}
+        {adminNotice && <div className="admin-notice-banner">{adminNotice}</div>}
+
         {/* 이미지 갤러리 */}
         <div className="gallery">
-          {accommodation.images && accommodation.images.length > 0 ? (
-            <img src={accommodation.images[0]} alt={accommodation.title} className="main-image" />
-          ) : (
-            <div className="image-placeholder">이미지 없음</div>
-          )}
+          <ImageCarousel images={accommodation.images} alt={accommodation.title} />
         </div>
 
         <div className="detail-content">
           {/* 왼쪽: 정보 */}
           <div className="info-section">
-            <h1>{accommodation.title}</h1>
-            
+            <div className="title-row">
+              <h1>{accommodation.title}</h1>
+              {canEdit && (
+                <Link to={`/my-accommodations?edit=${accommodation.id}`} className="btn btn-secondary edit-btn">
+                  <Edit size={16} />
+                  수정하기
+                </Link>
+              )}
+              {isOwnHost && userProfile?.role !== 'admin' && accommodation.admin_feedback_type === 'rejection' && (
+                <Link to="/my-accommodations" className="btn btn-secondary edit-btn">
+                  <Trash2 size={16} />
+                  반려됨 · 삭제 후 재등록
+                </Link>
+              )}
+            </div>
+
             <p className="location">
               <MapPin size={20} />
               {accommodation.location}
@@ -110,16 +404,35 @@ function AccommodationDetail() {
               <p>{accommodation.description}</p>
             </div>
 
-            {accommodation.amenities && accommodation.amenities.length > 0 && (
-              <div className="amenities">
+            {(matchedAmenities.length > 0 || otherAmenities.length > 0) && (
+              <div className="amenities-section">
                 <h3>편의시설</h3>
-                <ul>
-                  {accommodation.amenities.map((amenity, idx) => (
-                    <li key={idx}>{amenity}</li>
+                <div className="amenities-box">
+                  {matchedAmenities.map(item => (
+                    <div key={item.key} className="amenity-chip">
+                      <AmenityIcon name={item.icon} size={16} />
+                      <span>{item.label}</span>
+                    </div>
                   ))}
-                </ul>
+                  {otherAmenities.map(value => (
+                    <div key={value} className="amenity-chip">
+                      <AmenityIcon name="CheckCircle" size={16} />
+                      <span>{value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
+
+            {/* 위치 지도 */}
+            <div className="map-section">
+              <h3>위치</h3>
+              <AccommodationMap
+                lat={accommodation.latitude}
+                lng={accommodation.longitude}
+                title={accommodation.title}
+              />
+            </div>
 
             {/* 호스트 정보 */}
             <div className="host-info">
@@ -128,60 +441,210 @@ function AccommodationDetail() {
                 <div className="host-details">
                   <h4>{host?.full_name}</h4>
                   <p>{host?.church_name}</p>
-                  <button className="btn btn-secondary">
-                    <MessageCircle size={16} />
-                    호스트에게 메시지
-                  </button>
+
+                  {contactSuccess && <p className="contact-success-msg">{contactSuccess}</p>}
+
+                  {contactMode ? (
+                    <form className="contact-inline-form" onSubmit={handleContactSubmit}>
+                      <label>
+                        {contactMode === 'host' ? '호스트님께 보낼 메시지' : '위위 관리자에게 보낼 문의 내용'}
+                      </label>
+                      <textarea
+                        rows="4"
+                        value={contactMessage}
+                        onChange={(e) => setContactMessage(e.target.value)}
+                        placeholder="메시지를 입력해주세요"
+                      />
+                      {contactError && <p className="form-error">{contactError}</p>}
+                      <div className="contact-form-actions">
+                        <button type="submit" className="btn btn-primary" disabled={contactSubmitting}>
+                          {contactSubmitting ? '전송 중...' : '보내기'}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => setContactMode(null)}
+                          disabled={contactSubmitting}
+                        >
+                          취소
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="contact-buttons">
+                      {userProfile?.id !== host?.id && (
+                        <button className="btn btn-secondary" onClick={() => openContact('host')}>
+                          <MessageCircle size={16} />
+                          호스트에게 메시지
+                        </button>
+                      )}
+                      <button className="btn btn-secondary" onClick={() => openContact('admin')}>
+                        <Send size={16} />
+                        위위 관리자에게 문의하기
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 오른쪽: 예약 양식 */}
+          {/* 오른쪽: 예약 양식 (관리자가 승인 대기중인 숙소를 볼 때는 검토 패널로 대체) */}
           <div className="booking-section">
+            {isAdminPendingReview ? (
+              <div className="booking-card admin-review-card">
+                <h3>관리자 검토</h3>
+
+                {accommodation.rejection_reason && (
+                  <div className={`admin-review-prev-feedback ${accommodation.admin_feedback_type === 'revision' ? 'is-revision' : 'is-rejection'}`}>
+                    <strong>{accommodation.admin_feedback_type === 'revision' ? '이전에 남긴 수정 요청' : '이전에 남긴 거절 사유'}</strong>
+                    <p>{accommodation.rejection_reason}</p>
+                  </div>
+                )}
+
+                {adminActionMode ? (
+                  <div className="admin-reason-form">
+                    <label>{adminActionMode === 'revision' ? '수정 요청 사유 *' : '거절 사유 *'}</label>
+                    <textarea
+                      rows="5"
+                      value={adminReason}
+                      onChange={(e) => setAdminReason(e.target.value)}
+                      placeholder="호스트에게 전달할 내용을 자세히 입력해주세요"
+                    />
+                    {adminActionError && <p className="form-error">{adminActionError}</p>}
+                    <div className="admin-review-actions">
+                      <button className="btn btn-danger" disabled={adminBusy} onClick={handleAdminFeedbackSubmit}>
+                        {adminBusy ? '처리 중...' : (adminActionMode === 'revision' ? '수정 요청 보내기' : '거절 사유 보내기')}
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        disabled={adminBusy}
+                        onClick={() => { setAdminActionMode(null); setAdminReason(''); setAdminActionError(''); }}
+                      >
+                        취소
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="admin-review-hint">
+                      숙소 상태는 승인 전까지 계속 <strong>승인 대기중</strong>으로 유지되며, 수정 요청·거절 사유는 호스트의 "내 숙소" 페이지에서 확인할 수 있습니다.
+                    </p>
+                    {adminActionError && <p className="form-error">{adminActionError}</p>}
+                    <div className="admin-review-actions admin-review-actions-main">
+                      <button className="btn btn-success" disabled={adminBusy} onClick={handleAdminApprove}>
+                        <CheckCircle size={16} />
+                        승인
+                      </button>
+                      <button
+                        className="btn btn-warning"
+                        disabled={adminBusy}
+                        onClick={() => { setAdminActionMode('revision'); setAdminReason(''); setAdminActionError(''); }}
+                      >
+                        <Edit size={16} />
+                        수정 요청
+                      </button>
+                      <button
+                        className="btn btn-danger"
+                        disabled={adminBusy}
+                        onClick={() => { setAdminActionMode('rejection'); setAdminReason(''); setAdminActionError(''); }}
+                      >
+                        <XCircle size={16} />
+                        거절
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                <Link to="/admin" className="admin-review-back">관리자 대시보드로 돌아가기</Link>
+              </div>
+            ) : isOwnHost ? (
+              // 본인이 등록한 숙소는 예약할 수 없습니다. 승인 전(반려 포함)에는 예약하기 버튼 대신
+              // 안내 문구만 보여줍니다 — "내 숙소"에서 열람했을 때 활성화된 예약 버튼이 보이던 버그 수정.
+              <div className="booking-card owner-notice-card">
+                <h3>예약 안내</h3>
+                {accommodation.status !== 'approved' ? (
+                  <>
+                    <p className="owner-notice-text">관리자 승인 후 이용 가능합니다.</p>
+                    {accommodation.admin_feedback_type === 'rejection' && (
+                      <p className="owner-notice-text owner-notice-sub">
+                        이 숙소는 반려되었습니다. 수정은 불가하며, "내 숙소"에서 삭제 후 다시 등록해주세요.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="owner-notice-text">본인이 등록한 숙소는 예약할 수 없습니다.</p>
+                )}
+              </div>
+            ) : accommodation.status !== 'approved' ? (
+              <div className="booking-card owner-notice-card">
+                <h3>예약 안내</h3>
+                <p className="owner-notice-text">관리자 승인 후 이용 가능합니다.</p>
+              </div>
+            ) : (
             <div className="booking-card">
               <div className="price-header">
                 <p className="price">₩{accommodation.price?.toLocaleString()}</p>
                 <p className="per-night">1박 기준</p>
               </div>
 
-              <div className="form-group">
-                <label>체크인</label>
-                <input
-                  type="date"
-                  value={bookingData.checkIn}
-                  onChange={(e) => setBookingData({ ...bookingData, checkIn: e.target.value })}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>체크아웃</label>
-                <input
-                  type="date"
-                  value={bookingData.checkOut}
-                  onChange={(e) => setBookingData({ ...bookingData, checkOut: e.target.value })}
-                />
-              </div>
-
-              {bookingData.checkIn && bookingData.checkOut && (
-                <div className="price-summary">
-                  <div className="summary-row">
-                    <span>₩{accommodation.price?.toLocaleString()} × {Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))}박</span>
-                    <span>₩{(accommodation.price * Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))).toLocaleString()}</span>
-                  </div>
-                  <div className="summary-total">
-                    <span>합계</span>
-                    <span>₩{(accommodation.price * Math.ceil((new Date(bookingData.checkOut) - new Date(bookingData.checkIn)) / (1000 * 60 * 60 * 24))).toLocaleString()}</span>
-                  </div>
+              {bookingSuccess ? (
+                <div className="booking-success">
+                  <CheckCircle size={36} />
+                  <h4>예약 요청이 접수되었습니다</h4>
+                  <p>호스트님의 확인 후 예약이 확정되며, "내 예약" 페이지에서 진행 상황을 확인하실 수 있습니다.</p>
+                  <button className="btn btn-secondary btn-block" onClick={() => setBookingSuccess(false)}>
+                    다른 날짜 예약하기
+                  </button>
                 </div>
+              ) : (
+                <>
+                  <div className="date-selection-summary">
+                    <div className="date-box">
+                      <label>체크인</label>
+                      <p>{bookingData.checkIn || '날짜 선택'}</p>
+                    </div>
+                    <div className="date-box">
+                      <label>체크아웃</label>
+                      <p>{bookingData.checkOut || '날짜 선택'}</p>
+                    </div>
+                  </div>
+
+                  <p className="calendar-hint">
+                    회색으로 표시된 날짜는 예약이 불가능합니다. 달력에서 체크인 날짜를 먼저 선택하고, 이어서 체크아웃 날짜를 선택해주세요.
+                  </p>
+
+                  <Calendar
+                    isDisabled={isCalDisabled}
+                    isSelected={isCalSelected}
+                    isInRange={isCalInRange}
+                    onDayClick={handleDayClick}
+                  />
+
+                  {nights > 0 && (
+                    <div className="price-summary">
+                      <div className="summary-row">
+                        <span>₩{accommodation.price?.toLocaleString()} × {nights}박</span>
+                        <span>₩{(accommodation.price * nights).toLocaleString()}</span>
+                      </div>
+                      <div className="summary-total">
+                        <span>합계</span>
+                        <span>₩{(accommodation.price * nights).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {bookingError && <p className="form-error">{bookingError}</p>}
+
+                  <button className="btn btn-primary btn-block" onClick={handleBooking} disabled={submitting}>
+                    {submitting ? '예약 중...' : '예약하기'}
+                  </button>
+
+                  <p className="note">예약 후 호스트의 승인이 필요합니다.</p>
+                </>
               )}
-
-              <button className="btn btn-primary btn-block" onClick={handleBooking}>
-                예약하기
-              </button>
-
-              <p className="note">예약 후 호스트의 승인이 필요합니다.</p>
             </div>
+            )}
           </div>
         </div>
       </div>
@@ -189,6 +652,130 @@ function AccommodationDetail() {
       <style>{`
         .accommodation-detail {
           flex: 1;
+        }
+
+        .admin-review-banner {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          background: #fff8e6;
+          color: #8a5a12;
+          border: 1px solid #f0dcb0;
+          border-radius: 8px;
+          padding: 0.9rem 1.1rem;
+          margin-top: 1.5rem;
+          font-size: 0.92rem;
+          line-height: 1.5;
+        }
+
+        .admin-review-banner svg {
+          flex-shrink: 0;
+        }
+
+        .admin-notice-banner {
+          background: #faf1e6;
+          color: #b8622c;
+          border: 1px solid #f0dcc0;
+          border-radius: 8px;
+          padding: 0.75rem 1.1rem;
+          margin-top: 0.75rem;
+          font-size: 0.9rem;
+          font-weight: 600;
+        }
+
+        .admin-review-card h3 {
+          color: #2c3e50;
+          margin-bottom: 1rem;
+        }
+
+        .admin-review-hint {
+          font-size: 0.85rem;
+          color: #7f8c8d;
+          line-height: 1.6;
+          margin-bottom: 1.25rem;
+        }
+
+        .admin-review-prev-feedback {
+          border-radius: 6px;
+          padding: 0.85rem 1rem;
+          margin-bottom: 1.25rem;
+          font-size: 0.88rem;
+        }
+
+        .admin-review-prev-feedback strong {
+          display: block;
+          margin-bottom: 0.35rem;
+        }
+
+        .admin-review-prev-feedback p {
+          margin: 0;
+          white-space: pre-wrap;
+          line-height: 1.6;
+        }
+
+        .admin-review-prev-feedback.is-revision {
+          background: #fff8e6;
+          color: #8a5a12;
+          border-left: 4px solid #f39c12;
+        }
+
+        .admin-review-prev-feedback.is-rejection {
+          background: #fadbd8;
+          color: #922b21;
+          border-left: 4px solid #e74c3c;
+        }
+
+        .admin-reason-form label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 0.9rem;
+        }
+
+        .admin-reason-form textarea {
+          width: 100%;
+          padding: 0.75rem;
+          border: 2px solid #ecf0f1;
+          border-radius: 6px;
+          font-family: inherit;
+          resize: vertical;
+        }
+
+        .admin-reason-form textarea:focus {
+          outline: none;
+          border-color: #d97b3f;
+        }
+
+        .admin-review-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.6rem;
+          margin-top: 1rem;
+        }
+
+        .admin-review-actions-main button {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.4rem;
+          white-space: nowrap;
+        }
+
+        .admin-review-back {
+          display: block;
+          text-align: center;
+          margin-top: 1.5rem;
+          padding-top: 1rem;
+          border-top: 1px solid #ecf0f1;
+          color: #d97b3f;
+          font-size: 0.85rem;
+          text-decoration: none;
+        }
+
+        .admin-review-back:hover {
+          text-decoration: underline;
         }
 
         .gallery {
@@ -199,20 +786,6 @@ function AccommodationDetail() {
           background: #ecf0f1;
         }
 
-        .main-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .image-placeholder {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 100%;
-          color: #95a5a6;
-        }
-
         .detail-content {
           display: grid;
           grid-template-columns: 2fr 1fr;
@@ -220,9 +793,24 @@ function AccommodationDetail() {
           margin-top: 2rem;
         }
 
+        .title-row {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 1rem;
+        }
+
         .info-section h1 {
           color: #2c3e50;
           margin-bottom: 1rem;
+        }
+
+        .edit-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          white-space: nowrap;
+          text-decoration: none;
         }
 
         .location {
@@ -255,7 +843,7 @@ function AccommodationDetail() {
           margin-bottom: 2rem;
         }
 
-        .description h3, .amenities h3, .host-info h3 {
+        .description h3, .amenities-section h3, .host-info h3, .map-section h3 {
           color: #2c3e50;
           margin-bottom: 1rem;
         }
@@ -265,18 +853,37 @@ function AccommodationDetail() {
           color: #555;
         }
 
-        .amenities ul {
-          list-style: none;
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 0.75rem;
+        .amenities-section {
+          margin-bottom: 2rem;
         }
 
-        .amenities li {
-          padding: 0.75rem;
+        .amenities-box {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem 1.5rem;
           background: #f8f9fa;
-          border-radius: 4px;
-          color: #555;
+          border-radius: 8px;
+          padding: 1.25rem 1.5rem;
+        }
+
+        .amenity-chip {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: #444;
+          font-size: 0.92rem;
+          min-width: 45%;
+        }
+
+        .amenity-chip svg {
+          color: #d97b3f;
+          flex-shrink: 0;
+        }
+
+        .map-section {
+          margin-top: 2rem;
+          padding-top: 2rem;
+          border-top: 2px solid #ecf0f1;
         }
 
         .host-info {
@@ -301,9 +908,51 @@ function AccommodationDetail() {
           margin-bottom: 1rem;
         }
 
+        .contact-buttons {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+        }
+
+        .contact-success-msg {
+          color: #d97b3f;
+          font-weight: 600;
+          margin-bottom: 0.75rem !important;
+        }
+
+        .contact-inline-form label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 0.9rem;
+        }
+
+        .contact-inline-form textarea {
+          width: 100%;
+          padding: 0.75rem;
+          border: 2px solid #ecf0f1;
+          border-radius: 6px;
+          font-family: inherit;
+          resize: vertical;
+          transition: border-color 0.3s;
+        }
+
+        .contact-inline-form textarea:focus {
+          outline: none;
+          border-color: #d97b3f;
+        }
+
+        .contact-form-actions {
+          display: flex;
+          gap: 0.5rem;
+          margin-top: 0.75rem;
+        }
+
         .booking-section {
           position: sticky;
           top: 100px;
+          align-self: start;
         }
 
         .booking-card {
@@ -312,6 +961,34 @@ function AccommodationDetail() {
           border-radius: 8px;
           padding: 1.5rem;
           box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .owner-notice-card {
+          text-align: center;
+        }
+
+        .owner-notice-card h3 {
+          margin: 0 0 1rem;
+          font-size: 1.1rem;
+          color: #2c3e50;
+        }
+
+        .owner-notice-text {
+          background: #fdf8f1;
+          border: 1px solid #f0dcc0;
+          border-radius: 6px;
+          padding: 0.9rem 1rem;
+          color: #b8622c;
+          font-size: 0.9rem;
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        .owner-notice-sub {
+          margin-top: 0.6rem;
+          background: #fadbd8;
+          border-color: #f1b3ac;
+          color: #922b21;
         }
 
         .price-header {
@@ -324,7 +1001,7 @@ function AccommodationDetail() {
         .price {
           font-size: 2rem;
           font-weight: bold;
-          color: #667eea;
+          color: #d97b3f;
           margin: 0;
         }
 
@@ -332,6 +1009,40 @@ function AccommodationDetail() {
           color: #7f8c8d;
           margin: 0;
           font-size: 0.9rem;
+        }
+
+        .date-selection-summary {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.75rem;
+          margin-bottom: 1rem;
+        }
+
+        .date-box {
+          border: 1px solid #dfe6e9;
+          border-radius: 6px;
+          padding: 0.6rem 0.75rem;
+        }
+
+        .date-box label {
+          display: block;
+          font-size: 0.75rem;
+          color: #95a5a6;
+          margin-bottom: 0.2rem;
+        }
+
+        .date-box p {
+          margin: 0;
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 0.9rem;
+        }
+
+        .calendar-hint {
+          font-size: 0.8rem;
+          color: #7f8c8d;
+          margin-bottom: 0.75rem;
+          line-height: 1.5;
         }
 
         .price-summary {
@@ -359,6 +1070,7 @@ function AccommodationDetail() {
         .btn-block {
           width: 100%;
           margin-top: 1rem;
+          justify-content: center;
         }
 
         .note {
@@ -368,21 +1080,245 @@ function AccommodationDetail() {
           margin-top: 1rem;
         }
 
+        .form-error {
+          color: #e74c3c;
+          font-size: 0.85rem;
+          margin: 0.5rem 0 0;
+        }
+
+        .booking-success {
+          text-align: center;
+          padding: 1rem 0;
+        }
+
+        .booking-success svg {
+          color: #d97b3f;
+          margin-bottom: 0.75rem;
+        }
+
+        .booking-success h4 {
+          color: #2c3e50;
+          margin-bottom: 0.5rem;
+        }
+
+        .booking-success p {
+          color: #7f8c8d;
+          font-size: 0.9rem;
+          line-height: 1.6;
+          margin-bottom: 1rem;
+        }
+
         @media (max-width: 768px) {
+          .admin-review-banner {
+            gap: 0.5rem;
+            padding: 0.8rem 0.9rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+          }
+
+          .admin-notice-banner {
+            font-size: 0.85rem;
+            padding: 0.7rem 0.9rem;
+          }
+
+          .gallery {
+            margin: 1.25rem 0;
+            height: 260px;
+          }
+
           .detail-content {
             grid-template-columns: 1fr;
+            gap: 1.75rem;
+            margin-top: 1.25rem;
+          }
+
+          .title-row {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.6rem;
+          }
+
+          .info-section h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+          }
+
+          .edit-btn {
+            justify-content: center;
+          }
+
+          .location {
+            font-size: 1rem;
+            margin-bottom: 1.1rem;
+          }
+
+          .basic-info {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            padding: 0.85rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .info-item {
+            font-size: 0.92rem;
+          }
+
+          .description,
+          .amenities-section {
+            margin-bottom: 1.5rem;
+          }
+
+          .description p {
+            font-size: 0.92rem;
+            line-height: 1.65;
+          }
+
+          .amenities-box {
+            padding: 1rem 1.1rem;
+            gap: 0.6rem 1rem;
+          }
+
+          .amenity-chip {
+            min-width: 100%;
+            font-size: 0.88rem;
+          }
+
+          .map-section,
+          .host-info {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+          }
+
+          .host-card {
+            padding: 1.1rem;
+          }
+
+          .contact-buttons {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .contact-buttons .btn {
+            justify-content: center;
           }
 
           .booking-section {
             position: static;
           }
 
-          .basic-info {
-            grid-template-columns: 1fr;
+          .booking-card {
+            padding: 1.1rem;
           }
 
+          .price {
+            font-size: 1.6rem;
+          }
+
+          .price-header {
+            margin-bottom: 1.1rem;
+            padding-bottom: 1.1rem;
+          }
+
+          .calendar-hint {
+            font-size: 0.78rem;
+          }
+
+          .admin-review-actions-main {
+            flex-direction: column;
+          }
+
+          .admin-review-actions-main button {
+            width: 100%;
+          }
+        }
+
+        @media (max-width: 480px) {
           .gallery {
-            height: 250px;
+            height: 220px;
+            margin: 1rem 0;
+            border-radius: 6px;
+          }
+
+          .admin-review-banner {
+            font-size: 0.8rem;
+          }
+
+          .info-section h1 {
+            font-size: 1.4rem;
+          }
+
+          .location {
+            font-size: 0.92rem;
+          }
+
+          .description h3,
+          .amenities-section h3,
+          .host-info h3,
+          .map-section h3,
+          .admin-review-card h3 {
+            font-size: 1.05rem;
+          }
+
+          .description p {
+            font-size: 0.88rem;
+          }
+
+          .amenity-chip {
+            font-size: 0.85rem;
+          }
+
+          .host-details h4 {
+            font-size: 1rem;
+          }
+
+          .host-details p {
+            font-size: 0.88rem;
+          }
+
+          .booking-card {
+            padding: 0.9rem;
+          }
+
+          .price {
+            font-size: 1.45rem;
+          }
+
+          .per-night {
+            font-size: 0.82rem;
+          }
+
+          .date-selection-summary {
+            gap: 0.5rem;
+          }
+
+          .date-box {
+            padding: 0.5rem 0.6rem;
+          }
+
+          .date-box p {
+            font-size: 0.85rem;
+          }
+
+          .price-summary {
+            padding: 0.85rem;
+          }
+
+          .summary-row,
+          .summary-total {
+            font-size: 0.88rem;
+          }
+
+          .note {
+            font-size: 0.8rem;
+          }
+
+          .admin-review-hint {
+            font-size: 0.8rem;
+          }
+
+          .admin-review-prev-feedback {
+            font-size: 0.85rem;
+            padding: 0.75rem 0.85rem;
           }
         }
       `}</style>

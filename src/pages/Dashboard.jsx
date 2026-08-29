@@ -1,18 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { Home, Users, Star, MessageSquare } from 'lucide-react';
+import { Home, Users, MessageSquare, ChevronRight, Heart } from 'lucide-react';
+import PageHero from '../components/PageHero';
+
+// 마이페이지 상단 슬라이드 배너 사진
+const DASHBOARD_HERO_IMAGES = [
+  'https://images.pexels.com/photos/8517946/pexels-photo-8517946.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/27817983/pexels-photo-27817983.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/15226810/pexels-photo-15226810.jpeg?auto=compress&cs=tinysrgb&w=1600'
+];
+
+const BOOKING_STATUS_LABEL = { pending: '예약됨', confirmed: '예약 확정됨', cancelled: '취소됨' };
+const BOOKING_STATUS_BADGE = { pending: 'badge-warning', confirmed: 'badge-success', cancelled: 'badge-danger' };
 
 function Dashboard({ userProfile }) {
   const [stats, setStats] = useState({
     totalAccommodations: 0,
     totalBookings: 0,
-    totalReviews: 0,
+    totalMessages: 0,
     recentBookings: []
   });
 
   useEffect(() => {
     fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchStats = async () => {
@@ -23,75 +35,121 @@ function Dashboard({ userProfile }) {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'approved');
 
-      // 예약 수
-      const { data: bookings } = await supabase
+      // 예약 수 (정확한 전체 개수)
+      const { count: bookingCount } = await supabase
+        .from('bookings')
+        .select('*', { count: 'exact', head: true });
+
+      // 최근 예약 1건만 대시보드에 표시 (나머지는 "더보기"로 예약 관리 페이지에서 확인)
+      const { data: recentBookings } = await supabase
         .from('bookings')
         .select('*, accommodations(title), users(full_name)')
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(1);
 
-      // 리뷰 수
-      const { count: reviewCount } = await supabase
-        .from('reviews')
-        .select('*', { count: 'exact', head: true });
+      // 내가 받은 메시지 수
+      const { count: messageCount } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('recipient_id', userProfile.id);
 
       setStats({
         totalAccommodations: accCount || 0,
-        totalBookings: bookings?.length || 0,
-        totalReviews: reviewCount || 0,
-        recentBookings: bookings || []
+        totalBookings: bookingCount || 0,
+        totalMessages: messageCount || 0,
+        recentBookings: recentBookings || []
       });
     } catch (error) {
       console.error('통계 로드 오류:', error);
     }
   };
 
+  const canSearchAccommodations = userProfile?.role === 'admin' || userProfile?.role === 'missionary';
+  const canManageAccommodations = userProfile?.role === 'admin' || userProfile?.role === 'host';
+  const accommodationsLink = canSearchAccommodations ? '/accommodations' : (canManageAccommodations ? '/my-accommodations' : null);
+  // 선교사(및 관리자)는 예약할 수 있는 숙소 목록으로 이동하고, 호스트는 본인이 등록한 숙소 목록으로 이동하므로
+  // 카드 문구도 그에 맞게 다르게 표시합니다.
+  const accommodationsLabel = canSearchAccommodations ? '예약 가능한 숙소' : '등록된 숙소';
+  // "예약" 카드에 표시되는 숫자(totalBookings)는 관리자의 경우 RLS 정책상 플랫폼 전체 예약 수를
+  // 의미합니다. 예전에는 이 카드를 눌러도 관리자 본인이 "게스트"로 등록한 예약만 보여주는
+  // /my-bookings로 이동해 카드에 적힌 숫자와 실제로 보이는 목록의 개수가 서로 달랐습니다(대부분 0건).
+  // 그래서 관리자는 전체 예약을 실제로 확인/조정할 수 있는 관리자 대시보드의 "전체 예약" 탭으로
+  // 보내 숫자와 목록이 항상 일치하도록 합니다.
+  const bookingsLink = userProfile?.role === 'admin'
+    ? '/admin?tab=bookings'
+    : userProfile?.role === 'host'
+      ? '/host-bookings'
+      : '/my-bookings';
+
   return (
     <div className="dashboard">
+      <PageHero
+        images={DASHBOARD_HERO_IMAGES}
+        eyebrow="MY PAGE"
+        title="편안한 쉼이 있는 마이페이지"
+        subtitle="예약과 숙소, 메시지를 이곳에서 한눈에 확인하세요."
+      />
       <div className="container">
-        <h1>대시보드</h1>
+        <h1>마이페이지</h1>
         <p className="welcome">환영합니다, {userProfile?.full_name}님!</p>
 
         {/* 통계 카드 */}
         <div className="stats-grid">
-          <div className="stat-card">
-            <Home size={32} />
-            <h3>등록된 숙소</h3>
-            <p className="stat-number">{stats.totalAccommodations}</p>
-          </div>
-          <div className="stat-card">
+          {accommodationsLink ? (
+            <Link to={accommodationsLink} className="stat-card stat-card-link">
+              <Home size={32} />
+              <h3>{accommodationsLabel}</h3>
+              <p className="stat-number">{stats.totalAccommodations}</p>
+            </Link>
+          ) : (
+            <div className="stat-card">
+              <Home size={32} />
+              <h3>{accommodationsLabel}</h3>
+              <p className="stat-number">{stats.totalAccommodations}</p>
+            </div>
+          )}
+          <Link to={bookingsLink} className="stat-card stat-card-link">
             <Users size={32} />
             <h3>예약</h3>
             <p className="stat-number">{stats.totalBookings}</p>
-          </div>
-          <div className="stat-card">
-            <Star size={32} />
-            <h3>리뷰</h3>
-            <p className="stat-number">{stats.totalReviews}</p>
-          </div>
-          <div className="stat-card">
+          </Link>
+          <Link to="/messages" className="stat-card stat-card-link">
             <MessageSquare size={32} />
             <h3>메시지</h3>
-            <p className="stat-number">0</p>
-          </div>
+            <p className="stat-number">{stats.totalMessages}</p>
+          </Link>
         </div>
 
         {/* 빠른 링크 */}
         <div className="quick-links">
           <h2>빠른 접근</h2>
           <div className="grid grid-3">
-            <Link to="/accommodations" className="quick-link-card">
-              <Home size={40} />
-              <h3>숙소 검색</h3>
-              <p>승인된 숙소를 검색하고 예약하세요</p>
-            </Link>
-            {userProfile?.role === 'host' && (
+            {(userProfile?.role === 'admin' || userProfile?.role === 'missionary') && (
+              <Link to="/accommodations" className="quick-link-card">
+                <Home size={40} />
+                <h3>숙소 검색</h3>
+                <p>승인된 숙소를 검색하고 예약하세요</p>
+              </Link>
+            )}
+            {(userProfile?.role === 'admin' || userProfile?.role === 'host') && (
               <Link to="/my-accommodations" className="quick-link-card">
                 <Home size={40} />
                 <h3>내 숙소 관리</h3>
                 <p>등록하신 숙소를 관리하세요</p>
               </Link>
             )}
+            {(userProfile?.role === 'admin' || userProfile?.role === 'host') && (
+              <Link to="/reviews" className="quick-link-card">
+                <Heart size={40} />
+                <h3>리뷰</h3>
+                <p>선교사님들이 남긴 감사 인사를 확인하세요</p>
+              </Link>
+            )}
+            <Link to="/messages" className="quick-link-card">
+              <MessageSquare size={40} />
+              <h3>메시지함</h3>
+              <p>받은 메시지를 확인하세요</p>
+            </Link>
             <Link to="/profile" className="quick-link-card">
               <Users size={40} />
               <h3>프로필</h3>
@@ -100,10 +158,15 @@ function Dashboard({ userProfile }) {
           </div>
         </div>
 
-        {/* 최근 예약 */}
+        {/* 최근 예약 (최신 1건만 표시, 나머지는 예약 관리 페이지에서) */}
         {stats.recentBookings.length > 0 && (
           <div className="recent-section">
-            <h2>최근 예약</h2>
+            <div className="recent-section-header">
+              <h2>최근 예약</h2>
+              <Link to={bookingsLink} className="see-more-link">
+                더보기 <ChevronRight size={14} />
+              </Link>
+            </div>
             <div className="table-responsive">
               <table className="booking-table">
                 <thead>
@@ -119,7 +182,11 @@ function Dashboard({ userProfile }) {
                     <tr key={booking.id}>
                       <td>{booking.accommodations?.title}</td>
                       <td>{booking.users?.full_name}</td>
-                      <td><span className="badge badge-info">예약 완료</span></td>
+                      <td>
+                        <span className={`badge ${BOOKING_STATUS_BADGE[booking.status] || 'badge-info'}`}>
+                          {BOOKING_STATUS_LABEL[booking.status] || booking.status}
+                        </span>
+                      </td>
                       <td>{new Date(booking.created_at).toLocaleDateString()}</td>
                     </tr>
                   ))}
@@ -133,9 +200,11 @@ function Dashboard({ userProfile }) {
         <div className="info-banner">
           <h3>💡 팁</h3>
           <p>
-            {userProfile?.role === 'missionary' 
+            {userProfile?.role === 'missionary'
               ? '숙소를 검색하고 예약하려면 "숙소 검색" 메뉴에서 시작하세요. 호스트와 직접 메시지로 소통할 수 있습니다.'
-              : '숙소를 등록하려면 "내 숙소" 메뉴에서 새 숙소를 추가할 수 있습니다. 등록한 숙소는 관리자 승인 후 공개됩니다.'}
+              : userProfile?.role === 'host'
+              ? '숙소를 등록하려면 "내 숙소" 메뉴에서 새 숙소를 추가할 수 있습니다. 등록한 숙소는 관리자 승인 후 공개됩니다.'
+              : '"관리" 메뉴에서 승인 대기 중인 회원과 숙소를 검토할 수 있습니다.'}
           </p>
         </div>
       </div>
@@ -171,8 +240,19 @@ function Dashboard({ userProfile }) {
           transform: translateY(-4px);
         }
 
+        .stat-card-link {
+          text-decoration: none;
+          color: inherit;
+          cursor: pointer;
+          display: block;
+        }
+
+        .stat-card-link:hover {
+          box-shadow: 0 4px 16px rgba(217, 123, 63, 0.2);
+        }
+
         .stat-card svg {
-          color: #667eea;
+          color: #d97b3f;
           margin-bottom: 1rem;
         }
 
@@ -185,7 +265,7 @@ function Dashboard({ userProfile }) {
         .stat-number {
           font-size: 2rem;
           font-weight: bold;
-          color: #667eea;
+          color: #d97b3f;
           margin: 0;
         }
 
@@ -217,7 +297,7 @@ function Dashboard({ userProfile }) {
         }
 
         .quick-link-card svg {
-          color: #667eea;
+          color: #d97b3f;
         }
 
         .quick-link-card h3 {
@@ -237,6 +317,31 @@ function Dashboard({ userProfile }) {
           border-radius: 8px;
           margin: 2rem 0;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .recent-section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+        }
+
+        .recent-section-header h2 {
+          margin: 0;
+        }
+
+        .see-more-link {
+          display: flex;
+          align-items: center;
+          gap: 0.2rem;
+          font-size: 0.85rem;
+          color: #d97b3f;
+          text-decoration: none;
+          font-weight: 600;
+        }
+
+        .see-more-link:hover {
+          text-decoration: underline;
         }
 
         .table-responsive {
@@ -267,7 +372,7 @@ function Dashboard({ userProfile }) {
         }
 
         .info-banner {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #d97b3f 0%, #b8622c 100%);
           color: white;
           padding: 2rem;
           border-radius: 8px;
@@ -285,12 +390,131 @@ function Dashboard({ userProfile }) {
         }
 
         @media (max-width: 768px) {
+          .welcome {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+          }
+
           .stats-grid {
             grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+          }
+
+          .stat-card {
+            padding: 1.25rem 1rem;
+          }
+
+          .stat-card svg {
+            width: 26px;
+            height: 26px;
+            margin-bottom: 0.6rem;
+          }
+
+          .stat-card h3 {
+            font-size: 0.85rem;
+          }
+
+          .stat-number {
+            font-size: 1.6rem;
+          }
+
+          .quick-links {
+            margin: 2rem 0;
+          }
+
+          .quick-links h2 {
+            margin-bottom: 1rem;
           }
 
           .quick-links .grid {
             grid-template-columns: 1fr;
+          }
+
+          .quick-link-card {
+            padding: 1.25rem;
+            flex-direction: row;
+            text-align: left;
+            gap: 1rem;
+          }
+
+          .quick-link-card svg {
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+          }
+
+          .recent-section {
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+          }
+
+          .booking-table th,
+          .booking-table td {
+            padding: 0.65rem;
+            font-size: 0.85rem;
+          }
+
+          .info-banner {
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .welcome {
+            font-size: 0.92rem;
+          }
+
+          .stats-grid {
+            gap: 0.75rem;
+          }
+
+          .stat-card {
+            padding: 1rem 0.75rem;
+          }
+
+          .stat-card h3 {
+            font-size: 0.78rem;
+          }
+
+          .stat-number {
+            font-size: 1.35rem;
+          }
+
+          .quick-link-card {
+            padding: 1rem;
+            gap: 0.75rem;
+          }
+
+          .quick-link-card h3 {
+            font-size: 1rem;
+          }
+
+          .quick-link-card p {
+            font-size: 0.82rem;
+          }
+
+          .recent-section-header h2 {
+            font-size: 1.15rem;
+          }
+
+          .see-more-link {
+            font-size: 0.78rem;
+          }
+
+          .booking-table th,
+          .booking-table td {
+            padding: 0.5rem;
+            font-size: 0.78rem;
+          }
+
+          .info-banner h3 {
+            font-size: 1rem;
+          }
+
+          .info-banner p {
+            font-size: 0.85rem;
           }
         }
       `}</style>

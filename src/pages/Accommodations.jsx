@@ -1,7 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, DollarSign, Users, Star } from 'lucide-react';
+import { MapPin, Users, Star, Calendar } from 'lucide-react';
+import SearchMap from '../components/SearchMap';
+import PageHero from '../components/PageHero';
+
+// 숙소 검색 페이지 상단 슬라이드 배너 사진
+const SEARCH_HERO_IMAGES = [
+  'https://images.pexels.com/photos/33085059/pexels-photo-33085059.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/38333372/pexels-photo-38333372.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  'https://images.pexels.com/photos/29673494/pexels-photo-29673494.jpeg?auto=compress&cs=tinysrgb&w=1600'
+];
 
 function Accommodations() {
   const [accommodations, setAccommodations] = useState([]);
@@ -14,6 +23,16 @@ function Accommodations() {
     capacity: 1
   });
 
+  // 일정(체크인/체크아웃) — 선택하면 해당 기간에 예약 가능한 숙소만 표시.
+  const [checkIn, setCheckIn] = useState('');
+  const [checkOut, setCheckOut] = useState('');
+  const [availableIds, setAvailableIds] = useState(null); // null = 일정 필터 미적용
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [dateError, setDateError] = useState('');
+
+  // 지도 화면 범위 — 지도를 움직이거나 확대하면 갱신되어, 그 범위 안의 숙소만 아래 목록에 표시.
+  const [mapBounds, setMapBounds] = useState(null);
+
   useEffect(() => {
     fetchAccommodations();
   }, []);
@@ -22,6 +41,43 @@ function Accommodations() {
     applyFilters();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, accommodations]);
+
+  // 일정 선택 시 예약 가능한 숙소 id 목록 조회 (RLS를 우회하는 전용 RPC).
+  useEffect(() => {
+    if (!checkIn || !checkOut) {
+      setAvailableIds(null);
+      setDateError('');
+      return;
+    }
+    if (checkOut <= checkIn) {
+      setDateError('체크아웃 날짜는 체크인 날짜 이후여야 합니다.');
+      setAvailableIds(null);
+      return;
+    }
+    setDateError('');
+    let cancelled = false;
+    (async () => {
+      setAvailabilityLoading(true);
+      try {
+        const { data, error } = await supabase.rpc('get_available_accommodation_ids', {
+          p_check_in: checkIn,
+          p_check_out: checkOut
+        });
+        if (error) throw error;
+        if (!cancelled) {
+          setAvailableIds(new Set((data || []).map((row) => row.accommodation_id)));
+        }
+      } catch (error) {
+        console.error('예약 가능 숙소 조회 오류:', error);
+        if (!cancelled) setAvailableIds(null);
+      } finally {
+        if (!cancelled) setAvailabilityLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [checkIn, checkOut]);
 
   const fetchAccommodations = async () => {
     try {
@@ -68,14 +124,65 @@ function Accommodations() {
     }));
   };
 
+  // 일정 조건까지 반영한 숙소 목록 (지도 마커에도 사용).
+  const dateFilteredAccommodations = useMemo(() => {
+    if (!availableIds) return filteredAccommodations;
+    return filteredAccommodations.filter(acc => availableIds.has(acc.id));
+  }, [filteredAccommodations, availableIds]);
+
+  // 지도 범위(bounds) 안에 있는 숙소만 최종 목록에 노출.
+  const visibleAccommodations = useMemo(() => {
+    if (!mapBounds) return dateFilteredAccommodations;
+    return dateFilteredAccommodations.filter(acc => {
+      if (acc.latitude == null || acc.longitude == null) return false;
+      return mapBounds.contains({ lat: Number(acc.latitude), lng: Number(acc.longitude) });
+    });
+  }, [dateFilteredAccommodations, mapBounds]);
+
+  const clearDates = () => {
+    setCheckIn('');
+    setCheckOut('');
+    setDateError('');
+  };
+
   return (
     <div className="accommodations">
+      <PageHero
+        images={SEARCH_HERO_IMAGES}
+        eyebrow="FIND A STAY"
+        title="신뢰할 수 있는 숙소를 찾아보세요"
+        subtitle="승인된 숙소만 이곳에 노출됩니다."
+      />
       <div className="container">
         <h1>숙소 검색</h1>
 
         {/* 필터 */}
         <div className="filter-section">
           <div className="filter-card">
+            <div className="form-group date-group">
+              <label>
+                <Calendar size={16} />
+                체크인
+              </label>
+              <input
+                type="date"
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group date-group">
+              <label>
+                <Calendar size={16} />
+                체크아웃
+              </label>
+              <input
+                type="date"
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+              />
+            </div>
+
             <div className="form-group">
               <label>지역</label>
               <input
@@ -117,21 +224,55 @@ function Accommodations() {
 
             <button
               className="btn btn-secondary"
-              onClick={() => setFilters({ location: '', minPrice: 0, maxPrice: 1000000, capacity: 1 })}
+              onClick={() => {
+                setFilters({ location: '', minPrice: 0, maxPrice: 1000000, capacity: 1 });
+                clearDates();
+              }}
             >
               초기화
             </button>
           </div>
+
+          {dateError && <p className="form-error date-error">{dateError}</p>}
+          {checkIn && checkOut && !dateError && (
+            <p className="date-hint">
+              {availabilityLoading
+                ? '예약 가능한 숙소를 확인하는 중...'
+                : `${checkIn} ~ ${checkOut} 기간에 예약 가능한 숙소만 표시하고 있습니다.`}
+            </p>
+          )}
+        </div>
+
+        {/* 지도 검색 */}
+        <div className="map-search-section">
+          <div className="map-search-header">
+            <div>
+              <h2>지도에서 찾기</h2>
+              <p className="map-search-hint">
+                지도를 확대하면 숙소명과 1박 가격이 바로 보여요. 지도를 움직이거나 확대/축소하면
+                현재 화면에 보이는 지역의 숙소만 아래 목록에 표시됩니다.
+              </p>
+            </div>
+          </div>
+
+          <SearchMap
+            accommodations={dateFilteredAccommodations}
+            onBoundsChange={setMapBounds}
+          />
         </div>
 
         {/* 숙소 목록 */}
         {loading ? (
           <p>로드 중...</p>
-        ) : filteredAccommodations.length === 0 ? (
-          <p className="empty-message">해당하는 숙소가 없습니다.</p>
+        ) : visibleAccommodations.length === 0 ? (
+          <p className="empty-message">
+            {checkIn && checkOut
+              ? '해당 일정에 예약 가능하면서 현재 지도 범위에 있는 숙소가 없습니다. 일정을 바꾸거나 지도를 움직여 보세요.'
+              : '현재 지도 범위에 있는 숙소가 없습니다. 지도를 움직이거나 축소해 보세요.'}
+          </p>
         ) : (
           <div className="grid grid-2">
-            {filteredAccommodations.map(accommodation => (
+            {visibleAccommodations.map(accommodation => (
               <Link
                 key={accommodation.id}
                 to={`/accommodations/${accommodation.id}`}
@@ -189,11 +330,55 @@ function Accommodations() {
           margin-bottom: 0;
         }
 
+        .filter-card .form-group.date-group label {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+        }
+
         .filter-card span {
           display: block;
           margin-top: 0.5rem;
-          color: #667eea;
+          color: #d97b3f;
           font-weight: 600;
+        }
+
+        .date-error {
+          color: #e74c3c;
+          font-size: 0.85rem;
+          margin: 1rem 0 0;
+        }
+
+        .date-hint {
+          color: #d97b3f;
+          font-size: 0.85rem;
+          margin: 1rem 0 0;
+          background: #faf1e6;
+          padding: 0.6rem 0.9rem;
+          border-radius: 6px;
+        }
+
+        .map-search-section {
+          background: white;
+          padding: 2rem;
+          border-radius: 8px;
+          margin-bottom: 2rem;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .map-search-header {
+          margin-bottom: 1rem;
+        }
+
+        .map-search-header h2 {
+          color: #2c3e50;
+          margin-bottom: 0.35rem;
+        }
+
+        .map-search-hint {
+          color: #7f8c8d;
+          font-size: 0.9rem;
+          margin: 0;
         }
 
         .empty-message {
@@ -289,7 +474,7 @@ function Accommodations() {
         .price {
           font-size: 1.3rem;
           font-weight: bold;
-          color: #667eea;
+          color: #d97b3f;
           margin: 0 0 0.5rem;
         }
 
@@ -300,8 +485,121 @@ function Accommodations() {
         }
 
         @media (max-width: 768px) {
+          .filter-section,
+          .map-search-section {
+            padding: 1.25rem;
+            margin: 1.25rem 0;
+          }
+
           .filter-card {
             grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+
+          .map-search-header h2 {
+            font-size: 1.2rem;
+          }
+
+          .map-search-hint {
+            font-size: 0.85rem;
+          }
+
+          .date-hint,
+          .date-error {
+            font-size: 0.8rem;
+          }
+
+          .accommodation-image {
+            height: 180px;
+          }
+
+          .accommodation-details {
+            padding: 1.1rem;
+          }
+
+          .accommodation-details h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+          }
+
+          .location {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+          }
+
+          .description {
+            font-size: 0.88rem;
+            margin-bottom: 0.75rem;
+          }
+
+          .info-row {
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+          }
+
+          .price {
+            font-size: 1.15rem;
+            margin-bottom: 0.35rem;
+          }
+
+          .host {
+            font-size: 0.85rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .filter-section,
+          .map-search-section {
+            padding: 0.9rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+          }
+
+          .filter-card {
+            gap: 0.85rem;
+          }
+
+          .filter-card span {
+            font-size: 0.9rem;
+          }
+
+          .map-search-header h2 {
+            font-size: 1.1rem;
+          }
+
+          .map-search-hint {
+            font-size: 0.8rem;
+          }
+
+          .accommodation-image {
+            height: 160px;
+          }
+
+          .accommodation-details {
+            padding: 0.9rem;
+          }
+
+          .accommodation-details h3 {
+            font-size: 1.02rem;
+          }
+
+          .location,
+          .description,
+          .info-row {
+            font-size: 0.82rem;
+          }
+
+          .price {
+            font-size: 1.05rem;
+          }
+
+          .host {
+            font-size: 0.78rem;
+          }
+
+          .empty-message {
+            padding: 1.25rem;
+            font-size: 0.9rem;
           }
         }
       `}</style>
