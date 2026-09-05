@@ -114,8 +114,8 @@ function BookingCheckout({ userProfile }) {
         orderName: booking.accommodations?.title
           ? `${booking.accommodations.title} 숙박비`
           : 'WEWE STAY 숙박비',
-        successUrl: `${window.location.origin}/payment/success?bookingId=${booking.id}`,
-        failUrl: `${window.location.origin}/payment/fail?bookingId=${booking.id}`,
+        successUrl: `${window.location.origin}/stay/payment/success?bookingId=${booking.id}`,
+        failUrl: `${window.location.origin}/stay/payment/fail?bookingId=${booking.id}`,
         customerEmail: userProfile.email,
         customerName: userProfile.full_name,
         customerMobilePhone: userProfile.phone ? userProfile.phone.replace(/[^0-9]/g, '') : undefined,

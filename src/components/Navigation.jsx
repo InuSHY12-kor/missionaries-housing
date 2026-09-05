@@ -117,6 +117,14 @@ function Navigation({ user, userProfile, onLogout }) {
                       <span className="nav-btn-label">마이페이지</span>
                     </Link>
                   </li>
+                  <li>
+                    {/* 위위 스테이는 이제 WEWE 전체 홈페이지 안의 하위 사이트입니다.
+                        여기는 별도로 마운트된 앱(basename="/stay")이므로 React Router가 아닌
+                        일반 링크(전체 페이지 이동)로 최상위 WEWE 홈으로 돌아갑니다. */}
+                    <a href="/" className="nav-btn">
+                      <span className="nav-btn-label">위위</span>
+                    </a>
+                  </li>
                   {(userProfile.role === 'admin' || userProfile.role === 'missionary') && (
                     <li>
                       <Link to="/accommodations" className="nav-btn">
@@ -203,6 +211,10 @@ function Navigation({ user, userProfile, onLogout }) {
 
             <ul className="navbar-nav">
               <li><Link to="/" className="nav-btn">홈</Link></li>
+              <li>
+                {/* 최상위 WEWE 홈페이지로 돌아가는 링크 — 별도로 마운트된 앱이므로 일반 링크 사용 */}
+                <a href="/" className="nav-btn">위위</a>
+              </li>
               <li><Link to="/login" className="nav-btn">로그인</Link></li>
               <li><Link to="/signup" className="nav-btn">가입하기</Link></li>
             </ul>

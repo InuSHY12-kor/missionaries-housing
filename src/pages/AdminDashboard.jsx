@@ -258,7 +258,7 @@ function AdminDashboard({ userProfile }) {
       });
       if (tokenError) throw tokenError;
 
-      const link = `${window.location.origin}/verify-email?token=${token}`;
+      const link = `${window.location.origin}/stay/verify-email?token=${token}`;
       const { error: emailError } = await supabase.functions.invoke('send-email', {
         body: { type: 'email_verification', userId: user.id, link }
       });

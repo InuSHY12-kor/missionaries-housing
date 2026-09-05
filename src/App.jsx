@@ -321,7 +321,7 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/stay">
       <div className="App">
         {autoLogoutMessage && (
           <div className="auto-logout-banner">

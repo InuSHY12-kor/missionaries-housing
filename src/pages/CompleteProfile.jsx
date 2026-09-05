@@ -147,7 +147,7 @@ function CompleteProfile() {
           p_user_id: userId
         });
         if (!tokenError && token) {
-          const link = `${window.location.origin}/verify-email?token=${token}`;
+          const link = `${window.location.origin}/stay/verify-email?token=${token}`;
           await supabase.functions.invoke('send-email', {
             body: { type: 'email_verification', userId, link }
           });
@@ -160,7 +160,7 @@ function CompleteProfile() {
       }
 
       // 프로필 상태를 앱 전체에 반영하기 위해 새로고침하면서 완료 안내 페이지로 이동
-      window.location.href = '/signup-complete';
+      window.location.href = '/stay/signup-complete';
     } catch (err) {
       setError(err.message);
       setLoading(false);
