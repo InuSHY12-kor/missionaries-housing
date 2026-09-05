@@ -1,22 +1,38 @@
-import React from 'react';
-import { ArrowRight, Home as HomeIcon, Car, HeartHandshake, Users2 } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Home as HomeIcon } from 'lucide-react';
 import WeweHeader from './WeweHeader';
-import weweLogoFull from '../assets/wewe-logo-full.png';
+import WeweFooter from './WeweFooter';
+import './wewe-shared.css';
 
 // WEWE 비영리단체 전체 소개 홈페이지 (최상위 '/').
 // 기존 위위스테이 전용 랜딩(지금은 /stay 안의 LandingPage.jsx)의 디자인 언어(에디토리얼 톤,
 // 히어로 배너, 색상 등)를 재사용하되 콘텐츠는 WEWE 전체 소개로 새로 구성했습니다.
 //
-// 이번 단계(Phase 2)의 범위: 홈페이지 자체와 이원 로고 체계까지만.
-// "소개"/"사역 소식"은 Phase 3·4에서 실제 하위 페이지(/about, /blog)로 분리될 예정이라,
-// 지금은 이 홈페이지 안의 섹션(#about, #news)으로 연결해둔 임시 구조입니다.
-// 로그인/가입하기는 Phase 6 전까지는 실제로 동작하는 /stay 쪽 로그인·가입 화면을 그대로 사용합니다.
+// Phase 2(2026-09-05)에서는 "소개"/"사역 소개" 전체 내용을 이 홈페이지 안의 섹션(#about,
+// #ministries)으로 임시 구현했었습니다. Phase 3에서 그 내용을 실제 하위 페이지
+// (/about, /about/ministries, /about/leadership)로 옮기고, 이 홈페이지는 각 섹션의
+// 짧은 요약 + "자세히 보기" 링크만 남겨 홈페이지 자체는 더 가볍게 유지합니다.
+// "사역 소식"은 아직 실제 페이지가 없어(Phase 4) #news 섹션에 "준비 중" 안내만 둡니다.
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1604881991575-dfb1003d8811?auto=format&fit=crop&w=1800&q=80'; // Priscilla Du Preez - 맞잡은 손
 
 function WeweHome() {
+  // 다른 페이지에서 "/#news"처럼 해시가 붙은 주소로 들어온 경우, 해당 섹션이
+  // 화면에 그려진 뒤에 스크롤해서 보여줍니다(브라우저의 기본 해시 스크롤은 정적
+  // HTML을 기준으로 동작해서, 이 콘텐츠처럼 자바스크립트로 그려지는 섹션에는
+  // 적용되지 않기 때문입니다).
+  useEffect(() => {
+    if (window.location.hash) {
+      const el = document.querySelector(window.location.hash);
+      if (el) {
+        requestAnimationFrame(() => el.scrollIntoView({ behavior: 'auto' }));
+      }
+    }
+  }, []);
+
   return (
-    <div className="wewe-home">
+    <div className="wewe-page wewe-home">
       <WeweHeader />
 
       {/* 히어로 */}
@@ -38,58 +54,33 @@ function WeweHome() {
         </div>
       </section>
 
-      {/* OUR STORY */}
+      {/* OUR STORY (요약 — 전체 내용은 /about) */}
       <section id="about" className="wh-about">
         <div className="wh-container wh-container-narrow">
           <span className="wh-eyebrow wh-eyebrow-center">OUR STORY</span>
           <h2 className="wh-h2-center">위(WE)로자의 위(WE)로자</h2>
 
           <blockquote className="wh-verse">
-            “너희 중에 분깃이나 기업이 없는 레위인과 네 성중에 거류하는 객과 및 고아와 과부들이 와서 먹고 배부르게 하라
-            그리하면 네 하나님 여호와께서 네 손으로 하는 범사에 네게 복을 주시리라”
+            &ldquo;너희 중에 분깃이나 기업이 없는 레위인과 네 성중에 거류하는 객과 및 고아와 과부들이 와서 먹고
+            배부르게 하라 그리하면 네 하나님 여호와께서 네 손으로 하는 범사에 네게 복을 주시리라&rdquo;
             <cite>(신명기 14:29)</cite>
           </blockquote>
 
           <p>
-            WEWE는 가장 깊은 상실의 자리에서 시작되었습니다. 누군가의 아픔을 돌보는 이들이 정작 자신의 무너진 마음은
-            숨겨야만 하는 현실, 그리고 그들의 눈물을 안타까움으로 바라보시는 하나님의 시선을 마주했습니다.
-            &ldquo;누가 그들의 눈물을 닦아주는가?&rdquo; 이 질문에 대한 답을 성경에서 찾았습니다. 고아와 과부, 나그네를
-            향한 구제의 손길 이전에, 기업이 없어 공동체의 돌봄이 절실했던 &lsquo;레위인&rsquo;이 있었습니다. WEWE는
-            현대판 레위인인 목회자와 선교사들이 다시 일어설 수 있도록, 그들의 &lsquo;위로자&rsquo;가 되고자 합니다.
+            WEWE는 가장 깊은 상실의 자리에서 시작되었습니다. 누군가의 아픔을 돌보는 이들이 정작 자신의 무너진
+            마음은 숨겨야만 하는 현실 속에서, WEWE는 현대판 레위인인 목회자와 선교사들의 &lsquo;위로자&rsquo;가
+            되고자 합니다.
           </p>
 
-          <div className="wh-identity-grid">
-            <div className="wh-identity-card">
-              <h3>WE + WE<span className="wh-identity-sub">나에서 우리로</span></h3>
-              <p>
-                혼자(I) 있던 위로자에게 다가가, 다시 &lsquo;우리(WE)&rsquo;가 되는 연결이 됩니다. 먼저 아파본
-                위로자(WE)가 지금 아픈 위로자(WE)의 손을 잡아 줍니다.
-              </p>
-            </div>
-            <div className="wh-identity-card">
-              <h3>The Hands of &lsquo;W&rsquo;<span className="wh-identity-sub">브랜드 심볼의 의미</span></h3>
-              <p>
-                &lsquo;W&rsquo;는 아래에서 위로 향하는 두 손의 모양입니다. 출애굽기에서 모세의 팔이 내려가지 않도록
-                곁에서 받쳐주었던 아론과 훌의 손을 상징합니다. 위로자의 팔이 꺾이지 않도록, WEWE가 묵묵히 지지합니다.
-              </p>
-            </div>
-          </div>
-
-          <div className="wh-leader">
-            <img src={weweLogoFull} alt="WEWE" className="wh-leader-logo" />
-            <div>
-              <h4>대표 홍현지</h4>
-              <p>
-                간호학(전공) 학사 · 호스피스 전문 간호사(석사) — 현 세브란스 완화의료팀 프로젝트매니저,
-                전 세브란스 완화의료팀 소아전문간호사, 전 국립암센터 소아암 병동 전문간호사.
-                이사회 구성 등 자세한 소개는 준비 중입니다.
-              </p>
-            </div>
+          <div className="wh-about-more">
+            <Link to="/about" className="wh-btn wh-btn-ghost">
+              WEWE 이야기 더 보기 <ArrowRight size={16} />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* 사역 소개 */}
+      {/* 사역 소개 (요약 — 전체 내용은 /about/ministries) */}
       <section id="ministries" className="wh-ministries">
         <div className="wh-container">
           <span className="wh-eyebrow wh-eyebrow-center">OUR MINISTRIES</span>
@@ -102,16 +93,8 @@ function WeweHome() {
               <span className="wh-ministry-tag">PROJECT 1 · 목회자</span>
               <h3>Refresh Pastor Academy</h3>
               <p className="wh-ministry-desc">레위인의 회복 — 성도의 위로가 되어온 목회자님이, 이제는 위로받으실 시간입니다.</p>
-              <ul className="wh-ministry-list">
-                <li>
-                  <strong>목회자 아카데미</strong>
-                  <span>심포지엄 · 목회자 세미나 · 소진관리 프로그램</span>
-                </li>
-                <li>
-                  <strong>개별 지원</strong>
-                  <span>심리상담·자기탐색 프로그램, 재정 지원, 목회자 양성 장학사업</span>
-                </li>
-              </ul>
+              <p className="wh-ministry-summary">목회자 아카데미(심포지엄·세미나·소진관리)와 개별 지원(심리상담, 재정, 장학사업)으로 구성됩니다.</p>
+              <Link to="/about/ministries" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
             </div>
 
             {/* 프로젝트 2 — 선교사 */}
@@ -119,37 +102,18 @@ function WeweHome() {
               <span className="wh-ministry-tag">PROJECT 2 · 선교사</span>
               <h3>Missionary Care</h3>
               <p className="wh-ministry-desc">선교사의 회복 — 열방의 나그네가, 고국에서는 편히 쉬실 수 있도록.</p>
-              <ul className="wh-ministry-list">
-                <li className="wh-ministry-list-live">
-                  <span className="wh-ministry-icon"><HomeIcon size={18} /></span>
-                  <div>
-                    <strong>WEWE 스테이 <span className="wh-live-badge">이용 가능</span></strong>
-                    <span>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼</span>
-                  </div>
-                  <a href="/stay" className="wh-ministry-link">바로가기 <ArrowRight size={14} /></a>
-                </li>
-                <li>
-                  <span className="wh-ministry-icon"><Car size={18} /></span>
-                  <div>
-                    <strong>레위인의 모빌리티</strong>
-                    <span>단기 귀국 선교사를 위한 차량 쉐어링</span>
-                  </div>
-                </li>
-                <li>
-                  <span className="wh-ministry-icon"><HeartHandshake size={18} /></span>
-                  <div>
-                    <strong>Poiema 돌봄</strong>
-                    <span>선교사 정체성 회복을 위한 전인적 힐링캠프</span>
-                  </div>
-                </li>
-                <li>
-                  <span className="wh-ministry-icon"><Users2 size={18} /></span>
-                  <div>
-                    <strong>WE+WE 커넥트</strong>
-                    <span>후원자·선교사, 선교사·선교사를 잇는 멤버십 프로그램</span>
-                  </div>
-                </li>
-              </ul>
+
+              <div className="wh-ministry-live">
+                <span className="wh-ministry-icon"><HomeIcon size={18} /></span>
+                <div>
+                  <strong>WEWE 스테이 <span className="wh-live-badge">이용 가능</span></strong>
+                  <span>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼</span>
+                </div>
+                <a href="/stay" className="wh-ministry-link">바로가기 <ArrowRight size={14} /></a>
+              </div>
+
+              <p className="wh-ministry-summary">그 외 레위인의 모빌리티(차량 쉐어링), Poiema 돌봄(힐링캠프), WE+WE 커넥트(멤버십)도 준비하고 있습니다.</p>
+              <Link to="/about/ministries" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
             </div>
           </div>
         </div>
@@ -181,76 +145,9 @@ function WeweHome() {
         </div>
       </section>
 
-      {/* 푸터 */}
-      <footer className="wh-footer">
-        <div className="wh-container wh-footer-inner">
-          <div className="wh-footer-brand">
-            <img src={weweLogoFull} alt="WEWE" className="wh-footer-logo" />
-            <p>위로자의 위로자 — 목회자와 선교사, 그들의 위로자가 되는 비영리단체</p>
-          </div>
-
-          <div className="wh-footer-info">
-            <p>비영리단체 WEWE (위로자의 위로자) · 대표 홍현지</p>
-            <p>사업자(고유번호) 501-82-75164</p>
-            <p>주소 서울특별시 종로구 대학로12길 61, 5층 501-176A호(동승동, 계우빌딩)</p>
-            <p>전화 [연락처 입력 필요] · 이메일 wewe@wewestay.com</p>
-          </div>
-
-          <div className="wh-footer-copy">
-            <p>&copy; {new Date().getFullYear()} WEWE. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <WeweFooter />
 
       <style>{`
-        .wewe-home {
-          --wh-ink: #1c1c1a;
-          --wh-ink-soft: #4a4a46;
-          --wh-stone: #8c8880;
-          --wh-line: #e5e2da;
-          --wh-bg: #ffffff;
-          --wh-bg-soft: #faf9f6;
-          --wh-teal: #146b71;
-          --wh-orange: #d97b3f;
-          --wh-orange-deep: #b8622c;
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          background: var(--wh-bg);
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-        }
-
-        .wh-container {
-          max-width: 1160px;
-          margin: 0 auto;
-          padding: 0 1.5rem;
-        }
-
-        .wh-container-narrow {
-          max-width: 760px;
-        }
-
-        .wh-eyebrow {
-          display: inline-block;
-          font-size: 0.75rem;
-          font-weight: 700;
-          letter-spacing: 0.18em;
-          color: var(--wh-orange);
-          margin-bottom: 0.85rem;
-        }
-
-        .wh-eyebrow-center {
-          display: block;
-          text-align: center;
-        }
-
-        .wh-h2-center {
-          text-align: center;
-          color: var(--wh-ink);
-          margin-bottom: 2rem;
-          font-size: 1.85rem;
-        }
-
         /* 히어로 */
         .wh-hero {
           position: relative;
@@ -310,47 +207,6 @@ function WeweHome() {
           flex-wrap: wrap;
         }
 
-        .wh-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.85rem 1.6rem;
-          border-radius: 6px;
-          font-weight: 700;
-          font-size: 0.98rem;
-          text-decoration: none;
-          transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-        }
-
-        .wh-btn-primary {
-          color: #fff;
-          background: linear-gradient(90deg, var(--wh-orange) 0%, var(--wh-orange-deep) 100%);
-        }
-
-        .wh-btn-primary:hover {
-          box-shadow: 0 6px 18px rgba(217, 123, 63, 0.45);
-        }
-
-        .wh-btn-outline {
-          color: #fff;
-          border: 1.5px solid rgba(255,255,255,0.65);
-        }
-
-        .wh-btn-outline:hover {
-          border-color: #fff;
-          background: rgba(255,255,255,0.08);
-        }
-
-        .wh-btn-ghost {
-          color: var(--wh-ink);
-          border: 1.5px solid var(--wh-line);
-        }
-
-        .wh-btn-ghost:hover {
-          border-color: var(--wh-orange);
-          color: var(--wh-orange);
-        }
-
         /* OUR STORY */
         .wh-about {
           padding: 5.5rem 0;
@@ -384,65 +240,9 @@ function WeweHome() {
           font-size: 0.9rem;
         }
 
-        .wh-identity-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1.25rem;
-          margin: 2.5rem 0;
-        }
-
-        .wh-identity-card {
-          padding: 1.75rem;
-          background: var(--wh-bg-soft);
-          border: 1px solid var(--wh-line);
-          border-radius: 10px;
-        }
-
-        .wh-identity-card h3 {
-          color: var(--wh-ink);
-          margin-bottom: 0.85rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
-
-        .wh-identity-sub {
-          font-size: 0.78rem;
-          font-weight: 600;
-          color: var(--wh-stone);
-          letter-spacing: 0.02em;
-        }
-
-        .wh-identity-card p {
-          margin: 0;
-          font-size: 0.95rem;
-        }
-
-        .wh-leader {
-          display: grid;
-          grid-template-columns: 90px 1fr;
-          align-items: center;
-          gap: 1.5rem;
-          padding: 1.5rem 1.75rem;
-          background: var(--wh-bg-soft);
-          border: 1px solid var(--wh-line);
-          border-radius: 10px;
-        }
-
-        .wh-leader-logo {
-          width: 100%;
-          height: auto;
-        }
-
-        .wh-leader h4 {
-          color: var(--wh-ink);
-          margin-bottom: 0.4rem;
-        }
-
-        .wh-leader p {
-          margin: 0;
-          font-size: 0.92rem;
-          color: var(--wh-ink-soft);
+        .wh-about-more {
+          text-align: center;
+          margin-top: 1.5rem;
         }
 
         /* 사역 소개 */
@@ -470,6 +270,8 @@ function WeweHome() {
           border-radius: 12px;
           padding: 2rem;
           border-top: 4px solid transparent;
+          display: flex;
+          flex-direction: column;
         }
 
         .wh-ministry-teal {
@@ -508,39 +310,36 @@ function WeweHome() {
 
         .wh-ministry-desc {
           color: var(--wh-ink-soft);
-          margin-bottom: 1.5rem;
+          margin-bottom: 1rem;
           line-height: 1.7;
         }
 
-        .wh-ministry-list {
-          list-style: none;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
+        .wh-ministry-summary {
+          color: var(--wh-stone);
+          font-size: 0.88rem;
+          line-height: 1.6;
+          margin-bottom: 1rem;
         }
 
-        .wh-ministry-list li {
+        .wh-ministry-live {
           display: flex;
-          align-items: flex-start;
+          align-items: center;
           gap: 0.75rem;
-          padding-top: 1rem;
+          flex-wrap: wrap;
+          padding: 1rem 0;
+          margin-bottom: 0.5rem;
           border-top: 1px solid var(--wh-line);
+          border-bottom: 1px solid var(--wh-line);
         }
 
-        .wh-ministry-list li:first-child {
-          padding-top: 0;
-          border-top: none;
-        }
-
-        .wh-ministry-list li > strong {
+        .wh-ministry-live > strong {
           display: block;
           color: var(--wh-ink);
           font-size: 0.98rem;
           margin-bottom: 0.15rem;
         }
 
-        .wh-ministry-list li > span,
-        .wh-ministry-list li div > span:not(.wh-live-badge) {
+        .wh-ministry-live > div > span {
           display: block;
           color: var(--wh-stone);
           font-size: 0.87rem;
@@ -559,11 +358,6 @@ function WeweHome() {
           justify-content: center;
         }
 
-        .wh-ministry-list-live {
-          align-items: center;
-          flex-wrap: wrap;
-        }
-
         .wh-live-badge {
           display: inline-block;
           margin-left: 0.5rem;
@@ -577,7 +371,7 @@ function WeweHome() {
         }
 
         .wh-ministry-link {
-          margin-left: auto;
+          margin-top: auto;
           display: inline-flex;
           align-items: center;
           gap: 0.3rem;
@@ -586,6 +380,11 @@ function WeweHome() {
           color: var(--wh-orange-deep);
           text-decoration: none;
           white-space: nowrap;
+        }
+
+        .wh-ministry-live .wh-ministry-link {
+          margin-top: 0;
+          margin-left: auto;
         }
 
         .wh-ministry-link:hover {
@@ -665,50 +464,6 @@ function WeweHome() {
           background: rgba(255,255,255,0.08);
         }
 
-        /* 푸터 */
-        .wh-footer {
-          background: #141412;
-          padding: 2.75rem 1.5rem;
-        }
-
-        .wh-footer-inner {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: space-between;
-          gap: 2rem;
-        }
-
-        .wh-footer-logo {
-          height: 40px;
-          width: auto;
-          display: block;
-          margin-bottom: 0.6rem;
-        }
-
-        .wh-footer-brand p {
-          color: rgba(255,255,255,0.5);
-          font-size: 0.85rem;
-          max-width: 280px;
-          line-height: 1.6;
-        }
-
-        .wh-footer-info p {
-          color: rgba(255,255,255,0.55);
-          font-size: 0.85rem;
-          margin: 0.2rem 0;
-          line-height: 1.6;
-        }
-
-        .wh-footer-copy {
-          display: flex;
-          align-items: flex-end;
-        }
-
-        .wh-footer-copy p {
-          color: rgba(255,255,255,0.35);
-          font-size: 0.8rem;
-        }
-
         /* 모바일 */
         @media (max-width: 860px) {
           .wh-hero {
@@ -724,14 +479,8 @@ function WeweHome() {
             font-size: 0.95rem;
           }
 
-          .wh-identity-grid,
           .wh-ministry-grid {
             grid-template-columns: 1fr;
-          }
-
-          .wh-leader {
-            grid-template-columns: 64px 1fr;
-            padding: 1.25rem;
           }
 
           .wh-about, .wh-ministries, .wh-news {
@@ -742,10 +491,6 @@ function WeweHome() {
             flex-direction: column;
             align-items: flex-start;
             text-align: left;
-          }
-
-          .wh-footer-inner {
-            flex-direction: column;
           }
         }
       `}</style>
