@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Home as HomeIcon } from 'lucide-react';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
+import { weweSupabase } from './weweSupabase';
 import './wewe-shared.css';
 
 // WEWE 비영리단체 전체 소개 홈페이지 (최상위 '/').
@@ -13,12 +14,17 @@ import './wewe-shared.css';
 // #ministries)으로 임시 구현했었습니다. Phase 3에서 그 내용을 실제 하위 페이지
 // (/about, /about/ministries, /about/leadership)로 옮기고, 이 홈페이지는 각 섹션의
 // 짧은 요약 + "자세히 보기" 링크만 남겨 홈페이지 자체는 더 가볍게 유지합니다.
-// "사역 소식"은 아직 실제 페이지가 없어(Phase 4) #news 섹션에 "준비 중" 안내만 둡니다.
+// Phase 4에서 "사역 소식" 섹션도 실제 게시글(ministry_posts, /about/ministries의
+// 관리자가 /stay/admin에서 작성·발행)의 최신 3개를 보여주도록 바꿨습니다 — 아직 발행된
+// 글이 없으면 이전과 같은 "Coming soon" 안내를 그대로 보여줍니다.
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1604881991575-dfb1003d8811?auto=format&fit=crop&w=1800&q=80'; // Priscilla Du Preez - 맞잡은 손
 
 function WeweHome() {
-  // 다른 페이지에서 "/#news"처럼 해시가 붙은 주소로 들어온 경우, 해당 섹션이
+  const [newsPosts, setNewsPosts] = useState([]);
+  const [newsLoaded, setNewsLoaded] = useState(false);
+
+  // 다른 페이지에서 "/#ministries"처럼 해시가 붙은 주소로 들어온 경우, 해당 섹션이
   // 화면에 그려진 뒤에 스크롤해서 보여줍니다(브라우저의 기본 해시 스크롤은 정적
   // HTML을 기준으로 동작해서, 이 콘텐츠처럼 자바스크립트로 그려지는 섹션에는
   // 적용되지 않기 때문입니다).
@@ -29,6 +35,24 @@ function WeweHome() {
         requestAnimationFrame(() => el.scrollIntoView({ behavior: 'auto' }));
       }
     }
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    weweSupabase
+      .from('ministry_posts')
+      .select('id, slug, title, excerpt, published_at')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(3)
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (!error) setNewsPosts(data || []);
+        setNewsLoaded(true);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (
@@ -119,15 +143,39 @@ function WeweHome() {
         </div>
       </section>
 
-      {/* 사역 소식 (준비 중) */}
+      {/* 사역 소식 */}
       <section id="news" className="wh-news">
         <div className="wh-container wh-container-narrow">
           <span className="wh-eyebrow wh-eyebrow-center">MINISTRY NEWS</span>
           <h2 className="wh-h2-center">사역 소식</h2>
-          <div className="wh-news-card">
-            <p>WEWE가 걸어가는 이야기와 사역 현장의 소식을 곧 이곳에서 전해드릴게요.</p>
-            <span className="wh-news-soon">Coming soon</span>
-          </div>
+
+          {newsLoaded && newsPosts.length > 0 ? (
+            <>
+              <ul className="wh-news-list">
+                {newsPosts.map((post) => (
+                  <li key={post.id}>
+                    <Link to={`/news/${post.slug}`} className="wh-news-item">
+                      <span className="wh-news-item-date">
+                        {post.published_at ? new Date(post.published_at).toLocaleDateString('ko-KR') : ''}
+                      </span>
+                      <span className="wh-news-item-title">{post.title}</span>
+                      <ArrowRight size={14} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <div className="wh-news-more">
+                <Link to="/news" className="wh-btn wh-btn-ghost">
+                  사역 소식 전체 보기 <ArrowRight size={16} />
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="wh-news-card">
+              <p>WEWE가 걸어가는 이야기와 사역 현장의 소식을 곧 이곳에서 전해드릴게요.</p>
+              <span className="wh-news-soon">Coming soon</span>
+            </div>
+          )}
         </div>
       </section>
 
@@ -420,6 +468,55 @@ function WeweHome() {
           border: 1px solid var(--wh-line);
           border-radius: 999px;
           padding: 0.3rem 0.9rem;
+        }
+
+        .wh-news-list {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .wh-news-item {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1.1rem 1.4rem;
+          background: var(--wh-bg-soft);
+          border: 1px solid var(--wh-line);
+          border-radius: 10px;
+          text-decoration: none;
+          color: var(--wh-ink);
+          transition: border-color 0.15s ease;
+        }
+
+        .wh-news-item:hover {
+          border-color: var(--wh-orange);
+        }
+
+        .wh-news-item-date {
+          flex-shrink: 0;
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: var(--wh-stone);
+        }
+
+        .wh-news-item-title {
+          flex: 1;
+          font-weight: 600;
+          font-size: 0.98rem;
+        }
+
+        .wh-news-item svg {
+          flex-shrink: 0;
+          color: var(--wh-orange-deep);
+        }
+
+        .wh-news-more {
+          text-align: center;
+          margin-top: 1.75rem;
         }
 
         /* CTA 밴드 */
