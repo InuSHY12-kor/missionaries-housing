@@ -7,9 +7,9 @@ import weweIconWhite from '../assets/wewe-icon-white.png';
 // 분리된 별도 컴포넌트입니다 — 어두운 배경 위에 투명하게 얹히고, 흰색 로고 아이콘 +
 // "위로자의 위로자" 태그라인을 사용합니다.
 //
-// "홈"/"소개"는 이 헤더가 마운트되는 WeweSite 라우터(BrowserRouter) 안의 실제 페이지라서
-// react-router-dom의 Link로 이동합니다(Phase 3). 그 외 메뉴는 아직 이렇게 연결됩니다:
-//  - 사역 소식: 아직 실제 페이지가 없어(Phase 4) 홈페이지의 준비 중 섹션(#news)으로 이동
+// "홈"/"소개"/"사역 소식"은 이 헤더가 마운트되는 WeweSite 라우터(BrowserRouter) 안의
+// 실제 페이지라서 react-router-dom의 Link로 이동합니다(소개: Phase 3, 사역 소식: Phase 4).
+// 그 외 메뉴는 아직 이렇게 연결됩니다:
 //  - 로그인 / 가입하기: 지금 실제로 동작하는 /stay 쪽 로그인·가입 페이지로 연결 — Phase 6에서 WEWE 전체용으로 교체 예정
 //  - 위위 스테이: /stay (별도로 마운트된 앱이라 일반 링크로 이동)
 function WeweHeader() {
@@ -40,7 +40,7 @@ function WeweHeader() {
         <nav className="wewe-nav">
           <Link to="/" className="wewe-nav-link" onClick={closeMobileNav}>홈</Link>
           <Link to="/about" className="wewe-nav-link" onClick={closeMobileNav}>소개</Link>
-          <a href="/#news" className="wewe-nav-link" onClick={closeMobileNav}>사역 소식</a>
+          <Link to="/news" className="wewe-nav-link" onClick={closeMobileNav}>사역 소식</Link>
           <a href="/stay" className="wewe-nav-link" onClick={closeMobileNav}>위위 스테이</a>
           <a href="/stay/login" className="wewe-nav-link" onClick={closeMobileNav}>로그인</a>
           <a href="/stay/signup" className="wewe-nav-link wewe-nav-cta" onClick={closeMobileNav}>가입하기</a>
