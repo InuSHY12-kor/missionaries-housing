@@ -1,0 +1,222 @@
+/*
+ * WEWE 전체 홈페이지(최상위 '/', '/about', '/about/ministries', '/about/leadership')
+ * 공용 스타일. 색상 변수, 컨테이너, 버튼, 아이바로우/제목, 푸터처럼
+ * 모든 페이지에서 반복되는 요소를 여기서 한 번만 정의합니다.
+ *
+ * 페이지별 전용 스타일(히어로 배경, 카드 레이아웃 등)은 각 페이지 컴포넌트 안의
+ * <style> 블록에 그대로 둡니다 — 기존 컴포넌트별 스타일 관례를 유지.
+ */
+
+.wewe-page {
+  --wh-ink: #1c1c1a;
+  --wh-ink-soft: #4a4a46;
+  --wh-stone: #8c8880;
+  --wh-line: #e5e2da;
+  --wh-bg: #ffffff;
+  --wh-bg-soft: #faf9f6;
+  --wh-teal: #146b71;
+  --wh-orange: #d97b3f;
+  --wh-orange-deep: #b8622c;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--wh-bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+}
+
+.wh-container {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.wh-container-narrow {
+  max-width: 760px;
+}
+
+.wh-eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--wh-orange);
+  margin-bottom: 0.85rem;
+}
+
+.wh-eyebrow-center {
+  display: block;
+  text-align: center;
+}
+
+.wh-h2-center {
+  text-align: center;
+  color: var(--wh-ink);
+  margin-bottom: 2rem;
+  font-size: 1.85rem;
+}
+
+/* 버튼 */
+.wh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.6rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.98rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.wh-btn-primary {
+  color: #fff;
+  background: linear-gradient(90deg, var(--wh-orange) 0%, var(--wh-orange-deep) 100%);
+}
+
+.wh-btn-primary:hover {
+  box-shadow: 0 6px 18px rgba(217, 123, 63, 0.45);
+}
+
+.wh-btn-outline {
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.65);
+}
+
+.wh-btn-outline:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.wh-btn-ghost {
+  color: var(--wh-ink);
+  border: 1.5px solid var(--wh-line);
+}
+
+.wh-btn-ghost:hover {
+  border-color: var(--wh-orange);
+  color: var(--wh-orange);
+}
+
+/* 하위 페이지 공용 히어로 배너 (WevePageHero) */
+.wp-hero {
+  position: relative;
+  padding: 8.5rem 2rem 3.5rem;
+  text-align: center;
+  background: linear-gradient(135deg, #14201d 0%, #1c2f2c 55%, #22201a 100%);
+}
+
+.wp-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #f0c9a0;
+  margin-bottom: 0.75rem;
+}
+
+.wp-hero h1 {
+  color: #fff;
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.6rem;
+}
+
+.wp-hero p {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 1rem;
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* 소개 서브 내비게이션 (AboutSubNav) */
+.wp-subnav {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.wp-subnav a {
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.wp-subnav a:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
+.wp-subnav a.active {
+  background: #fff;
+  color: var(--wh-ink);
+  border-color: #fff;
+}
+
+/* 푸터 (WeweFooter) */
+.wh-footer {
+  background: #141412;
+  padding: 2.75rem 1.5rem;
+}
+
+.wh-footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.wh-footer-logo {
+  height: 40px;
+  width: auto;
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.wh-footer-brand p {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  max-width: 280px;
+  line-height: 1.6;
+}
+
+.wh-footer-info p {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.85rem;
+  margin: 0.2rem 0;
+  line-height: 1.6;
+}
+
+.wh-footer-copy {
+  display: flex;
+  align-items: flex-end;
+}
+
+.wh-footer-copy p {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 860px) {
+  .wp-hero {
+    padding: 7rem 1.25rem 2.75rem;
+  }
+
+  .wp-hero h1 {
+    font-size: 1.6rem;
+  }
+
+  .wh-footer-inner {
+    flex-direction: column;
+  }
+}
