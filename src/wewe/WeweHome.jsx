@@ -540,7 +540,7 @@ function WeweHome() {
         }
 
         .wh-ministry-list li > span,
-        .wh-ministry-list li div span {
+        .wh-ministry-list li div > span:not(.wh-live-badge) {
           display: block;
           color: var(--wh-stone);
           font-size: 0.87rem;
