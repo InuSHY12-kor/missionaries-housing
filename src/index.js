@@ -10,10 +10,10 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 // "/stay"로 시작하는 주소는 그대로 기존 앱(App.jsx, basename="/stay")을 렌더링한다.
 //
 // 최상위 "/", "/about" 계열(위위란?/사역 소개/대표·이사회, Phase 3), "/news" 계열
-// (사역 소식 목록/상세, Phase 4)은 신규 WEWE 전체 소개 홈페이지(WeweSite, 자체
-// BrowserRouter를 가진 별도의 React 트리)를 렌더링한다.
-// 그 외 주소(예: 아직 만들어지지 않은 "/donate" 등 — 이후 단계에서 실제 페이지로 구현될
-// 예정. 그리고 Phase 1 이전에 발송된 이메일 등에 남아있는 구버전 절대경로
+// (사역 소식 목록/상세, Phase 4), "/donate"(후원 안내, Phase 5)는 신규 WEWE 전체 소개
+// 홈페이지(WeweSite, 자체 BrowserRouter를 가진 별도의 React 트리)를 렌더링한다.
+// 그 외 주소(예: 아직 만들어지지 않은 "/signup", "/login" WEWE 전체용 페이지 등 — Phase 6에서
+// 구현될 예정. 그리고 Phase 1 이전에 발송된 이메일 등에 남아있는 구버전 절대경로
 // "/verify-email", "/complete-profile" 같은 딥링크)는 계속 "/stay"로 리다이렉트해서
 // 기존 기능이 깨지지 않도록 한다.
 const { pathname, search, hash } = window.location;
@@ -24,7 +24,8 @@ const isWeweSitePath =
   pathname === '/about' ||
   pathname.startsWith('/about/') ||
   pathname === '/news' ||
-  pathname.startsWith('/news/');
+  pathname.startsWith('/news/') ||
+  pathname === '/donate';
 
 if (isStayPath) {
   root.render(
