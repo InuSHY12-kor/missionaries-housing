@@ -14,6 +14,7 @@ import AccountStatus from './pages/AccountStatus';
 import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminPostEditor from './pages/AdminPostEditor';
 import Accommodations from './pages/Accommodations';
 import AccommodationDetail from './pages/AccommodationDetail';
 import HostAccommodations from './pages/HostAccommodations';
@@ -278,7 +279,14 @@ function App() {
         <>
           {/* 관리자 */}
           {userProfile.role === 'admin' && (
-            <Route path="/admin/*" element={<AdminDashboard userProfile={userProfile} />} />
+            <>
+              {/* 사역 소식 글 작성/수정 화면. react-router v6은 경로 구체성으로 매칭
+                  순위를 정하므로("/admin/*" 같은 와일드카드는 항상 우선순위가 가장 낮음),
+                  아래처럼 "/admin/*" 바로 위/아래 어디에 두어도 이 두 경로가 먼저 매칭됩니다. */}
+              <Route path="/admin/posts/new" element={<AdminPostEditor userProfile={userProfile} />} />
+              <Route path="/admin/posts/:id/edit" element={<AdminPostEditor userProfile={userProfile} />} />
+              <Route path="/admin/*" element={<AdminDashboard userProfile={userProfile} />} />
+            </>
           )}
 
           {/* 일반 사용자 */}
