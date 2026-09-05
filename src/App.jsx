@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import CompleteProfile from './pages/CompleteProfile';
 import PendingApproval from './pages/PendingApproval';
 import AccountStatus from './pages/AccountStatus';
+import SupporterHome from './pages/SupporterHome';
 import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -274,6 +275,11 @@ function App() {
       // withdrawn: 탈퇴 처리 완료(5년 보관 후 자동 삭제) / deletion_pending: 관리자가 사유를
       // 입력해 삭제 처리 — 본인이 사유를 확인해야 계정이 완전히 삭제됨
       authenticatedRoutes = <Route path="*" element={<AccountStatus userProfile={userProfile} onLogout={handleLogout} />} />;
+    } else if (userProfile.status === 'approved' && userProfile.email_verified_at && userProfile.role === 'supporter') {
+      // (Phase 6) 후원자는 서류 심사·관리자 승인 없이 즉시 승인되는 대신, /stay 안에서는
+      // 어떤 경로로 들어오든 소개 전용 안내 화면만 보여줍니다(숙소 검색/예약, 관리 기능 등
+      // 선교사·호스트·관리자 전용 기능에는 접근할 수 없음) — 사용자가 명시적으로 선택한 범위입니다.
+      authenticatedRoutes = <Route path="*" element={<SupporterHome userProfile={userProfile} onLogout={handleLogout} />} />;
     } else if (userProfile.status === 'approved' && userProfile.email_verified_at) {
       authenticatedRoutes = (
         <>

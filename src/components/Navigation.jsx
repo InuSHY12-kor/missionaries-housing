@@ -8,12 +8,17 @@ import MessageIcon from './MessageIcon';
 const ROLE_LABELS = {
   admin: '관리자',
   missionary: '선교사',
-  host: '숙소 제공자'
+  host: '숙소 제공자',
+  supporter: '후원자'
 };
 
 function Navigation({ user, userProfile, onLogout }) {
   // 관리자 승인과 이메일 인증이 모두 완료되어야 실제 서비스 메뉴가 노출됨
   const hasFullAccess = userProfile?.status === 'approved' && !!userProfile?.email_verified_at;
+  // (Phase 6) 후원자는 숙소 검색/예약/등록 등 실제 서비스 메뉴를 이용하지 않고 App.jsx에서
+  // 항상 소개 전용 화면(SupporterHome)만 보게 되므로, 상단 메뉴도 "위위" 링크와 로그아웃만
+  // 남긴 훨씬 단순한 형태로 보여줍니다.
+  const isSupporterRole = userProfile?.role === 'supporter';
 
   // 로그인한 사용자(특히 관리자)는 메뉴 항목이 많아 좁은 화면에서 상단바가 여러 줄로
   // 늘어날 수 있습니다. 사진 배너 페이지에서는 상단바가 배너 위에 투명하게 얹히기 때문에
@@ -66,13 +71,17 @@ function Navigation({ user, userProfile, onLogout }) {
   // 마찬가지로 "*" 라우트 + PageHero 배너로 렌더링되므로 동일하게 처리합니다.
   const isAccountStatusScreen = !!userProfile
     && (userProfile.status === 'withdrawn' || userProfile.status === 'deletion_pending');
+  // (Phase 6) 후원자는 App.jsx에서 "*" 라우트로 항상 SupporterHome만 렌더링하므로
+  // 실제 URL 경로와 무관하게 PageHero 배너가 있는 화면으로 취급합니다.
+  const isSupporterHomeScreen = hasFullAccess && isSupporterRole;
   const hasHeroBanner = HERO_BANNER_ROUTES.includes(location.pathname)
     || isAdminRoute
     || isAccommodationDetailRoute
     || isBookingDetailRoute
     || isCompleteProfileScreen
     || isPendingApprovalScreen
-    || isAccountStatusScreen;
+    || isAccountStatusScreen
+    || isSupporterHomeScreen;
 
   const brand = (
     <Link to="/" className="navbar-brand">
@@ -109,7 +118,17 @@ function Navigation({ user, userProfile, onLogout }) {
             </div>
 
             <ul className="navbar-nav">
-              {hasFullAccess && (
+              {hasFullAccess && isSupporterRole && (
+                <li>
+                  {/* 후원자는 숙소 검색/예약 등 실제 서비스 메뉴를 이용하지 않으므로
+                      WEWE 전체 홈페이지로 돌아가는 링크만 보여줍니다. */}
+                  <a href="/" className="nav-btn">
+                    <span className="nav-btn-label">위위 소개 보기</span>
+                  </a>
+                </li>
+              )}
+
+              {hasFullAccess && !isSupporterRole && (
                 <>
                   <li>
                     <Link to="/dashboard" className="nav-btn">
@@ -186,7 +205,7 @@ function Navigation({ user, userProfile, onLogout }) {
                 </li>
               )}
 
-              {hasFullAccess && (
+              {hasFullAccess && !isSupporterRole && (
                 <>
                   <li>
                     <NotificationBell userProfile={userProfile} />

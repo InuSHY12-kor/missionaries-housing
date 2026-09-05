@@ -15,7 +15,7 @@ const ADMIN_HERO_IMAGES = [
 // 계정 삭제 유예기간(일). Profile.jsx의 DELETION_GRACE_PERIOD_DAYS와 동일한 값이어야 함.
 const DELETION_GRACE_PERIOD_DAYS = 15;
 
-const ROLE_LABEL = { admin: '관리자', host: '호스트', missionary: '선교사' };
+const ROLE_LABEL = { admin: '관리자', host: '호스트', missionary: '선교사', supporter: '후원자' };
 const BOOKING_STATUS_LABEL = { pending: '예약됨', confirmed: '예약 확정됨', cancelled: '취소됨' };
 const BOOKING_STATUS_BADGE = { pending: 'badge-warning', confirmed: 'badge-success', cancelled: 'badge-danger' };
 // 예약이 확정(confirmed)된 후, 게스트의 숙박비 결제가 완료됐는지 여부를 관리자가 확인할 수 있는 배지.
@@ -25,6 +25,7 @@ const MEMBER_FILTERS = [
   { key: 'all', label: '전체', test: () => true },
   { key: 'missionary', label: '선교사', test: (m) => m.role === 'missionary' },
   { key: 'host', label: '호스트', test: (m) => m.role === 'host' },
+  { key: 'supporter', label: '후원자', test: (m) => m.role === 'supporter' },
   { key: 'admin', label: '관리자', test: (m) => m.role === 'admin' },
   { key: 'withdrawn', label: '탈퇴 회원', test: (m) => m.status === 'withdrawn' },
   { key: 'deletion_pending', label: '삭제 대기', test: (m) => m.status === 'deletion_pending' }
@@ -531,7 +532,7 @@ function AdminDashboard({ userProfile }) {
                       <p><strong>교회:</strong> {user.church_name}</p>
                       <p><strong>주소:</strong> {user.church_address || '미입력'}</p>
                       <p><strong>전화:</strong> {user.phone}</p>
-                                            <p><strong>역할:</strong> {user.role === 'admin' ? '관리자' : user.role === 'missionary' ? '선교사' : '숙소 제공자'}</p>
+                                            <p><strong>역할:</strong> {ROLE_LABEL[user.role] || user.role}</p>
                       <p><strong>가입일:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
                     </div>
 
@@ -722,7 +723,7 @@ function AdminDashboard({ userProfile }) {
                       </div>
                       <div className="user-info">
                         <p><strong>이메일:</strong> {user.email}</p>
-                        <p><strong>역할:</strong> {user.role === 'admin' ? '관리자' : user.role === 'missionary' ? '선교사' : '숙소 제공자'}</p>
+                        <p><strong>역할:</strong> {ROLE_LABEL[user.role] || user.role}</p>
                         <p><strong>탈퇴 요청일:</strong> {requestedAt.toLocaleDateString()}</p>
                         <p><strong>자동 탈퇴 처리 예정일:</strong> {scheduledFor.toLocaleDateString()}</p>
                         <p className="member-notice">탈퇴 처리 후에는 5년간 보관되다가 자동으로 완전히 삭제됩니다.</p>
@@ -872,6 +873,7 @@ function AdminDashboard({ userProfile }) {
                               >
                                 <option value="missionary">선교사</option>
                                 <option value="host">호스트</option>
+                                <option value="supporter">후원자</option>
                                 <option value="admin">관리자</option>
                               </select>
                               {roleChangeBusyId === member.id && <span className="role-change-busy">변경 중...</span>}
@@ -1420,6 +1422,11 @@ function AdminDashboard({ userProfile }) {
 
         .role-badge.role-missionary {
           background: #d97b3f;
+          color: white;
+        }
+
+        .role-badge.role-supporter {
+          background: #146b71;
           color: white;
         }
 
