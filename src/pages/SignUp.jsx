@@ -75,7 +75,7 @@ function SignUp({ role }) {
         password: formData.password,
         options: {
           // 이메일 인증 링크를 클릭하면 프로필 등록 페이지로 돌아오도록 설정
-          emailRedirectTo: `${window.location.origin}/complete-profile`,
+          emailRedirectTo: `${window.location.origin}/stay/complete-profile`,
           data: {
             role
           }

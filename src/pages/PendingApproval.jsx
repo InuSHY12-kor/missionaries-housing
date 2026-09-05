@@ -30,7 +30,7 @@ function PendingApproval({ userProfile }) {
       });
       if (error) throw error;
 
-      const link = `${window.location.origin}/verify-email?token=${token}`;
+      const link = `${window.location.origin}/stay/verify-email?token=${token}`;
       const { error: fnError } = await supabase.functions.invoke('send-email', {
         body: { type: 'email_verification', userId: userProfile.id, link }
       });
