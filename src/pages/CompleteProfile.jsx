@@ -42,8 +42,10 @@ function CompleteProfile() {
       setUserEmail(session.user.email);
 
       // 가입 시 선택한 회원 유형이 있다면 미리 채워둠
+      // (Phase 6) supporter(후원자)는 서류 심사 없이 즉시 승인되는 별도 흐름이라
+      // 아래 handleSubmit / 화면 렌더링에서 role별로 분기합니다.
       const metaRole = session.user.user_metadata?.role;
-      if (metaRole === 'missionary' || metaRole === 'host') {
+      if (metaRole === 'missionary' || metaRole === 'host' || metaRole === 'supporter') {
         setFormData(prev => ({ ...prev, role: metaRole }));
       }
 
@@ -90,12 +92,62 @@ function CompleteProfile() {
     }));
   };
 
+  // (Phase 6) 후원자(supporter)는 서류 제출 없이 즉시 이용 가능(자동 승인)하도록 확정되어,
+  // 선교사/호스트와는 완전히 다른(훨씬 짧은) 제출 흐름을 갖습니다. 아래에서 role로 분기합니다.
+  const handleSupporterSubmit = async () => {
+    if (!formData.fullName) {
+      throw new Error('성명을 입력해주세요.');
+    }
+
+    // 회원가입(SupporterSignup.jsx) 단계에서 이미 이메일 인증 메일 발송 + 인증 링크 클릭을
+    // 거쳐야만 이 화면(세션 있음)에 도달하므로, 여기서는 관리자 승인 대기 없이 바로
+    // status: 'approved'로 프로필을 생성합니다. email_verified_at도 함께 채워서
+    // App.jsx의 "이메일 인증 대기" 화면(PendingApproval)에 걸리지 않도록 합니다 —
+    // 선교사/호스트가 프로필 등록 후 별도로 거치는 2차 이메일 인증(커스텀 토큰 링크)은
+    // 후원자에게는 적용하지 않는 의도적인 설계입니다.
+    const { error: profileError } = await supabase
+      .from('users')
+      .insert({
+        id: userId,
+        email: userEmail,
+        full_name: formData.fullName,
+        role: 'supporter',
+        church_name: null,
+        church_address: null,
+        phone: formData.phone || null,
+        bio: null,
+        status: 'approved',
+        verification_docs: [],
+        email_verified_at: new Date().toISOString(),
+        created_at: new Date().toISOString()
+      });
+
+    if (profileError) throw profileError;
+
+    // 관리자에게 신규 후원자 가입을 알리는 참고용 알림 메일 (승인 액션이 필요한 것은 아님).
+    // 실패해도 가입 자체는 이미 완료된 것이므로 무시하고 계속 진행합니다.
+    try {
+      await supabase.functions.invoke('send-email', {
+        body: { type: 'admin_new_signup', userId }
+      });
+    } catch (emailErr) {
+      console.error('알림 메일 발송 오류:', emailErr);
+    }
+
+    window.location.href = '/stay/signup-complete?role=supporter';
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
+      if (formData.role === 'supporter') {
+        await handleSupporterSubmit();
+        return;
+      }
+
       if (!formData.fullName || !formData.churchName) {
         throw new Error('필수 정보를 모두 입력해주세요.');
       }
@@ -176,19 +228,27 @@ function CompleteProfile() {
     );
   }
 
+  // (Phase 6) 후원자는 서류 심사 없이 성명만으로 즉시 가입이 완료되므로 완전히 다른(짧은)
+  // 안내 문구와 입력폼을 보여줍니다.
+  const isSupporter = formData.role === 'supporter';
+
   return (
     <>
       <PageHero
         images={COMPLETE_PROFILE_HERO_IMAGES}
         eyebrow="LAST STEP"
-        title="프로필을 등록해주세요"
-        subtitle="마지막 단계입니다. 성명·연락처·소속 교회 정보를 입력해주세요"
+        title={isSupporter ? '거의 다 왔어요' : '프로필을 등록해주세요'}
+        subtitle={isSupporter ? '성함만 알려주시면 바로 이용을 시작하실 수 있어요' : '마지막 단계입니다. 성명·연락처·소속 교회 정보를 입력해주세요'}
       />
       <div className="signup-container">
       <div className="container">
         <div className="signup-form">
-          <h1>프로필 등록</h1>
-          <p className="subtitle">마지막 단계입니다. 성명·연락처·소속 교회 및 증빙 자료를 등록해주세요.</p>
+          <h1>{isSupporter ? '후원자 정보 등록' : '프로필 등록'}</h1>
+          <p className="subtitle">
+            {isSupporter
+              ? '서류 심사 없이 성함만 등록하시면 바로 후원자로 활동하실 수 있습니다.'
+              : '마지막 단계입니다. 성명·연락처·소속 교회 및 증빙 자료를 등록해주세요.'}
+          </p>
 
           {error && (
             <div className="alert alert-error">
@@ -197,6 +257,46 @@ function CompleteProfile() {
             </div>
           )}
 
+          {isSupporter ? (
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label>회원 유형</label>
+                <div className="role-readonly">후원자 (서류 심사 없이 즉시 이용 가능)</div>
+              </div>
+
+              <div className="form-group">
+                <label>성명 *</label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleInputChange}
+                  placeholder="홍길동"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>전화번호</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  placeholder="010-1234-5678 (선택)"
+                  maxLength={13}
+                />
+              </div>
+
+              <p className="help-text">
+                후원자 계정은 관리자 승인 없이 바로 이용하실 수 있습니다. 등록 후 위위 소개 페이지로 안내해드립니다.
+              </p>
+
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? '등록 중...' : '등록 완료하기'}
+              </button>
+            </form>
+          ) : (
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>회원 유형</label>
@@ -319,6 +419,7 @@ function CompleteProfile() {
               {loading ? '제출 중...' : '제출하고 승인 요청하기'}
             </button>
           </form>
+          )}
         </div>
       </div>
 
