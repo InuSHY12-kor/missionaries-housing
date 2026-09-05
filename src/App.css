@@ -353,7 +353,8 @@ body {
 /* 배경 없이 굵은 글씨로만 역할을 표시 — 불투명 상단바에서는 어두운 글씨, 투명 상단바에서는 흰 글씨 */
 .status-role-admin,
 .status-role-missionary,
-.status-role-host {
+.status-role-host,
+.status-role-supporter {
   background: transparent;
   padding: 0;
   border-radius: 0;
@@ -363,7 +364,8 @@ body {
 
 .navbar-transparent .status-role-admin,
 .navbar-transparent .status-role-missionary,
-.navbar-transparent .status-role-host {
+.navbar-transparent .status-role-host,
+.navbar-transparent .status-role-supporter {
   color: #fff;
 }
 
@@ -672,7 +674,8 @@ body {
   .status-badge,
   .status-role-admin,
   .status-role-missionary,
-  .status-role-host {
+  .status-role-host,
+  .status-role-supporter {
     font-size: 0.78rem;
   }
 }
