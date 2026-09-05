@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../App';
-import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning, Plus, Pencil } from 'lucide-react';
 import PageHero from '../components/PageHero';
 import AmenityIcon from '../components/AmenityIcon';
 import { AMENITY_MAP } from '../utils/amenities';
@@ -32,7 +32,9 @@ const MEMBER_FILTERS = [
 
 // 다른 페이지(마이페이지 통계 카드 등)에서 /admin?tab=bookings 처럼 특정 탭으로 바로
 // 이동할 수 있도록 지원하는 탭 키 목록.
-const VALID_TABS = ['users', 'accommodations', 'inquiries', 'deletions', 'members', 'bookings'];
+const VALID_TABS = ['users', 'accommodations', 'inquiries', 'deletions', 'members', 'bookings', 'posts'];
+const POST_STATUS_LABEL = { draft: '임시저장', published: '발행됨' };
+const POST_STATUS_BADGE = { draft: 'badge-neutral', published: 'badge-success' };
 
 function AdminDashboard({ userProfile }) {
   const [searchParams] = useSearchParams();
@@ -48,6 +50,8 @@ function AdminDashboard({ userProfile }) {
   const [roleChangeBusyId, setRoleChangeBusyId] = useState(null);
   const [allBookings, setAllBookings] = useState([]);
   const [bookingStatusBusyId, setBookingStatusBusyId] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [postBusyId, setPostBusyId] = useState(null);
   const [loading, setLoading] = useState(true);
   // 탭 버튼에 표시되는 "항목 (숫자)" 배지용 카운트. 각 탭의 실제 데이터(users, accommodations 등)는
   // 해당 탭을 클릭했을 때만 불러오지만, 배지 숫자는 처음 페이지에 들어오자마자 전체 탭에 대해
@@ -58,7 +62,8 @@ function AdminDashboard({ userProfile }) {
     inquiries: 0,
     deletions: 0,
     members: 0,
-    bookings: 0
+    bookings: 0,
+    posts: 0
   });
   const [selectedItem, setSelectedItem] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -115,13 +120,14 @@ function AdminDashboard({ userProfile }) {
 
   const fetchAllCounts = async () => {
     try {
-      const [usersRes, accRes, inqRes, delRes, memRes, bookRes] = await Promise.all([
+      const [usersRes, accRes, inqRes, delRes, memRes, bookRes, postRes] = await Promise.all([
         supabase.from('users').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('accommodations').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('inquiries').select('*', { count: 'exact', head: true }),
         supabase.from('users').select('*', { count: 'exact', head: true }).not('deletion_requested_at', 'is', null).not('status', 'in', '(withdrawn,deletion_pending)'),
         supabase.from('users').select('*', { count: 'exact', head: true }),
-        supabase.from('bookings').select('*', { count: 'exact', head: true })
+        supabase.from('bookings').select('*', { count: 'exact', head: true }),
+        supabase.from('ministry_posts').select('*', { count: 'exact', head: true })
       ]);
       setCounts({
         users: usersRes.count || 0,
@@ -129,7 +135,8 @@ function AdminDashboard({ userProfile }) {
         inquiries: inqRes.count || 0,
         deletions: delRes.count || 0,
         members: memRes.count || 0,
-        bookings: bookRes.count || 0
+        bookings: bookRes.count || 0,
+        posts: postRes.count || 0
       });
     } catch (error) {
       console.error('카운트 로드 오류:', error);
@@ -190,6 +197,13 @@ function AdminDashboard({ userProfile }) {
           .order('created_at', { ascending: false });
         setAllBookings(data || []);
         setCounts(prev => ({ ...prev, bookings: (data || []).length }));
+      } else if (activeTab === 'posts') {
+        const { data } = await supabase
+          .from('ministry_posts')
+          .select('*, users(full_name)')
+          .order('created_at', { ascending: false });
+        setPosts(data || []);
+        setCounts(prev => ({ ...prev, posts: (data || []).length }));
       }
     } catch (error) {
       console.error('데이터 로드 오류:', error);
@@ -379,6 +393,62 @@ function AdminDashboard({ userProfile }) {
     }
   };
 
+  // 사역 소식 게시글 발행/발행 취소. published로 바뀌는 순간에만 published_at을 새로 찍고,
+  // 이미 한 번 발행됐던 글을 다시 임시저장으로 내려도 published_at은 그대로 남겨둡니다
+  // (다음에 재발행하면 그때 다시 갱신) — 처음 공개된 날짜를 잃지 않기 위함입니다.
+  const togglePostPublish = async (post) => {
+    const nextStatus = post.status === 'published' ? 'draft' : 'published';
+    const label = nextStatus === 'published' ? '발행' : '임시저장으로 전환';
+    if (!window.confirm(`"${post.title}" 글을 ${label}하시겠습니까?`)) return;
+    setPostBusyId(post.id);
+    try {
+      const updates = { status: nextStatus, updated_at: new Date().toISOString() };
+      if (nextStatus === 'published' && !post.published_at) {
+        updates.published_at = new Date().toISOString();
+      }
+      const { error } = await supabase
+        .from('ministry_posts')
+        .update(updates)
+        .eq('id', post.id);
+      if (error) throw error;
+      setPosts(posts.map(p => (p.id === post.id ? { ...p, ...updates } : p)));
+    } catch (error) {
+      alert('오류: ' + error.message);
+    } finally {
+      setPostBusyId(null);
+    }
+  };
+
+  const deletePost = async (post) => {
+    if (!window.confirm(`"${post.title}" 글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) return;
+    setPostBusyId(post.id);
+    try {
+      const { error } = await supabase.from('ministry_posts').delete().eq('id', post.id);
+      if (error) throw error;
+
+      // 대표 이미지도 스토리지에서 함께 삭제(실패해도 게시글 삭제 자체는 이미 끝난 상태라 조용히 무시)
+      if (post.cover_image_url) {
+        try {
+          const marker = '/ministry-post-images/';
+          const idx = post.cover_image_url.indexOf(marker);
+          if (idx !== -1) {
+            const storagePath = post.cover_image_url.slice(idx + marker.length);
+            await supabase.storage.from('ministry-post-images').remove([storagePath]);
+          }
+        } catch {
+          // 이미지 삭제 실패는 무시
+        }
+      }
+
+      setPosts(posts.filter(p => p.id !== post.id));
+      setCounts(prev => ({ ...prev, posts: Math.max(0, prev.posts - 1) }));
+    } catch (error) {
+      alert('오류: ' + error.message);
+    } finally {
+      setPostBusyId(null);
+    }
+  };
+
   return (
     <div className="admin-dashboard">
       <PageHero
@@ -427,6 +497,12 @@ function AdminDashboard({ userProfile }) {
             onClick={() => setActiveTab('bookings')}
           >
             전체 예약 ({counts.bookings})
+          </button>
+          <button
+            className={`tab ${activeTab === 'posts' ? 'active' : ''}`}
+            onClick={() => setActiveTab('posts')}
+          >
+            사역 소식 ({counts.posts})
           </button>
         </div>
 
@@ -884,6 +960,68 @@ function AdminDashboard({ userProfile }) {
           </div>
         )}
 
+        {/* 사역 소식 관리 */}
+        {activeTab === 'posts' && (
+          <div className="review-section">
+            <div className="posts-toolbar">
+              <p className="member-notice">
+                작성한 글은 "발행"을 눌러야 WEWE 홈페이지의 사역 소식 페이지에 공개됩니다. 발행 전에는 임시저장 상태로만 보관됩니다.
+              </p>
+              <Link to="/admin/posts/new" className="btn btn-primary">
+                <Plus size={16} />
+                새 글 작성
+              </Link>
+            </div>
+            {loading ? (
+              <p>로드 중...</p>
+            ) : posts.length === 0 ? (
+              <p className="empty-message">작성된 글이 없습니다.</p>
+            ) : (
+              <div className="grid grid-2">
+                {posts.map(post => (
+                  <div key={post.id} className="card post-admin-card">
+                    <div className="card-header">
+                      <h3>{post.title}</h3>
+                      <span className={`badge ${POST_STATUS_BADGE[post.status] || 'badge-neutral'}`}>
+                        {POST_STATUS_LABEL[post.status] || post.status}
+                      </span>
+                    </div>
+                    <div className="user-info">
+                      <p><strong>작성자:</strong> {post.users?.full_name || '알 수 없음'}</p>
+                      <p><strong>작성일:</strong> {new Date(post.created_at).toLocaleDateString()}</p>
+                      {post.published_at && (
+                        <p><strong>발행일:</strong> {new Date(post.published_at).toLocaleDateString()}</p>
+                      )}
+                      {post.excerpt && <p className="post-admin-excerpt">{post.excerpt}</p>}
+                    </div>
+                    <div className="action-buttons">
+                      <Link to={`/admin/posts/${post.id}/edit`} className="btn btn-secondary">
+                        <Pencil size={16} />
+                        수정
+                      </Link>
+                      <button
+                        className={post.status === 'published' ? 'btn btn-warning' : 'btn btn-success'}
+                        disabled={postBusyId === post.id}
+                        onClick={() => togglePostPublish(post)}
+                      >
+                        {post.status === 'published' ? '발행 취소' : '발행하기'}
+                      </button>
+                      <button
+                        className="btn btn-danger"
+                        disabled={postBusyId === post.id}
+                        onClick={() => deletePost(post)}
+                      >
+                        <Trash2 size={16} />
+                        삭제
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* 숙소 상세 검토 모달 — 승인 전에 전체 내용/사진을 확인합니다 */}
         {/* 거절 모달 (사용자 승인 거절용) */}
         {selectedItem && (
@@ -999,7 +1137,7 @@ function AdminDashboard({ userProfile }) {
           margin-top: 2rem;
         }
 
-        .user-card, .accommodation-card, .inquiry-card, .booking-admin-card {
+        .user-card, .accommodation-card, .inquiry-card, .booking-admin-card, .post-admin-card {
           display: flex;
           flex-direction: column;
         }
@@ -1009,6 +1147,33 @@ function AdminDashboard({ userProfile }) {
           flex-wrap: wrap;
           gap: 0.4rem;
           margin-top: 0.5rem;
+        }
+
+        .posts-toolbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+          flex-wrap: wrap;
+          margin-bottom: 1rem;
+        }
+
+        .posts-toolbar .member-notice {
+          margin: 0;
+          flex: 1;
+          min-width: 240px;
+        }
+
+        .posts-toolbar .btn {
+          flex-shrink: 0;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+        }
+
+        .post-admin-excerpt {
+          color: #888 !important;
+          font-style: italic;
         }
 
         .user-info, .accommodation-info {
