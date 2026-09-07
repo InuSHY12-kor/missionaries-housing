@@ -427,14 +427,23 @@ function AdminDashboard({ userProfile }) {
       const { error } = await supabase.from('ministry_posts').delete().eq('id', post.id);
       if (error) throw error;
 
-      // 대표 이미지도 스토리지에서 함께 삭제(실패해도 게시글 삭제 자체는 이미 끝난 상태라 조용히 무시)
-      if (post.cover_image_url) {
+      // 첨부된 사진들도 스토리지에서 함께 삭제(실패해도 게시글 삭제 자체는 이미 끝난 상태라 조용히 무시).
+      // image_urls가 없던(옛날) 글은 cover_image_url 하나만 지웁니다.
+      const attachedImages = Array.isArray(post.image_urls) && post.image_urls.length > 0
+        ? post.image_urls
+        : (post.cover_image_url ? [post.cover_image_url] : []);
+
+      if (attachedImages.length > 0) {
         try {
           const marker = '/ministry-post-images/';
-          const idx = post.cover_image_url.indexOf(marker);
-          if (idx !== -1) {
-            const storagePath = post.cover_image_url.slice(idx + marker.length);
-            await supabase.storage.from('ministry-post-images').remove([storagePath]);
+          const storagePaths = attachedImages
+            .map((url) => {
+              const idx = url.indexOf(marker);
+              return idx !== -1 ? url.slice(idx + marker.length) : null;
+            })
+            .filter(Boolean);
+          if (storagePaths.length > 0) {
+            await supabase.storage.from('ministry-post-images').remove(storagePaths);
           }
         } catch {
           // 이미지 삭제 실패는 무시
