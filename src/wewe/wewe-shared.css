@@ -100,11 +100,42 @@
 }
 
 /* 하위 페이지 공용 히어로 배너 (WevePageHero) */
+/* (2026-09-07 수정) 사진이 전혀 없던 배경에 4장짜리 크로스페이드 슬라이드쇼를 추가.
+   .wp-hero-slide가 절대 위치로 겹겹이 쌓여 opacity로 전환되고, ::before의 어두운
+   그라데이션이 그 위에 얹혀 글자 대비를 지켜줍니다(WEWE STAY 랜딩 히어로와 동일 기법). */
 .wp-hero {
   position: relative;
   padding: 8.5rem 2rem 3.5rem;
   text-align: center;
-  background: linear-gradient(135deg, #14201d 0%, #1c2f2c 55%, #22201a 100%);
+  background: #14201d;
+  overflow: hidden;
+}
+
+.wp-hero-slide {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+.wp-hero-slide.active {
+  opacity: 1;
+}
+
+.wp-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(135deg, rgba(20, 32, 29, 0.88) 0%, rgba(28, 47, 44, 0.82) 55%, rgba(34, 32, 26, 0.88) 100%);
+}
+
+.wp-hero-inner {
+  position: relative;
+  z-index: 2;
 }
 
 .wp-hero-eyebrow {

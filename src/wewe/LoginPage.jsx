@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 import { supabase } from '../App';
 import WeweHeader from './WeweHeader';
@@ -8,12 +8,14 @@ import WevePageHero from './WevePageHero';
 import './wewe-shared.css';
 
 // WEWE 전체 로그인 페이지 (/login, Phase 6).
-// 로그인 성공 후에는 항상 /stay로 이동합니다 — 로그인 이후 무엇을 보여줄지(승인
-// 대기 화면, 관리자 대시보드, 후원자 전용 안내 등)는 이미 App.jsx가 회원 상태(role,
-// status, email_verified_at)에 따라 전부 분기하고 있으므로, 여기서 다시 판단할
-// 필요가 없습니다. WeweSite와 /stay는 서로 다른 라우터(BrowserRouter)이므로
-// react-router의 navigate가 아닌 전체 페이지 이동을 사용합니다.
+// (2026-09-07 수정) 로그인 성공 후 더 이상 /stay로 강제 이동하지 않고 위위 홈페이지
+// 그대로 머무릅니다 — 위위 스테이 이용은 헤더의 "위위 스테이" 링크로 사용자가 직접
+// 선택합니다(WeweHeader도 로그인 상태를 함께 감지해 "로그인/가입하기"를 "로그아웃"으로
+// 바꿔서 보여줍니다). 승인 대기 화면·관리자 대시보드·후원자 전용 안내 등 /stay 안에서
+// 무엇을 보여줄지는 사용자가 실제로 /stay로 들어갔을 때 App.jsx가 회원 상태(role,
+// status, email_verified_at)에 따라 판단합니다.
 function LoginPage() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -40,7 +42,20 @@ function LoginPage() {
 
       if (signInError) throw signInError;
 
-      window.location.href = '/stay';
+      // 방금 로그인했다는 시각을 /stay 앱(App.jsx)과 공유하는 localStorage 키에도 미리
+      // 기록해둡니다. 이렇게 하지 않으면, 나중에 사용자가 "위위 스테이" 링크를 눌러 /stay로
+      // 이동했을 때(완전히 새로 불러오는 별도의 앱이라 이번 로그인의 "방금 로그인했다"는
+      // 메모리 상 표시가 전달되지 않음) 예전에 남아있던 오래된 활동 시각을 그대로 이어받아
+      // 로그인한 지 얼마 안 됐는데도 곧바로 "장시간 활동이 없어 로그아웃되었습니다"로
+      // 잘못 처리되는 문제가 있었습니다.
+      try {
+        window.localStorage.setItem('wewe_last_activity_at', String(Date.now()));
+      } catch (e) {
+        // localStorage 접근 불가(프라이빗 모드 등) 시에도 로그인 자체는 계속 진행
+      }
+
+      // 위위 홈페이지에서 로그인했으니 위위 홈페이지에 그대로 머무릅니다.
+      navigate('/');
     } catch (err) {
       if (err.message === 'Email not confirmed') {
         setError('이메일 인증이 아직 완료되지 않았습니다. 가입 시 받으신 인증 메일의 링크를 먼저 클릭해주세요.');

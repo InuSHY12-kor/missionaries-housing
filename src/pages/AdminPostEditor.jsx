@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { AlertCircle, Upload, X } from 'lucide-react';
+import { AlertCircle, Upload, X, ArrowLeft, ArrowRight } from 'lucide-react';
 import PageHero from '../components/PageHero';
 
 const EDITOR_HERO_IMAGES = [
@@ -13,7 +13,7 @@ const EMPTY_FORM = {
   slug: '',
   excerpt: '',
   content: '',
-  coverImageUrl: '',
+  imageUrls: [],
   status: 'draft'
 };
 
@@ -60,12 +60,18 @@ function AdminPostEditor({ userProfile }) {
           .single();
         if (fetchError) throw fetchError;
 
+        // image_urls가 없던(옛날) 글은 cover_image_url 하나만 있을 수 있어 그것을
+        // 첫 장으로 대체합니다 — 기존 데이터도 새 다중 이미지 UI에서 그대로 보이도록.
+        const existingImages = Array.isArray(data.image_urls) && data.image_urls.length > 0
+          ? data.image_urls
+          : (data.cover_image_url ? [data.cover_image_url] : []);
+
         setFormData({
           title: data.title || '',
           slug: data.slug || '',
           excerpt: data.excerpt || '',
           content: data.content || '',
-          coverImageUrl: data.cover_image_url || '',
+          imageUrls: existingImages,
           status: data.status || 'draft'
         });
         // 이미 슬러그가 있는(기존) 글이므로 제목이 바뀌어도 슬러그를 자동으로 덮어쓰지 않도록 함
@@ -94,25 +100,33 @@ function AdminPostEditor({ userProfile }) {
     setFormData((prev) => ({ ...prev, slug: slugify(e.target.value) }));
   };
 
+  // 인스타그램 카드뉴스 형태로 여러 장을 한 번에 업로드합니다. 선택한 파일들을 순서대로
+  // 업로드해서 formData.imageUrls 배열 뒤에 이어 붙입니다(이미 올린 사진은 그대로 두고
+  // 추가만 되도록). 첫 번째로 올라간 사진이 목록/공유 미리보기의 대표 이미지가 됩니다.
   const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
     setUploadingImage(true);
     try {
-      const ext = file.name.split('.').pop();
-      const path = `${userProfile.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const uploadedUrls = [];
+      for (const file of files) {
+        const ext = file.name.split('.').pop();
+        const path = `${userProfile.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('ministry-post-images')
-        .upload(path, file);
-      if (uploadError) throw uploadError;
+        const { error: uploadError } = await supabase.storage
+          .from('ministry-post-images')
+          .upload(path, file);
+        if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from('ministry-post-images')
-        .getPublicUrl(path);
+        const { data: urlData } = supabase.storage
+          .from('ministry-post-images')
+          .getPublicUrl(path);
 
-      setFormData((prev) => ({ ...prev, coverImageUrl: urlData.publicUrl }));
+        uploadedUrls.push(urlData.publicUrl);
+      }
+
+      setFormData((prev) => ({ ...prev, imageUrls: [...prev.imageUrls, ...uploadedUrls] }));
     } catch (err) {
       alert('이미지 업로드 오류: ' + err.message);
     } finally {
@@ -121,9 +135,12 @@ function AdminPostEditor({ userProfile }) {
     }
   };
 
-  const removeCoverImage = async () => {
-    const url = formData.coverImageUrl;
-    setFormData((prev) => ({ ...prev, coverImageUrl: '' }));
+  const removeImage = async (index) => {
+    const url = formData.imageUrls[index];
+    setFormData((prev) => ({
+      ...prev,
+      imageUrls: prev.imageUrls.filter((_, i) => i !== index)
+    }));
 
     try {
       const marker = '/ministry-post-images/';
@@ -135,6 +152,16 @@ function AdminPostEditor({ userProfile }) {
     } catch {
       // 스토리지 삭제 실패는 조용히 무시(폼에서는 이미 제거됨)
     }
+  };
+
+  const moveImage = (index, direction) => {
+    setFormData((prev) => {
+      const next = [...prev.imageUrls];
+      const target = index + direction;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
+      return { ...prev, imageUrls: next };
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -158,7 +185,10 @@ function AdminPostEditor({ userProfile }) {
         slug,
         excerpt: formData.excerpt.trim() || null,
         content: formData.content,
-        cover_image_url: formData.coverImageUrl || null,
+        image_urls: formData.imageUrls,
+        // cover_image_url은 목록 카드/공유 미리보기 등 기존 코드와의 하위 호환을 위해
+        // 첫 번째 사진으로 계속 채워둡니다.
+        cover_image_url: formData.imageUrls[0] || null,
         status: formData.status,
         updated_at: new Date().toISOString()
       };
@@ -268,29 +298,68 @@ function AdminPostEditor({ userProfile }) {
               </div>
 
               <div className="form-group">
-                <label>대표 이미지</label>
-                {formData.coverImageUrl ? (
-                  <div className="cover-image-preview">
-                    <img src={formData.coverImageUrl} alt="대표 이미지 미리보기" />
-                    <button type="button" className="cover-image-remove" onClick={removeCoverImage}>
-                      <X size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="image-upload">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      id="post-cover-image-input"
-                      onChange={handleImageUpload}
-                      disabled={uploadingImage}
-                    />
-                    <label htmlFor="post-cover-image-input" className="image-upload-label">
-                      <Upload size={24} />
-                      <span>{uploadingImage ? '업로드 중...' : '대표 이미지를 선택하세요'}</span>
-                    </label>
+                <label>사진 (여러 장 선택 가능)</label>
+                <p className="field-hint field-hint-top">
+                  인스타그램 카드뉴스처럼 목록에 여러 장이 함께 노출됩니다. 첫 번째 사진이 대표 이미지가 됩니다.
+                </p>
+
+                {formData.imageUrls.length > 0 && (
+                  <div className="post-image-grid">
+                    {formData.imageUrls.map((url, index) => (
+                      <div className="post-image-item" key={url}>
+                        <img src={url} alt={`사진 ${index + 1}`} />
+                        {index === 0 && <span className="post-image-cover-tag">대표</span>}
+                        <div className="post-image-item-actions">
+                          <button
+                            type="button"
+                            onClick={() => moveImage(index, -1)}
+                            disabled={index === 0}
+                            title="앞으로 이동"
+                          >
+                            <ArrowLeft size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveImage(index, 1)}
+                            disabled={index === formData.imageUrls.length - 1}
+                            title="뒤로 이동"
+                          >
+                            <ArrowRight size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            className="post-image-remove"
+                            onClick={() => removeImage(index)}
+                            title="삭제"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
+
+                <div className="image-upload">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    id="post-cover-image-input"
+                    onChange={handleImageUpload}
+                    disabled={uploadingImage}
+                  />
+                  <label htmlFor="post-cover-image-input" className="image-upload-label">
+                    <Upload size={24} />
+                    <span>
+                      {uploadingImage
+                        ? '업로드 중...'
+                        : formData.imageUrls.length > 0
+                          ? '사진 추가하기'
+                          : '사진을 선택하세요 (여러 장 가능)'}
+                    </span>
+                  </label>
+                </div>
               </div>
 
               <div className="form-group">
@@ -419,31 +488,82 @@ function AdminPostEditor({ userProfile }) {
           cursor: pointer;
         }
 
-        .cover-image-preview {
-          position: relative;
-          max-width: 320px;
+        .field-hint-top {
+          margin-top: -0.2rem;
+          margin-bottom: 0.75rem;
         }
 
-        .cover-image-preview img {
+        .post-image-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+          gap: 0.75rem;
+          margin-bottom: 0.9rem;
+        }
+
+        .post-image-item {
+          position: relative;
+          aspect-ratio: 1;
+          border-radius: 8px;
+          overflow: hidden;
+          background: #f2f0eb;
+        }
+
+        .post-image-item img {
           width: 100%;
-          border-radius: 6px;
+          height: 100%;
+          object-fit: cover;
           display: block;
         }
 
-        .cover-image-remove {
+        .post-image-cover-tag {
           position: absolute;
-          top: 8px;
-          right: 8px;
-          width: 28px;
-          height: 28px;
+          top: 6px;
+          left: 6px;
+          padding: 0.15rem 0.5rem;
+          border-radius: 999px;
+          background: rgba(217, 123, 63, 0.92);
+          color: #fff;
+          font-size: 0.65rem;
+          font-weight: 700;
+        }
+
+        .post-image-item-actions {
+          position: absolute;
+          inset: auto 0 0 0;
+          display: flex;
+          justify-content: center;
+          gap: 0.3rem;
+          padding: 0.35rem;
+          background: linear-gradient(0deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%);
+          opacity: 0;
+          transition: opacity 0.15s ease;
+        }
+
+        .post-image-item:hover .post-image-item-actions {
+          opacity: 1;
+        }
+
+        .post-image-item-actions button {
+          width: 24px;
+          height: 24px;
           border-radius: 50%;
           border: none;
-          background: rgba(0,0,0,0.6);
-          color: white;
+          background: rgba(255,255,255,0.92);
+          color: #1c1c1a;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
+        }
+
+        .post-image-item-actions button:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+
+        .post-image-item-actions button.post-image-remove {
+          background: rgba(220, 60, 50, 0.92);
+          color: #fff;
         }
 
         .form-actions {
