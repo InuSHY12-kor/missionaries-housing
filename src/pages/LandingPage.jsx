@@ -54,7 +54,12 @@ const MARQUEE_IMAGES = [
   'https://images.unsplash.com/photo-1650476524542-c5cc53306700?auto=format&fit=crop&w=900&q=80'
 ];
 
-function LandingPage() {
+// noticeBanner: 히어로 바로 아래에 끼워 넣을 선택적 안내 배너(예: 후원자 계정 안내,
+// SupporterHome.jsx 참고). 헤더가 히어로 위에 position: absolute로 얹히는 구조라서,
+// 안내 배너를 히어로보다 앞(맨 위)에 두면 헤더가 안내 배너와 겹쳐버립니다 — 그래서
+// 히어로는 그대로 맨 위에 두고 그 다음 자리에만 렌더링합니다. 값이 없으면(기본값)
+// 기존 공개 페이지("/")는 전혀 변경 없이 그대로 동작합니다.
+function LandingPage({ noticeBanner = null }) {
   const [openFaq, setOpenFaq] = useState(0);
 
   // 히어로 슬라이드쇼: 약 3초마다 다음 이미지로 자동 전환
@@ -156,6 +161,8 @@ function LandingPage() {
           ))}
         </div>
       </section>
+
+      {noticeBanner}
 
       {/* 우리의 이야기 섹션 */}
       <section className="story">
