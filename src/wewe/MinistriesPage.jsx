@@ -92,15 +92,20 @@ function MinistriesPage() {
           </div>
 
           <h3 className="wm-h3">핵심 프로그램</h3>
-          <div className="wm-program-grid">
+          <div className="wm-program-grid wm-program-grid-3">
             <div className="wm-program-card">
               <h4>목회자 아카데미</h4>
               <p>심포지엄 · 목회자 세미나 · 목회자 소진관리 프로그램</p>
             </div>
             <div className="wm-program-card">
               <h4>개별 지원</h4>
-              <p>연간 N명의 대상자 선정, 목회자 자기탐색(심리상담 프로그램), 개별 지원(전투복 지원·재정 등),
+              <p>연간 N명의 대상자 선정, 목회자 자기탐색(심리상담 프로그램), 개별 지원(재정 등),
                 목회자 양성 장학사업</p>
+            </div>
+            <div className="wm-program-card wm-program-live">
+              <h4>전투복 프로젝트 <span className="wh-progress-badge">진행중</span></h4>
+              <p>지친 목회자님들의 회복과 응원을 위한 프로젝트입니다. 시기별 SNS를 통해 개별 사연 모집을
+                통해 진행합니다.</p>
             </div>
           </div>
         </div>
@@ -386,6 +391,11 @@ function MinistriesPage() {
           gap: 1rem;
         }
 
+        /* 핵심 프로그램 카드가 3개로 늘어난 PROJECT 1 전용 레이아웃 */
+        .wm-program-grid-3 {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
         .wm-goal-card,
         .wm-program-card {
           padding: 1.4rem 1.5rem;
@@ -443,6 +453,18 @@ function MinistriesPage() {
           padding: 0.15rem 0.5rem;
           border-radius: 999px;
           background: var(--wh-teal);
+          color: #fff;
+          vertical-align: middle;
+        }
+
+        .wh-progress-badge {
+          display: inline-block;
+          margin-left: 0.4rem;
+          font-size: 0.65rem;
+          font-weight: 700;
+          padding: 0.15rem 0.5rem;
+          border-radius: 999px;
+          background: var(--wh-orange);
           color: #fff;
           vertical-align: middle;
         }
@@ -518,6 +540,7 @@ function MinistriesPage() {
           .wm-quote-grid,
           .wm-goal-grid,
           .wm-program-grid,
+          .wm-program-grid-3,
           .wm-outcome-grid {
             grid-template-columns: 1fr;
           }
