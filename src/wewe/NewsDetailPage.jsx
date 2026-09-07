@@ -28,7 +28,7 @@ function NewsDetailPage() {
       try {
         const { data, error } = await weweSupabase
           .from('ministry_posts')
-          .select('id, title, excerpt, content, cover_image_url, published_at')
+          .select('id, title, excerpt, content, cover_image_url, image_urls, published_at')
           .eq('slug', slug)
           .eq('status', 'published')
           .maybeSingle();
@@ -92,9 +92,23 @@ function NewsDetailPage() {
 
       <article className="nd-article">
         <div className="wh-container wh-container-narrow">
-          {post.cover_image_url && (
-            <img src={post.cover_image_url} alt={post.title} className="nd-cover-image" />
-          )}
+          {(() => {
+            // image_urls가 없던(옛날) 글은 cover_image_url 한 장만 보여줍니다.
+            const images = Array.isArray(post.image_urls) && post.image_urls.length > 0
+              ? post.image_urls
+              : (post.cover_image_url ? [post.cover_image_url] : []);
+            if (images.length === 0) return null;
+            if (images.length === 1) {
+              return <img src={images[0]} alt={post.title} className="nd-cover-image" />;
+            }
+            return (
+              <div className="nd-gallery">
+                {images.map((url, i) => (
+                  <img key={url} src={url} alt={`${post.title} 사진 ${i + 1}`} className="nd-gallery-image" />
+                ))}
+              </div>
+            );
+          })()}
 
           {splitIntoParagraphs(post.content).map((para, i) => (
             <p key={i}>
@@ -136,6 +150,27 @@ function NewsDetailPage() {
           border-radius: 10px;
           margin-bottom: 2rem;
           display: block;
+        }
+
+        /* 사진이 여러 장인 글은 카드뉴스 갤러리 형태로 나란히 보여줍니다 */
+        .nd-gallery {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.6rem;
+          margin-bottom: 2rem;
+        }
+
+        .nd-gallery-image {
+          width: 100%;
+          aspect-ratio: 1;
+          object-fit: cover;
+          border-radius: 10px;
+          display: block;
+        }
+
+        .nd-gallery-image:first-child:nth-last-child(odd) {
+          grid-column: 1 / -1;
+          aspect-ratio: 16 / 10;
         }
 
         .nd-article p {
