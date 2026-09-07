@@ -126,6 +126,13 @@ function App() {
     await supabase.auth.signOut();
     setUser(null);
     setUserProfile(null);
+    // 다음에 로그인할 때 이번 세션의 마지막 활동 시각이 남아있다가 잘못 이어받는 것을
+    // 막기 위해 공유 저장된 마지막 활동 시각도 함께 지웁니다.
+    try {
+      window.localStorage.removeItem(LAST_ACTIVITY_STORAGE_KEY);
+    } catch (e) {
+      // localStorage 접근 불가(프라이빗 모드 등) 시에도 로그아웃 자체는 계속 진행
+    }
   };
 
   // 로그인된 사용자의 활동을 감지해 일정 시간(2시간) 이상 활동이 없으면 자동 로그아웃.
@@ -229,6 +236,21 @@ function App() {
   const canSearchAccommodations = userProfile && (userProfile.role === 'admin' || userProfile.role === 'missionary');
   // 숙소 등록/관리: 관리자 + 숙소 제공자만 이용 가능
   const canManageAccommodations = userProfile && (userProfile.role === 'admin' || userProfile.role === 'host');
+
+  // (Phase 6, 2026-09-07 수정) 후원자는 /stay 안에서 어떤 URL로 들어와도 항상 소개 전용
+  // 화면(SupporterHome)만 보게 하기로 한 결정입니다(결정 사항 #6). 그런데 이 화면은 원래
+  // authenticatedRoutes의 "*" 라우트로만 등록돼 있었고, 아래 <Routes>에는 "/", "/signup",
+  // "/login" 같은 공개 페이지 라우트도 항상 함께 등록돼 있습니다 — react-router v6은 이런
+  // 구체적인 경로를 "*"보다 항상 먼저 매칭하므로, 후원자가 정확히 "/stay"(빈 경로)나
+  // "/stay/login" 등으로 들어오면 의도와 다르게 공개 랜딩/로그인 페이지가 그대로 보이는
+  // 문제가 있었습니다. 그래서 후원자인 경우에는 아래에서 공개 페이지 라우트 자체를 건너뛰고
+  // SupporterHome 하나만 등록해 이 문제를 근본적으로 막습니다.
+  const isSupporterHome = !!(
+    userProfile
+    && userProfile.status === 'approved'
+    && userProfile.email_verified_at
+    && userProfile.role === 'supporter'
+  );
 
   // 로그인 상태에서 렌더링할 경로들을 상태에 따라 하나로 결정 (동시에 여러 "*" 라우트가
   // 매칭되는 것을 방지하기 위해 우선순위대로 분기)
@@ -354,20 +376,29 @@ function App() {
         <Navigation user={user} userProfile={userProfile} onLogout={handleLogout} />
 
         <Routes>
-          {/* 공개 페이지 */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/signup" element={<SignupRoleSelect />} />
-          <Route path="/signup/missionary" element={<SignUp role="missionary" />} />
-          <Route path="/signup/host" element={<SignUp role="host" />} />
-          {/* 프로필 등록 직후 안내 화면: 승인 대기 중인 사용자의 catch-all("*") 라우트보다
-              더 구체적인 경로이므로 항상 우선적으로 매칭됩니다. */}
-          <Route path="/signup-complete" element={<SignupComplete />} />
-          {/* 이메일 인증 링크 도착 페이지: 로그인 여부와 무관하게 항상 접근 가능해야 함 */}
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/login" element={<Login />} />
+          {isSupporterHome ? (
+            // 후원자는 공개 페이지 라우트와 경로 경쟁이 없는 완전히 별도의 <Routes>로
+            // 렌더링해서, 어떤 URL로 들어오든(정확히 "/stay"인 경우 포함) 항상
+            // SupporterHome만 보이도록 합니다.
+            authenticatedRoutes
+          ) : (
+            <>
+              {/* 공개 페이지 */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/signup" element={<SignupRoleSelect />} />
+              <Route path="/signup/missionary" element={<SignUp role="missionary" />} />
+              <Route path="/signup/host" element={<SignUp role="host" />} />
+              {/* 프로필 등록 직후 안내 화면: 승인 대기 중인 사용자의 catch-all("*") 라우트보다
+                  더 구체적인 경로이므로 항상 우선적으로 매칭됩니다. */}
+              <Route path="/signup-complete" element={<SignupComplete />} />
+              {/* 이메일 인증 링크 도착 페이지: 로그인 여부와 무관하게 항상 접근 가능해야 함 */}
+              <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/login" element={<Login />} />
 
-          {/* 로그인 필요 */}
-          {user ? authenticatedRoutes : <Route path="*" element={<Navigate to="/" replace />} />}
+              {/* 로그인 필요 */}
+              {user ? authenticatedRoutes : <Route path="*" element={<Navigate to="/" replace />} />}
+            </>
+          )}
         </Routes>
       </div>
     </BrowserRouter>
