@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../App';
 import weweIconWhite from '../assets/wewe-icon-white.png';
 
 // WEWE 전체 홈페이지(최상위 '/', '/about', '/about/ministries', '/about/leadership')용
@@ -12,8 +13,39 @@ import weweIconWhite from '../assets/wewe-icon-white.png';
 // (소개: Phase 3, 사역 소식: Phase 4, 후원하기: Phase 5, 로그인/가입하기: Phase 6).
 // "위위 스테이"만 별도로 마운트된 다른 앱(/stay, basename="/stay")이라 일반 링크(전체
 // 페이지 이동)로 연결합니다.
+//
+// (2026-09-07 수정) /stay 앱(App.jsx)이 쓰는 것과 동일한 supabase 클라이언트를 그대로
+// 가져와서(같은 브라우저 localStorage에 저장된 세션을 공유) 로그인 여부를 확인합니다.
+// 위위 홈페이지에서 로그인하면 더 이상 /stay로 강제 이동하지 않고 이 헤더의 상태만
+// "로그인/가입하기" → "로그아웃"으로 바뀝니다 — 로그인한 채로 위위 홈페이지를 계속 볼 수
+// 있고, "위위 스테이"는 사용자가 원할 때 직접 눌러서 이동합니다.
 function WeweHeader() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (mounted) setIsLoggedIn(!!data?.session?.user);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) setIsLoggedIn(!!session?.user);
+    });
+
+    return () => {
+      mounted = false;
+      subscription?.unsubscribe();
+    };
+  }, []);
+
   const closeMobileNav = () => document.body.classList.remove('wewe-nav-open');
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    closeMobileNav();
+    await supabase.auth.signOut();
+  };
 
   return (
     <header className="wewe-header">
@@ -43,8 +75,16 @@ function WeweHeader() {
           <Link to="/news" className="wewe-nav-link" onClick={closeMobileNav}>사역 소식</Link>
           <a href="/stay" className="wewe-nav-link" onClick={closeMobileNav}>위위 스테이</a>
           <Link to="/donate" className="wewe-nav-link wewe-nav-donate" onClick={closeMobileNav}>후원하기</Link>
-          <Link to="/login" className="wewe-nav-link" onClick={closeMobileNav}>로그인</Link>
-          <Link to="/signup" className="wewe-nav-link wewe-nav-cta" onClick={closeMobileNav}>가입하기</Link>
+          {isLoggedIn ? (
+            <button type="button" className="wewe-nav-link wewe-nav-logout" onClick={handleLogout}>
+              로그아웃
+            </button>
+          ) : (
+            <>
+              <Link to="/login" className="wewe-nav-link" onClick={closeMobileNav}>로그인</Link>
+              <Link to="/signup" className="wewe-nav-link wewe-nav-cta" onClick={closeMobileNav}>가입하기</Link>
+            </>
+          )}
         </nav>
       </div>
 
@@ -136,6 +176,14 @@ function WeweHeader() {
           padding: 0.5rem 1rem;
           border-radius: 6px;
           border: 1.5px solid rgba(255, 255, 255, 0.55);
+        }
+
+        .wewe-nav-logout {
+          background: none;
+          border: none;
+          padding: 0;
+          font-family: inherit;
+          cursor: pointer;
         }
 
         .wewe-nav-donate:hover {
