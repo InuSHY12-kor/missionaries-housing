@@ -1,19 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { SquareStack } from 'lucide-react';
+import { SquareStack, PenSquare } from 'lucide-react';
+import { supabase } from '../App';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
 import { weweSupabase } from './weweSupabase';
+import HERO_IMAGE_SETS from './heroImages';
+import Reveal from './Reveal';
 import './wewe-shared.css';
 
 // 사역 소식 목록 페이지 (/news, Phase 4).
 // 관리자 대시보드(/stay/admin, "사역 소식" 탭)에서 발행(status='published')한 글만
 // 최신순으로 보여줍니다. 로그인 없이도 볼 수 있는 공개 페이지입니다.
+//
+// (2026-09-09 추가) 관리자로 로그인한 경우에만 "새 글쓰기" 버튼을 보여줍니다. 후원자·
+// 선교사·숙소 제공자 계정은 글을 읽기만 할 수 있어야 하므로, 인증된 supabase 클라이언트로
+// 세션 + users.role을 직접 확인합니다(weweSupabase는 익명 클라이언트라 role을 알 수 없음).
 function NewsListPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    const checkAdmin = async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData?.session?.user;
+      if (!user) return;
+
+      const { data } = await supabase.from('users').select('role').eq('id', user.id).maybeSingle();
+      if (active && data?.role === 'admin') setIsAdmin(true);
+    };
+
+    checkAdmin();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -48,10 +74,20 @@ function NewsListPage() {
         eyebrow="MINISTRY NEWS"
         title="사역 소식"
         subtitle="WEWE가 걸어가는 이야기와 사역 현장의 소식을 전합니다."
+        images={HERO_IMAGE_SETS.news}
       />
 
       <section className="nl-section">
         <div className="wh-container">
+          {isAdmin && (
+            <div className="nl-admin-bar">
+              <a href="/stay/admin/posts/new" className="wh-btn wh-btn-primary">
+                <PenSquare size={16} />
+                새 글쓰기
+              </a>
+            </div>
+          )}
+
           {loading ? (
             <p className="nl-status">불러오는 중...</p>
           ) : loadError ? (
@@ -62,11 +98,17 @@ function NewsListPage() {
             </div>
           ) : (
             <div className="nl-grid">
-              {posts.map((post) => {
+              {posts.map((post, idx) => {
                 const imageCount = Array.isArray(post.image_urls) ? post.image_urls.length : 0;
                 const thumbnail = post.cover_image_url || (imageCount > 0 ? post.image_urls[0] : '');
                 return (
-                  <Link key={post.id} to={`/news/${post.slug}`} className="nl-card">
+                  <Reveal
+                    key={post.id}
+                    as={Link}
+                    to={`/news/${post.slug}`}
+                    className="nl-card"
+                    delay={(idx % 6) * 40}
+                  >
                     {thumbnail ? (
                       <div className="nl-card-image" style={{ backgroundImage: `url(${thumbnail})` }} />
                     ) : (
@@ -90,7 +132,7 @@ function NewsListPage() {
                       <h3>{post.title}</h3>
                       {post.excerpt && <p>{post.excerpt}</p>}
                     </div>
-                  </Link>
+                  </Reveal>
                 );
               })}
             </div>
@@ -105,6 +147,12 @@ function NewsListPage() {
           padding: 4rem 0 5rem;
           background: var(--wh-bg);
           flex: 1;
+        }
+
+        .nl-admin-bar {
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 1.5rem;
         }
 
         .nl-status {

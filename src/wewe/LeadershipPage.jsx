@@ -3,12 +3,17 @@ import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
 import AboutSubNav from './AboutSubNav';
-import weweLogoFull from '../assets/wewe-logo-full.png';
+import Reveal from './Reveal';
+import HERO_IMAGE_SETS from './heroImages';
+import weweRepresentative from '../assets/wewe-representative.jpg';
+import weweLogoNew from '../assets/wewe-logo-new.png';
 import './wewe-shared.css';
 
 // "소개" > "대표·이사회" 페이지 (/about/leadership).
 // 대표 홍현지님 소개(claude/wewe-brand-content-2026-09-05.md #7)와,
 // 아직 구성되지 않은 이사회에 대한 안내(#8, "향후 추가 예정")를 담습니다.
+// (2026-09-09) 대표 소개 카드의 로고 자리표시자를 실제 대표 프로필 사진으로,
+// 이사회 안내 카드에는 새로 전달받은 WEWE 로고를 붙였습니다.
 function LeadershipPage() {
   return (
     <div className="wewe-page wewe-leadership-page">
@@ -18,17 +23,20 @@ function LeadershipPage() {
         eyebrow="LEADERSHIP"
         title="대표 및 이사회"
         subtitle="WEWE를 이끌어가는 사람들을 소개합니다."
+        images={HERO_IMAGE_SETS.leadership}
       >
         <AboutSubNav active="/about/leadership" />
       </WevePageHero>
 
       <section className="wl-leader">
         <div className="wh-container wh-container-narrow">
-          <span className="wh-eyebrow wh-eyebrow-center">REPRESENTATIVE</span>
-          <h2 className="wh-h2-center">대표 홍현지</h2>
+          <Reveal>
+            <span className="wh-eyebrow wh-eyebrow-center">REPRESENTATIVE</span>
+            <h2 className="wh-h2-center">대표 홍현지</h2>
+          </Reveal>
 
-          <div className="wl-leader-card">
-            <img src={weweLogoFull} alt="WEWE" className="wl-leader-logo" />
+          <Reveal as="div" className="wl-leader-card" delay={80}>
+            <img src={weweRepresentative} alt="대표 홍현지" className="wl-leader-photo" />
             <div className="wl-leader-body">
               <p className="wl-leader-degree">간호학(전공) 학사 · 호스피스 전문 간호사(석사)</p>
               <ul className="wl-leader-history">
@@ -38,19 +46,22 @@ function LeadershipPage() {
               </ul>
               <p className="wl-leader-note">약력은 계속 추가될 예정입니다.</p>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       <section className="wl-board">
         <div className="wh-container wh-container-narrow">
-          <span className="wh-eyebrow wh-eyebrow-center">BOARD OF DIRECTORS</span>
-          <h2 className="wh-h2-center">이사회</h2>
+          <Reveal>
+            <span className="wh-eyebrow wh-eyebrow-center">BOARD OF DIRECTORS</span>
+            <h2 className="wh-h2-center">이사회</h2>
+          </Reveal>
 
-          <div className="wl-board-card">
+          <Reveal as="div" className="wl-board-card" delay={80}>
+            <img src={weweLogoNew} alt="WEWE" className="wl-board-logo" />
             <p>WEWE는 임의법인에서 사단법인으로 전환하는 과정에서 이사회를 구성하고 있습니다.</p>
             <span className="wl-board-soon">구성 중</span>
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -73,9 +84,12 @@ function LeadershipPage() {
           border-radius: 12px;
         }
 
-        .wl-leader-logo {
+        .wl-leader-photo {
           width: 100%;
-          height: auto;
+          aspect-ratio: 2 / 3;
+          object-fit: cover;
+          border-radius: 10px;
+          display: block;
         }
 
         .wl-leader-degree {
@@ -129,6 +143,13 @@ function LeadershipPage() {
           background: var(--wh-bg-soft);
           border: 1px dashed var(--wh-line);
           border-radius: 10px;
+        }
+
+        .wl-board-logo {
+          height: 44px;
+          width: auto;
+          margin: 0 auto 1.25rem;
+          display: block;
         }
 
         .wl-board-card p {

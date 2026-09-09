@@ -5,6 +5,8 @@ import { supabase } from '../App';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
+import Reveal from './Reveal';
+import HERO_IMAGE_SETS from './heroImages';
 import './wewe-shared.css';
 
 // WEWE 전체 로그인 페이지 (/login, Phase 6).
@@ -76,11 +78,12 @@ function LoginPage() {
         eyebrow="WELCOME BACK"
         title="다시 만나 반가워요"
         subtitle="로그인하고 위위와 함께 이어가세요"
+        images={HERO_IMAGE_SETS.login}
       />
 
       <section className="wl-section">
         <div className="wh-container wh-container-narrow">
-          <div className="wl-card">
+          <Reveal className="wl-card">
             {error && (
               <div className="wl-alert">
                 <AlertCircle size={20} />
@@ -121,7 +124,7 @@ function LoginPage() {
             <p className="wl-links">
               계정이 없으신가요? <Link to="/signup">가입하기</Link>
             </p>
-          </div>
+          </Reveal>
         </div>
       </section>
 

@@ -10,6 +10,9 @@ import DonatePage from './DonatePage';
 import SignupPage from './SignupPage';
 import SupporterSignup from './SupporterSignup';
 import LoginPage from './LoginPage';
+import MyPage from './MyPage';
+import WeweProfilePage from './WeweProfilePage';
+import ScrollToTop from './ScrollToTop';
 
 // WEWE 전체 홈페이지의 최상위 라우터 (Phase 3, Phase 4에서 /news* 추가, Phase 5에서 /donate 추가,
 // Phase 6에서 /signup, /signup/supporter, /login 추가).
@@ -27,6 +30,7 @@ import LoginPage from './LoginPage';
 function WeweSite() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<WeweHome />} />
         <Route path="/about" element={<AboutPage />} />
@@ -38,6 +42,8 @@ function WeweSite() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/signup/supporter" element={<SupporterSignup />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/profile" element={<WeweProfilePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

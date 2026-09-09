@@ -6,6 +6,8 @@ import { SUPPORTER_TERMS } from '../data/termsOfService';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
+import Reveal from './Reveal';
+import HERO_IMAGE_SETS from './heroImages';
 import './wewe-shared.css';
 
 // 후원자(supporter) 가입 페이지 (/signup/supporter, Phase 6).
@@ -88,11 +90,12 @@ function SupporterSignup() {
         eyebrow="SUPPORT WEWE"
         title="후원자로 가입하기"
         subtitle="서류 심사 없이 이메일 인증만으로 바로 가입이 완료됩니다."
+        images={HERO_IMAGE_SETS.supporterSignup}
       />
 
       <section className="ss-section">
         <div className="wh-container wh-container-narrow">
-          <div className="ss-card">
+          <Reveal as="div" className="ss-card">
             <p className="ss-lead">
               후원자 계정은 숙소 예약·제공 기능을 사용하지 않는, WEWE의 소식과 사역을 계속 확인하기
               위한 가벼운 계정입니다. 선교사·호스트 가입과 달리 별도의 증빙 서류나 관리자 승인 없이
@@ -176,7 +179,7 @@ function SupporterSignup() {
               <span className="ss-links-divider">|</span>
               이미 계정이 있으신가요? <Link to="/login">로그인</Link>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Home as HomeIcon } from 'lucide-react';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
+import Reveal from './Reveal';
+import HERO_IMAGE_SETS from './heroImages';
 import { weweSupabase } from './weweSupabase';
 import './wewe-shared.css';
 
@@ -18,11 +20,31 @@ import './wewe-shared.css';
 // 관리자가 /stay/admin에서 작성·발행)의 최신 3개를 보여주도록 바꿨습니다 — 아직 발행된
 // 글이 없으면 이전과 같은 "Coming soon" 안내를 그대로 보여줍니다.
 
-const HERO_IMAGE = 'https://images.unsplash.com/photo-1604881991575-dfb1003d8811?auto=format&fit=crop&w=1800&q=80'; // Priscilla Du Preez - 맞잡은 손
+// 스토리 갤러리(3분할) / 브랜드 심볼 / 사역 카드 사진 — 위위 스테이 랜딩 페이지, AboutPage와
+// 동일한 검증된 Unsplash 사진을 재사용합니다.
+const STORY_GALLERY = {
+  left: 'https://images.unsplash.com/photo-1763616828336-e7fcd02086f5?auto=format&fit=crop&w=700&q=80',
+  center: 'https://images.unsplash.com/photo-1749703810919-1f979a9a3982?auto=format&fit=crop&w=800&q=80',
+  right: 'https://images.unsplash.com/photo-1769366316790-dfcb6a546f05?auto=format&fit=crop&w=700&q=80',
+};
+const MINISTRY_PHOTOS = {
+  teal: 'https://images.unsplash.com/photo-1543525238-54e3d131f7ca?auto=format&fit=crop&w=700&q=80', // 기도하는 손
+  orange: 'https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?auto=format&fit=crop&w=700&q=80', // 맞잡은 두 손, 환대
+};
 
 function WeweHome() {
   const [newsPosts, setNewsPosts] = useState([]);
   const [newsLoaded, setNewsLoaded] = useState(false);
+  const [heroSlide, setHeroSlide] = useState(0);
+  const heroImages = HERO_IMAGE_SETS.home;
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroSlide((prev) => (prev + 1) % heroImages.length);
+    }, 3500);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 다른 페이지에서 "/#ministries"처럼 해시가 붙은 주소로 들어온 경우, 해당 섹션이
   // 화면에 그려진 뒤에 스크롤해서 보여줍니다(브라우저의 기본 해시 스크롤은 정적
@@ -59,8 +81,17 @@ function WeweHome() {
     <div className="wewe-page wewe-home">
       <WeweHeader />
 
-      {/* 히어로 */}
-      <section id="top" className="wh-hero" style={{ backgroundImage: `url(${HERO_IMAGE})` }}>
+      {/* 히어로 — 3.5초마다 전환되는 크로스페이드 슬라이드쇼 + 원형 링 진행 인디케이터
+          (2026-09-09) WevePageHero.jsx의 하위 페이지 히어로와 동일한 효과를 홈 히어로에도 적용. */}
+      <section id="top" className="wh-hero">
+        {heroImages.map((src, idx) => (
+          <div
+            key={src}
+            className={`wh-hero-slide ${idx === heroSlide ? 'active' : ''}`}
+            style={{ backgroundImage: `url(${src})` }}
+          />
+        ))}
+
         <div className="wh-hero-content">
           <span className="wh-hero-eyebrow">WE + WE, 나에서 우리로</span>
           <h1>위로자의 위로자, WEWE입니다</h1>
@@ -76,25 +107,48 @@ function WeweHome() {
             <a href="#ministries" className="wh-btn wh-btn-outline">사역 알아보기</a>
           </div>
         </div>
+
+        {heroImages.length > 1 && (
+          <div className="wp-hero-progress">
+            {heroImages.map((src, idx) => (
+              <div className="wp-hero-dot-wrap" key={src}>
+                <svg className="wp-hero-ring" viewBox="0 0 32 32">
+                  <circle className="wp-hero-ring-track" cx="16" cy="16" r="14" />
+                  {idx === heroSlide && (
+                    <circle key={`fill-${heroSlide}`} className="wp-hero-ring-fill" cx="16" cy="16" r="14" />
+                  )}
+                </svg>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* OUR STORY (요약 — 전체 내용은 /about) */}
       <section id="about" className="wh-about">
         <div className="wh-container wh-container-narrow">
-          <span className="wh-eyebrow wh-eyebrow-center">OUR STORY</span>
-          <h2 className="wh-h2-center">위(WE)로자의 위(WE)로자</h2>
+          <Reveal>
+            <span className="wh-eyebrow wh-eyebrow-center">OUR STORY</span>
+            <h2 className="wh-h2-center">위(WE)로자의 위(WE)로자</h2>
 
-          <blockquote className="wh-verse">
-            &ldquo;너희 중에 분깃이나 기업이 없는 레위인과 네 성중에 거류하는 객과 및 고아와 과부들이 와서 먹고
-            배부르게 하라 그리하면 네 하나님 여호와께서 네 손으로 하는 범사에 네게 복을 주시리라&rdquo;
-            <cite>(신명기 14:29)</cite>
-          </blockquote>
+            <blockquote className="wh-verse">
+              &ldquo;너희 중에 분깃이나 기업이 없는 레위인과 네 성중에 거류하는 객과 및 고아와 과부들이 와서
+              먹고 배부르게 하라 그리하면 네 하나님 여호와께서 네 손으로 하는 범사에 네게 복을 주시리라&rdquo;
+              <cite>(신명기 14:29)</cite>
+            </blockquote>
 
-          <p>
-            WEWE는 가장 깊은 상실의 자리에서 시작되었습니다. 누군가의 아픔을 돌보는 이들이 정작 자신의 무너진
-            마음은 숨겨야만 하는 현실 속에서, WEWE는 현대판 레위인인 목회자와 선교사들의 &lsquo;위로자&rsquo;가
-            되고자 합니다.
-          </p>
+            <p>
+              WEWE는 가장 깊은 상실의 자리에서 시작되었습니다. 누군가의 아픔을 돌보는 이들이 정작 자신의
+              무너진 마음은 숨겨야만 하는 현실 속에서, WEWE는 현대판 레위인인 목회자와 선교사들의
+              &lsquo;위로자&rsquo;가 되고자 합니다.
+            </p>
+          </Reveal>
+
+          <Reveal as="div" className="wh-story-gallery" delay={100}>
+            <div className="side left" style={{ backgroundImage: `url(${STORY_GALLERY.left})` }} />
+            <div className="arch" style={{ backgroundImage: `url(${STORY_GALLERY.center})` }} />
+            <div className="side right" style={{ backgroundImage: `url(${STORY_GALLERY.right})` }} />
+          </Reveal>
 
           <div className="wh-about-more">
             <Link to="/about" className="wh-btn wh-btn-ghost">
@@ -107,22 +161,36 @@ function WeweHome() {
       {/* 사역 소개 (요약 — 전체 내용은 /about/ministries) */}
       <section id="ministries" className="wh-ministries">
         <div className="wh-container">
-          <span className="wh-eyebrow wh-eyebrow-center">OUR MINISTRIES</span>
-          <h2 className="wh-h2-center">우리가 하는 일</h2>
-          <p className="wh-ministries-lead">Blessed Blessing, 하나님의 영광을 위해 사람을 세웁니다.</p>
+          <Reveal>
+            <span className="wh-eyebrow wh-eyebrow-center">OUR MINISTRIES</span>
+            <h2 className="wh-h2-center">우리가 하는 일</h2>
+            <p className="wh-ministries-lead">Blessed Blessing, 하나님의 영광을 위해 사람을 세웁니다.</p>
+          </Reveal>
 
           <div className="wh-ministry-grid">
             {/* 프로젝트 1 — 목회자 */}
-            <div className="wh-ministry-card wh-ministry-teal">
+            <Reveal as="div" className="wh-ministry-card wh-ministry-teal">
+              <div
+                className="wh-ministry-photo"
+                style={{ backgroundImage: `url(${MINISTRY_PHOTOS.teal})` }}
+                role="img"
+                aria-label="기도하는 손"
+              />
               <span className="wh-ministry-tag">PROJECT 1 · 목회자</span>
               <h3>Refresh Pastor Academy</h3>
               <p className="wh-ministry-desc">레위인의 회복 — 성도의 위로가 되어온 목회자님이, 이제는 위로받으실 시간입니다.</p>
               <p className="wh-ministry-summary">목회자 아카데미(심포지엄·세미나·소진관리)와 개별 지원(심리상담, 재정, 장학사업)으로 구성됩니다.</p>
               <Link to="/about/ministries" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
-            </div>
+            </Reveal>
 
             {/* 프로젝트 2 — 선교사 */}
-            <div className="wh-ministry-card wh-ministry-orange">
+            <Reveal as="div" className="wh-ministry-card wh-ministry-orange" delay={100}>
+              <div
+                className="wh-ministry-photo"
+                style={{ backgroundImage: `url(${MINISTRY_PHOTOS.orange})` }}
+                role="img"
+                aria-label="맞잡은 두 손, 환대"
+              />
               <span className="wh-ministry-tag">PROJECT 2 · 선교사</span>
               <h3>Missionary Care</h3>
               <p className="wh-ministry-desc">선교사의 회복 — 열방의 나그네가, 고국에서는 편히 쉬실 수 있도록.</p>
@@ -138,7 +206,7 @@ function WeweHome() {
 
               <p className="wh-ministry-summary">그 외 레위인의 모빌리티(차량 쉐어링), Poiema 돌봄(힐링캠프), WE+WE 커넥트(멤버십)도 준비하고 있습니다.</p>
               <Link to="/about/ministries" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
@@ -206,14 +274,28 @@ function WeweHome() {
           text-align: center;
           padding: 6rem 2rem;
           background-color: #14201d;
+          overflow: hidden;
+        }
+
+        .wh-hero-slide {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
           background-size: cover;
           background-position: center;
+          opacity: 0;
+          transition: opacity 1.4s ease;
+        }
+
+        .wh-hero-slide.active {
+          opacity: 1;
         }
 
         .wh-hero::before {
           content: '';
           position: absolute;
           inset: 0;
+          z-index: 1;
           background: linear-gradient(180deg, rgba(15,20,18,0.6) 0%, rgba(15,20,18,0.5) 45%, rgba(15,20,18,0.88) 100%);
         }
 
@@ -288,6 +370,31 @@ function WeweHome() {
           font-size: 0.9rem;
         }
 
+        .wh-story-gallery {
+          display: grid;
+          grid-template-columns: 1fr 1.15fr 1fr;
+          align-items: end;
+          gap: 1rem;
+          margin: 2.5rem 0 1rem;
+        }
+
+        .wh-story-gallery .side,
+        .wh-story-gallery .arch {
+          background-size: cover;
+          background-position: center;
+          background-color: var(--wh-bg-soft);
+        }
+
+        .wh-story-gallery .side {
+          height: 190px;
+          border-radius: 6px;
+        }
+
+        .wh-story-gallery .arch {
+          height: 260px;
+          border-radius: 160px 160px 6px 6px;
+        }
+
         .wh-about-more {
           text-align: center;
           margin-top: 1.5rem;
@@ -320,6 +427,14 @@ function WeweHome() {
           border-top: 4px solid transparent;
           display: flex;
           flex-direction: column;
+        }
+
+        .wh-ministry-photo {
+          height: 140px;
+          margin: -2rem -2rem 1.25rem;
+          border-radius: 8px 8px 0 0;
+          background-size: cover;
+          background-position: center;
         }
 
         .wh-ministry-teal {
@@ -578,6 +693,14 @@ function WeweHome() {
 
           .wh-ministry-grid {
             grid-template-columns: 1fr;
+          }
+
+          .wh-story-gallery {
+            grid-template-columns: 1fr 1fr;
+          }
+
+          .wh-story-gallery .right {
+            display: none;
           }
 
           .wh-about, .wh-ministries, .wh-news {

@@ -238,6 +238,71 @@
   font-size: 0.8rem;
 }
 
+/* 슬라이드 진행 표시 — 위위스테이 랜딩 히어로와 동일한, 원형 링이 채워지는 인디케이터.
+   (2026-09-09 추가) 위위 전체 페이지의 히어로 슬라이드쇼에도 동일하게 적용합니다. */
+.wp-hero-progress {
+  position: absolute;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  gap: 0.85rem;
+}
+
+.wp-hero-dot-wrap {
+  width: 18px;
+  height: 18px;
+}
+
+.wp-hero-ring {
+  width: 18px;
+  height: 18px;
+  transform: rotate(-90deg);
+}
+
+.wp-hero-ring-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-width: 2.5;
+}
+
+.wp-hero-ring-fill {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 87.9;
+  stroke-dashoffset: 87.9;
+  animation: wpHeroRingFill 3.5s linear forwards;
+}
+
+@keyframes wpHeroRingFill {
+  from { stroke-dashoffset: 87.9; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* 등장(떠오르는) 애니메이션 — Reveal.jsx가 붙이는 공용 클래스.
+   (2026-09-09 추가) 위위 스테이 랜딩 히어로의 fadeIn 느낌을 전 페이지 섹션에 재사용. */
+.wp-reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.wp-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wp-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 @media (max-width: 860px) {
   .wp-hero {
     padding: 7rem 1.25rem 2.75rem;

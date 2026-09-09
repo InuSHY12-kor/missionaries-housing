@@ -1,15 +1,132 @@
 import React from 'react';
-import { ArrowRight, Home as HomeIcon, Car, HeartHandshake, Users2 } from 'lucide-react';
+import {
+  ArrowRight,
+  Home as HomeIcon,
+  Car,
+  HeartHandshake,
+  Users2,
+  GraduationCap,
+  UserCheck,
+  Shield,
+} from 'lucide-react';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
 import AboutSubNav from './AboutSubNav';
+import Reveal from './Reveal';
+import HERO_IMAGE_SETS from './heroImages';
 import './wewe-shared.css';
 
 // "소개" > "사역 소개" 페이지 (/about/ministries).
 // Phase 2에서는 홈페이지 안의 #ministries 섹션에 두 프로젝트를 간략히만 소개했는데,
 // Phase 3에서 claude/wewe-brand-content-2026-09-05.md의 상세 내용(배경 및 필요성,
 // 사업 목표, 핵심 프로그램, 기대 효과)을 담아 실제 하위 페이지로 분리했습니다.
+//
+// (2026-09-09) PROJECT 1의 "배경 및 필요성" 통계를 3개짜리 단순 박스 대신, 자료
+// 출처별로 3겹 도넛(링) 차트 2개로 표현합니다 — 각 링은 12시 방향에서 시작해
+// 반시계 방향으로 퍼센트만큼 채워지고, 값이 작을수록 안쪽(작은) 링, 클수록 바깥쪽
+// (큰) 링이며, 값이 클수록 색이 더 어둡습니다.
+const RING_COLORS = {
+  teal: ['#5fa39d', '#146b71', '#0a3538'], // [가장 안쪽(작은 값) → 가장 바깥쪽(큰 값)]
+};
+
+// 반시계 방향 도넛 링 하나의 SVG path를 만듭니다. angleDeg는 12시 방향(0)에서
+// 시작해 반시계로 진행한 각도(0~360).
+function ringArcPath(cx, cy, r, angleDeg) {
+  const rad = (deg) => (deg * Math.PI) / 180;
+  const startX = cx;
+  const startY = cy - r;
+  // 원 전체(360deg)에 아주 가까우면 시작점=끝점이 되어 arc가 그려지지 않으므로
+  // 살짝 못 미치게(359.99) 클램프합니다.
+  const safeAngle = Math.max(0.0001, Math.min(359.99, angleDeg));
+  const endX = cx - r * Math.sin(rad(safeAngle));
+  const endY = cy - r * Math.cos(rad(safeAngle));
+  const largeArcFlag = safeAngle > 180 ? 1 : 0;
+  return `M ${startX} ${startY} A ${r} ${r} 0 ${largeArcFlag} 0 ${endX} ${endY}`;
+}
+
+// 각 프로젝트/섹션에 곁들이는 사진 (2026-09-09 추가) — heroImages.js와 동일하게
+// 검증된 Unsplash 사진을 재사용합니다.
+const SECTION_PHOTOS = {
+  project1: 'https://images.unsplash.com/photo-1543525238-54e3d131f7ca?auto=format&fit=crop&w=900&q=80', // 기도하는 손
+  project2: 'https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?auto=format&fit=crop&w=900&q=80', // 맞잡은 두 손, 환대
+  outcome: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80', // 회의 테이블
+};
+
+// (2026-09-09 수정) 라벨 3개가 링 반지름 차이(안쪽 → 바깥쪽)만큼 떨어진 위치에
+// 정렬되는데, 각 라벨이 2줄(퍼센트+텍스트)까지 차지할 수 있어서 반지름 차이가 너무
+// 작으면 라벨끼리 겹칩니다. 라벨이 겹치지 않도록 링 사이 간격을 넉넉히 벌리고
+// 차트 전체를 한 줄에 하나씩(세로로) 배치합니다(wm-ring-grid 참고).
+const RING_CHART_SIZE = 290;
+const RING_CENTER = RING_CHART_SIZE / 2;
+const RING_STROKE = 15;
+const RING_RADII = [24, 78, 132]; // 안쪽 → 바깥쪽
+
+function RingChart({ title, source, rings, colorSet = 'teal' }) {
+  // rings: 값이 큰 것부터 정렬되어 들어온다고 가정 — [0]이 가장 큰 값(바깥쪽, 가장 어두움).
+  const ordered = [...rings].sort((a, b) => b.value - a.value);
+  const colors = RING_COLORS[colorSet];
+  // ordered[0](최대값)은 가장 바깥쪽 반지름 + 가장 어두운 색, ordered[last]는 가장 안쪽 + 가장 밝은 색.
+  const n = ordered.length;
+
+  return (
+    <div className="wm-ring-chart">
+      <h4 className="wm-ring-title">&ldquo;{title}&rdquo;</h4>
+      <div className="wm-ring-body">
+        <svg
+          className="wm-ring-svg"
+          width={RING_CHART_SIZE}
+          height={RING_CHART_SIZE}
+          viewBox={`0 0 ${RING_CHART_SIZE} ${RING_CHART_SIZE}`}
+        >
+          {ordered.map((ring, idx) => {
+            const radius = RING_RADII[n - 1 - idx];
+            const color = colors[n - 1 - idx];
+            return (
+              <g key={ring.label}>
+                <circle
+                  cx={RING_CENTER}
+                  cy={RING_CENTER}
+                  r={radius}
+                  className="wm-ring-track"
+                />
+                <path
+                  d={ringArcPath(RING_CENTER, RING_CENTER, radius, (ring.value / 100) * 360)}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={RING_STROKE}
+                  strokeLinecap="round"
+                />
+              </g>
+            );
+          })}
+        </svg>
+
+        <div className="wm-ring-labels">
+          {ordered.map((ring, idx) => {
+            const radius = RING_RADII[n - 1 - idx];
+            const color = colors[n - 1 - idx];
+            const top = RING_CENTER - radius;
+            return (
+              <div
+                key={ring.label}
+                className="wm-ring-label"
+                style={{ top: `${top}px` }}
+              >
+                <span className="wm-ring-label-pct" style={{ color }}>
+                  {ring.value}%
+                </span>
+                <span className="wm-ring-label-text">{ring.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <p className="wm-ring-source">{source}</p>
+    </div>
+  );
+}
+
 function MinistriesPage() {
   return (
     <div className="wewe-page wewe-ministries-page">
@@ -19,6 +136,7 @@ function MinistriesPage() {
         eyebrow="OUR MINISTRIES"
         title="우리가 하는 일"
         subtitle="Blessed Blessing, 하나님의 영광을 위해 사람을 세웁니다."
+        images={HERO_IMAGE_SETS.ministries}
       >
         <AboutSubNav active="/about/ministries" />
       </WevePageHero>
@@ -38,27 +156,40 @@ function MinistriesPage() {
             시선이 머물고, 그들이 다시 작품으로 세워지는 꿈을 꿉니다.
           </blockquote>
 
+          <Reveal
+            as="div"
+            className="wm-project-photo"
+            style={{ backgroundImage: `url(${SECTION_PHOTOS.project1})` }}
+            role="img"
+            aria-label="기도하는 손"
+          />
+
           <h3 className="wm-h3">배경 및 필요성</h3>
           <p className="wm-lead-quote">
             &ldquo;우리는 그동안 목사님의 설교에 은혜받고, 목사님의 기도로 위로를 얻었습니다. 하지만, 정작
             목사님은 누구에게 위로받고 계신지 물어보지 못했습니다.&rdquo;
           </p>
 
-          <div className="wm-stat-grid">
-            <div className="wm-stat-card">
-              <span className="wm-stat-num">74%</span>
-              <p>목회자 4명 중 3명은 돌봄을 받고 싶다고 답했습니다. (한국교회 트렌드 2026)</p>
-            </div>
-            <div className="wm-stat-card">
-              <span className="wm-stat-num">55%</span>
-              <p>스스로를 돌보는 상담·코칭이 가장 필요하다고 답했습니다. (한국교회 트렌드 2026)</p>
-            </div>
-            <div className="wm-stat-card">
-              <span className="wm-stat-num">1/3</span>
-              <p>미국 전직 목회자 3명 중 1명이 45세 이전에 사역을 떠났고, 가장 큰 이유는 소명의 변화였습니다.
-                (라이프웨이 리서치, 2025.08)</p>
-            </div>
-          </div>
+          <Reveal as="div" className="wm-ring-grid">
+            <RingChart
+              title="목회자도 돌봄을 원한다."
+              source="*한국교회 트렌드 2026"
+              rings={[
+                { value: 74, label: '돌봄에 대한 필요성' },
+                { value: 55, label: '스스로를 돌보는 코칭이나 멘토 필요성' },
+                { value: 40, label: '자신의 자기성찰과 성장을 위한 상담 필요성' },
+              ]}
+            />
+            <RingChart
+              title="목회자가 사역의 자리를 떠나는 이유."
+              source="*라이프웨이 리서치 (2025.08)"
+              rings={[
+                { value: 40, label: '소명의 변화' },
+                { value: 18, label: '교회 내 갈등' },
+                { value: 16, label: '소진' },
+              ]}
+            />
+          </Reveal>
 
           <p>
             목회자는 &ldquo;하나님이 다 책임지시니 걱정할 것이 없다&rdquo;고 하기엔, 하나님은 사람을 통해
@@ -92,20 +223,29 @@ function MinistriesPage() {
           </div>
 
           <h3 className="wm-h3">핵심 프로그램</h3>
-          <div className="wm-program-grid wm-program-grid-3">
+          <div className="wm-program-grid wm-program-grid-3 wm-program-grid-icons">
             <div className="wm-program-card">
-              <h4>목회자 아카데미</h4>
-              <p>심포지엄 · 목회자 세미나 · 목회자 소진관리 프로그램</p>
+              <span className="wm-program-icon"><GraduationCap size={20} /></span>
+              <div>
+                <h4>목회자 아카데미</h4>
+                <p>심포지엄 · 목회자 세미나 · 목회자 소진관리 프로그램</p>
+              </div>
             </div>
             <div className="wm-program-card">
-              <h4>개별 지원</h4>
-              <p>연간 N명의 대상자 선정, 목회자 자기탐색(심리상담 프로그램), 개별 지원(재정 등),
-                목회자 양성 장학사업</p>
+              <span className="wm-program-icon"><UserCheck size={20} /></span>
+              <div>
+                <h4>개별 지원</h4>
+                <p>연간 N명의 대상자 선정, 목회자 자기탐색(심리상담 프로그램), 개별 지원(재정 등),
+                  목회자 양성 장학사업</p>
+              </div>
             </div>
             <div className="wm-program-card wm-program-live">
-              <h4>전투복 프로젝트 <span className="wh-progress-badge">진행중</span></h4>
-              <p>지친 목회자님들의 회복과 응원을 위한 프로젝트입니다. 시기별 SNS를 통해 개별 사연 모집을
-                통해 진행합니다.</p>
+              <span className="wm-program-icon"><Shield size={20} /></span>
+              <div>
+                <h4>전투복 프로젝트 <span className="wh-progress-badge">진행중</span></h4>
+                <p>지친 목회자님들의 회복과 응원을 위한 프로젝트입니다. 시기별 SNS를 통해 개별 사연 모집을
+                  통해 진행합니다.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -126,6 +266,14 @@ function MinistriesPage() {
             평안한 안식을 제공하는 것, 그것은 단순한 지원을 넘어 그들이 하나님의 &lsquo;걸작품(Poiema)&rsquo;
             으로 다시 세워지는 여정의 시작입니다.
           </blockquote>
+
+          <Reveal
+            as="div"
+            className="wm-project-photo"
+            style={{ backgroundImage: `url(${SECTION_PHOTOS.project2})` }}
+            role="img"
+            aria-label="맞잡은 두 손, 환대"
+          />
 
           <h3 className="wm-h3">배경 및 필요성</h3>
           <div className="wm-quote-grid">
@@ -194,10 +342,22 @@ function MinistriesPage() {
       {/* 기대 효과 */}
       <section className="wm-outcome">
         <div className="wh-container wh-container-narrow">
-          <span className="wh-eyebrow wh-eyebrow-center">EXPECTED OUTCOME</span>
-          <h2 className="wh-h2-center">기대되는 변화</h2>
+          <Reveal>
+            <span className="wh-eyebrow wh-eyebrow-center">EXPECTED OUTCOME</span>
+            <h2 className="wh-h2-center">기대되는 변화</h2>
+          </Reveal>
+
+          <Reveal
+            as="div"
+            className="wm-outcome-photo"
+            style={{ backgroundImage: `url(${SECTION_PHOTOS.outcome})` }}
+            role="img"
+            aria-label="함께 모여 이야기 나누는 사람들"
+            delay={60}
+          />
+
           <div className="wm-outcome-grid">
-            <div className="wm-outcome-card">
+            <Reveal as="div" className="wm-outcome-card">
               <h4>목회자가 경험하는 변화</h4>
               <ul>
                 <li>사역의 전문성 강화 — 최신 목회 동향 등 전문성 개발</li>
@@ -205,8 +365,8 @@ function MinistriesPage() {
                 <li>회복탄력성 강화 — 소진관리를 통한 회복으로 사역 지속</li>
                 <li>지속 가능한 사역동력 — 지속적인 사후 프로그램과 피드백</li>
               </ul>
-            </div>
-            <div className="wm-outcome-card">
+            </Reveal>
+            <Reveal as="div" className="wm-outcome-card" delay={100}>
               <h4>교회가 경험하는 변화</h4>
               <ul>
                 <li>리더 리스크 관리 — 사역의 연속성 확보</li>
@@ -214,7 +374,7 @@ function MinistriesPage() {
                 <li>교회의 현대화 — 디지털 사역 정착, 최신 사역 기획</li>
                 <li>건강한 동력 모델 구축 — 평신도 섬김, 외부 네트워크 자산화</li>
               </ul>
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
@@ -279,9 +439,38 @@ function MinistriesPage() {
         }
 
         .wm-h3 {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
           color: var(--wh-ink);
-          font-size: 1.2rem;
-          margin: 2.5rem 0 1rem;
+          font-size: 1.05rem;
+          font-weight: 800;
+          letter-spacing: 0.02em;
+          text-transform: uppercase;
+          margin: 3rem 0 1.25rem;
+          padding-bottom: 0.6rem;
+          border-bottom: 2px solid var(--wh-line);
+        }
+
+        .wm-h3::before {
+          content: '';
+          flex-shrink: 0;
+          width: 10px;
+          height: 10px;
+          border-radius: 2px;
+          background: var(--wh-teal);
+        }
+
+        .wm-project-orange .wm-h3::before {
+          background: var(--wh-orange);
+        }
+
+        .wm-project-photo {
+          height: 220px;
+          margin-bottom: 2.25rem;
+          border-radius: 12px;
+          background-size: cover;
+          background-position: center;
         }
 
         .wm-project p {
@@ -297,38 +486,76 @@ function MinistriesPage() {
           font-style: italic;
         }
 
-        .wm-stat-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1rem;
-          margin-bottom: 1.75rem;
+        .wm-ring-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          margin-bottom: 2rem;
         }
 
-        .wm-stat-card {
-          padding: 1.25rem 1.1rem;
+        .wm-ring-chart {
+          padding: 1.75rem 1.75rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
-          text-align: center;
+          border-radius: 12px;
         }
 
-        .wm-project-orange .wm-stat-card {
-          background: var(--wh-bg);
-        }
-
-        .wm-stat-num {
-          display: block;
-          font-size: 1.7rem;
-          font-weight: 800;
-          color: var(--wh-teal);
-          margin-bottom: 0.5rem;
-        }
-
-        .wm-stat-card p {
-          margin: 0;
-          font-size: 0.82rem;
-          color: var(--wh-ink-soft);
+        .wm-ring-title {
+          color: var(--wh-ink);
+          font-size: 0.95rem;
+          font-weight: 700;
+          margin: 0 0 1.1rem;
           line-height: 1.5;
+        }
+
+        .wm-ring-body {
+          display: flex;
+          align-items: center;
+          gap: 1.1rem;
+        }
+
+        .wm-ring-svg {
+          flex-shrink: 0;
+        }
+
+        .wm-ring-track {
+          fill: none;
+          stroke: rgba(0, 0, 0, 0.08);
+          stroke-width: 13px;
+        }
+
+        .wm-ring-labels {
+          position: relative;
+          flex: 1;
+          min-width: 0;
+          height: 290px;
+        }
+
+        .wm-ring-label {
+          position: absolute;
+          left: 0;
+          right: 0;
+          transform: translateY(-50%);
+          display: flex;
+          flex-direction: column;
+          gap: 0.15rem;
+        }
+
+        .wm-ring-label-pct {
+          font-size: 1.15rem;
+          font-weight: 800;
+        }
+
+        .wm-ring-label-text {
+          font-size: 0.85rem;
+          color: var(--wh-ink-soft);
+          line-height: 1.4;
+        }
+
+        .wm-ring-source {
+          margin: 1.1rem 0 0;
+          font-size: 0.78rem;
+          color: var(--wh-stone);
         }
 
         .wm-quote-grid {
@@ -489,6 +716,14 @@ function MinistriesPage() {
           background: var(--wh-bg);
         }
 
+        .wm-outcome-photo {
+          height: 200px;
+          margin: 1.75rem 0 2.5rem;
+          border-radius: 12px;
+          background-size: cover;
+          background-position: center;
+        }
+
         .wm-outcome-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -536,7 +771,7 @@ function MinistriesPage() {
         }
 
         @media (max-width: 860px) {
-          .wm-stat-grid,
+          .wm-ring-grid,
           .wm-quote-grid,
           .wm-goal-grid,
           .wm-program-grid,
@@ -547,6 +782,28 @@ function MinistriesPage() {
 
           .wm-project {
             padding: 3.5rem 0;
+          }
+
+          .wm-project-photo {
+            height: 160px;
+          }
+
+          .wm-ring-body {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .wm-ring-labels {
+            width: 100%;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+          }
+
+          .wm-ring-label {
+            position: static;
+            transform: none;
           }
         }
       `}</style>

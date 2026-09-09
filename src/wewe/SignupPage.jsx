@@ -4,6 +4,8 @@ import { Users, Home, Heart, ArrowRight } from 'lucide-react';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
+import Reveal from './Reveal';
+import HERO_IMAGE_SETS from './heroImages';
 import './wewe-shared.css';
 
 // WEWE 전체 가입 유형 선택 페이지 (/signup, Phase 6).
@@ -21,11 +23,12 @@ function SignupPage() {
         eyebrow="GET STARTED"
         title="가입 유형을 선택해주세요"
         subtitle="회원 유형에 따라 입력하시는 정보와 이용 방법이 달라집니다."
+        images={HERO_IMAGE_SETS.signup}
       />
 
       <section className="wsg-section">
         <div className="wh-container wh-container-narrow">
-          <div className="wsg-cards">
+          <Reveal as="div" className="wsg-cards">
             <a href="/stay/signup/missionary" className="wsg-card">
               <div className="wsg-card-icon">
                 <Users size={32} />
@@ -70,7 +73,7 @@ function SignupPage() {
                 후원자로 가입하기 <ArrowRight size={16} />
               </span>
             </Link>
-          </div>
+          </Reveal>
 
           <div className="wsg-login-link">
             이미 계정이 있으신가요? <Link to="/login">로그인</Link>

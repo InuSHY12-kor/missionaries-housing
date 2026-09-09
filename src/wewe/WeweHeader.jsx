@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
 import weweIconWhite from '../assets/wewe-icon-white.png';
@@ -21,6 +21,8 @@ import weweIconWhite from '../assets/wewe-icon-white.png';
 // 있고, "위위 스테이"는 사용자가 원할 때 직접 눌러서 이동합니다.
 function WeweHeader() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navRef = useRef(null);
+  const toggleRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
@@ -41,6 +43,26 @@ function WeweHeader() {
 
   const closeMobileNav = () => document.body.classList.remove('wewe-nav-open');
 
+  // (2026-09-09 추가) 모바일 햄버거 메뉴가 열려 있을 때, 메뉴 바깥(또는 토글 버튼이 아닌
+  // 곳)을 탭/클릭하면 자동으로 닫히도록 합니다.
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (!document.body.classList.contains('wewe-nav-open')) return;
+      const nav = navRef.current;
+      const toggle = toggleRef.current;
+      if (nav && nav.contains(e.target)) return;
+      if (toggle && toggle.contains(e.target)) return;
+      closeMobileNav();
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
+  }, []);
+
   const handleLogout = async (e) => {
     e.preventDefault();
     closeMobileNav();
@@ -60,6 +82,7 @@ function WeweHeader() {
 
         <button
           type="button"
+          ref={toggleRef}
           className="wewe-nav-toggle"
           aria-label="메뉴 열기"
           onClick={() => document.body.classList.toggle('wewe-nav-open')}
@@ -69,12 +92,18 @@ function WeweHeader() {
           <span />
         </button>
 
-        <nav className="wewe-nav">
+        <nav className="wewe-nav" ref={navRef}>
           <Link to="/" className="wewe-nav-link" onClick={closeMobileNav}>홈</Link>
           <Link to="/about" className="wewe-nav-link" onClick={closeMobileNav}>소개</Link>
           <Link to="/news" className="wewe-nav-link" onClick={closeMobileNav}>사역 소식</Link>
           <a href="/stay" className="wewe-nav-link" onClick={closeMobileNav}>위위 스테이</a>
           <Link to="/donate" className="wewe-nav-link wewe-nav-donate" onClick={closeMobileNav}>후원하기</Link>
+          {isLoggedIn && (
+            <>
+              <Link to="/mypage" className="wewe-nav-link" onClick={closeMobileNav}>마이페이지</Link>
+              <Link to="/profile" className="wewe-nav-link" onClick={closeMobileNav}>프로필</Link>
+            </>
+          )}
           {isLoggedIn ? (
             <button type="button" className="wewe-nav-link wewe-nav-logout" onClick={handleLogout}>
               로그아웃
