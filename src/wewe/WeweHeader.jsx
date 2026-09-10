@@ -1,7 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 import { supabase } from '../App';
 import weweIconWhite from '../assets/wewe-icon-white.png';
+
+// 위위 스테이 상단바(Navigation.jsx)의 "등급 + 반갑습니다, ○○님" 표시와 동일하게, 여기서도
+// 로그인한 회원의 역할(회원 등급)을 사람이 읽는 이름으로 보여줍니다(2026-09-10 추가).
+const ROLE_LABELS = {
+  admin: '관리자',
+  missionary: '선교사',
+  host: '숙소 제공자',
+  supporter: '후원자',
+};
 
 // WEWE 전체 홈페이지(최상위 '/', '/about', '/about/ministries', '/about/leadership')용
 // 공용 헤더. 기존 /stay 앱의 Navigation.jsx(흰 배경 + "WEWESTAY" 워드마크)와는 완전히
@@ -21,18 +31,31 @@ import weweIconWhite from '../assets/wewe-icon-white.png';
 // 있고, "위위 스테이"는 사용자가 원할 때 직접 눌러서 이동합니다.
 function WeweHeader() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
   const navRef = useRef(null);
   const toggleRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
 
+    const loadProfile = async (userId) => {
+      const { data } = await supabase.from('users').select('role, full_name').eq('id', userId).maybeSingle();
+      if (mounted) setUserProfile(data || null);
+    };
+
     supabase.auth.getSession().then(({ data }) => {
-      if (mounted) setIsLoggedIn(!!data?.session?.user);
+      const user = data?.session?.user;
+      if (mounted) setIsLoggedIn(!!user);
+      if (user) loadProfile(user.id);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (mounted) setIsLoggedIn(!!session?.user);
+      if (session?.user) {
+        loadProfile(session.user.id);
+      } else if (mounted) {
+        setUserProfile(null);
+      }
     });
 
     return () => {
@@ -71,6 +94,20 @@ function WeweHeader() {
 
   return (
     <header className="wewe-header">
+      {isLoggedIn && userProfile && (userProfile.full_name || userProfile.role) && (
+        <div className="wewe-header-top">
+          <div className="wewe-header-top-inner">
+            {userProfile.role && (
+              <span className={`wewe-status-badge wewe-status-role-${userProfile.role}`}>
+                {ROLE_LABELS[userProfile.role] || userProfile.role}
+              </span>
+            )}
+            {userProfile.full_name && (
+              <span className="wewe-header-welcome">안녕하세요, {userProfile.full_name}님</span>
+            )}
+          </div>
+        </div>
+      )}
       <div className="wewe-header-inner">
         <Link to="/" className="wewe-brand" onClick={closeMobileNav}>
           <img src={weweIconWhite} alt="WEWE" className="wewe-brand-icon" />
@@ -105,8 +142,9 @@ function WeweHeader() {
             </>
           )}
           {isLoggedIn ? (
-            <button type="button" className="wewe-nav-link wewe-nav-logout" onClick={handleLogout}>
-              로그아웃
+            <button type="button" className="wewe-nav-logout-btn" onClick={handleLogout}>
+              <LogOut size={16} />
+              <span>로그아웃</span>
             </button>
           ) : (
             <>
@@ -125,6 +163,45 @@ function WeweHeader() {
           right: 0;
           z-index: 100;
           padding: 1.5rem 0;
+        }
+
+        .wewe-header-top {
+          background: rgba(10, 10, 9, 0.35);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .wewe-header-top-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0.5rem 1.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .wewe-status-badge {
+          display: inline-flex;
+          align-items: center;
+          padding: 0.2rem 0.6rem;
+          border-radius: 999px;
+          font-size: 0.72rem;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          background: rgba(217, 123, 63, 0.22);
+          color: #f0a875;
+          border: 1px solid rgba(240, 168, 117, 0.4);
+        }
+
+        .wewe-status-role-admin {
+          background: rgba(95, 163, 157, 0.22);
+          color: #8fd3cb;
+          border-color: rgba(143, 211, 203, 0.4);
+        }
+
+        .wewe-header-welcome {
+          color: rgba(255, 255, 255, 0.88);
+          font-size: 0.82rem;
+          font-weight: 600;
         }
 
         .wewe-header-inner {
@@ -207,12 +284,25 @@ function WeweHeader() {
           border: 1.5px solid rgba(255, 255, 255, 0.55);
         }
 
-        .wewe-nav-logout {
-          background: none;
-          border: none;
-          padding: 0;
+        .wewe-nav-logout-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.5rem 1rem;
+          border-radius: 999px;
+          border: 1.5px solid rgba(255, 255, 255, 0.55);
+          background: transparent;
+          color: rgba(255, 255, 255, 0.92);
           font-family: inherit;
+          font-size: 0.9rem;
+          font-weight: 700;
           cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .wewe-nav-logout-btn:hover {
+          border-color: #f0a875;
+          color: #f0a875;
         }
 
         .wewe-nav-donate:hover {

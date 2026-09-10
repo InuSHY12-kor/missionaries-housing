@@ -7,11 +7,16 @@ import { useLocation } from 'react-router-dom';
 // 내려놓은 상태였다면 새 페이지도 그 위치(중간)로 열려버립니다. 경로(pathname)가
 // 바뀔 때마다 맨 위로 되돌려 모든 페이지 이동에 공통으로 적용합니다.
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
 
   useEffect(() => {
+    // 해시가 붙어서 들어온 경우(예: "/about/ministries#project2")는 특정 섹션으로
+    // 이동하려는 의도이므로 맨 위로 강제로 되돌리지 않습니다 — 목적지 페이지 쪽에서
+    // 직접 해당 섹션으로 스크롤합니다(예: MinistriesPage.jsx의 해시 스크롤 처리).
+    if (hash) return;
     window.scrollTo(0, 0);
-  }, [pathname]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, hash]);
 
   return null;
 }

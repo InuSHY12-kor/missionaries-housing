@@ -191,14 +191,8 @@ function NewsDetailPage() {
         title={post.title}
         subtitle={post.published_at ? new Date(post.published_at).toLocaleDateString('ko-KR') : ''}
         images={HERO_IMAGE_SETS.news}
-      >
-        {isAdmin && (
-          <a href={`/stay/admin/posts/${post.id}/edit`} className="wh-btn wh-btn-outline nd-edit-btn">
-            <Pencil size={16} />
-            수정
-          </a>
-        )}
-      </WevePageHero>
+      />
+
 
       <article className="nd-article">
         <Reveal as="div" className="wh-container wh-container-narrow">
@@ -250,6 +244,13 @@ function NewsDetailPage() {
               );
             })}
             {!currentUserId && <span className="nd-reaction-hint">로그인 후 반응을 남길 수 있어요</span>}
+
+            {isAdmin && (
+              <a href={`/stay/admin/posts/${post.id}/edit`} className="wh-btn wh-btn-outline nd-edit-btn">
+                <Pencil size={16} />
+                수정
+              </a>
+            )}
           </div>
 
           <div className="nd-back">
@@ -283,25 +284,19 @@ function NewsDetailPage() {
           display: block;
         }
 
-        /* 사진이 여러 장인 글은 카드뉴스 갤러리 형태로 나란히 보여줍니다 */
+        /* 사진이 여러 장인 글은 세로로 한 장씩 풀사이즈로 이어서 보여줍니다
+           (2026-09-10: 2열 그리드에서 세로 1열 레이아웃으로 변경) */
         .nd-gallery {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
+          display: flex;
+          flex-direction: column;
           gap: 0.6rem;
           margin-bottom: 2rem;
         }
 
         .nd-gallery-image {
           width: 100%;
-          aspect-ratio: 1;
-          object-fit: cover;
           border-radius: 10px;
           display: block;
-        }
-
-        .nd-gallery-image:first-child:nth-last-child(odd) {
-          grid-column: 1 / -1;
-          aspect-ratio: 16 / 10;
         }
 
         .nd-article p {
@@ -362,7 +357,7 @@ function NewsDetailPage() {
         }
 
         .nd-edit-btn {
-          margin-top: 1rem;
+          margin-left: auto;
         }
 
         .nd-back {

@@ -20,17 +20,22 @@ import './wewe-shared.css';
 // 관리자가 /stay/admin에서 작성·발행)의 최신 3개를 보여주도록 바꿨습니다 — 아직 발행된
 // 글이 없으면 이전과 같은 "Coming soon" 안내를 그대로 보여줍니다.
 
-// 스토리 갤러리(3분할) / 브랜드 심볼 / 사역 카드 사진 — 위위 스테이 랜딩 페이지, AboutPage와
-// 동일한 검증된 Unsplash 사진을 재사용합니다.
+// 스토리 갤러리(3분할) 사진 (2026-09-10 교체) — 이전에는 상단 히어로 배너와 같은 사진을
+// 그대로 재사용해서 위위 스테이(숙소) 느낌이 강하다는 피드백이 있었습니다. 히어로(위쪽)와
+// 겹치지 않는, "위로자의 위로자"다운 동행·나눔·환대의 사진으로 교체했습니다.
 const STORY_GALLERY = {
-  left: 'https://images.unsplash.com/photo-1763616828336-e7fcd02086f5?auto=format&fit=crop&w=700&q=80',
-  center: 'https://images.unsplash.com/photo-1749703810919-1f979a9a3982?auto=format&fit=crop&w=800&q=80',
-  right: 'https://images.unsplash.com/photo-1769366316790-dfcb6a546f05?auto=format&fit=crop&w=700&q=80',
+  left: 'https://images.unsplash.com/photo-1484973768669-7fb6b5451095?auto=format&fit=crop&w=700&q=80', // 소파에 나란히 앉아 대화 — 동행
+  center: 'https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?auto=format&fit=crop&w=800&q=80', // 맞잡은 두 손, 환대
+  right: 'https://images.unsplash.com/photo-1447619297994-b829cc1ab44a?auto=format&fit=crop&w=700&q=80', // 마주 편 두 손바닥 — 나눔
 };
 const MINISTRY_PHOTOS = {
   teal: 'https://images.unsplash.com/photo-1543525238-54e3d131f7ca?auto=format&fit=crop&w=700&q=80', // 기도하는 손
   orange: 'https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?auto=format&fit=crop&w=700&q=80', // 맞잡은 두 손, 환대
 };
+
+// 사역 소식 그리드(2026-09-10 수정) — 인스타그램 피드처럼 한 줄에 4개씩, 최대 2줄(8개)까지만
+// 노출합니다. 글이 8개보다 적으면 남는 칸은 빈 박스로 채워 그리드 모양을 유지합니다.
+const NEWS_GRID_SIZE = 8;
 
 function WeweHome() {
   const [newsPosts, setNewsPosts] = useState([]);
@@ -63,10 +68,10 @@ function WeweHome() {
     let active = true;
     weweSupabase
       .from('ministry_posts')
-      .select('id, slug, title, excerpt, published_at')
+      .select('id, slug, title, excerpt, cover_image_url, image_urls, published_at')
       .eq('status', 'published')
       .order('published_at', { ascending: false })
-      .limit(3)
+      .limit(NEWS_GRID_SIZE)
       .then(({ data, error }) => {
         if (!active) return;
         if (!error) setNewsPosts(data || []);
@@ -101,10 +106,8 @@ function WeweHome() {
             먼저 아파본 위로자가 지금 아픈 위로자의 손을 잡아드립니다.
           </p>
           <div className="wh-hero-actions">
-            <a href="/stay" className="wh-btn wh-btn-primary">
-              위위 스테이 살펴보기 <ArrowRight size={18} />
-            </a>
             <a href="#ministries" className="wh-btn wh-btn-outline">사역 알아보기</a>
+            <a href="/stay" className="wh-btn wh-btn-outline">위위 스테이 살펴보기</a>
           </div>
         </div>
 
@@ -205,7 +208,7 @@ function WeweHome() {
               </div>
 
               <p className="wh-ministry-summary">그 외 레위인의 모빌리티(차량 쉐어링), Poiema 돌봄(힐링캠프), WE+WE 커넥트(멤버십)도 준비하고 있습니다.</p>
-              <Link to="/about/ministries" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
+              <Link to="/about/ministries#project2" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
             </Reveal>
           </div>
         </div>
@@ -213,25 +216,39 @@ function WeweHome() {
 
       {/* 사역 소식 */}
       <section id="news" className="wh-news">
-        <div className="wh-container wh-container-narrow">
+        <div className="wh-container">
           <span className="wh-eyebrow wh-eyebrow-center">MINISTRY NEWS</span>
           <h2 className="wh-h2-center">사역 소식</h2>
 
           {newsLoaded && newsPosts.length > 0 ? (
             <>
-              <ul className="wh-news-list">
-                {newsPosts.map((post) => (
-                  <li key={post.id}>
-                    <Link to={`/news/${post.slug}`} className="wh-news-item">
-                      <span className="wh-news-item-date">
-                        {post.published_at ? new Date(post.published_at).toLocaleDateString('ko-KR') : ''}
-                      </span>
-                      <span className="wh-news-item-title">{post.title}</span>
-                      <ArrowRight size={14} />
+              <div className="wh-newsgrid">
+                {newsPosts.map((post) => {
+                  const imageCount = Array.isArray(post.image_urls) ? post.image_urls.length : 0;
+                  const thumbnail = post.cover_image_url || (imageCount > 0 ? post.image_urls[0] : '');
+                  return (
+                    <Link key={post.id} to={`/news/${post.slug}`} className="wh-newsgrid-card">
+                      {thumbnail ? (
+                        <div className="wh-newsgrid-image" style={{ backgroundImage: `url(${thumbnail})` }} />
+                      ) : (
+                        <div className="wh-newsgrid-image wh-newsgrid-image-placeholder">
+                          <span>WEWE</span>
+                        </div>
+                      )}
+                      <div className="wh-newsgrid-caption">
+                        <span className="wh-newsgrid-date">
+                          {post.published_at ? new Date(post.published_at).toLocaleDateString('ko-KR') : ''}
+                        </span>
+                        <h3>{post.title}</h3>
+                      </div>
                     </Link>
-                  </li>
+                  );
+                })}
+                {/* 글이 8개(4×2)보다 적으면 남는 칸을 빈 박스로 채워 그리드 형태를 유지합니다. */}
+                {Array.from({ length: Math.max(0, NEWS_GRID_SIZE - newsPosts.length) }).map((_, idx) => (
+                  <div key={`wh-newsgrid-empty-${idx}`} className="wh-newsgrid-card wh-newsgrid-empty" aria-hidden="true" />
                 ))}
-              </ul>
+              </div>
               <div className="wh-news-more">
                 <Link to="/news" className="wh-btn wh-btn-ghost">
                   사역 소식 전체 보기 <ArrowRight size={16} />
@@ -247,16 +264,17 @@ function WeweHome() {
         </div>
       </section>
 
-      {/* WEWE 스테이 CTA 밴드 */}
+      {/* WEWE CTA 밴드 (2026-09-10 수정) — 이전에는 위위 스테이 회원가입을 안내하는
+          문구/링크였는데, 여기는 위위 랜딩 페이지이므로 위위 자체 가입·로그인으로 바꿨습니다. */}
       <section className="wh-cta">
         <div className="wh-container wh-cta-inner">
           <div>
-            <h2>선교사이신가요, 숙소를 나누고 싶으신가요?</h2>
-            <p>위위 스테이에서 회원가입하고 신뢰의 공유 숙소 커뮤니티에 함께해 주세요.</p>
+            <h2>목회자이신가요, 선교사이신가요?</h2>
+            <p>WEWE에 가입하고 위로자의 위로자 공동체와 함께해 주세요.</p>
           </div>
           <div className="wh-cta-actions">
-            <a href="/stay/signup" className="wh-btn wh-btn-primary">가입하기</a>
-            <a href="/stay/login" className="wh-btn wh-btn-ghost">로그인</a>
+            <Link to="/signup" className="wh-btn wh-btn-primary">가입하기</Link>
+            <Link to="/login" className="wh-btn wh-btn-ghost">로그인</Link>
           </div>
         </div>
       </section>
@@ -561,6 +579,8 @@ function WeweHome() {
         }
 
         .wh-news-card {
+          max-width: 640px;
+          margin: 0 auto;
           text-align: center;
           padding: 2.5rem;
           background: var(--wh-bg-soft);
@@ -585,48 +605,81 @@ function WeweHome() {
           padding: 0.3rem 0.9rem;
         }
 
-        .wh-news-list {
-          list-style: none;
-          margin: 0;
-          padding: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
+        /* 인스타그램 피드처럼 한 줄에 4개, 최대 2줄(8개)까지만 노출 (2026-09-10) —
+           NewsListPage.jsx의 정사각형 사진 카드 그리드와 같은 느낌으로 맞췄습니다. */
+        .wh-newsgrid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 0.5rem;
         }
 
-        .wh-news-item {
+        .wh-newsgrid-card {
+          position: relative;
+          display: block;
+          aspect-ratio: 1;
+          overflow: hidden;
+          border-radius: 6px;
+          background: var(--wh-bg-soft);
+          text-decoration: none;
+        }
+
+        .wh-newsgrid-image {
+          position: absolute;
+          inset: 0;
+          background-size: cover;
+          background-position: center;
+          background-color: var(--wh-bg-soft);
+          transition: transform 0.35s ease;
+        }
+
+        .wh-newsgrid-card:hover .wh-newsgrid-image {
+          transform: scale(1.05);
+        }
+
+        .wh-newsgrid-image-placeholder {
           display: flex;
           align-items: center;
-          gap: 1rem;
-          padding: 1.1rem 1.4rem;
-          background: var(--wh-bg-soft);
-          border: 1px solid var(--wh-line);
-          border-radius: 10px;
-          text-decoration: none;
-          color: var(--wh-ink);
-          transition: border-color 0.15s ease;
+          justify-content: center;
+          background: linear-gradient(135deg, var(--wh-teal) 0%, var(--wh-orange) 100%);
         }
 
-        .wh-news-item:hover {
-          border-color: var(--wh-orange);
+        .wh-newsgrid-image-placeholder span {
+          color: rgba(255,255,255,0.9);
+          font-weight: 800;
+          font-size: 0.95rem;
+          letter-spacing: 0.06em;
         }
 
-        .wh-news-item-date {
-          flex-shrink: 0;
-          font-size: 0.8rem;
+        .wh-newsgrid-caption {
+          position: absolute;
+          inset: auto 0 0 0;
+          padding: 1.4rem 0.7rem 0.55rem;
+          background: linear-gradient(0deg, rgba(10,10,9,0.85) 0%, rgba(10,10,9,0.5) 55%, rgba(10,10,9,0) 100%);
+        }
+
+        .wh-newsgrid-date {
+          display: block;
+          font-size: 0.64rem;
           font-weight: 700;
-          color: var(--wh-stone);
+          color: rgba(255,255,255,0.75);
+          margin-bottom: 0.15rem;
         }
 
-        .wh-news-item-title {
-          flex: 1;
-          font-weight: 600;
-          font-size: 0.98rem;
+        .wh-newsgrid-caption h3 {
+          color: #fff;
+          font-size: 0.82rem;
+          line-height: 1.4;
+          margin: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
         }
 
-        .wh-news-item svg {
-          flex-shrink: 0;
-          color: var(--wh-orange-deep);
+        .wh-newsgrid-empty {
+          border: 1px dashed var(--wh-line);
+          background: var(--wh-bg-soft);
         }
 
         .wh-news-more {
@@ -693,6 +746,10 @@ function WeweHome() {
 
           .wh-ministry-grid {
             grid-template-columns: 1fr;
+          }
+
+          .wh-newsgrid {
+            grid-template-columns: repeat(2, 1fr);
           }
 
           .wh-story-gallery {

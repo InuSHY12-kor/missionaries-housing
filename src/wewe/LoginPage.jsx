@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AlertCircle } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../App';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
@@ -18,9 +18,11 @@ import './wewe-shared.css';
 // status, email_verified_at)에 따라 판단합니다.
 function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const passwordResetDone = !!location.state?.passwordResetDone;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -84,6 +86,12 @@ function LoginPage() {
       <section className="wl-section">
         <div className="wh-container wh-container-narrow">
           <Reveal className="wl-card">
+            {passwordResetDone && !error && (
+              <div className="wl-alert wl-alert-success">
+                <CheckCircle2 size={20} />
+                <span>비밀번호가 변경되었습니다. 새 비밀번호로 로그인해주세요.</span>
+              </div>
+            )}
             {error && (
               <div className="wl-alert">
                 <AlertCircle size={20} />
@@ -122,6 +130,9 @@ function LoginPage() {
             </form>
 
             <p className="wl-links">
+              <Link to="/forgot-password">비밀번호를 잊으셨나요? 비밀번호 찾기</Link>
+            </p>
+            <p className="wl-links">
               계정이 없으신가요? <Link to="/signup">가입하기</Link>
             </p>
           </Reveal>
@@ -158,6 +169,12 @@ function LoginPage() {
           background: #fdecea;
           color: #b8452e;
           border: 1px solid #f3c5bb;
+        }
+
+        .wl-alert-success {
+          background: #eaf5f2;
+          color: #146b58;
+          border: 1px solid #bfe3d8;
         }
 
         .wl-field {

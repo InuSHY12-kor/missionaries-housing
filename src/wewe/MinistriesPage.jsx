@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   ArrowRight,
   Home as HomeIcon,
@@ -128,6 +128,18 @@ function RingChart({ title, source, rings, colorSet = 'teal' }) {
 }
 
 function MinistriesPage() {
+  // 랜딩 페이지 "PROJECT 2 · 선교사" 카드의 "자세히 보기"가 "/about/ministries#project2"로
+  // 들어오면, 페이지 맨 위가 아니라 실제 PROJECT 2 섹션으로 바로 스크롤합니다
+  // (2026-09-10, ScrollToTop.jsx가 해시가 있을 때는 맨 위로 강제 이동하지 않도록 함께 수정).
+  useEffect(() => {
+    if (window.location.hash) {
+      const el = document.querySelector(window.location.hash);
+      if (el) {
+        requestAnimationFrame(() => el.scrollIntoView({ behavior: 'auto' }));
+      }
+    }
+  }, []);
+
   return (
     <div className="wewe-page wewe-ministries-page">
       <WeweHeader />
@@ -252,7 +264,7 @@ function MinistriesPage() {
       </section>
 
       {/* PROJECT 2 — 선교사 */}
-      <section className="wm-project wm-project-orange">
+      <section id="project2" className="wm-project wm-project-orange">
         <div className="wh-container wh-container-narrow">
           <span className="wm-tag">PROJECT 2 · 선교사</span>
           <h2>Missionary Care</h2>

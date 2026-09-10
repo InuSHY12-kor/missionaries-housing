@@ -76,6 +76,14 @@ function LandingPage({ noticeBanner = null }) {
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
+  // (2026-09-10 추가) 위위 스테이 문의와는 별개로, 비영리단체 WEWE 자체에 대한 문의도
+  // 이 랜딩 페이지에서 남길 수 있도록 동일한 형태의 문의 섹션을 하나 더 둡니다.
+  // 같은 inquiries 테이블을 쓰되 topic='wewe'로 저장해 관리자 화면에서 구분됩니다.
+  const [weweForm, setWeweForm] = useState({ name: '', email: '', phone: '', message: '' });
+  const [weweSubmitting, setWeweSubmitting] = useState(false);
+  const [weweSubmitted, setWeweSubmitted] = useState(false);
+  const [weweSubmitError, setWeweSubmitError] = useState('');
+
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
@@ -116,6 +124,47 @@ function LandingPage({ noticeBanner = null }) {
       setSubmitError('오류가 발생했습니다: ' + error.message);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleWeweFormChange = (e) => {
+    const { name, value } = e.target;
+    setWeweForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleWeweInquirySubmit = async (e) => {
+    e.preventDefault();
+    if (!weweForm.name.trim() || !weweForm.email.trim() || !weweForm.phone.trim()) {
+      setWeweSubmitError('이름, 이메일, 전화번호는 필수 입력입니다.');
+      return;
+    }
+
+    setWeweSubmitting(true);
+    setWeweSubmitError('');
+
+    try {
+      const inquiryId = window.crypto.randomUUID();
+      const { error } = await supabase.from('inquiries').insert({
+        id: inquiryId,
+        name: weweForm.name.trim(),
+        email: weweForm.email.trim(),
+        phone: weweForm.phone.trim(),
+        message: weweForm.message.trim() || null,
+        topic: 'wewe'
+      });
+
+      if (error) throw error;
+
+      supabase.functions
+        .invoke('send-email', { body: { type: 'inquiry', inquiryId } })
+        .catch((emailErr) => console.error('문의 이메일 발송 오류:', emailErr));
+
+      setWeweSubmitted(true);
+      setWeweForm({ name: '', email: '', phone: '', message: '' });
+    } catch (error) {
+      setWeweSubmitError('오류가 발생했습니다: ' + error.message);
+    } finally {
+      setWeweSubmitting(false);
     }
   };
 
@@ -434,6 +483,90 @@ function LandingPage({ noticeBanner = null }) {
         </div>
       </section>
 
+      {/* WEWE(비영리단체) 문의 섹션 (2026-09-10 추가) — 바로 위 문의 섹션은 위위 스테이(숙소)
+          이용 관련이고, 이 섹션은 WEWE 단체 자체에 대해 궁금한 점을 남길 수 있는 별도 섹션입니다. */}
+      <section className="contact contact-wewe">
+        <div className="container">
+          <div className="contact-grid">
+            <div className="contact-intro">
+              <span className="eyebrow">ABOUT WEWE</span>
+              <h2>위위(WEWE)에 대해 궁금한 점이 있으신가요?</h2>
+              <p className="contact-lead">비영리단체 WEWE, 후원, 사역 소개 등 무엇이든 편하게 문의해 주세요.</p>
+              <p>
+                단체 소개나 후원 방법, 협력 문의 등을 남겨주시면 WEWE 팀이 확인 후 안내해 드리겠습니다.
+                WEWE 소개 페이지는 상단의 '위위' 링크로 둘러보실 수 있어요.
+              </p>
+            </div>
+
+            <div className="contact-form-wrap">
+              {weweSubmitted ? (
+                <div className="contact-success">
+                  <CheckCircle size={40} />
+                  <h3>문의가 접수되었습니다</h3>
+                  <p>남겨주신 연락처로 WEWE 팀이 곧 안내해 드리겠습니다. 감사합니다.</p>
+                </div>
+              ) : (
+                <form className="contact-form" onSubmit={handleWeweInquirySubmit}>
+                  <div className="form-group">
+                    <label>이름 *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={weweForm.name}
+                      onChange={handleWeweFormChange}
+                      placeholder="성함을 입력해주세요"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>이메일 *</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={weweForm.email}
+                      onChange={handleWeweFormChange}
+                      placeholder="이메일 주소를 입력해주세요"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>전화번호 *</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={weweForm.phone}
+                      onChange={handleWeweFormChange}
+                      placeholder="연락 가능한 전화번호를 입력해주세요"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>메시지</label>
+                    <textarea
+                      name="message"
+                      value={weweForm.message}
+                      onChange={handleWeweFormChange}
+                      rows="4"
+                      placeholder="궁금하신 점이나 남기고 싶은 말씀을 자유롭게 적어주세요"
+                    />
+                  </div>
+
+                  {weweSubmitError && <p className="form-error">{weweSubmitError}</p>}
+
+                  <button type="submit" className="link-cta link-cta-dark link-cta-block" disabled={weweSubmitting}>
+                    <Send size={18} />
+                    {weweSubmitting ? '접수 중...' : '문의하기'}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 하단 푸터 — 전화번호만 확인 후 추가 필요 */}
       <footer className="site-footer">
         <div className="container footer-inner">
@@ -443,10 +576,11 @@ function LandingPage({ noticeBanner = null }) {
           </div>
 
           <div className="footer-info">
-            <p>비영리단체 WEWE (위로자의 위로자) · 대표 홍현지</p>
+            <p>법인으로 보는 단체 WEWE (위로자의 위로자)</p>
+            <p>대표 홍현지</p>
             <p>사업자(고유번호) 501-82-75164</p>
             <p>주소 서울특별시 종로구 대학로12길 61, 5층 501-176A호(동승동, 계우빌딩)</p>
-            <p>전화 [연락처 입력 필요] · 이메일 wewe@wewestay.com</p>
+            <p>전화 010-8339-7740 · 이메일 wewe@wewestay.com</p>
           </div>
 
           <div className="footer-copy">
@@ -946,6 +1080,13 @@ function LandingPage({ noticeBanner = null }) {
         .contact {
           padding: 5rem 2rem;
           background: var(--ink);
+        }
+
+        /* WEWE 문의 섹션 — 바로 위 위위 스테이 문의 섹션과 시각적으로 구분되도록
+           같은 톤의 다른 색을 씁니다(2026-09-10 추가). */
+        .contact-wewe {
+          background: #14201d;
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .contact .container {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { AlertCircle, Upload, X, ArrowLeft, ArrowRight } from 'lucide-react';
 import PageHero from '../components/PageHero';
@@ -35,17 +35,56 @@ function fallbackSlug() {
   return `post-${Date.now()}`;
 }
 
+// 새 글 작성 중 실수로 화면을 벗어나도(다른 페이지로 이동, 새로고침 등) 작성하던 내용이
+// 사라지지 않도록 임시저장해두는 로컬 스토리지 키입니다. 사용자가 글 내용을 직접 지우거나
+// 저장을 완료하기 전까지는 계속 남아있다가, 다음에 새 글 작성 화면을 열면 자동으로 복원됩니다.
+const NEW_POST_DRAFT_KEY = 'wewe_new_post_draft';
+
 function AdminPostEditor({ userProfile }) {
-  const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = Boolean(id);
 
-  const [formData, setFormData] = useState(EMPTY_FORM);
+  const [formData, setFormData] = useState(() => {
+    if (id) return EMPTY_FORM;
+    try {
+      const saved = window.localStorage.getItem(NEW_POST_DRAFT_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          return { ...EMPTY_FORM, ...parsed };
+        }
+      }
+    } catch {
+      // 저장된 임시글이 손상된 경우 조용히 무시하고 빈 폼으로 시작
+    }
+    return EMPTY_FORM;
+  });
   const [slugTouched, setSlugTouched] = useState(false);
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState('');
+
+  // 새 글 작성 중일 때만 임시저장합니다(기존 글 수정 화면은 서버에 저장된 내용을 불러오므로
+  // 임시저장과 충돌할 수 있어 제외). 사용자가 입력을 바꿀 때마다 로컬 스토리지에 반영되고,
+  // 저장(발행/임시저장) 버튼을 눌러 정상적으로 제출되면 임시글은 지워집니다.
+  useEffect(() => {
+    if (isEditing) return;
+    try {
+      const isBlank =
+        !formData.title.trim() &&
+        !formData.excerpt.trim() &&
+        !formData.content.trim() &&
+        formData.imageUrls.length === 0;
+      if (isBlank) {
+        window.localStorage.removeItem(NEW_POST_DRAFT_KEY);
+      } else {
+        window.localStorage.setItem(NEW_POST_DRAFT_KEY, JSON.stringify(formData));
+      }
+    } catch {
+      // 로컬 스토리지를 쓸 수 없는 환경(프라이빗 모드 등)에서는 임시저장을 건너뜀
+    }
+  }, [formData, isEditing]);
 
   useEffect(() => {
     if (!isEditing) return;
@@ -221,7 +260,17 @@ function AdminPostEditor({ userProfile }) {
         if (insertError) throw insertError;
       }
 
-      navigate('/admin?tab=posts');
+      // 저장이 끝났으므로 임시저장해두었던 내용은 정리
+      try {
+        window.localStorage.removeItem(NEW_POST_DRAFT_KEY);
+      } catch {
+        // 무시
+      }
+
+      // (2026-09-10) 사역 소식은 위위(WEWE) 홈페이지에 노출되는 콘텐츠이므로, 글을 쓰고 난
+      // 뒤에는 위위스테이 관리자 대시보드가 아니라 위위 마이페이지로 이동합니다. 위위 쪽은
+      // 별도의 BrowserRouter(basename 없음)를 쓰므로 전체 페이지 이동으로 화면을 넘깁니다.
+      window.location.href = '/mypage';
     } catch (err) {
       if (err.code === '23505') {
         setError('이미 사용 중인 슬러그입니다. 다른 슬러그를 입력해주세요.');

@@ -1,12 +1,30 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Copy, Mail, ExternalLink, Receipt } from 'lucide-react';
+import {
+  ArrowRight,
+  Copy,
+  Mail,
+  ExternalLink,
+  Receipt,
+  Home as HomeIcon,
+  Car,
+  HeartHandshake,
+  Users2,
+} from 'lucide-react';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import './wewe-shared.css';
+
+// 후원이 만드는 변화 / 후원 방법 섹션에 들어가는 사진(2026-09-10 추가).
+// 사역 소개 페이지의 "Refresh Pastor Academy" 하단 사진(.wm-project-photo)과 동일한
+// 사이즈로 보여주기 위해 같은 스타일(.wd-section-photo)을 재사용합니다.
+const DONATE_PHOTOS = {
+  impact: 'https://images.unsplash.com/photo-1651372381086-9861c9c81db5?auto=format&fit=crop&w=1400&q=80',
+  how: 'https://images.unsplash.com/photo-1646339761106-9f6b7b47af8d?auto=format&fit=crop&w=1400&q=80',
+};
 
 // 후원(도네이션) 안내 페이지 (/donate, Phase 5).
 // (2026-09-09 수정) 후원 방법을 두 가지로 안내합니다.
@@ -22,22 +40,28 @@ const ACCOUNT_INFO = {
 const MISSIONFUND_URL = 'https://go.missionfund.org/WEWE2026';
 const MISSIONFUND_LOGO = 'https://missionfund.org/assets/logo/main_logo.png';
 
+// 아이콘은 사역 소개 페이지의 "핵심 프로그램" 섹션과 동일한 4가지 프로그램을 가리키므로
+// 그곳과 같은 아이콘을 재사용해 두 페이지에서 같은 프로그램은 같은 아이콘으로 보이도록 합니다.
 const IMPACT_ITEMS = [
   {
     title: 'WEWE 스테이',
     desc: '한국에 돌아온 선교사님이 안심하고 머물 수 있는 공유 숙소 네트워크를 넓혀갑니다.',
+    icon: HomeIcon,
   },
   {
     title: '레위인의 모빌리티',
     desc: '단기 귀국한 선교사님의 병원 진료, 사역지 방문을 위한 차량 쉐어링을 지원합니다.',
+    icon: Car,
   },
   {
     title: 'Poiema 돌봄',
     desc: '선교사님이 하나님의 작품(Poiema)으로 다시 세워지는 전인적 회복 프로그램·힐링캠프를 엽니다.',
+    icon: HeartHandshake,
   },
   {
     title: 'WE+WE 커넥트',
     desc: '후원자와 선교사, 선교사와 선교사를 잇는 멤버십 프로그램으로 고립감을 해소합니다.',
+    icon: Users2,
   },
 ];
 
@@ -93,11 +117,22 @@ function DonatePage() {
           <span className="wh-eyebrow wh-eyebrow-center">WHERE IT GOES</span>
           <h2 className="wh-h2-center">후원이 만드는 변화</h2>
 
+          <Reveal
+            as="div"
+            className="wd-section-photo"
+            style={{ backgroundImage: `url(${DONATE_PHOTOS.impact})` }}
+            role="img"
+            aria-label="함께 손을 맞잡은 사람들"
+          />
+
           <div className="wd-impact-grid">
-            {IMPACT_ITEMS.map((item, idx) => (
-              <Reveal as="div" key={item.title} className="wd-impact-card" delay={idx * 80}>
-                <h3>{item.title}</h3>
-                <p>{item.desc}</p>
+            {IMPACT_ITEMS.map(({ title, desc, icon: Icon }, idx) => (
+              <Reveal as="div" key={title} className="wd-impact-card" delay={idx * 80}>
+                <span className="wd-impact-icon"><Icon size={20} /></span>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{desc}</p>
+                </div>
               </Reveal>
             ))}
           </div>
@@ -112,6 +147,14 @@ function DonatePage() {
             아래 두 가지 방법 중 편하신 방법으로 후원해주세요. 기부금 영수증(세액공제)이 필요하신
             분은 MissionFund를 이용해주세요.
           </p>
+
+          <Reveal
+            as="div"
+            className="wd-section-photo"
+            style={{ backgroundImage: `url(${DONATE_PHOTOS.how})` }}
+            role="img"
+            aria-label="환하게 웃으며 나눔의 손짓을 하는 사람"
+          />
 
           <div className="wd-methods">
             <Reveal as="div" className="wd-method-card">
@@ -236,18 +279,43 @@ function DonatePage() {
           background: var(--wh-bg-soft);
         }
 
+        /* 사역 소개 페이지의 Refresh Pastor Academy 하단 사진(.wm-project-photo)과
+           동일한 사이즈로 맞춘 섹션 사진 (2026-09-10 추가) */
+        .wd-section-photo {
+          height: 220px;
+          margin: 2rem 0 2.25rem;
+          border-radius: 12px;
+          background-size: cover;
+          background-position: center;
+        }
+
         .wd-impact-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 1.25rem;
-          margin-top: 2.25rem;
         }
 
         .wd-impact-card {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.9rem;
           padding: 1.75rem;
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
           border-radius: 10px;
+        }
+
+        /* 사역 소개 페이지 "핵심 프로그램" 아이콘(.wm-program-icon)과 동일한 스타일 */
+        .wd-impact-icon {
+          flex-shrink: 0;
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          background: rgba(217, 123, 63, 0.12);
+          color: var(--wh-orange-deep);
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .wd-impact-card h3 {
@@ -271,7 +339,7 @@ function DonatePage() {
         .wd-how-lead {
           text-align: center;
           color: var(--wh-ink-soft);
-          margin: 1rem 0 2.5rem;
+          margin: 1rem 0 0;
         }
 
         .wd-methods {

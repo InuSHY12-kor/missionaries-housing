@@ -57,10 +57,16 @@ function LeadershipPage() {
             <h2 className="wh-h2-center">이사회</h2>
           </Reveal>
 
+          {/* 대표 홍현지 섹션(wl-leader-card)과 동일하게 왼쪽 이미지 + 오른쪽 내용 배치로
+              구성합니다(2026-09-10 수정) — 사진 대신 WEWE 로고를 넣습니다. */}
           <Reveal as="div" className="wl-board-card" delay={80}>
-            <img src={weweLogoNew} alt="WEWE" className="wl-board-logo" />
-            <p>WEWE는 임의법인에서 사단법인으로 전환하는 과정에서 이사회를 구성하고 있습니다.</p>
-            <span className="wl-board-soon">구성 중</span>
+            <div className="wl-board-logo-wrap">
+              <img src={weweLogoNew} alt="WEWE" className="wl-board-logo" />
+            </div>
+            <div className="wl-board-body">
+              <p>WEWE는 임의법인에서 사단법인으로 전환하는 과정에서 이사회를 구성하고 있습니다.</p>
+              <span className="wl-board-soon">구성 중</span>
+            </div>
           </Reveal>
         </div>
       </section>
@@ -138,21 +144,36 @@ function LeadershipPage() {
         }
 
         .wl-board-card {
-          text-align: center;
-          padding: 2.5rem;
+          display: grid;
+          grid-template-columns: 140px 1fr;
+          gap: 2rem;
+          align-items: center;
+          padding: 2rem;
           background: var(--wh-bg-soft);
           border: 1px dashed var(--wh-line);
+          border-radius: 12px;
+        }
+
+        .wl-board-logo-wrap {
+          width: 100%;
+          aspect-ratio: 2 / 3;
           border-radius: 10px;
+          background: var(--wh-bg);
+          border: 1px solid var(--wh-line);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
         }
 
         .wl-board-logo {
-          height: 44px;
-          width: auto;
-          margin: 0 auto 1.25rem;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
           display: block;
         }
 
-        .wl-board-card p {
+        .wl-board-body p {
           color: var(--wh-ink-soft);
           margin-bottom: 0.9rem;
           font-size: 1rem;
@@ -170,7 +191,8 @@ function LeadershipPage() {
         }
 
         @media (max-width: 860px) {
-          .wl-leader-card {
+          .wl-leader-card,
+          .wl-board-card {
             grid-template-columns: 72px 1fr;
             padding: 1.5rem;
             gap: 1.25rem;

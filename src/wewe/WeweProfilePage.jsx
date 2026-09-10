@@ -16,9 +16,10 @@ import './wewe-shared.css';
 // 마운트되어 userProfile을 prop으로 받지 못하므로 여기서 직접 supabase 세션과 users
 // 테이블을 조회합니다.
 //
-// 알림 설정만 위위 스테이와 다르게, 두 서비스의 알림을 각각 독립적으로 켜고 끌 수
-// 있도록 두 개의 토글로 분리했습니다: notification_email(위위 스테이 알림, 기존 컬럼) /
-// notification_email_wewe(위위 알림, 신규 컬럼).
+// (2026-09-10 수정) 알림 설정은 위위 스테이(Profile.jsx)와 동일한 디자인으로 맞추고,
+// 위위(WEWE) 알림 하나만 관리합니다 — 후원자 계정은 위위 스테이 기능을 아예 쓸 수 없어서
+// 위위 스테이 알림 토글이 함께 있으면 오히려 혼란을 줄 수 있다는 이유로, 이전에 있던
+// "위위 스테이 알림" 토글(notification_email)은 이 페이지에서 제거했습니다.
 function roleLabel(profile) {
   if (profile?.role === 'admin') {
     return profile?.is_super_admin ? '최고 관리자' : '관리자';
@@ -49,7 +50,6 @@ function WeweProfilePage() {
   });
 
   const [notifWewe, setNotifWewe] = useState(true);
-  const [notifStay, setNotifStay] = useState(true);
   const [notifSaving, setNotifSaving] = useState(false);
 
   useEffect(() => {
@@ -84,7 +84,6 @@ function WeweProfilePage() {
           bio: data.bio || '',
         });
         setNotifWewe(data.notification_email_wewe ?? true);
-        setNotifStay(data.notification_email ?? true);
       }
       setLoadingProfile(false);
     };
@@ -146,7 +145,7 @@ function WeweProfilePage() {
     try {
       const { error } = await supabase
         .from('users')
-        .update({ notification_email_wewe: notifWewe, notification_email: notifStay })
+        .update({ notification_email_wewe: notifWewe })
         .eq('id', userProfile.id);
       if (error) throw error;
       alert('알림 설정이 저장되었습니다.');
@@ -287,22 +286,19 @@ function WeweProfilePage() {
                 </form>
               </Reveal>
 
+              {/* 위위 스테이 Profile.jsx의 알림 설정과 동일한 디자인(토글 1개 + 준비 중 항목
+                  2개)으로 맞추고, 위위(WEWE) 알림 하나만 관리합니다(2026-09-10 수정). */}
               <Reveal as="div" className="wprof-card" delay={120}>
                 <h2>
                   <Bell size={22} />
                   알림 설정
                 </h2>
-                <p className="wprof-notif-lead">
-                  위위(WEWE)와 위위 스테이 알림을 각각 따로 켜고 끌 수 있습니다.
-                </p>
 
                 <div className="wprof-notif-list">
                   <div className="wprof-notif-row">
                     <div className="wprof-notif-info">
-                      <span className="wprof-notif-label">위위(WEWE) 알림</span>
-                      <span className="wprof-notif-desc">
-                        사역 소식, 후원 안내 등 위위 홈페이지 소식을 이메일로 받습니다.
-                      </span>
+                      <span className="wprof-notif-label">이메일 알림</span>
+                      <span className="wprof-notif-desc">사역 소식, 후원 안내 등 위위 소식을 이메일로 받습니다.</span>
                     </div>
                     <button
                       type="button"
@@ -314,19 +310,26 @@ function WeweProfilePage() {
                     </button>
                   </div>
 
-                  <div className="wprof-notif-row">
+                  <div className="wprof-notif-row wprof-notif-row-disabled">
                     <div className="wprof-notif-info">
-                      <span className="wprof-notif-label">위위 스테이 알림</span>
-                      <span className="wprof-notif-desc">
-                        예약, 승인, 메시지 등 위위 스테이 이용 관련 알림을 이메일로 받습니다.
+                      <span className="wprof-notif-label">
+                        카카오톡 알림 <span className="wprof-coming-soon">준비 중</span>
                       </span>
+                      <span className="wprof-notif-desc">카카오톡으로 실시간 알림을 받습니다.</span>
                     </div>
-                    <button
-                      type="button"
-                      className={`wprof-toggle${notifStay ? ' on' : ''}`}
-                      onClick={() => setNotifStay((v) => !v)}
-                      aria-pressed={notifStay}
-                    >
+                    <button type="button" className="wprof-toggle" disabled aria-pressed={false}>
+                      <span className="wprof-toggle-knob" />
+                    </button>
+                  </div>
+
+                  <div className="wprof-notif-row wprof-notif-row-disabled">
+                    <div className="wprof-notif-info">
+                      <span className="wprof-notif-label">
+                        SMS 알림 <span className="wprof-coming-soon">준비 중</span>
+                      </span>
+                      <span className="wprof-notif-desc">문자 메시지로 중요 알림을 받습니다.</span>
+                    </div>
+                    <button type="button" className="wprof-toggle" disabled aria-pressed={false}>
                       <span className="wprof-toggle-knob" />
                     </button>
                   </div>
@@ -450,12 +453,6 @@ function WeweProfilePage() {
           box-shadow: 0 0 0 3px rgba(217, 123, 63, 0.15);
         }
 
-        .wprof-notif-lead {
-          color: var(--wh-ink-soft);
-          font-size: 0.88rem;
-          margin: -0.75rem 0 1.25rem;
-        }
-
         .wprof-notif-list {
           display: flex;
           flex-direction: column;
@@ -472,6 +469,27 @@ function WeweProfilePage() {
 
         .wprof-notif-row:last-child {
           border-bottom: none;
+        }
+
+        .wprof-notif-row-disabled {
+          opacity: 0.55;
+        }
+
+        .wprof-coming-soon {
+          display: inline-block;
+          margin-left: 0.4rem;
+          font-size: 0.68rem;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          color: var(--wh-stone);
+          border: 1px solid var(--wh-line);
+          border-radius: 999px;
+          padding: 0.1rem 0.5rem;
+          vertical-align: middle;
+        }
+
+        .wprof-toggle:disabled {
+          cursor: default;
         }
 
         .wprof-notif-info {

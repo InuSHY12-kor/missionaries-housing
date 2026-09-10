@@ -686,6 +686,9 @@ function AdminDashboard({ userProfile }) {
                       </span>
                     </div>
                     <div className="user-info">
+                      {/* (2026-09-10 추가) 위위 랜딩 페이지에도 동일한 문의하기 섹션이 생기면서
+                          관리자가 어느 사이트에서 들어온 문의인지 구분할 수 있도록 표시합니다. */}
+                      <p><strong>문의 사이트:</strong> {inquiry.topic === 'wewe' ? 'WEWE 소개 페이지' : '위위 스테이'}</p>
                       <p><strong>이메일:</strong> {inquiry.email}</p>
                       <p><strong>전화:</strong> {inquiry.phone}</p>
                       {inquiry.message && <p><strong>메시지:</strong> {inquiry.message}</p>}

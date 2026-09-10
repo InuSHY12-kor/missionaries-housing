@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
 import { AlertCircle, X } from 'lucide-react';
+import { useIdleAutoLogout } from './utils/useIdleAutoLogout';
 import Navigation from './components/Navigation';
 import LandingPage from './pages/LandingPage';
 import SignUp from './pages/SignUp';
 import SignupRoleSelect from './pages/SignupRoleSelect';
 import SignupComplete from './pages/SignupComplete';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import CompleteProfile from './pages/CompleteProfile';
 import PendingApproval from './pages/PendingApproval';
 import AccountStatus from './pages/AccountStatus';
@@ -43,24 +46,15 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   },
 });
 
-// 활동이 없을 때 자동 로그아웃까지 대기하는 시간 (2시간)
-const IDLE_TIMEOUT_MS = 2 * 60 * 60 * 1000;
-// 활동 감지에 사용할 이벤트 목록
-const ACTIVITY_EVENTS = ['mousedown', 'mousemove', 'keydown', 'wheel', 'scroll', 'touchstart'];
-// 탭 간에 마지막 활동 시각을 공유하기 위한 localStorage 키
-// (한 탭에서 활동이 있으면 다른 탭에서도 유휴 타이머가 함께 리셋됨)
-const LAST_ACTIVITY_STORAGE_KEY = 'wewe_last_activity_at';
-
 function App() {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
-  const [autoLogoutMessage, setAutoLogoutMessage] = useState(null);
-  const lastActivityRef = useRef(Date.now());
-  // 로그인 폼을 통해 방금 막 로그인했는지 여부(참이면 활동 시각을 "지금"으로 초기화,
-  // 거짓이면 기존 세션이 복원된 것으로 보고 저장된 마지막 활동 시각을 그대로 이어감)
-  const justSignedInRef = useRef(false);
+  // 유휴(활동 없음) 자동 로그아웃 규칙은 위위 스테이·위위 홈페이지가 공유하는
+  // src/utils/useIdleAutoLogout.js 훅으로 옮겼습니다 — 어느 사이트를 보고 있어도 동일한
+  // 2시간 규칙과 마지막 활동 시각(localStorage)을 함께 씁니다.
+  const { autoLogoutMessage, dismissAutoLogoutMessage } = useIdleAutoLogout(!!user);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -71,12 +65,8 @@ function App() {
     // 인증 상태 변경 리스너
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'SIGNED_IN') {
-          justSignedInRef.current = true;
-        }
         setUser(session?.user || null);
         if (session?.user) {
-          setAutoLogoutMessage(null);
           await fetchUserProfile(session.user.id);
         } else {
           setUserProfile(null);
@@ -129,99 +119,11 @@ function App() {
     // 다음에 로그인할 때 이번 세션의 마지막 활동 시각이 남아있다가 잘못 이어받는 것을
     // 막기 위해 공유 저장된 마지막 활동 시각도 함께 지웁니다.
     try {
-      window.localStorage.removeItem(LAST_ACTIVITY_STORAGE_KEY);
+      window.localStorage.removeItem('wewe_last_activity_at');
     } catch (e) {
       // localStorage 접근 불가(프라이빗 모드 등) 시에도 로그아웃 자체는 계속 진행
     }
   };
-
-  // 로그인된 사용자의 활동을 감지해 일정 시간(2시간) 이상 활동이 없으면 자동 로그아웃.
-  // 마지막 활동 시각을 localStorage에도 기록해 여러 탭에서 공유되도록 함 — 어느 한 탭에서만
-  // 활동이 있어도 모든 탭의 유휴 타이머가 함께 리셋되고, 반대로 모든 탭이 동시에 유휴 상태여야
-  // 자동 로그아웃됨.
-  // 의존성을 user 객체가 아닌 boolean(로그인 여부)으로 둬서, 토큰 자동 갱신 등으로
-  // user 객체 참조만 바뀌는 경우에는 타이머가 리셋되지 않도록 함.
-  const isLoggedIn = !!user;
-  useEffect(() => {
-    if (!isLoggedIn) return;
-
-    const readSharedLastActivity = () => {
-      const stored = Number(window.localStorage.getItem(LAST_ACTIVITY_STORAGE_KEY));
-      return Number.isFinite(stored) && stored > 0 ? stored : null;
-    };
-
-    const writeSharedLastActivity = (timestamp) => {
-      try {
-        window.localStorage.setItem(LAST_ACTIVITY_STORAGE_KEY, String(timestamp));
-      } catch (e) {
-        // localStorage 접근 불가(예: 프라이빗 모드 제한) 시에도 현재 탭 내 동작은 계속되도록 무시
-      }
-    };
-
-    // 세션이 시작된 경위에 따라 초기 활동 시각을 다르게 설정:
-    // - 로그인 폼으로 방금 직접 로그인했다면 지금을 활동 시각으로 간주.
-    // - 브라우저 재시작 등으로 기존 세션이 조용히 복원된 경우, 공유 저장된 마지막
-    //   활동 시각을 그대로 이어받아서 이미 유휴 시간을 초과했다면 곧이어 실행되는
-    //   checkIdle()에서 바로 로그아웃되도록 함(탭 공유는 유지하되 유휴 판정은 정확하게).
-    if (justSignedInRef.current) {
-      lastActivityRef.current = Date.now();
-      writeSharedLastActivity(lastActivityRef.current);
-      justSignedInRef.current = false;
-    } else {
-      const shared = readSharedLastActivity();
-      if (shared) {
-        lastActivityRef.current = shared;
-      }
-    }
-
-    const updateActivity = () => {
-      const now = Date.now();
-      lastActivityRef.current = now;
-      writeSharedLastActivity(now);
-    };
-    ACTIVITY_EVENTS.forEach((evt) => window.addEventListener(evt, updateActivity, { passive: true }));
-
-    const getLastActivity = () => {
-      const shared = readSharedLastActivity();
-      return shared && shared > lastActivityRef.current ? shared : lastActivityRef.current;
-    };
-
-    const checkIdle = async () => {
-      if (Date.now() - getLastActivity() >= IDLE_TIMEOUT_MS) {
-        await supabase.auth.signOut();
-        setUser(null);
-        setUserProfile(null);
-        setAutoLogoutMessage('장시간 활동이 없어 자동으로 로그아웃되었습니다. 다시 로그인해주세요.');
-      }
-    };
-
-    // 세션 복원 직후에도 이미 유휴 시간을 초과한 상태는 아닌지 즉시 한 번 확인
-    checkIdle();
-
-    // 1분마다 유휴 시간을 확인하고, 탭이 다시 보일 때(예: 절전 모드 복귀)도 즉시 확인
-    const intervalId = setInterval(checkIdle, 60 * 1000);
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') checkIdle();
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    // 다른 탭에서 활동이 있어 localStorage 값이 바뀌면 이 탭의 로컬 참조값도 함께 갱신
-    const handleStorageChange = (e) => {
-      if (e.key === LAST_ACTIVITY_STORAGE_KEY && e.newValue) {
-        const value = Number(e.newValue);
-        if (Number.isFinite(value) && value > lastActivityRef.current) {
-          lastActivityRef.current = value;
-        }
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      ACTIVITY_EVENTS.forEach((evt) => window.removeEventListener(evt, updateActivity));
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(intervalId);
-    };
-  }, [isLoggedIn]);
 
   if (loading) {
     return (
@@ -366,7 +268,7 @@ function App() {
             <button
               type="button"
               className="auto-logout-banner-close"
-              onClick={() => setAutoLogoutMessage(null)}
+              onClick={dismissAutoLogoutMessage}
               aria-label="닫기"
             >
               <X size={16} />
@@ -394,6 +296,10 @@ function App() {
               {/* 이메일 인증 링크 도착 페이지: 로그인 여부와 무관하게 항상 접근 가능해야 함 */}
               <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/login" element={<Login />} />
+              {/* 비밀번호 찾기 링크는 이메일로 전달되어 언제든(로그인 여부와 무관하게)
+                  들어올 수 있어야 하므로 로그인 필요 라우트보다 앞서 공개 경로로 둡니다. */}
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
               {/* 로그인 필요 */}
               {user ? authenticatedRoutes : <Route path="*" element={<Navigate to="/" replace />} />}

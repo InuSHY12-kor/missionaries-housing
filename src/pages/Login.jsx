@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import PageHero from '../components/PageHero';
 
 const LOGIN_HERO_IMAGES = [
@@ -12,6 +12,8 @@ const LOGIN_HERO_IMAGES = [
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const passwordResetDone = !!location.state?.passwordResetDone;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -72,6 +74,13 @@ function Login() {
           <h1>로그인</h1>
           <p className="subtitle">선교사 커뮤니티에 다시 오신 것을 환영합니다</p>
 
+          {passwordResetDone && !error && (
+            <div className="alert alert-success">
+              <CheckCircle2 size={20} />
+              <span>비밀번호가 변경되었습니다. 새 비밀번호로 로그인해주세요.</span>
+            </div>
+          )}
+
           {error && (
             <div className="alert alert-error">
               <AlertCircle size={20} />
@@ -108,6 +117,10 @@ function Login() {
           </form>
 
           <p className="subtitle" style={{ marginTop: '1rem' }}>
+            <Link to="/forgot-password">비밀번호를 잊으셨나요? 비밀번호 찾기</Link>
+          </p>
+
+          <p className="subtitle" style={{ marginTop: '0.5rem' }}>
             계정이 없으신가요? <Link to="/signup">가입하기</Link>
           </p>
         </div>
