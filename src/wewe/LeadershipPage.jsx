@@ -13,17 +13,15 @@ import './wewe-shared.css';
 
 // 협력기관 / 후원기관 목록 (2026-09-13 추가). 로고를 누르면 각 기관의 홈페이지 또는
 // 인스타그램으로 이동합니다. 기관이 늘어나면 이 배열에만 추가하면 됩니다.
-// (2026-09-13) 혜성교회 로고 원본 파일은 배경이 투명이 아니라 짙은 검정으로 되어 있어,
-// 밝은 카드 배경(--wh-bg-soft) 위에 놓으면 로고 주변이 검은 사각형으로 도드라져 보입니다.
-// 로고를 다시 가공하는 대신, 이 로고만 카드 배경을 로고의 원래 배경과 어울리는 짙은 색으로
-// 바꿔주는 `dark` 플래그를 둡니다.
+// (2026-09-13, 새 로고로 재교체) 혜성교회 로고를 배경이 투명하게 처리된 새 버전으로
+// 교체하면서, 카드 배경을 어둡게 바꿔주던 임시 처리(`dark` 플래그)는 더 이상 필요하지
+// 않아 제거했습니다.
 const PARTNER_ORGS = [
   {
     kind: '협력기관',
     name: '혜성교회',
     logo: hyesungChurchLogo,
     url: 'https://www.hyesung.or.kr/',
-    dark: true,
   },
 ];
 
@@ -114,7 +112,7 @@ function LeadershipPage() {
                   href={org.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`wl-partner-card${org.dark ? ' wl-partner-card-dark' : ''}`}
+                  className="wl-partner-card"
                   aria-label={`${org.name} 바로가기`}
                 >
                   <img src={org.logo} alt={org.name} className="wl-partner-logo" />
@@ -295,11 +293,6 @@ function LeadershipPage() {
         .wl-partner-card:hover {
           border-color: var(--wh-orange);
           transform: translateY(-2px);
-        }
-
-        .wl-partner-card-dark {
-          background: var(--wh-ink);
-          border-color: var(--wh-ink);
         }
 
         .wl-partner-logo {
