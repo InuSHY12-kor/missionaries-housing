@@ -95,17 +95,15 @@ function WeweHeader() {
   return (
     <header className="wewe-header">
       {isLoggedIn && userProfile && (userProfile.full_name || userProfile.role) && (
-        <div className="wewe-header-top">
-          <div className="wewe-header-top-inner">
-            {userProfile.role && (
-              <span className={`wewe-status-badge wewe-status-role-${userProfile.role}`}>
-                {ROLE_LABELS[userProfile.role] || userProfile.role}
-              </span>
-            )}
-            {userProfile.full_name && (
-              <span className="wewe-header-welcome">안녕하세요, {userProfile.full_name}님</span>
-            )}
-          </div>
+        <div className="wewe-header-top-inner">
+          {userProfile.role && (
+            <span className={`wewe-status-badge wewe-status-role-${userProfile.role}`}>
+              {ROLE_LABELS[userProfile.role] || userProfile.role}
+            </span>
+          )}
+          {userProfile.full_name && (
+            <span className="wewe-header-welcome">안녕하세요, {userProfile.full_name}님</span>
+          )}
         </div>
       )}
       <div className="wewe-header-inner">
@@ -162,21 +160,21 @@ function WeweHeader() {
           left: 0;
           right: 0;
           z-index: 100;
-          padding: 1.5rem 0;
         }
 
-        .wewe-header-top {
-          background: rgba(10, 10, 9, 0.35);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-        }
-
+        /* (2026-09-13 수정) 위위스테이 상단바(Navigation.jsx)와 동일하게 — 별도의
+           불투명 배경 박스 없이, 배너 사진 위에 투명하게 얹힌 채로 로고 반대편(오른쪽)에
+           정렬합니다. 헤더 자체(.wewe-header)에는 세로 여백을 주지 않고, 이 줄이 배너
+           맨 위에 간격 없이 바로 붙도록 하고, 아래 메인 메뉴 줄(.wewe-header-inner)에서
+           여백을 관리합니다. */
         .wewe-header-top-inner {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 0.5rem 1.5rem;
+          padding: 0.85rem 1.5rem 0;
           display: flex;
-          align-items: center;
-          gap: 0.75rem;
+          align-items: baseline;
+          justify-content: flex-end;
+          gap: 0.6rem;
         }
 
         .wewe-status-badge {
@@ -207,7 +205,7 @@ function WeweHeader() {
         .wewe-header-inner {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 0 1.5rem;
+          padding: 1rem 1.5rem 1.5rem;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -333,8 +331,12 @@ function WeweHeader() {
         }
 
         @media (max-width: 860px) {
-          .wewe-header {
-            padding: 1.1rem 0;
+          .wewe-header-top-inner {
+            padding: 0.65rem 1.25rem 0;
+          }
+
+          .wewe-header-inner {
+            padding: 0.85rem 1.25rem 1.1rem;
           }
 
           .wewe-brand-icon {

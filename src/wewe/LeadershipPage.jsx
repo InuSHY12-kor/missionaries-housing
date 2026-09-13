@@ -7,7 +7,34 @@ import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import weweRepresentative from '../assets/wewe-representative.jpg';
 import weweLogoNew from '../assets/wewe-logo-new.png';
+import hyesungChurchLogo from '../assets/hyesung-church-logo.png';
+import hisLogo from '../assets/his-logo.png';
 import './wewe-shared.css';
+
+// 협력기관 / 후원기관 목록 (2026-09-13 추가). 로고를 누르면 각 기관의 홈페이지 또는
+// 인스타그램으로 이동합니다. 기관이 늘어나면 이 배열에만 추가하면 됩니다.
+// (2026-09-13) 혜성교회 로고 원본 파일은 배경이 투명이 아니라 짙은 검정으로 되어 있어,
+// 밝은 카드 배경(--wh-bg-soft) 위에 놓으면 로고 주변이 검은 사각형으로 도드라져 보입니다.
+// 로고를 다시 가공하는 대신, 이 로고만 카드 배경을 로고의 원래 배경과 어울리는 짙은 색으로
+// 바꿔주는 `dark` 플래그를 둡니다.
+const PARTNER_ORGS = [
+  {
+    kind: '협력기관',
+    name: '혜성교회',
+    logo: hyesungChurchLogo,
+    url: 'https://www.hyesung.or.kr/',
+    dark: true,
+  },
+];
+
+const SPONSOR_ORGS = [
+  {
+    kind: '후원기관',
+    name: 'History in Scent (HIS)',
+    logo: hisLogo,
+    url: 'https://www.instagram.com/history_in_scent/',
+  },
+];
 
 // "소개" > "대표·이사회" 페이지 (/about/leadership).
 // 대표 홍현지님 소개(claude/wewe-brand-content-2026-09-05.md #7)와,
@@ -68,6 +95,34 @@ function LeadershipPage() {
               <span className="wl-board-soon">구성 중</span>
             </div>
           </Reveal>
+        </div>
+      </section>
+
+      <section className="wl-partners">
+        <div className="wh-container wh-container-narrow">
+          <Reveal>
+            <span className="wh-eyebrow wh-eyebrow-center">PARTNERS &amp; SPONSORS</span>
+            <h2 className="wh-h2-center">협력기관 · 후원기관</h2>
+            <p className="wl-partners-lead">WEWE의 사역에 함께해주시는 기관들입니다.</p>
+          </Reveal>
+
+          <div className="wl-partners-grid">
+            {[...PARTNER_ORGS, ...SPONSOR_ORGS].map((org, idx) => (
+              <Reveal as="div" key={org.name} className="wl-partner-group" delay={idx * 80}>
+                <span className="wl-partner-kind">{org.kind}</span>
+                <a
+                  href={org.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`wl-partner-card${org.dark ? ' wl-partner-card-dark' : ''}`}
+                  aria-label={`${org.name} 바로가기`}
+                >
+                  <img src={org.logo} alt={org.name} className="wl-partner-logo" />
+                </a>
+                <span className="wl-partner-name">{org.name}</span>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -188,6 +243,77 @@ function LeadershipPage() {
           border: 1px solid var(--wh-line);
           border-radius: 999px;
           padding: 0.3rem 0.9rem;
+        }
+
+        .wl-partners {
+          padding: 1rem 0 5.5rem;
+          background: var(--wh-bg);
+        }
+
+        .wl-partners-lead {
+          text-align: center;
+          color: var(--wh-ink-soft);
+          margin: 0.75rem 0 0;
+        }
+
+        .wl-partners-grid {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 2rem;
+          margin-top: 2.25rem;
+        }
+
+        .wl-partner-group {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.6rem;
+          width: 220px;
+        }
+
+        .wl-partner-kind {
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          color: var(--wh-orange-deep);
+        }
+
+        .wl-partner-card {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 110px;
+          padding: 1.25rem;
+          background: var(--wh-bg-soft);
+          border: 1px solid var(--wh-line);
+          border-radius: 12px;
+          transition: border-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .wl-partner-card:hover {
+          border-color: var(--wh-orange);
+          transform: translateY(-2px);
+        }
+
+        .wl-partner-card-dark {
+          background: var(--wh-ink);
+          border-color: var(--wh-ink);
+        }
+
+        .wl-partner-logo {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+          display: block;
+        }
+
+        .wl-partner-name {
+          font-size: 0.88rem;
+          font-weight: 600;
+          color: var(--wh-ink);
+          text-align: center;
         }
 
         @media (max-width: 860px) {

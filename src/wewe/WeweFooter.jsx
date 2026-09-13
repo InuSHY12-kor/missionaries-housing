@@ -1,4 +1,5 @@
 import React from 'react';
+import { Instagram } from 'lucide-react';
 import weweLogoFull from '../assets/wewe-logo-new.png';
 
 // WEWE 전체 홈페이지(홈/소개/사역 소개/대표·이사회)에서 공통으로 쓰는 푸터.
@@ -10,6 +11,16 @@ function WeweFooter() {
         <div className="wh-footer-brand">
           <img src={weweLogoFull} alt="WEWE" className="wh-footer-logo" />
           <p>위로자의 위로자 — 목회자와 선교사, 그들의 위로자가 되는 비영리단체</p>
+          <a
+            href="https://www.instagram.com/wewe_team/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="wh-footer-instagram"
+            aria-label="WEWE 인스타그램"
+          >
+            <Instagram size={16} />
+            <span>@wewe_team</span>
+          </a>
         </div>
 
         <div className="wh-footer-info">

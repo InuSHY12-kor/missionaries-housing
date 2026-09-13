@@ -342,11 +342,13 @@ function DonatePage() {
           margin: 1rem 0 0;
         }
 
+        /* (2026-09-13 수정) 계좌이체/MissionFund를 나란히 2열이 아니라 위아래로 배치해서,
+           바로 위 섹션 사진(.wd-section-photo)과 너비가 같은 wh-container-narrow 폭을
+           그대로 씁니다. */
         .wd-methods {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
+          display: flex;
+          flex-direction: column;
           gap: 1.5rem;
-          align-items: stretch;
         }
 
         .wd-method-card {
@@ -511,10 +513,6 @@ function DonatePage() {
 
         @media (max-width: 860px) {
           .wd-impact-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .wd-methods {
             grid-template-columns: 1fr;
           }
 

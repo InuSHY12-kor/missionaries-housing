@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Home as HomeIcon } from 'lucide-react';
+import { ArrowRight, Home as HomeIcon, Send, CheckCircle2 } from 'lucide-react';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
 import Reveal from './Reveal';
@@ -37,11 +37,65 @@ const MINISTRY_PHOTOS = {
 // 노출합니다. 글이 8개보다 적으면 남는 칸은 빈 박스로 채워 그리드 모양을 유지합니다.
 const NEWS_GRID_SIZE = 8;
 
+const EMPTY_INQUIRY_FORM = { name: '', email: '', phone: '', message: '' };
+
 function WeweHome() {
   const [newsPosts, setNewsPosts] = useState([]);
   const [newsLoaded, setNewsLoaded] = useState(false);
   const [heroSlide, setHeroSlide] = useState(0);
   const heroImages = HERO_IMAGE_SETS.home;
+
+  // WEWE 문의 폼 (2026-09-13 이동) — 이전에는 위위스테이 랜딩 페이지(/stay)의 "궁금한 점이
+  // 있으신가요?" 섹션 아래에 있었는데, WEWE 자체에 대한 문의이므로 위위 랜딩(여기)의 사역
+  // 소식 섹션 아래로 옮겼습니다. 로그인 여부와 무관한 공개 문의 폼이라 익명 키를 쓰는
+  // weweSupabase로 inquiries 테이블에 topic='wewe'로 저장합니다(관리자 화면에서 구분).
+  const [inquiryForm, setInquiryForm] = useState(EMPTY_INQUIRY_FORM);
+  const [inquirySubmitting, setInquirySubmitting] = useState(false);
+  const [inquirySubmitted, setInquirySubmitted] = useState(false);
+  const [inquiryError, setInquiryError] = useState('');
+
+  const handleInquiryFormChange = (e) => {
+    const { name, value } = e.target;
+    setInquiryForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleInquirySubmit = async (e) => {
+    e.preventDefault();
+    if (!inquiryForm.name.trim() || !inquiryForm.email.trim() || !inquiryForm.phone.trim()) {
+      setInquiryError('이름, 이메일, 전화번호는 필수 입력입니다.');
+      return;
+    }
+
+    setInquirySubmitting(true);
+    setInquiryError('');
+
+    try {
+      // 비로그인 방문자가 남기는 문의라 inquiries에는 SELECT 정책이 없습니다(관리자만 열람 가능).
+      // insert().select()를 쓰면 삽입 직후 되읽기 단계에서 RLS에 막히므로, id를 미리 만들어 함께 저장합니다.
+      const inquiryId = window.crypto.randomUUID();
+      const { error } = await weweSupabase.from('inquiries').insert({
+        id: inquiryId,
+        name: inquiryForm.name.trim(),
+        email: inquiryForm.email.trim(),
+        phone: inquiryForm.phone.trim(),
+        message: inquiryForm.message.trim() || null,
+        topic: 'wewe',
+      });
+
+      if (error) throw error;
+
+      weweSupabase.functions
+        .invoke('send-email', { body: { type: 'inquiry', inquiryId } })
+        .catch((emailErr) => console.error('문의 이메일 발송 오류:', emailErr));
+
+      setInquirySubmitted(true);
+      setInquiryForm(EMPTY_INQUIRY_FORM);
+    } catch (error) {
+      setInquiryError('오류가 발생했습니다: ' + error.message);
+    } finally {
+      setInquirySubmitting(false);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -264,12 +318,92 @@ function WeweHome() {
         </div>
       </section>
 
+      {/* WEWE 문의 섹션 (2026-09-13 이동) — 위위스테이 랜딩 페이지의 "궁금한 점이
+          있으신가요?" 아래에 있던 것을, WEWE 자체에 대한 문의이므로 이 페이지의 사역
+          소식 섹션 아래로 옮겼습니다. */}
+      <section className="wh-inquiry">
+        <div className="wh-container wh-container-narrow">
+          <Reveal>
+            <span className="wh-eyebrow wh-eyebrow-center">CONTACT</span>
+            <h2 className="wh-h2-center">위위(WEWE)에 대해 궁금한 점이 있으신가요?</h2>
+            <p className="wh-inquiry-lead">비영리단체 WEWE, 후원, 사역 소개 등 무엇이든 편하게 문의해 주세요.</p>
+          </Reveal>
+
+          <Reveal as="div" className="wh-inquiry-card" delay={80}>
+            {inquirySubmitted ? (
+              <div className="wh-inquiry-success">
+                <CheckCircle2 size={40} />
+                <h3>문의가 접수되었습니다</h3>
+                <p>남겨주신 연락처로 WEWE 팀이 곧 안내해 드리겠습니다. 감사합니다.</p>
+              </div>
+            ) : (
+              <form className="wh-inquiry-form" onSubmit={handleInquirySubmit}>
+                <div className="wh-inquiry-form-row">
+                  <div className="wh-form-group">
+                    <label>이름 *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={inquiryForm.name}
+                      onChange={handleInquiryFormChange}
+                      placeholder="성함을 입력해주세요"
+                      required
+                    />
+                  </div>
+                  <div className="wh-form-group">
+                    <label>이메일 *</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={inquiryForm.email}
+                      onChange={handleInquiryFormChange}
+                      placeholder="이메일 주소를 입력해주세요"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="wh-form-group">
+                  <label>전화번호 *</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={inquiryForm.phone}
+                    onChange={handleInquiryFormChange}
+                    placeholder="연락 가능한 전화번호를 입력해주세요"
+                    required
+                  />
+                </div>
+
+                <div className="wh-form-group">
+                  <label>메시지</label>
+                  <textarea
+                    name="message"
+                    value={inquiryForm.message}
+                    onChange={handleInquiryFormChange}
+                    rows="4"
+                    placeholder="궁금하신 점이나 남기고 싶은 말씀을 자유롭게 적어주세요"
+                  />
+                </div>
+
+                {inquiryError && <p className="wh-form-error">{inquiryError}</p>}
+
+                <button type="submit" className="wh-btn wh-btn-primary wh-inquiry-submit" disabled={inquirySubmitting}>
+                  <Send size={18} />
+                  {inquirySubmitting ? '접수 중...' : '문의하기'}
+                </button>
+              </form>
+            )}
+          </Reveal>
+        </div>
+      </section>
+
       {/* WEWE CTA 밴드 (2026-09-10 수정) — 이전에는 위위 스테이 회원가입을 안내하는
           문구/링크였는데, 여기는 위위 랜딩 페이지이므로 위위 자체 가입·로그인으로 바꿨습니다. */}
       <section className="wh-cta">
         <div className="wh-container wh-cta-inner">
           <div>
-            <h2>목회자이신가요, 선교사이신가요?</h2>
+            <h2>위위의 사역에 관심이 있으신가요?</h2>
             <p>WEWE에 가입하고 위로자의 위로자 공동체와 함께해 주세요.</p>
           </div>
           <div className="wh-cta-actions">
@@ -687,6 +821,102 @@ function WeweHome() {
           margin-top: 1.75rem;
         }
 
+        /* WEWE 문의 섹션 (2026-09-13 이동) */
+        .wh-inquiry {
+          padding: 5rem 0;
+          background: var(--wh-bg-soft);
+        }
+
+        .wh-inquiry-lead {
+          text-align: center;
+          color: var(--wh-ink-soft);
+          margin: 0.75rem 0 0;
+        }
+
+        .wh-inquiry-card {
+          max-width: 640px;
+          margin: 2.25rem auto 0;
+          padding: 2.25rem;
+          background: var(--wh-bg);
+          border: 1px solid var(--wh-line);
+          border-radius: 14px;
+        }
+
+        .wh-inquiry-form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.25rem;
+        }
+
+        .wh-form-group {
+          margin-bottom: 1.25rem;
+        }
+
+        .wh-form-group label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 700;
+          color: var(--wh-ink);
+          font-size: 0.9rem;
+        }
+
+        .wh-form-group input,
+        .wh-form-group textarea {
+          width: 100%;
+          padding: 0.75rem 0.9rem;
+          border: 1px solid var(--wh-line);
+          border-radius: 6px;
+          font-size: 1rem;
+          font-family: inherit;
+          background: var(--wh-bg);
+          color: var(--wh-ink);
+          resize: vertical;
+        }
+
+        .wh-form-group input:focus,
+        .wh-form-group textarea:focus {
+          outline: none;
+          border-color: var(--wh-orange);
+          box-shadow: 0 0 0 3px rgba(217, 123, 63, 0.15);
+        }
+
+        .wh-form-error {
+          color: #c0392b;
+          font-size: 0.88rem;
+          margin: -0.5rem 0 1.25rem;
+        }
+
+        .wh-inquiry-submit {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          width: 100%;
+          border: none;
+          cursor: pointer;
+        }
+
+        .wh-inquiry-submit:disabled {
+          opacity: 0.7;
+          cursor: default;
+        }
+
+        .wh-inquiry-success {
+          text-align: center;
+          padding: 1.5rem 0;
+          color: var(--wh-ink-soft);
+        }
+
+        .wh-inquiry-success svg {
+          color: var(--wh-orange-deep);
+          margin-bottom: 0.75rem;
+        }
+
+        .wh-inquiry-success h3 {
+          color: var(--wh-ink);
+          margin-bottom: 0.5rem;
+        }
+
         /* CTA 밴드 */
         .wh-cta {
           padding: 4rem 0;
@@ -732,8 +962,11 @@ function WeweHome() {
         /* 모바일 */
         @media (max-width: 860px) {
           .wh-hero {
+            /* (2026-09-13) 모바일에서 히어로 버튼과 원형 슬라이드 인디케이터가 거의
+               겹칠 만큼 여백이 부족했던 문제 — 하단 여백을 넉넉히 늘렸습니다. 상단 여백도
+               로그인 시 헤더 위에 뜨는 "안녕하세요 ○○님" 줄까지 겹치지 않도록 늘렸습니다. */
             min-height: 560px;
-            padding: 7rem 1.25rem 3.5rem;
+            padding: 8.25rem 1.25rem 5rem;
           }
 
           .wh-hero h1 {
@@ -760,8 +993,16 @@ function WeweHome() {
             display: none;
           }
 
-          .wh-about, .wh-ministries, .wh-news {
+          .wh-about, .wh-ministries, .wh-news, .wh-inquiry {
             padding: 3.5rem 0;
+          }
+
+          .wh-inquiry-card {
+            padding: 1.5rem;
+          }
+
+          .wh-inquiry-form-row {
+            grid-template-columns: 1fr;
           }
 
           .wh-cta-inner {

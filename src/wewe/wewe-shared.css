@@ -221,6 +221,22 @@
   line-height: 1.6;
 }
 
+.wh-footer-instagram {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.wh-footer-instagram:hover {
+  color: var(--wh-orange);
+}
+
 .wh-footer-info p {
   color: rgba(255, 255, 255, 0.55);
   font-size: 0.85rem;
@@ -305,11 +321,18 @@
 
 @media (max-width: 860px) {
   .wp-hero {
-    padding: 7rem 1.25rem 2.75rem;
+    /* (2026-09-13) 모바일에서 서브내비/버튼 바로 아래 원형 슬라이드 인디케이터와
+       거의 겹칠 만큼 여백이 부족했던 문제 — 하단 여백을 넉넉히 늘렸습니다. 상단 여백도
+       로그인 시 헤더 위에 뜨는 "안녕하세요 ○○님" 줄까지 겹치지 않도록 늘렸습니다. */
+    padding: 8.25rem 1.25rem 4.5rem;
   }
 
   .wp-hero h1 {
     font-size: 1.6rem;
+  }
+
+  .wp-hero-progress {
+    bottom: 1.25rem;
   }
 
   .wh-footer-inner {
