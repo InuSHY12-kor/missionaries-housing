@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, HeartHandshake, Link2, Sparkles, ShieldCheck } from 'lucide-react';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
@@ -9,6 +9,36 @@ import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import weweLogoColor from '../assets/wewe-logo-color.png';
 import './wewe-shared.css';
+
+// (2026-10-03 추가) WEWE_2026_사업계획서 260930.pptx 슬라이드 7(Mission·Vision·Core
+// Values)과 슬라이드 8(사업 구조)을 담았습니다. 네 가지 핵심가치는 PPT의 아이콘 없는
+// 텍스트 카드를 lucide 아이콘으로 보강했습니다.
+const CORE_VALUES = [
+  {
+    icon: HeartHandshake,
+    en: 'Hospitality',
+    ko: '환대',
+    desc: '예수님의 사랑처럼 조건 없이, 사랑을 흘려보냅니다.',
+  },
+  {
+    icon: Link2,
+    en: 'Connection',
+    ko: '연결',
+    desc: '혼자(I)였던 사역자를 동료·교회·후원자와 이어 ‘우리’가 되게 합니다.',
+  },
+  {
+    icon: Sparkles,
+    en: 'Restoration',
+    ko: '회복',
+    desc: '소모품이 아닌 하나님의 걸작품(Poiema)으로 다시 세웁니다.',
+  },
+  {
+    icon: ShieldCheck,
+    en: 'Integrity',
+    ko: '신뢰',
+    desc: '체계적이고 투명한 운영으로 후원의 신뢰를 지킵니다.',
+  },
+];
 
 // (2026-09-10 개편) "위위란?" 페이지 중간 사진들을 재구성했습니다 — 기존 3분할 갤러리(wa-gallery)는
 // 위위 스테이 랜딩과 시각이 겹치고 "위로자의 위로자"라는 정체성과 어울리지 않는다는 의견으로
@@ -125,6 +155,81 @@ function AboutPage() {
         </div>
       </section>
 
+      {/* MISSION / VISION / CORE VALUES — PPT 슬라이드 7 (2026-10-03 신규) */}
+      <section className="wa-values">
+        <div className="wh-container wh-container-narrow">
+          <Reveal>
+            <span className="wh-eyebrow wh-eyebrow-center">MISSION · VISION</span>
+            <h2 className="wh-h2-center">하나님의 마음으로 위로자를 위로합니다</h2>
+          </Reveal>
+
+          <Reveal as="div" className="wa-mv-grid" delay={60}>
+            <div className="wa-mv-card">
+              <span className="wa-mv-label">MISSION</span>
+              <p>하나님의 마음으로 위로자를 위로한다.</p>
+            </div>
+            <div className="wa-mv-card">
+              <span className="wa-mv-label">VISION</span>
+              <p>돌봄받은 위로자가 다시 위로자가 되는 &lsquo;우리(WE)&rsquo;의 선순환 공동체</p>
+            </div>
+          </Reveal>
+
+          <Reveal delay={100}>
+            <span className="wh-eyebrow wh-eyebrow-center wa-cv-eyebrow">CORE VALUES</span>
+          </Reveal>
+
+          <div className="wa-cv-grid">
+            {CORE_VALUES.map((cv, idx) => (
+              <Reveal as="div" key={cv.en} className="wa-cv-card" delay={120 + idx * 60}>
+                <span className="wa-cv-icon"><cv.icon size={22} /></span>
+                <h4>{cv.ko} <span>{cv.en}</span></h4>
+                <p>{cv.desc}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 사업 구조 — PPT 슬라이드 8 (2026-10-03 신규) */}
+      <section className="wa-structure">
+        <div className="wh-container wh-container-narrow">
+          <Reveal>
+            <span className="wh-eyebrow wh-eyebrow-center">사업 구조</span>
+            <h2 className="wh-h2-center">위로자의 위로자, WEWE의 두 프로젝트</h2>
+          </Reveal>
+
+          <Reveal as="div" className="wa-org-chart" delay={80}>
+            <div className="wa-org-root">WEWE<span>위로자의 위로자</span></div>
+            <div className="wa-org-branches">
+              <div className="wa-org-branch wa-org-branch-teal">
+                <div className="wa-org-target">목회자</div>
+                <div className="wa-org-project">
+                  <strong>Project 1 · Refresh Pastor Academy</strong>
+                  <ul>
+                    <li>목회자 아카데미 심포지엄</li>
+                    <li>목회자 세미나 · 소진관리</li>
+                    <li>개별 지원 (심리상담 · 재정 · 장학)</li>
+                    <li>전투복 프로젝트 <span className="wh-progress-badge">진행 중</span></li>
+                  </ul>
+                </div>
+              </div>
+              <div className="wa-org-branch wa-org-branch-orange">
+                <div className="wa-org-target">선교사</div>
+                <div className="wa-org-project">
+                  <strong>Project 2 · Missionary Care</strong>
+                  <ul>
+                    <li>WEWE 스테이 (주거) <span className="wh-live-badge">진행 중</span></li>
+                    <li>레위인의 모빌리티 (이동)</li>
+                    <li>Poiema 돌봄</li>
+                    <li>WE+WE 커넥트</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       <section className="wa-target">
         <div className="wh-container wh-container-narrow">
           <Reveal>
@@ -132,10 +237,10 @@ function AboutPage() {
             <h2 className="wh-h2-center">우리가 위로하는 사람들</h2>
             <p className="wa-target-line">WEWE → 목회자 → 선교사</p>
             <p>
-              지속 가능한 위로를 위해 WEWE는 여러 분야의 전문가들과 협업하며, 체계적이고 투명한 운영을
-              지향합니다. 임의법인으로 시작해 사단법인으로 전환하며 법적 지위와 조직의 지속가능성을 갖추어
-              가고, 구체적인 사례를 중심으로 모금 명분을 다져 갑니다. 평신도와 기업의 후원이 전문적인 돌봄으로,
-              다시 교회와 선교현장의 회복으로 이어지는 선순환 구조를 만들어가고 있습니다.
+              WEWE는 여러 분야의 전문가들과 협업하며, 체계적이고 투명한 운영을 지향합니다. 평신도와 기업의
+              후원이 전문적인 돌봄으로, 다시 교회와 선교현장의 회복으로 이어지는 선순환 구조를 만들어가고
+              있습니다. 법인 설립 방향과 재원 조성 계획, 추진 일정 등 WEWE의 지속가능성에 대한 더 자세한
+              이야기는 아래에서 확인하실 수 있습니다.
             </p>
           </Reveal>
 
@@ -158,6 +263,18 @@ function AboutPage() {
           </div>
           <Link to="/about/ministries" className="wh-btn wh-btn-primary">
             사역 소개 보기 <ArrowRight size={18} />
+          </Link>
+        </div>
+      </section>
+
+      <section className="wa-cta wa-cta-alt">
+        <div className="wh-container wa-cta-inner">
+          <div>
+            <h2>WEWE의 운영과 지속가능성이 궁금하신가요?</h2>
+            <p>법인 설립 방향, 선순환 구조, 재원 조성 계획과 추진 일정을 소개합니다.</p>
+          </div>
+          <Link to="/about/sustainability" className="wh-btn wh-btn-outline">
+            운영 · 지속가능성 보기 <ArrowRight size={18} />
           </Link>
         </div>
       </section>
@@ -280,6 +397,203 @@ function AboutPage() {
           margin-bottom: 0;
         }
 
+        /* MISSION / VISION / CORE VALUES (2026-10-03 신규) */
+        .wa-values {
+          padding: 1rem 0 4.5rem;
+          background: var(--wh-bg);
+        }
+
+        .wa-mv-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.25rem;
+          margin: 1.75rem 0 3rem;
+        }
+
+        .wa-mv-card {
+          padding: 1.75rem;
+          background: var(--wh-bg-soft);
+          border: 1px solid var(--wh-line);
+          border-radius: 12px;
+          text-align: center;
+        }
+
+        .wa-mv-label {
+          display: block;
+          font-size: 0.75rem;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          color: var(--wh-orange-deep);
+          margin-bottom: 0.75rem;
+        }
+
+        .wa-mv-card p {
+          margin: 0;
+          color: var(--wh-ink);
+          font-weight: 700;
+          font-size: 1.05rem;
+          line-height: 1.6;
+        }
+
+        .wa-cv-eyebrow {
+          display: block;
+          text-align: center;
+          margin-bottom: 1.5rem;
+        }
+
+        .wa-cv-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1rem;
+        }
+
+        .wa-cv-card {
+          padding: 1.5rem 1.25rem;
+          background: var(--wh-bg-soft);
+          border: 1px solid var(--wh-line);
+          border-radius: 12px;
+          text-align: center;
+        }
+
+        .wa-cv-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 46px;
+          height: 46px;
+          border-radius: 50%;
+          background: rgba(217, 123, 63, 0.12);
+          color: var(--wh-orange-deep);
+          margin-bottom: 0.9rem;
+        }
+
+        .wa-cv-card h4 {
+          color: var(--wh-ink);
+          font-size: 1.02rem;
+          margin-bottom: 0.6rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.2rem;
+        }
+
+        .wa-cv-card h4 span {
+          font-size: 0.72rem;
+          font-weight: 600;
+          color: var(--wh-stone);
+          letter-spacing: 0.04em;
+        }
+
+        .wa-cv-card p {
+          margin: 0;
+          color: var(--wh-ink-soft);
+          font-size: 0.88rem;
+          line-height: 1.6;
+        }
+
+        /* 사업 구조 (2026-10-03 신규) */
+        .wa-structure {
+          padding: 1rem 0 4.5rem;
+          background: var(--wh-bg-soft);
+        }
+
+        .wa-org-chart {
+          margin-top: 2rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0;
+        }
+
+        .wa-org-root {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 1rem 2rem;
+          background: var(--wh-ink);
+          color: #fff;
+          font-weight: 800;
+          font-size: 1.15rem;
+          border-radius: 10px;
+        }
+
+        .wa-org-root span {
+          font-size: 0.72rem;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.65);
+          margin-top: 0.2rem;
+        }
+
+        .wa-org-branches {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.5rem;
+          width: 100%;
+          margin-top: 1.75rem;
+          padding-top: 1.75rem;
+          border-top: 2px dashed var(--wh-line);
+          position: relative;
+        }
+
+        .wa-org-branch {
+          display: flex;
+          flex-direction: column;
+          gap: 0.9rem;
+        }
+
+        .wa-org-target {
+          align-self: center;
+          padding: 0.45rem 1.1rem;
+          border-radius: 999px;
+          font-weight: 800;
+          font-size: 0.92rem;
+          color: #fff;
+        }
+
+        .wa-org-branch-teal .wa-org-target {
+          background: var(--wh-teal);
+        }
+
+        .wa-org-branch-orange .wa-org-target {
+          background: var(--wh-orange);
+        }
+
+        .wa-org-project {
+          padding: 1.5rem;
+          background: var(--wh-bg);
+          border: 1px solid var(--wh-line);
+          border-radius: 10px;
+        }
+
+        .wa-org-branch-teal .wa-org-project {
+          border-top: 3px solid var(--wh-teal);
+        }
+
+        .wa-org-branch-orange .wa-org-project {
+          border-top: 3px solid var(--wh-orange);
+        }
+
+        .wa-org-project strong {
+          display: block;
+          color: var(--wh-ink);
+          font-size: 0.95rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .wa-org-project ul {
+          margin: 0;
+          padding: 0;
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .wa-org-project li {
+          color: var(--wh-ink-soft);
+          font-size: 0.88rem;
+          line-height: 1.5;
+        }
+
         .wa-target {
           padding: 4rem 0 5rem;
           background: var(--wh-bg-soft);
@@ -313,30 +627,6 @@ function AboutPage() {
           margin-bottom: 1rem !important;
         }
 
-        .wa-cta {
-          padding: 4rem 0;
-          background: var(--wh-ink);
-        }
-
-        .wa-cta-inner {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 2rem;
-          flex-wrap: wrap;
-        }
-
-        .wa-cta h2 {
-          color: #fff;
-          font-size: 1.5rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .wa-cta p {
-          color: rgba(255, 255, 255, 0.72);
-          margin: 0;
-        }
-
         @media (max-width: 860px) {
           .wa-logo-block {
             grid-template-columns: 1fr;
@@ -344,6 +634,16 @@ function AboutPage() {
 
           .wa-logo-block-visual {
             height: 180px;
+          }
+
+          .wa-mv-grid,
+          .wa-cv-grid,
+          .wa-org-branches {
+            grid-template-columns: 1fr;
+          }
+
+          .wa-org-branches {
+            gap: 2rem;
           }
 
           .wa-cta-inner {

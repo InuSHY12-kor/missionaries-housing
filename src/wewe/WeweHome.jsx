@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Home as HomeIcon, Send, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Home as HomeIcon, Send, CheckCircle2, Target } from 'lucide-react';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
 import Reveal from './Reveal';
@@ -179,6 +179,58 @@ function WeweHome() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* 한눈에 보는 WEWE — PPT 슬라이드 3 "SUMMARY" 요약 (2026-10-03 신규).
+          미션 한 줄 + 두 프로젝트 요약 + 운영 기반(법인화·선순환)을 카드 3개로 압축해
+          히어로 바로 아래에 배치, 홈페이지에서도 전체 그림이 한눈에 보이도록 합니다. */}
+      <section className="wh-snapshot">
+        <div className="wh-container">
+          <Reveal>
+            <span className="wh-eyebrow wh-eyebrow-center">SUMMARY</span>
+            <h2 className="wh-h2-center">한눈에 보는 WEWE</h2>
+            <p className="wh-snapshot-mission">
+              <Target size={16} /> 현대판 레위인인 목회자와 선교사가 다시 일어설 수 있도록, 그들의 위로자가 됩니다.
+            </p>
+          </Reveal>
+
+          <Reveal as="div" className="wh-snapshot-grid" delay={80}>
+            <div className="wh-snapshot-card">
+              <span className="wh-snapshot-tag wh-snapshot-tag-teal">PROJECT 1 · 목회자</span>
+              <h3>Refresh Pastor Academy</h3>
+              <ul>
+                <li>목회자 아카데미 심포지엄</li>
+                <li>목회자 세미나 · 소진관리</li>
+                <li>개별 지원: 심리상담 · 재정 · 장학</li>
+              </ul>
+              <span className="wh-progress-badge">진행 중 · 전투복 프로젝트</span>
+            </div>
+
+            <div className="wh-snapshot-card">
+              <span className="wh-snapshot-tag wh-snapshot-tag-orange">PROJECT 2 · 선교사</span>
+              <h3>Missionary Care</h3>
+              <ul>
+                <li>WEWE 스테이 (주거)</li>
+                <li>레위인의 모빌리티 (이동)</li>
+                <li>Poiema 돌봄 · WE+WE 커넥트</li>
+              </ul>
+              <span className="wh-progress-badge">진행 중 · WEWE 스테이</span>
+            </div>
+
+            <div className="wh-snapshot-card wh-snapshot-card-foundation">
+              <span className="wh-snapshot-tag wh-snapshot-tag-dark">FOUNDATION · 운영 기반</span>
+              <h3>지속 가능한 돌봄 모델</h3>
+              <ul>
+                <li>임의단체 → 사단법인 전환</li>
+                <li>다분야 전문가 협업 · 투명한 운영</li>
+                <li>평신도 · 교회 · 기업 후원의 선순환</li>
+              </ul>
+              <Link to="/about/sustainability" className="wh-ministry-link">
+                운영·지속가능성 보기 <ArrowRight size={14} />
+              </Link>
+            </div>
+          </Reveal>
+        </div>
       </section>
 
       {/* OUR STORY (요약 — 전체 내용은 /about) */}
@@ -489,6 +541,109 @@ function WeweHome() {
           flex-wrap: wrap;
         }
 
+        /* 한눈에 보는 WEWE (2026-10-03 신규) */
+        .wh-snapshot {
+          padding: 5rem 0 1.5rem;
+          background: var(--wh-bg);
+        }
+
+        .wh-snapshot-mission {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          max-width: 620px;
+          margin: 0 auto;
+          text-align: center;
+          color: var(--wh-ink-soft);
+          font-weight: 600;
+          line-height: 1.7;
+        }
+
+        .wh-snapshot-mission svg {
+          flex-shrink: 0;
+          color: var(--wh-orange-deep);
+        }
+
+        .wh-snapshot-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 1.5rem;
+          margin-top: 2.5rem;
+        }
+
+        .wh-snapshot-card {
+          display: flex;
+          flex-direction: column;
+          padding: 1.75rem;
+          background: var(--wh-bg-soft);
+          border: 1px solid var(--wh-line);
+          border-radius: 12px;
+        }
+
+        .wh-snapshot-card-foundation {
+          background: var(--wh-ink);
+          border-color: var(--wh-ink);
+        }
+
+        .wh-snapshot-tag {
+          display: inline-block;
+          align-self: flex-start;
+          font-size: 0.7rem;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          padding: 0.3rem 0.6rem;
+          border-radius: 4px;
+          margin-bottom: 0.9rem;
+        }
+
+        .wh-snapshot-tag-teal {
+          color: var(--wh-teal);
+          background: rgba(20, 107, 113, 0.1);
+        }
+
+        .wh-snapshot-tag-orange {
+          color: var(--wh-orange-deep);
+          background: rgba(217, 123, 63, 0.1);
+        }
+
+        .wh-snapshot-tag-dark {
+          color: #f0c9a0;
+          background: rgba(255,255,255,0.1);
+        }
+
+        .wh-snapshot-card h3 {
+          color: var(--wh-ink);
+          font-size: 1.2rem;
+          margin-bottom: 0.9rem;
+        }
+
+        .wh-snapshot-card-foundation h3 {
+          color: #fff;
+        }
+
+        .wh-snapshot-card ul {
+          margin: 0 0 1.1rem;
+          padding-left: 1.1rem;
+          color: var(--wh-ink-soft);
+          font-size: 0.9rem;
+          line-height: 1.7;
+        }
+
+        .wh-snapshot-card-foundation ul {
+          color: rgba(255,255,255,0.78);
+        }
+
+        .wh-snapshot-card .wh-progress-badge {
+          align-self: flex-start;
+          margin-left: 0;
+          margin-top: auto;
+        }
+
+        .wh-snapshot-card-foundation .wh-ministry-link {
+          color: #f0c9a0;
+        }
+
         /* OUR STORY */
         .wh-about {
           padding: 5.5rem 0;
@@ -671,18 +826,6 @@ function WeweHome() {
           display: flex;
           align-items: center;
           justify-content: center;
-        }
-
-        .wh-live-badge {
-          display: inline-block;
-          margin-left: 0.5rem;
-          font-size: 0.68rem;
-          font-weight: 700;
-          padding: 0.15rem 0.5rem;
-          border-radius: 999px;
-          background: var(--wh-teal);
-          color: #fff;
-          vertical-align: middle;
         }
 
         .wh-ministry-link {
@@ -977,8 +1120,13 @@ function WeweHome() {
             font-size: 0.95rem;
           }
 
-          .wh-ministry-grid {
+          .wh-ministry-grid,
+          .wh-snapshot-grid {
             grid-template-columns: 1fr;
+          }
+
+          .wh-snapshot {
+            padding: 3.5rem 0 0.5rem;
           }
 
           .wh-newsgrid {

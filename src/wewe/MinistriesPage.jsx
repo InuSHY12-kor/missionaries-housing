@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   Home as HomeIcon,
@@ -257,6 +258,7 @@ function MinistriesPage() {
                 <h4>전투복 프로젝트 <span className="wh-progress-badge">진행중</span></h4>
                 <p>지친 목회자님들의 회복과 응원을 위한 프로젝트입니다. 시기별 SNS를 통해 개별 사연 모집을
                   통해 진행합니다.</p>
+                <Link to="/about/ministries/combat-uniform" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
               </div>
             </div>
           </div>
@@ -323,7 +325,10 @@ function MinistriesPage() {
               <div>
                 <h4>WEWE 스테이 <span className="wh-live-badge">이용 가능</span></h4>
                 <p>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼 — 지금 바로 이용하실 수 있습니다.</p>
-                <a href="/stay" className="wh-ministry-link">바로가기 <ArrowRight size={14} /></a>
+                <div className="wm-link-row">
+                  <Link to="/about/ministries/wewe-stay" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
+                  <a href="/stay" className="wh-ministry-link">바로가기 <ArrowRight size={14} /></a>
+                </div>
               </div>
             </div>
             <div className="wm-program-card">
@@ -684,30 +689,6 @@ function MinistriesPage() {
           border-color: var(--wh-teal);
         }
 
-        .wh-live-badge {
-          display: inline-block;
-          margin-left: 0.4rem;
-          font-size: 0.65rem;
-          font-weight: 700;
-          padding: 0.15rem 0.5rem;
-          border-radius: 999px;
-          background: var(--wh-teal);
-          color: #fff;
-          vertical-align: middle;
-        }
-
-        .wh-progress-badge {
-          display: inline-block;
-          margin-left: 0.4rem;
-          font-size: 0.65rem;
-          font-weight: 700;
-          padding: 0.15rem 0.5rem;
-          border-radius: 999px;
-          background: var(--wh-orange);
-          color: #fff;
-          vertical-align: middle;
-        }
-
         .wh-ministry-link {
           display: inline-flex;
           align-items: center;
@@ -717,6 +698,12 @@ function MinistriesPage() {
           font-weight: 700;
           color: var(--wh-orange-deep);
           text-decoration: none;
+        }
+
+        .wm-link-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 1.1rem;
         }
 
         .wh-ministry-link:hover {

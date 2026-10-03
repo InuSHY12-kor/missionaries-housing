@@ -7,6 +7,9 @@ import WeweHome from './WeweHome';
 import AboutPage from './AboutPage';
 import MinistriesPage from './MinistriesPage';
 import LeadershipPage from './LeadershipPage';
+import SustainabilityPage from './SustainabilityPage';
+import CombatUniformPage from './CombatUniformPage';
+import WeweStayIntroPage from './WeweStayIntroPage';
 import NewsListPage from './NewsListPage';
 import NewsDetailPage from './NewsDetailPage';
 import DonatePage from './DonatePage';
@@ -78,6 +81,9 @@ function WeweSite() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/about/ministries" element={<MinistriesPage />} />
         <Route path="/about/leadership" element={<LeadershipPage />} />
+        <Route path="/about/sustainability" element={<SustainabilityPage />} />
+        <Route path="/about/ministries/combat-uniform" element={<CombatUniformPage />} />
+        <Route path="/about/ministries/wewe-stay" element={<WeweStayIntroPage />} />
         <Route path="/news" element={<NewsListPage />} />
         <Route path="/news/:slug" element={<NewsDetailPage />} />
         <Route path="/donate" element={<DonatePage />} />

@@ -339,3 +339,272 @@
     flex-direction: column;
   }
 }
+
+/* 로그인 / 비밀번호 찾기 / 새 비밀번호 설정 공용 폼 스타일 (2026-10-03 이동).
+   예전에는 LoginPage.jsx의 <style> 안에만 정의되어 있었는데, ForgotPasswordPage·
+   ResetPasswordPage도 똑같은 .wl-* 클래스를 쓰면서 자기 스타일은 정의하지 않았습니다.
+   한 페이지의 <style> 태그는 그 페이지가 실제로 마운트될 때만 DOM에 삽입되므로,
+   로그인 페이지를 먼저 거치지 않고 "비밀번호 찾기"로 바로 들어오면 이 클래스들에
+   스타일이 전혀 적용되지 않아 레이아웃이 깨져 보였습니다. 세 페이지가 공통으로
+   import하는 이 공유 CSS로 옮겨 항상 적용되도록 했습니다. */
+.wl-section {
+  flex: 1;
+  padding: 4rem 0 5rem;
+  background: var(--wh-bg-soft);
+}
+
+.wl-card {
+  max-width: 440px;
+  margin: 0 auto;
+  background: var(--wh-bg);
+  border: 1px solid var(--wh-line);
+  border-radius: 12px;
+  padding: 2.5rem;
+}
+
+.wl-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.9rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  background: #fdecea;
+  color: #b8452e;
+  border: 1px solid #f3c5bb;
+}
+
+.wl-alert-success {
+  background: #eaf5f2;
+  color: #146b58;
+  border: 1px solid #bfe3d8;
+}
+
+.wl-field {
+  margin-bottom: 1.5rem;
+}
+
+.wl-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  color: var(--wh-ink);
+  font-size: 0.92rem;
+}
+
+.wl-field input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--wh-line);
+  border-radius: 6px;
+  font-size: 1rem;
+  background: var(--wh-bg);
+  color: var(--wh-ink);
+}
+
+.wl-field input:focus {
+  outline: none;
+  border-color: var(--wh-orange);
+  box-shadow: 0 0 0 3px rgba(217, 123, 63, 0.15);
+}
+
+.wl-submit {
+  width: 100%;
+  justify-content: center;
+  border: none;
+}
+
+.wl-links {
+  text-align: center;
+  margin: 1.5rem 0 0;
+  color: var(--wh-stone);
+  font-size: 0.92rem;
+}
+
+.wl-links a {
+  color: var(--wh-orange-deep);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+@media (max-width: 860px) {
+  .wl-card {
+    padding: 1.75rem;
+  }
+}
+
+/* "이용 가능" / "진행 중" 상태 배지 (2026-10-03 이동). 전에는 MinistriesPage.jsx와
+   WeweHome.jsx 양쪽에 거의 동일한 내용이 각자 중복 정의되어 있었는데, 다른 페이지에서
+   같은 이름의 배지를 쓰면(.wl-* 문제와 동일한 이유로) 스타일이 적용되지 않는 문제가
+   있어 공용 CSS로 통합했습니다. */
+.wh-live-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--wh-teal);
+  color: #fff;
+  vertical-align: middle;
+}
+
+.wh-progress-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--wh-orange);
+  color: #fff;
+  vertical-align: middle;
+}
+
+/* 하단 CTA 밴드 (2026-10-03 이동). AboutPage.jsx에만 있던 스타일인데
+   SustainabilityPage/CombatUniformPage/WeweStayIntroPage도 같은 마크업을 재사용하면서
+   역시 ".wl-*" 문제와 같은 이유로 공용 CSS로 옮겼습니다. */
+.wa-cta {
+  padding: 4rem 0;
+  background: var(--wh-ink);
+}
+
+.wa-cta-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.wa-cta h2 {
+  color: #fff;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.wa-cta p {
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0;
+}
+
+.wa-cta-alt {
+  background: var(--wh-teal);
+}
+
+/* 상세 페이지(전투복 프로젝트 / WEWE 스테이 소개) 공용 블록 (2026-10-03 신규) —
+   두 페이지가 똑같이 쓰는 breadcrumb · 섹션 패딩 · 리드 문구 · 개요(WHAT/WHY/...) 카드 ·
+   노트 박스를 한 곳에서 정의해, 다른 상세 페이지를 거치지 않고 바로 들어와도 스타일이
+   깨지지 않도록 합니다. */
+.wcu-breadcrumb {
+  padding: 1.75rem 1.5rem 0;
+}
+
+.wcu-breadcrumb a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--wh-stone);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.wcu-breadcrumb a:hover {
+  color: var(--wh-orange-deep);
+}
+
+.wcu-section {
+  padding: 3.5rem 0;
+  background: var(--wh-bg);
+}
+
+.wcu-section-soft {
+  background: var(--wh-bg-soft);
+}
+
+.wcu-lead {
+  text-align: center;
+  color: var(--wh-ink-soft);
+  font-size: 0.98rem;
+  margin: 0 0 2.25rem;
+}
+
+.wcu-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.wcu-overview-card {
+  padding: 1.5rem;
+  background: var(--wh-bg-soft);
+  border: 1px solid var(--wh-line);
+  border-radius: 10px;
+}
+
+.wcu-overview-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--wh-orange-deep);
+  margin-bottom: 0.6rem;
+}
+
+.wcu-overview-card p {
+  margin: 0;
+  color: var(--wh-ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.wcu-note-box {
+  padding: 1.25rem 1.5rem;
+  background: var(--wh-bg);
+  border-left: 3px solid var(--wh-teal);
+  border-radius: 8px;
+}
+
+.wcu-note-box strong {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--wh-ink);
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.wcu-note-box ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.wcu-note-box li {
+  color: var(--wh-ink-soft);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.ws-table-note {
+  margin: 0.9rem 0 0;
+  font-size: 0.78rem;
+  color: var(--wh-stone);
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .wcu-section {
+    padding: 2.75rem 0;
+  }
+
+  .wcu-overview-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -31,6 +31,8 @@ const isWeweSitePath =
   pathname === '/signup' ||
   pathname.startsWith('/signup/') ||
   pathname === '/login' ||
+  pathname === '/forgot-password' ||
+  pathname === '/reset-password' ||
   pathname === '/mypage' ||
   pathname === '/profile';
 

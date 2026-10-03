@@ -44,6 +44,12 @@ export const HERO_IMAGE_SETS = {
   signup: [F, G, H],
   supporterSignup: [I, J, K],
   news: [G, K, N, D],
+  // (2026-10-03 추가) 사업계획서(PPT) 기반 신규 하위 페이지 3곳 — 전부 이미 검증되어
+  // 쓰이고 있는 사진 조합을 테마에 맞게 재조합한 것으로, 새로 검증이 필요한 사진은
+  // 추가하지 않았습니다.
+  sustainability: [O, M, N], // 회의 테이블, 협업, 기도하는 손 — 운영/구조 테마
+  combatUniform: [E, H, D], // 존중·응원·동행 테마
+  weweStayIntro: [P, A, F], // 환대의 손길, 맞잡은 손, 한옥(주거) 테마
 };
 
 export default HERO_IMAGE_SETS;
