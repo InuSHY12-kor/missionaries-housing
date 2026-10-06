@@ -20,6 +20,7 @@ import ForgotPasswordPage from './ForgotPasswordPage';
 import ResetPasswordPage from './ResetPasswordPage';
 import MyPage from './MyPage';
 import WeweProfilePage from './WeweProfilePage';
+import WeweAdminPage from './WeweAdminPage';
 import ScrollToTop from './ScrollToTop';
 import SiteTitle from './SiteTitle';
 
@@ -94,6 +95,10 @@ function WeweSite() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/profile" element={<WeweProfilePage />} />
+        {/* (2026-10-07) WEWE 쪽 관리자 페이지 — 내용은 /stay/admin과 같은 컴포넌트·데이터를 공유합니다. */}
+        <Route path="/admin" element={<WeweAdminPage />} />
+        <Route path="/admin/posts/new" element={<WeweAdminPage mode="post-editor" />} />
+        <Route path="/admin/posts/:id/edit" element={<WeweAdminPage mode="post-editor" />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 

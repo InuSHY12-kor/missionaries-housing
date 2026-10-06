@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { AlertCircle, Upload, X, ArrowLeft, ArrowRight } from 'lucide-react';
 import PageHero from '../components/PageHero';
+import WevePageHero from '../wewe/WevePageHero';
 
 const EDITOR_HERO_IMAGES = [
   'https://images.pexels.com/photos/261510/pexels-photo-261510.jpeg?auto=compress&cs=tinysrgb&w=1600'
@@ -40,7 +41,10 @@ function fallbackSlug() {
 // 저장을 완료하기 전까지는 계속 남아있다가, 다음에 새 글 작성 화면을 열면 자동으로 복원됩니다.
 const NEW_POST_DRAFT_KEY = 'wewe_new_post_draft';
 
-function AdminPostEditor({ userProfile }) {
+// (2026-10-07) site prop — AdminDashboard와 마찬가지로 위위스테이(/stay/admin/posts/...)와
+// WEWE(/admin/posts/..., src/wewe/WeweAdminPage.jsx) 양쪽에서 같은 편집기를 공유합니다.
+function AdminPostEditor({ userProfile, site = 'stay' }) {
+  const isWeweSite = site === 'wewe';
   const { id } = useParams();
   const isEditing = Boolean(id);
 
@@ -270,7 +274,8 @@ function AdminPostEditor({ userProfile }) {
       // (2026-09-10) 사역 소식은 위위(WEWE) 홈페이지에 노출되는 콘텐츠이므로, 글을 쓰고 난
       // 뒤에는 위위스테이 관리자 대시보드가 아니라 위위 마이페이지로 이동합니다. 위위 쪽은
       // 별도의 BrowserRouter(basename 없음)를 쓰므로 전체 페이지 이동으로 화면을 넘깁니다.
-      window.location.href = '/mypage';
+      // (2026-10-07) WEWE 관리자 페이지에서 작성한 경우에는 WEWE 관리자 페이지의 사역 소식 탭으로 돌아갑니다.
+      window.location.href = isWeweSite ? '/admin?tab=posts' : '/mypage';
     } catch (err) {
       if (err.code === '23505') {
         setError('이미 사용 중인 슬러그입니다. 다른 슬러그를 입력해주세요.');
@@ -292,12 +297,21 @@ function AdminPostEditor({ userProfile }) {
 
   return (
     <>
-      <PageHero
-        images={EDITOR_HERO_IMAGES}
-        eyebrow="ADMIN"
-        title={isEditing ? '사역 소식 글 수정' : '사역 소식 새 글 작성'}
-        subtitle="발행하면 WEWE 홈페이지의 사역 소식 페이지에 바로 공개됩니다"
-      />
+      {isWeweSite ? (
+        <WevePageHero
+          images={EDITOR_HERO_IMAGES}
+          eyebrow="ADMIN"
+          title={isEditing ? '사역 소식 글 수정' : '사역 소식 새 글 작성'}
+          subtitle="발행하면 WEWE 홈페이지의 사역 소식 페이지에 바로 공개됩니다"
+        />
+      ) : (
+        <PageHero
+          images={EDITOR_HERO_IMAGES}
+          eyebrow="ADMIN"
+          title={isEditing ? '사역 소식 글 수정' : '사역 소식 새 글 작성'}
+          subtitle="발행하면 WEWE 홈페이지의 사역 소식 페이지에 바로 공개됩니다"
+        />
+      )}
       <div className="admin-post-editor-container">
         <div className="container">
           <div className="admin-post-editor">

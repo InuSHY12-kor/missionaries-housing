@@ -11,6 +11,8 @@ import {
   Church,
   Gift,
   BadgePercent,
+  Sprout,
+  Building2,
 } from 'lucide-react';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
@@ -24,6 +26,18 @@ import './wewe-shared.css';
 // WEWE_2026_사업계획서 260930.pptx의 PART IV "운영 및 지속가능성"(슬라이드 29-34)을
 // 담은 완전히 새로운 페이지입니다 — 법인 설립 방향, 선순환 구조, 재원 조성 계획(제안안),
 // 추진 일정, 기대효과까지, 기존 어떤 페이지에도 해당 내용이 없어 새로 만들었습니다.
+// (2026-10-07) 섹션별 배너 사진 — 섹션 제목의 키워드로 고른 Unsplash 무료 사진. 크기는 사역 소개
+// 페이지 Refresh Pastor Academy 배너와 동일(공용 클래스 .wh-section-banner, wewe-shared.css).
+const unsplash = (id, w = 1200) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;
+const SECTION_PHOTOS = {
+  foundation: unsplash('1450101499163-c8848c66ca85'), // 서류에 서명하는 손 — 법인 설립
+  cycle: unsplash('1542601906990-b4d3fb778b09'), // 두 손에 담긴 새싹 — 선순환·성장
+  funding: unsplash('1585143790814-b40d4b829e4a'), // 동전이 담긴 유리병 — 재원 조성
+  timeline: unsplash('1529651737248-dad5e287768e'), // 펼친 플래너·달력 — 추진 일정
+  outcome: unsplash('1500382017468-9049fed747ef'), // 들판 위로 떠오르는 해 — 회복·소생
+  why: unsplash('1781145854094-9dfa73d423e0', 700), // 서로 단단히 맞잡은 팔 — 그리스도의 지체
+};
+
 const FUNDING_SOURCES = [
   {
     icon: Users2,
@@ -101,6 +115,15 @@ function SustainabilityPage() {
             <p className="ws-lead">한 교회의 사역을 넘어, 지속 가능한 돌봄 모델로.</p>
           </Reveal>
 
+          <Reveal
+            as="div"
+            className="wh-section-banner"
+            style={{ backgroundImage: `url(${SECTION_PHOTOS.foundation})` }}
+            role="img"
+            aria-label="서류에 서명하는 손"
+            delay={40}
+          />
+
           <Reveal as="div" className="ws-limit-box" delay={60}>
             <strong>현재의 한계</strong>
             <p>지속적인 예산이 필요하고, 한 교회 규모로 진행할 경우 확장에 한계가 있습니다.</p>
@@ -108,6 +131,7 @@ function SustainabilityPage() {
 
           <div className="ws-stage-row">
             <Reveal as="div" className="ws-stage-card" delay={100}>
+              <span className="ws-stage-icon"><Sprout size={24} /></span>
               <span className="ws-stage-no">1차</span>
               <h4>임의단체(임의법인)</h4>
               <p>조직 구성 · 사업 시범 운영</p>
@@ -115,7 +139,8 @@ function SustainabilityPage() {
             <Reveal as="div" className="ws-stage-arrow" delay={120}>
               <ArrowRight size={20} />
             </Reveal>
-            <Reveal as="div" className="ws-stage-card" delay={140}>
+            <Reveal as="div" className="ws-stage-card ws-stage-card-final" delay={140}>
+              <span className="ws-stage-icon"><Building2 size={24} /></span>
               <span className="ws-stage-no">2차</span>
               <h4>사단법인 전환</h4>
               <p>법적 지위 · 기부금 신뢰 확보</p>
@@ -140,10 +165,19 @@ function SustainabilityPage() {
             </Reveal>
           </div>
 
-          <Reveal as="p" className="ws-callout" delay={100}>
-            <Megaphone size={18} />
-            <span><strong>모금 명분 (Why)</strong> — 레위인을 지키는 그리스도의 지체들. 사례 중심의 스토리와
-              비영리 모금 전문업체 연계로 모금 명분을 구체화합니다.</span>
+          {/* (2026-10-07) 모금 명분 — 왼쪽에 "그리스도의 지체"를 떠올리게 하는 사진을 함께 배치 */}
+          <Reveal as="div" className="ws-why-card" delay={100}>
+            <div
+              className="ws-why-photo"
+              style={{ backgroundImage: `url(${SECTION_PHOTOS.why})` }}
+              role="img"
+              aria-label="서로 단단히 맞잡은 팔"
+            />
+            <div className="ws-why-body">
+              <span className="ws-why-label"><Megaphone size={16} /> 모금 명분 (Why)</span>
+              <h4>레위인을 지키는 그리스도의 지체들</h4>
+              <p>사례 중심의 스토리와 비영리 모금 전문업체 연계로 모금 명분을 구체화합니다.</p>
+            </div>
           </Reveal>
         </div>
       </section>
@@ -171,6 +205,14 @@ function SustainabilityPage() {
               </Reveal>
             ))}
           </div>
+
+          <Reveal
+            as="div"
+            className="wh-section-banner wh-section-banner-after"
+            style={{ backgroundImage: `url(${SECTION_PHOTOS.cycle})` }}
+            role="img"
+            aria-label="두 손에 담긴 새싹"
+          />
         </div>
       </section>
 
@@ -185,6 +227,15 @@ function SustainabilityPage() {
               <span className="ws-proposal-tag"><BadgePercent size={13} /> 제안안</span>
             </p>
           </Reveal>
+
+          <Reveal
+            as="div"
+            className="wh-section-banner"
+            style={{ backgroundImage: `url(${SECTION_PHOTOS.funding})` }}
+            role="img"
+            aria-label="동전이 담긴 유리병"
+            delay={40}
+          />
 
           <div className="ws-funding-grid">
             {FUNDING_SOURCES.map((src, idx) => (
@@ -233,6 +284,14 @@ function SustainabilityPage() {
             </table>
           </Reveal>
           <p className="ws-table-note">검정 : 진행 중 &nbsp;·&nbsp; 노랑 : 핵심 추진 &nbsp;·&nbsp; 회색 : 계획</p>
+
+          <Reveal
+            as="div"
+            className="wh-section-banner wh-section-banner-after"
+            style={{ backgroundImage: `url(${SECTION_PHOTOS.timeline})` }}
+            role="img"
+            aria-label="펼쳐 놓은 플래너와 달력"
+          />
         </div>
       </section>
 
@@ -244,6 +303,15 @@ function SustainabilityPage() {
             <h2 className="wh-h2-center">위로자가 회복되면, 공동체도 살아납니다</h2>
             <p className="ws-lead">지속 가능한 사역 동력 · 외부 네트워크의 자산화 · 건강한 동역 모델 구축</p>
           </Reveal>
+
+          <Reveal
+            as="div"
+            className="wh-section-banner"
+            style={{ backgroundImage: `url(${SECTION_PHOTOS.outcome})` }}
+            role="img"
+            aria-label="들판 위로 떠오르는 해"
+            delay={40}
+          />
 
           <div className="ws-outcome-grid">
             {OUTCOME_GROUPS.map((group, idx) => (
@@ -409,27 +477,82 @@ function SustainabilityPage() {
           line-height: 1.55;
         }
 
-        .ws-callout {
+        /* 1차/2차 단계 카드 아이콘 (2026-10-07 추가) */
+        .ws-stage-icon {
           display: flex;
-          align-items: flex-start;
-          gap: 0.7rem;
-          padding: 1.1rem 1.4rem;
-          background: rgba(217, 123, 63, 0.08);
-          border-radius: 10px;
-          color: var(--wh-ink-soft);
-          font-size: 0.9rem;
-          line-height: 1.7;
-          margin: 0;
-        }
-
-        .ws-callout svg {
-          flex-shrink: 0;
+          align-items: center;
+          justify-content: center;
+          width: 52px;
+          height: 52px;
+          margin: 0 auto 0.7rem;
+          border-radius: 50%;
+          background: rgba(217, 123, 63, 0.12);
           color: var(--wh-orange-deep);
-          margin-top: 0.2rem;
         }
 
-        .ws-callout strong {
+        .ws-stage-card-final .ws-stage-icon {
+          background: rgba(20, 107, 113, 0.12);
+          color: var(--wh-teal);
+        }
+
+        .ws-stage-card-final .ws-stage-no {
+          color: var(--wh-teal);
+        }
+
+        /* 모금 명분 (2026-10-07 개편) — 왼쪽 사진 + 오른쪽 내용 */
+        .ws-why-card {
+          display: grid;
+          grid-template-columns: 240px 1fr;
+          background: rgba(217, 123, 63, 0.08);
+          border-radius: 12px;
+          overflow: hidden;
+        }
+
+        .ws-why-photo {
+          min-height: 180px;
+          background-size: cover;
+          background-position: center;
+        }
+
+        .ws-why-body {
+          padding: 1.6rem 1.75rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .ws-why-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          font-size: 0.78rem;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+          color: var(--wh-orange-deep);
+          margin-bottom: 0.5rem;
+        }
+
+        .ws-why-body h4 {
           color: var(--wh-ink);
+          font-size: 1.15rem;
+          margin-bottom: 0.45rem;
+        }
+
+        .ws-why-body p {
+          margin: 0;
+          color: var(--wh-ink-soft);
+          font-size: 0.92rem;
+          line-height: 1.7;
+        }
+
+        @media (max-width: 600px) {
+          .ws-why-card {
+            grid-template-columns: 1fr;
+          }
+
+          .ws-why-photo {
+            min-height: 160px;
+          }
         }
 
         .ws-cycle {

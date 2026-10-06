@@ -39,7 +39,7 @@ function WeweHeader() {
     let mounted = true;
 
     const loadProfile = async (userId) => {
-      const { data } = await supabase.from('users').select('role, full_name').eq('id', userId).maybeSingle();
+      const { data } = await supabase.from('users').select('role, status, full_name').eq('id', userId).maybeSingle();
       if (mounted) setUserProfile(data || null);
     };
 
@@ -63,6 +63,8 @@ function WeweHeader() {
       subscription?.unsubscribe();
     };
   }, []);
+
+  const isAdmin = isLoggedIn && userProfile?.role === 'admin' && userProfile?.status === 'approved';
 
   const closeMobileNav = () => document.body.classList.remove('wewe-nav-open');
 
@@ -127,27 +129,40 @@ function WeweHeader() {
           <span />
         </button>
 
+        {/* (2026-10-07) 메뉴 순서·스타일 개편.
+            - 로그인 전: 홈 · 소개 · 사역 소식 · 위위 스테이 · 로그인 · 가입하기 · 후원하기
+            - 로그인 후: 마이페이지 · 홈 · 소개 · 사역 소식 · (관리) · 프로필 · 후원하기 · 위위 스테이 · 로그아웃
+            - "관리"는 관리자(role=admin, 승인 완료)에게만 보이며, 위위 쪽 관리자 페이지(/admin)로
+              이동합니다. 내용은 위위스테이 관리자 페이지(/stay/admin)와 같은 화면·데이터를 공유합니다.
+            - 후원하기/가입하기에 있던 테두리·그라디언트 버튼 효과를 없애고 모든 메뉴를 같은
+              텍스트 링크 스타일로 통일했습니다(로그아웃 포함). */}
         <nav className="wewe-nav" ref={navRef}>
-          <Link to="/" className="wewe-nav-link" onClick={closeMobileNav}>홈</Link>
-          <Link to="/about" className="wewe-nav-link" onClick={closeMobileNav}>소개</Link>
-          <Link to="/news" className="wewe-nav-link" onClick={closeMobileNav}>사역 소식</Link>
-          <a href="/stay" className="wewe-nav-link" onClick={closeMobileNav}>위위 스테이</a>
-          <Link to="/donate" className="wewe-nav-link wewe-nav-donate" onClick={closeMobileNav}>후원하기</Link>
-          {isLoggedIn && (
+          {isLoggedIn ? (
             <>
               <Link to="/mypage" className="wewe-nav-link" onClick={closeMobileNav}>마이페이지</Link>
+              <Link to="/" className="wewe-nav-link" onClick={closeMobileNav}>홈</Link>
+              <Link to="/about" className="wewe-nav-link" onClick={closeMobileNav}>소개</Link>
+              <Link to="/news" className="wewe-nav-link" onClick={closeMobileNav}>사역 소식</Link>
+              {isAdmin && (
+                <Link to="/admin" className="wewe-nav-link" onClick={closeMobileNav}>관리</Link>
+              )}
               <Link to="/profile" className="wewe-nav-link" onClick={closeMobileNav}>프로필</Link>
+              <Link to="/donate" className="wewe-nav-link" onClick={closeMobileNav}>후원하기</Link>
+              <a href="/stay" className="wewe-nav-link" onClick={closeMobileNav}>위위 스테이</a>
+              <button type="button" className="wewe-nav-link wewe-nav-logout-btn" onClick={handleLogout}>
+                <LogOut size={15} />
+                <span>로그아웃</span>
+              </button>
             </>
-          )}
-          {isLoggedIn ? (
-            <button type="button" className="wewe-nav-logout-btn" onClick={handleLogout}>
-              <LogOut size={16} />
-              <span>로그아웃</span>
-            </button>
           ) : (
             <>
+              <Link to="/" className="wewe-nav-link" onClick={closeMobileNav}>홈</Link>
+              <Link to="/about" className="wewe-nav-link" onClick={closeMobileNav}>소개</Link>
+              <Link to="/news" className="wewe-nav-link" onClick={closeMobileNav}>사역 소식</Link>
+              <a href="/stay" className="wewe-nav-link" onClick={closeMobileNav}>위위 스테이</a>
               <Link to="/login" className="wewe-nav-link" onClick={closeMobileNav}>로그인</Link>
-              <Link to="/signup" className="wewe-nav-link wewe-nav-cta" onClick={closeMobileNav}>가입하기</Link>
+              <Link to="/signup" className="wewe-nav-link" onClick={closeMobileNav}>가입하기</Link>
+              <Link to="/donate" className="wewe-nav-link" onClick={closeMobileNav}>후원하기</Link>
             </>
           )}
         </nav>
@@ -249,7 +264,22 @@ function WeweHeader() {
         .wewe-nav {
           display: flex;
           align-items: center;
-          gap: 1.75rem;
+          gap: 1.4rem;
+        }
+
+        .wewe-nav .wewe-nav-link {
+          white-space: nowrap;
+        }
+
+        /* 로그인 후에는 메뉴가 최대 9개라 중간 폭 화면에서 간격·글자 크기를 조금 줄입니다. */
+        @media (max-width: 1120px) and (min-width: 861px) {
+          .wewe-nav {
+            gap: 1rem;
+          }
+
+          .wewe-nav .wewe-nav-link {
+            font-size: 0.88rem;
+          }
         }
 
         .wewe-nav-link {
@@ -264,48 +294,16 @@ function WeweHeader() {
           color: #f0a875;
         }
 
-        .wewe-nav-cta {
-          padding: 0.55rem 1.15rem;
-          border-radius: 6px;
-          background: linear-gradient(90deg, #d97b3f 0%, #b8622c 100%);
-          color: #fff !important;
-        }
-
-        .wewe-nav-cta:hover {
-          color: #fff !important;
-          box-shadow: 0 4px 12px rgba(217, 123, 63, 0.4);
-        }
-
-        .wewe-nav-donate {
-          padding: 0.5rem 1rem;
-          border-radius: 6px;
-          border: 1.5px solid rgba(255, 255, 255, 0.55);
-        }
-
+        /* 로그아웃도 다른 메뉴와 같은 텍스트 링크 스타일(버튼 기본 스타일만 제거). */
         .wewe-nav-logout-btn {
           display: inline-flex;
           align-items: center;
-          gap: 0.4rem;
-          padding: 0.5rem 1rem;
-          border-radius: 999px;
-          border: 1.5px solid rgba(255, 255, 255, 0.55);
-          background: transparent;
-          color: rgba(255, 255, 255, 0.92);
+          gap: 0.35rem;
+          padding: 0;
+          border: none;
+          background: none;
           font-family: inherit;
-          font-size: 0.9rem;
-          font-weight: 700;
           cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .wewe-nav-logout-btn:hover {
-          border-color: #f0a875;
-          color: #f0a875;
-        }
-
-        .wewe-nav-donate:hover {
-          border-color: #f0a875;
-          color: #f0a875;
         }
 
         .wewe-nav-toggle {
