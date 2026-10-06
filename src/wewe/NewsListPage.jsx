@@ -81,7 +81,7 @@ function NewsListPage() {
         <div className="wh-container">
           {isAdmin && (
             <div className="nl-admin-bar">
-              <a href="/stay/admin/posts/new" className="wh-btn wh-btn-primary">
+              <a href="/admin/posts/new" className="wh-btn wh-btn-primary">
                 <PenSquare size={16} />
                 새 글쓰기
               </a>

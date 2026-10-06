@@ -9,6 +9,7 @@ import {
   GraduationCap,
   UserCheck,
   Shield,
+  CheckCircle2,
 } from 'lucide-react';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
@@ -213,12 +214,12 @@ function MinistriesPage() {
           </p>
 
           <ul className="wm-issue-list">
-            <li><strong>재교육의 부재</strong> — 신학대학원 졸업 후, 급변하는 시대적 요구에 대응할 체계적인
-              재교육 기회가 부족합니다.</li>
-            <li><strong>사역의 고립감</strong> — 1인 다역을 수행하는 현장에서 목회자는 멘토 없이 늘 치열한
-              현장에 고립됩니다.</li>
-            <li><strong>소진의 위기</strong> — 감정노동의 최전선에서 성도들의 어려움을 공감하며 대리외상을
-              겪고, 영적 침체와 우울감을 경험합니다.</li>
+            <li><strong>재교육의 부재</strong><span>신학대학원 졸업 후, 급변하는 시대적 요구에 대응할 체계적인
+              재교육 기회가 부족합니다.</span></li>
+            <li><strong>사역의 고립감</strong><span>1인 다역을 수행하는 현장에서 목회자는 멘토 없이 늘 치열한
+              현장에 고립됩니다.</span></li>
+            <li><strong>소진의 위기</strong><span>감정노동의 최전선에서 성도들의 어려움을 공감하며 대리외상을
+              겪고, 영적 침체와 우울감을 경험합니다.</span></li>
           </ul>
 
           <h3 className="wm-h3">사업 목표</h3>
@@ -297,12 +298,12 @@ function MinistriesPage() {
           </div>
 
           <ul className="wm-issue-list">
-            <li><strong>생존 인프라의 부재</strong> — 가장 기본적인 권리인 &lsquo;머물 곳&rsquo;과
-              &lsquo;이동할 권리&rsquo;의 부재, 선교지와 한국 물가 사이의 격차.</li>
-            <li><strong>사역의 고립감</strong> — 우리(WE)가 아닌 혼자(I)인 위로자, 파송교회·후원자와의
-              유대와 공감 부재. 사역보고는 있으나 교제가 부족합니다.</li>
-            <li><strong>소진의 위기</strong> — 끊임없이 주는 삶에 익숙한 정서적 고갈 상태, 하나님의
-              걸작품이 아닌 소모품으로 전락하는 위기.</li>
+            <li><strong>생존 인프라의 부재</strong><span>가장 기본적인 권리인 &lsquo;머물 곳&rsquo;과
+              &lsquo;이동할 권리&rsquo;의 부재, 선교지와 한국 물가 사이의 격차.</span></li>
+            <li><strong>사역의 고립감</strong><span>우리(WE)가 아닌 혼자(I)인 위로자, 파송교회·후원자와의
+              유대와 공감 부재. 사역보고는 있으나 교제가 부족합니다.</span></li>
+            <li><strong>소진의 위기</strong><span>끊임없이 주는 삶에 익숙한 정서적 고갈 상태, 하나님의
+              걸작품이 아닌 소모품으로 전락하는 위기.</span></li>
           </ul>
 
           <h3 className="wm-h3">사업 목표</h3>
@@ -374,22 +375,24 @@ function MinistriesPage() {
           />
 
           <div className="wm-outcome-grid">
-            <Reveal as="div" className="wm-outcome-card">
-              <h4>목회자가 경험하는 변화</h4>
+            {/* (2026-10-07) 항목이 눈에 잘 띄도록 — 각 항목을 "굵은 제목 + 설명" 두 줄로 나누고,
+                체크 아이콘·카드 상단 색 띠(목회자=초록, 교회=주황)로 강조했습니다. */}
+            <Reveal as="div" className="wm-outcome-card wm-outcome-card-teal">
+              <h4><span className="wm-outcome-card-eyebrow">FOR PASTORS</span>목회자가 경험하는 변화</h4>
               <ul>
-                <li>사역의 전문성 강화 — 최신 목회 동향 등 전문성 개발</li>
-                <li>지지그룹 확보 — 동료그룹과 멘토그룹을 통한 지지체계</li>
-                <li>회복탄력성 강화 — 소진관리를 통한 회복으로 사역 지속</li>
-                <li>지속 가능한 사역동력 — 지속적인 사후 프로그램과 피드백</li>
+                <li><CheckCircle2 size={20} /><div><strong>사역의 전문성 강화</strong><span>최신 목회 동향 등 전문성 개발</span></div></li>
+                <li><CheckCircle2 size={20} /><div><strong>지지그룹 확보</strong><span>동료그룹과 멘토그룹을 통한 지지체계</span></div></li>
+                <li><CheckCircle2 size={20} /><div><strong>회복탄력성 강화</strong><span>소진관리를 통한 회복으로 사역 지속</span></div></li>
+                <li><CheckCircle2 size={20} /><div><strong>지속 가능한 사역동력</strong><span>지속적인 사후 프로그램과 피드백</span></div></li>
               </ul>
             </Reveal>
-            <Reveal as="div" className="wm-outcome-card" delay={100}>
-              <h4>교회가 경험하는 변화</h4>
+            <Reveal as="div" className="wm-outcome-card wm-outcome-card-orange" delay={100}>
+              <h4><span className="wm-outcome-card-eyebrow">FOR CHURCHES</span>교회가 경험하는 변화</h4>
               <ul>
-                <li>리더 리스크 관리 — 사역의 연속성 확보</li>
-                <li>공동체의 영적·정서적 건강도 상승 — 강단의 생명력 강화</li>
-                <li>교회의 현대화 — 디지털 사역 정착, 최신 사역 기획</li>
-                <li>건강한 동력 모델 구축 — 평신도 섬김, 외부 네트워크 자산화</li>
+                <li><CheckCircle2 size={20} /><div><strong>리더 리스크 관리</strong><span>사역의 연속성 확보</span></div></li>
+                <li><CheckCircle2 size={20} /><div><strong>공동체의 영적·정서적 건강도 상승</strong><span>강단의 생명력 강화</span></div></li>
+                <li><CheckCircle2 size={20} /><div><strong>교회의 현대화</strong><span>디지털 사역 정착, 최신 사역 기획</span></div></li>
+                <li><CheckCircle2 size={20} /><div><strong>건강한 동력 모델 구축</strong><span>평신도 섬김, 외부 네트워크 자산화</span></div></li>
               </ul>
             </Reveal>
           </div>
@@ -603,16 +606,22 @@ function MinistriesPage() {
           color: var(--wh-orange-deep);
         }
 
+        /* (2026-10-07) 설명이 두 줄 이상으로 넘어갈 때 제목(예: "소진의 위기 —") 아래로 파고들지
+           않도록, 제목과 설명을 두 칸 그리드로 나눠 설명 칸 안에서만 줄바꿈되게 했습니다(내어쓰기).
+           ul을 2열 그리드로 두고 li는 display: contents로 풀어서, 한 목록 안의 설명들이 가장 긴
+           제목 기준으로 같은 세로선에 맞춰 정렬됩니다. */
         .wm-issue-list {
           list-style: none;
           margin: 0 0 1.75rem;
           padding: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
+          display: grid;
+          grid-template-columns: max-content 1fr;
+          column-gap: 0.6rem;
+          row-gap: 0.55rem;
         }
 
         .wm-issue-list li {
+          display: contents;
           color: var(--wh-ink-soft);
           font-size: 0.95rem;
           line-height: 1.7;
@@ -620,6 +629,37 @@ function MinistriesPage() {
 
         .wm-issue-list strong {
           color: var(--wh-ink);
+          font-size: 0.95rem;
+          line-height: 1.7;
+          white-space: nowrap;
+        }
+
+        .wm-issue-list strong::after {
+          content: ' —';
+          color: var(--wh-ink-soft);
+          font-weight: 400;
+        }
+
+        .wm-issue-list li > span {
+          color: var(--wh-ink-soft);
+          font-size: 0.95rem;
+          line-height: 1.7;
+          word-break: keep-all;
+        }
+
+        @media (max-width: 560px) {
+          .wm-issue-list {
+            grid-template-columns: 1fr;
+            row-gap: 0.1rem;
+          }
+
+          .wm-issue-list li > span {
+            margin-bottom: 0.55rem;
+          }
+
+          .wm-issue-list strong::after {
+            content: '';
+          }
         }
 
         .wm-goal-caption {
@@ -730,15 +770,39 @@ function MinistriesPage() {
         }
 
         .wm-outcome-card {
-          padding: 1.75rem;
-          background: var(--wh-bg-soft);
+          --wm-outcome-accent: var(--wh-orange-deep);
+          padding: 2rem 1.9rem 1.9rem;
+          background: #fff;
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-top: 5px solid var(--wm-outcome-accent);
+          border-radius: 12px;
+          box-shadow: 0 10px 28px rgba(28, 28, 22, 0.07);
+        }
+
+        .wm-outcome-card-teal {
+          --wm-outcome-accent: var(--wh-teal);
+        }
+
+        .wm-outcome-card-orange {
+          --wm-outcome-accent: var(--wh-orange-deep);
         }
 
         .wm-outcome-card h4 {
           color: var(--wh-ink);
-          margin-bottom: 0.9rem;
+          font-size: 1.28rem;
+          font-weight: 800;
+          margin-bottom: 1.3rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid var(--wh-line);
+        }
+
+        .wm-outcome-card-eyebrow {
+          display: block;
+          font-size: 0.72rem;
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          color: var(--wm-outcome-accent);
+          margin-bottom: 0.35rem;
         }
 
         .wm-outcome-card ul {
@@ -747,26 +811,35 @@ function MinistriesPage() {
           list-style: none;
           display: flex;
           flex-direction: column;
-          gap: 0.6rem;
+          gap: 1.05rem;
         }
 
         .wm-outcome-card li {
-          color: var(--wh-ink-soft);
-          font-size: 0.9rem;
-          line-height: 1.6;
-          padding-left: 1rem;
-          position: relative;
+          display: flex;
+          align-items: flex-start;
+          gap: 0.75rem;
         }
 
-        .wm-outcome-card li::before {
-          content: '';
-          position: absolute;
-          left: 0;
-          top: 0.55rem;
-          width: 5px;
-          height: 5px;
-          border-radius: 50%;
-          background: var(--wh-orange);
+        .wm-outcome-card li > svg {
+          flex-shrink: 0;
+          color: var(--wm-outcome-accent);
+          margin-top: 0.1rem;
+        }
+
+        .wm-outcome-card li strong {
+          display: block;
+          color: var(--wh-ink);
+          font-size: 1.04rem;
+          font-weight: 800;
+          line-height: 1.45;
+        }
+
+        .wm-outcome-card li span {
+          display: block;
+          color: var(--wh-ink-soft);
+          font-size: 0.93rem;
+          line-height: 1.6;
+          margin-top: 0.15rem;
         }
 
         @media (max-width: 860px) {

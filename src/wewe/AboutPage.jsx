@@ -209,7 +209,8 @@ function AboutPage() {
                     <li>목회자 아카데미 심포지엄</li>
                     <li>목회자 세미나 · 소진관리</li>
                     <li>개별 지원 (심리상담 · 재정 · 장학)</li>
-                    <li>전투복 프로젝트 <span className="wh-progress-badge">진행 중</span></li>
+                    {/* (2026-10-07) 목회자(초록) 칸의 "진행 중" 표시는 초록, 선교사(주황) 칸은 주황으로 통일 */}
+                    <li>전투복 프로젝트 <span className="wh-live-badge">진행 중</span></li>
                   </ul>
                 </div>
               </div>
@@ -218,7 +219,7 @@ function AboutPage() {
                 <div className="wa-org-project">
                   <strong>Project 2 · Missionary Care</strong>
                   <ul>
-                    <li>WEWE 스테이 (주거) <span className="wh-live-badge">진행 중</span></li>
+                    <li>WEWE 스테이 (주거) <span className="wh-progress-badge">진행 중</span></li>
                     <li>레위인의 모빌리티 (이동)</li>
                     <li>Poiema 돌봄</li>
                     <li>WE+WE 커넥트</li>
@@ -267,13 +268,15 @@ function AboutPage() {
         </div>
       </section>
 
-      <section className="wa-cta wa-cta-alt">
+      {/* (2026-10-07) 배경을 초록 → 바로 위 CTA·푸터의 어두운 회색보다 15% 정도 밝은 회색으로 변경.
+          버튼은 기존에 보이던 초록 배경을 그대로 유지합니다. */}
+      <section className="wa-cta wa-cta-soft">
         <div className="wh-container wa-cta-inner">
           <div>
             <h2>WEWE의 운영과 지속가능성이 궁금하신가요?</h2>
             <p>법인 설립 방향, 선순환 구조, 재원 조성 계획과 추진 일정을 소개합니다.</p>
           </div>
-          <Link to="/about/sustainability" className="wh-btn wh-btn-outline">
+          <Link to="/about/sustainability" className="wh-btn wh-btn-outline wa-cta-soft-btn">
             운영 · 지속가능성 보기 <ArrowRight size={18} />
           </Link>
         </div>
@@ -282,6 +285,25 @@ function AboutPage() {
       <WeweFooter />
 
       <style>{`
+        /* (2026-10-07) 운영·지속가능성 CTA — 위 CTA(#1c1c1a)보다 약 15% 밝은 회색. 흰 글씨 대비 약 10:1. */
+        .wa-cta-soft {
+          background: #3e3e3b;
+        }
+
+        .wa-cta-soft p {
+          color: rgba(255, 255, 255, 0.85);
+        }
+
+        .wa-cta-soft-btn {
+          background: var(--wh-teal);
+          border-color: var(--wh-teal);
+        }
+
+        .wa-cta-soft-btn:hover {
+          background: #0f5a5f;
+          border-color: #0f5a5f;
+        }
+
         .wa-story {
           padding: 5rem 0 1rem;
           background: var(--wh-bg);

@@ -34,7 +34,11 @@ const isWeweSitePath =
   pathname === '/forgot-password' ||
   pathname === '/reset-password' ||
   pathname === '/mypage' ||
-  pathname === '/profile';
+  pathname === '/profile' ||
+  // (2026-10-07) WEWE 쪽 관리자 페이지(/admin, /admin/posts/...). 위위스테이 관리자 페이지는
+  // 계속 /stay/admin이며, 두 화면은 같은 컴포넌트·데이터를 공유합니다.
+  pathname === '/admin' ||
+  pathname.startsWith('/admin/');
 
 if (isStayPath) {
   root.render(

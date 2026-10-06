@@ -608,3 +608,25 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* 섹션 배너 사진 (2026-10-07 신규) — 사역 소개 페이지 Refresh Pastor Academy 섹션의
+   배너(.wm-project-photo)와 같은 크기·모양(높이 220px, 모바일 160px, 모서리 12px)입니다.
+   운영·지속가능성, 전투복 프로젝트 등 여러 페이지가 함께 쓰므로 공용 CSS에 둡니다. */
+.wh-section-banner {
+  height: 220px;
+  margin: 0 0 2.25rem;
+  border-radius: 12px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--wh-bg-soft);
+}
+
+.wh-section-banner-after {
+  margin: 2.25rem 0 0;
+}
+
+@media (max-width: 860px) {
+  .wh-section-banner {
+    height: 160px;
+  }
+}

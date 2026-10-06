@@ -66,6 +66,7 @@ function LeadershipPage() {
               <p className="wl-leader-degree">간호학(전공) 학사 · 호스피스 전문 간호사(석사)</p>
               <ul className="wl-leader-history">
                 <li>현 세브란스 완화의료팀 프로젝트매니저</li>
+                <li>현 상지대학교 아동간호학 강사</li>
                 <li>전 세브란스 완화의료팀 소아전문간호사</li>
                 <li>전 국립암센터 소아암 병동 전문간호사</li>
               </ul>

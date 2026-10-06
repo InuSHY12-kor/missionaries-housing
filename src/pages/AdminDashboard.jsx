@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../App';
 import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning, Plus, Pencil } from 'lucide-react';
 import PageHero from '../components/PageHero';
+import WevePageHero from '../wewe/WevePageHero';
 import AmenityIcon from '../components/AmenityIcon';
 import { AMENITY_MAP } from '../utils/amenities';
 
@@ -37,7 +38,12 @@ const VALID_TABS = ['users', 'accommodations', 'inquiries', 'deletions', 'member
 const POST_STATUS_LABEL = { draft: '임시저장', published: '발행됨' };
 const POST_STATUS_BADGE = { draft: 'badge-neutral', published: 'badge-success' };
 
-function AdminDashboard({ userProfile }) {
+// (2026-10-07) site prop — 같은 관리자 화면을 위위스테이(/stay/admin, 기본값 'stay')와 WEWE
+// (/admin, src/wewe/WeweAdminPage.jsx, 'wewe') 양쪽에서 공유합니다. 데이터·기능은 완전히 동일하고,
+// 'wewe'일 때는 히어로 배너만 WEWE 스타일로 바꾸고, 위위스테이 앱에만 있는 화면(숙소 상세)으로
+// 가는 링크는 /stay/... 전체 페이지 이동으로 연결합니다(WEWE 라우터에는 그 경로가 없기 때문).
+function AdminDashboard({ userProfile, site = 'stay' }) {
+  const isWeweSite = site === 'wewe';
   const [searchParams] = useSearchParams();
   const initialTab = VALID_TABS.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'users';
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -461,12 +467,21 @@ function AdminDashboard({ userProfile }) {
 
   return (
     <div className="admin-dashboard">
-      <PageHero
-        images={ADMIN_HERO_IMAGES}
-        eyebrow="ADMIN"
-        title="관리자 대시보드"
-        subtitle="회원과 숙소, 예약 현황을 한눈에 확인하고 관리하세요"
-      />
+      {isWeweSite ? (
+        <WevePageHero
+          images={ADMIN_HERO_IMAGES}
+          eyebrow="ADMIN"
+          title="관리자 대시보드"
+          subtitle="WEWE와 WEWE STAY의 회원·숙소·예약·사역 소식을 한 곳에서 관리하세요"
+        />
+      ) : (
+        <PageHero
+          images={ADMIN_HERO_IMAGES}
+          eyebrow="ADMIN"
+          title="관리자 대시보드"
+          subtitle="회원과 숙소, 예약 현황을 한눈에 확인하고 관리하세요"
+        />
+      )}
       <div className="container">
         <h1>관리자 대시보드</h1>
 
@@ -656,10 +671,17 @@ function AdminDashboard({ userProfile }) {
                     </div>
 
                     <div className="action-buttons">
-                      <Link to={`/accommodations/${acc.id}`} className="btn btn-primary">
-                        <Eye size={16} />
-                        실제 페이지에서 검토하기
-                      </Link>
+                      {isWeweSite ? (
+                        <a href={`/stay/accommodations/${acc.id}`} className="btn btn-primary">
+                          <Eye size={16} />
+                          실제 페이지에서 검토하기
+                        </a>
+                      ) : (
+                        <Link to={`/accommodations/${acc.id}`} className="btn btn-primary">
+                          <Eye size={16} />
+                          실제 페이지에서 검토하기
+                        </Link>
+                      )}
                     </div>
                   </div>
                 ))}

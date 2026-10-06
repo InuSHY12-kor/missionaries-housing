@@ -246,7 +246,7 @@ function NewsDetailPage() {
             {!currentUserId && <span className="nd-reaction-hint">로그인 후 반응을 남길 수 있어요</span>}
 
             {isAdmin && (
-              <a href={`/stay/admin/posts/${post.id}/edit`} className="wh-btn wh-btn-outline nd-edit-btn">
+              <a href={`/admin/posts/${post.id}/edit`} className="wh-btn wh-btn-outline nd-edit-btn">
                 <Pencil size={16} />
                 수정
               </a>
