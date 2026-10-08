@@ -71,28 +71,56 @@ function AboutPage() {
 
       <section className="wa-story">
         <div className="wh-container wh-container-narrow">
+          {/* (2026-10-08 가독성 개편) 섹션 제목을 추가하고, 이어 붙어 있던 세 문단을 사업계획서
+              Branding Story의 흐름(시작 → 질문 → 응답) 그대로 번호 붙은 세 단계로 나눠 핵심 문장이
+              먼저 눈에 들어오도록 했습니다. 문장 내용은 기존과 같습니다. */}
           <Reveal>
+            <span className="wh-eyebrow wh-eyebrow-center">BRANDING STORY</span>
+            <h2 className="wh-h2-center">위로자를 바라보시는 하나님의 마음</h2>
+
             <blockquote className="wh-verse">
               &ldquo;너희 중에 분깃이나 기업이 없는 레위인과 네 성중에 거류하는 객과 및 고아와 과부들이 와서
               먹고 배부르게 하라 그리하면 네 하나님 여호와께서 네 손으로 하는 범사에 네게 복을 주시리라&rdquo;
-              <cite>(신명기 14:29)</cite>
+              <cite>신명기 14:29</cite>
             </blockquote>
-
-            <p>
-              WEWE는 가장 깊은 상실의 자리에서 시작되었습니다. 누군가의 아픔을 돌보는 이들이 정작 자신의
-              무너진 마음은 숨겨야만 하는 현실, 그리고 그들의 눈물을 기특함과 안타까움으로 바라보시는
-              하나님의 시선을 마주했습니다.
-            </p>
-            <p>
-              &ldquo;누가 그들의 눈물을 닦아주는가?&rdquo; 이 질문에 대한 답을 성경에서 찾았습니다. 고아와
-              과부, 나그네를 향한 구제의 손길 이전에, 기업이 없어 공동체의 돌봄이 절실했던
-              &lsquo;레위인&rsquo;이 있었습니다.
-            </p>
-            <p>
-              WEWE는 현대판 레위인인 목회자와 선교사들이 다시 일어설 수 있도록, 그들의 &lsquo;위로자&rsquo;가
-              되고자 합니다.
-            </p>
           </Reveal>
+
+          <div className="wa-story-steps">
+            <Reveal as="div" className="wa-story-step" delay={40}>
+              <span className="wa-story-no">01</span>
+              <div>
+                <span className="wa-story-label">시작</span>
+                <h3>돌보는 이들의 숨겨진 아픔</h3>
+                <p>
+                  WEWE는 가장 깊은 상실의 자리에서 시작되었습니다. 누군가의 아픔을 돌보는 이들이 정작 자신의
+                  무너진 마음은 숨겨야만 하는 현실, 그리고 그들의 눈물을 기특함과 안타까움으로 바라보시는
+                  하나님의 시선을 마주했습니다.
+                </p>
+              </div>
+            </Reveal>
+            <Reveal as="div" className="wa-story-step" delay={80}>
+              <span className="wa-story-no">02</span>
+              <div>
+                <span className="wa-story-label">질문</span>
+                <h3>&ldquo;누가 그들의 눈물을 닦아주는가?&rdquo;</h3>
+                <p>
+                  이 질문에 대한 답을 성경에서 찾았습니다. 고아와 과부, 나그네를 향한 구제의 손길 이전에,
+                  기업이 없어 공동체의 돌봄이 절실했던 &lsquo;레위인&rsquo;이 있었습니다.
+                </p>
+              </div>
+            </Reveal>
+            <Reveal as="div" className="wa-story-step wa-story-step-answer" delay={120}>
+              <span className="wa-story-no">03</span>
+              <div>
+                <span className="wa-story-label">응답</span>
+                <h3>현대판 레위인의 위로자</h3>
+                <p>
+                  WEWE는 현대판 레위인인 <strong>목회자와 선교사들이 다시 일어설 수 있도록</strong>, 그들의
+                  &lsquo;위로자&rsquo;가 되고자 합니다.
+                </p>
+              </div>
+            </Reveal>
+          </div>
 
           {/* 말씀 구절 섹션과 같은 너비의 16:9 사진 한 장 — 위로자·말씀의 분위기를 담은
               사진이며, 스크롤하며 떠오르는 Reveal 애니메이션이 적용됩니다. */}
@@ -236,7 +264,13 @@ function AboutPage() {
           <Reveal>
             <span className="wh-eyebrow wh-eyebrow-center">FOR WHOM</span>
             <h2 className="wh-h2-center">우리가 위로하는 사람들</h2>
-            <p className="wa-target-line">WEWE → 목회자 → 선교사</p>
+            <p className="wa-target-line">
+              <span className="wa-flow-chip">WEWE</span>
+              <ArrowRight size={18} />
+              <span className="wa-flow-chip wa-flow-chip-teal">목회자</span>
+              <ArrowRight size={18} />
+              <span className="wa-flow-chip wa-flow-chip-orange">선교사</span>
+            </p>
             <p>
               WEWE는 여러 분야의 전문가들과 협업하며, 체계적이고 투명한 운영을 지향합니다. 평신도와 기업의
               후원이 전문적인 돌봄으로, 다시 교회와 선교현장의 회복으로 이어지는 선순환 구조를 만들어가고
@@ -649,7 +683,268 @@ function AboutPage() {
           margin-bottom: 1rem !important;
         }
 
+        /* ───────────────────────────────────────────────
+           (2026-10-08) 가독성 개편 — 본문 글씨를 진하고 크게(0.98~1.05rem, 진한 잉크색),
+           카드 제목은 1.1rem 이상 굵게, 영문 라벨은 브랜드 색으로 또렷하게. 한국어 단어가
+           줄 끝에서 쪼개지지 않도록 keep-all. 기울임꼴(한글 가독성 저하)은 쓰지 않습니다.
+           ─────────────────────────────────────────────── */
+        .wewe-about-page {
+          word-break: keep-all;
+        }
+
+        .wewe-about-page .wa-story {
+          padding: 4.5rem 0 1rem;
+        }
+
+        .wewe-about-page .wh-verse {
+          margin: 0 0 2.25rem;
+          padding: 1.75rem 2rem;
+          background: rgba(217, 123, 63, 0.07);
+          border-left: 4px solid var(--wh-orange);
+          border-radius: 0 12px 12px 0;
+          font-style: normal;
+          font-size: 1.08rem;
+          line-height: 1.9;
+          color: var(--wh-ink);
+        }
+
+        .wewe-about-page .wh-verse cite {
+          color: var(--wh-orange-deep);
+          font-weight: 800;
+          font-size: 0.9rem;
+        }
+
+        .wa-story-steps {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          margin-bottom: 2.5rem;
+        }
+
+        .wa-story-step {
+          display: grid;
+          grid-template-columns: 56px 1fr;
+          gap: 1.1rem;
+          padding: 1.5rem 1.6rem;
+          background: var(--wh-bg-soft);
+          border: 1px solid var(--wh-line);
+          border-radius: 12px;
+        }
+
+        .wa-story-step-answer {
+          background: rgba(20, 107, 113, 0.06);
+          border-color: rgba(20, 107, 113, 0.25);
+        }
+
+        .wa-story-no {
+          font-size: 1.6rem;
+          font-weight: 800;
+          color: var(--wh-orange);
+          line-height: 1.2;
+        }
+
+        .wa-story-step-answer .wa-story-no {
+          color: var(--wh-teal);
+        }
+
+        .wa-story-label {
+          display: block;
+          font-size: 0.78rem;
+          font-weight: 800;
+          letter-spacing: 0.1em;
+          color: var(--wh-orange-deep);
+          margin-bottom: 0.25rem;
+        }
+
+        .wa-story-step-answer .wa-story-label {
+          color: var(--wh-teal);
+        }
+
+        .wa-story-step h3 {
+          color: var(--wh-ink);
+          font-size: 1.22rem;
+          font-weight: 800;
+          margin: 0 0 0.5rem;
+        }
+
+        .wewe-about-page .wa-story-step p {
+          margin: 0;
+          color: var(--wh-ink);
+          font-size: 1rem;
+          line-height: 1.85;
+        }
+
+        .wa-story-step p strong {
+          color: var(--wh-teal);
+        }
+
+        .wewe-about-page .wa-logo-block {
+          padding: 2rem;
+          border-radius: 12px;
+        }
+
+        .wewe-about-page .wa-logo-block-text h3 {
+          font-size: 1.4rem;
+          font-weight: 800;
+        }
+
+        .wewe-about-page .wh-identity-sub {
+          font-size: 0.85rem;
+          font-weight: 800;
+          color: var(--wh-orange-deep);
+          letter-spacing: 0.04em;
+        }
+
+        .wewe-about-page .wa-logo-block-text p {
+          color: var(--wh-ink);
+          font-size: 0.99rem;
+          line-height: 1.85;
+        }
+
+        .wewe-about-page .wa-values {
+          padding: 3rem 0 4.5rem;
+        }
+
+        .wewe-about-page .wa-mv-card {
+          padding: 2rem 1.75rem;
+          background: var(--wh-bg);
+          border-top: 4px solid var(--wh-orange);
+          box-shadow: 0 8px 22px rgba(28, 28, 22, 0.05);
+        }
+
+        .wewe-about-page .wa-mv-card:last-child {
+          border-top-color: var(--wh-teal);
+        }
+
+        .wewe-about-page .wa-mv-label {
+          font-size: 0.85rem;
+          letter-spacing: 0.14em;
+        }
+
+        .wewe-about-page .wa-mv-card:last-child .wa-mv-label {
+          color: var(--wh-teal);
+        }
+
+        .wewe-about-page .wa-mv-card p {
+          font-size: 1.2rem;
+          font-weight: 800;
+          line-height: 1.6;
+        }
+
+        .wewe-about-page .wa-cv-card {
+          padding: 1.75rem 1.25rem;
+          background: var(--wh-bg);
+        }
+
+        .wewe-about-page .wa-cv-card h4 {
+          font-size: 1.18rem;
+          font-weight: 800;
+        }
+
+        .wewe-about-page .wa-cv-card h4 span {
+          font-size: 0.78rem;
+          font-weight: 800;
+          color: var(--wh-orange-deep);
+        }
+
+        .wewe-about-page .wa-cv-card p {
+          color: var(--wh-ink);
+          font-size: 0.95rem;
+          line-height: 1.7;
+        }
+
+        .wewe-about-page .wa-org-root {
+          font-size: 1.3rem;
+          padding: 1.1rem 2.4rem;
+        }
+
+        .wewe-about-page .wa-org-root span {
+          font-size: 0.82rem;
+        }
+
+        .wewe-about-page .wa-org-target {
+          font-size: 1rem;
+          padding: 0.5rem 1.4rem;
+        }
+
+        .wewe-about-page .wa-org-project {
+          padding: 1.6rem 1.75rem;
+          border-radius: 12px;
+        }
+
+        .wewe-about-page .wa-org-project strong {
+          font-size: 1.05rem;
+          font-weight: 800;
+          margin-bottom: 0.9rem;
+        }
+
+        .wewe-about-page .wa-org-project li {
+          color: var(--wh-ink);
+          font-size: 0.97rem;
+          line-height: 1.6;
+          padding-left: 0.95rem;
+          position: relative;
+        }
+
+        .wewe-about-page .wa-org-project li::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0.62rem;
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: var(--wh-stone);
+        }
+
+        .wewe-about-page .wa-org-branch-teal .wa-org-project li::before {
+          background: var(--wh-teal);
+        }
+
+        .wewe-about-page .wa-org-branch-orange .wa-org-project li::before {
+          background: var(--wh-orange);
+        }
+
+        .wewe-about-page .wa-target p {
+          color: var(--wh-ink);
+          font-size: 1.02rem;
+        }
+
+        .wewe-about-page .wa-target-line {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 0.6rem;
+          flex-wrap: wrap;
+          color: var(--wh-stone);
+          margin-bottom: 1.5rem !important;
+        }
+
+        .wa-flow-chip {
+          display: inline-block;
+          padding: 0.4rem 1rem;
+          border-radius: 999px;
+          background: var(--wh-ink);
+          color: #fff;
+          font-size: 0.95rem;
+          font-weight: 800;
+        }
+
+        .wa-flow-chip-teal {
+          background: var(--wh-teal);
+        }
+
+        .wa-flow-chip-orange {
+          background: var(--wh-orange);
+        }
+
         @media (max-width: 860px) {
+          .wa-story-step {
+            grid-template-columns: 1fr;
+            gap: 0.4rem;
+            padding: 1.3rem;
+          }
+
           .wa-logo-block {
             grid-template-columns: 1fr;
           }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AlertCircle, X } from 'lucide-react';
 import { supabase } from '../App';
 import { useIdleAutoLogout } from '../utils/useIdleAutoLogout';
@@ -37,6 +37,30 @@ import SiteTitle from './SiteTitle';
 // 시작하는 경로는 index.js가 이 컴포넌트를 마운트하기 전에 이미 걸러내므로 여기서는
 // 신경 쓰지 않아도 됩니다. 선교사·호스트 가입(서류 제출 + 관리자 승인)은 이미 검증된
 // /stay 쪽 흐름을 그대로 재사용하므로 이 라우터에는 별도 경로가 없습니다(SignupPage 참고).
+// (2026-10-08 추가) 로그아웃되면 어느 페이지에 있었든 랜딩(/)으로 돌려보냅니다 — 위위스테이
+// (App.jsx)에서 로그아웃하면 로그인 필요 화면이 사라지고 랜딩으로 가는 것과 같은 방식입니다.
+// 이전에는 상단 메뉴만 로그인 전 모습으로 바뀌고 보던 화면(관리자 페이지, 성과관리 수정 화면,
+// 마이페이지 등)이 그대로 남아 있었습니다. 헤더의 로그아웃 버튼뿐 아니라 2시간 유휴 자동
+// 로그아웃, 다른 탭에서의 로그아웃(SIGNED_OUT 이벤트)도 모두 여기서 처리합니다.
+// 같은 React 트리 안에서 이동(navigate)하므로 자동 로그아웃 안내 배너는 그대로 보입니다.
+// 비밀번호 재설정 화면은 스스로 로그아웃한 뒤 /login으로 보내므로 예외로 둡니다.
+const STAY_ON_SIGN_OUT_PATHS = ['/', '/login', '/reset-password'];
+
+function RedirectHomeOnSignOut() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== 'SIGNED_OUT') return;
+      if (STAY_ON_SIGN_OUT_PATHS.includes(window.location.pathname)) return;
+      navigate('/', { replace: true });
+    });
+    return () => subscription?.unsubscribe();
+  }, [navigate]);
+
+  return null;
+}
+
 function WeweSite() {
   // 위위 스테이(App.jsx)와 동일한 규칙(유휴 2시간 자동 로그아웃 + 같은 브라우저 내 로그인
   // 상태 유지)을 위위 홈페이지에서도 지키기 위해, 여기서도 로그인 여부를 직접 추적하고
@@ -63,6 +87,7 @@ function WeweSite() {
     <BrowserRouter>
       <SiteTitle title="WEWE (위로자의 위로자)" />
       <ScrollToTop />
+      <RedirectHomeOnSignOut />
       {autoLogoutMessage && (
         <div className="wewe-auto-logout-banner">
           <AlertCircle size={18} />

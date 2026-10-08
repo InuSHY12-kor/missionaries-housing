@@ -9,6 +9,8 @@ import weweRepresentative from '../assets/wewe-representative.jpg';
 import weweLogoNew from '../assets/wewe-logo-new.png';
 import hyesungChurchLogo from '../assets/hyesung-church-logo.png';
 import hisLogo from '../assets/his-logo.png';
+import lmodsLogo from '../assets/lmods-logo.png';
+import fouLogo from '../assets/fou-logo.png';
 import './wewe-shared.css';
 
 // 협력기관 / 후원기관 목록 (2026-09-13 추가). 로고를 누르면 각 기관의 홈페이지 또는
@@ -22,6 +24,21 @@ const PARTNER_ORGS = [
     name: '혜성교회',
     logo: hyesungChurchLogo,
     url: 'https://www.hyesung.or.kr/',
+  },
+  // (2026-10-08 추가) 엘모즈 비스포크 — 로고 하단 "L'MODS BESPOKE" 글씨가 밝은 베이지색이라
+  // 밝은 카드 위에서는 잘 안 보여서, 이 카드만 어두운 초록 배경(dark)으로 표시합니다.
+  {
+    kind: '협력기관',
+    name: '엘모즈 비스포크',
+    logo: lmodsLogo,
+    url: 'https://www.instagram.com/lmods.official/',
+    dark: true,
+  },
+  {
+    kind: '협력기관',
+    name: 'Focus on You (FoU)',
+    logo: fouLogo,
+    url: 'https://www.foufilm.com/',
   },
 ];
 
@@ -113,7 +130,7 @@ function LeadershipPage() {
                   href={org.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="wl-partner-card"
+                  className={`wl-partner-card${org.dark ? ' wl-partner-card-dark' : ''}`}
                   aria-label={`${org.name} 바로가기`}
                 >
                   <img src={org.logo} alt={org.name} className="wl-partner-logo" />
@@ -294,6 +311,12 @@ function LeadershipPage() {
         .wl-partner-card:hover {
           border-color: var(--wh-orange);
           transform: translateY(-2px);
+        }
+
+        .wl-partner-card-dark {
+          background: #24302a;
+          border-color: #24302a;
+          padding: 0.75rem;
         }
 
         .wl-partner-logo {
