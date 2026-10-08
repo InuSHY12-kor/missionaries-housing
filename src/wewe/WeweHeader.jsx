@@ -92,6 +92,13 @@ function WeweHeader() {
     e.preventDefault();
     closeMobileNav();
     await supabase.auth.signOut();
+    // 위위스테이(App.jsx handleLogout)와 같게 — 다음 로그인 때 이전 세션의 마지막 활동 시각을
+    // 이어받지 않도록 지웁니다. 페이지 이동(→ 랜딩)은 WeweSite의 RedirectHomeOnSignOut이 처리합니다.
+    try {
+      window.localStorage.removeItem('wewe_last_activity_at');
+    } catch (err) {
+      // localStorage 접근 불가(프라이빗 모드 등) 시에도 로그아웃 자체는 이미 완료됨
+    }
   };
 
   return (

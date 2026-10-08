@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowDown,
   Building2,
   Users,
   Home,
@@ -56,7 +57,6 @@ const SERVICE_MODEL = [
     title: 'WEWE 스테이',
     items: ['숙소 등록 · 현장 확인 (신뢰 검증)', '선교사 신청 · 파송교회 추천 확인', '매칭 · 예약 · 이용 가이드', '웰컴키트 · 체류 중 돌봄 연계', '이용 후기 · 호스트 결과 리포트'],
     value: '공간 · 사람 · 돌봄 데이터가 쌓이며 Missionary Care 전 프로그램의 허브로 성장',
-    highlight: true,
   },
   {
     icon: Users,
@@ -191,22 +191,28 @@ function WeweStayIntroPage() {
             delay={40}
           />
 
-          <div className="wsi-model-grid">
+          {/* (2026-10-08) 공급 → 플랫폼 → 이용 순서로 위에서 아래로 쌓고, 가운데(플랫폼)만 검은색이던
+              카드를 세 카드 모두 같은 색으로 통일했습니다. 카드 사이 화살표로 흐름을 보여줍니다. */}
+          <div className="wsi-model-list">
             {SERVICE_MODEL.map((m, idx) => (
-              <Reveal
-                as="div"
-                key={m.title}
-                className={`wsi-model-card${m.highlight ? ' wsi-model-card-highlight' : ''}`}
-                delay={idx * 80}
-              >
-                <span className="wsi-model-icon"><m.icon size={22} /></span>
-                <span className="wsi-model-tag">{m.tag}</span>
-                <h4>{m.title}</h4>
-                <ul>
-                  {m.items.map((it) => <li key={it}>{it}</li>)}
-                </ul>
-                <p className="wsi-model-value"><strong>얻는 가치</strong> {m.value}</p>
-              </Reveal>
+              <React.Fragment key={m.title}>
+                {idx > 0 && (
+                  <div className="wsi-model-arrow" aria-hidden="true"><ArrowDown size={20} /></div>
+                )}
+                <Reveal as="div" className="wsi-model-card" delay={idx * 80}>
+                  <div className="wsi-model-head">
+                    <span className="wsi-model-icon"><m.icon size={22} /></span>
+                    <div>
+                      <span className="wsi-model-tag">{m.tag}</span>
+                      <h4>{m.title}</h4>
+                    </div>
+                  </div>
+                  <ul>
+                    {m.items.map((it) => <li key={it}>{it}</li>)}
+                  </ul>
+                  <p className="wsi-model-value"><strong>얻는 가치</strong> {m.value}</p>
+                </Reveal>
+              </React.Fragment>
             ))}
           </div>
         </div>
@@ -451,42 +457,53 @@ function WeweStayIntroPage() {
           background: var(--wh-orange);
         }
 
-        .wsi-model-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1rem;
+        /* 서비스 모델 (2026-10-08 개편) — 세 카드를 위에서 아래로, 모두 같은 색으로.
+           카드 안은 윗줄 [아이콘·구분·이름], 아랫줄 [세부 항목 | 얻는 가치] 두 칸. */
+        .wsi-model-list {
+          display: flex;
+          flex-direction: column;
           align-items: stretch;
         }
 
-        .wsi-model-card {
+        .wsi-model-arrow {
           display: flex;
-          flex-direction: column;
-          padding: 1.75rem 1.6rem;
-          background: var(--wh-bg);
-          border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          justify-content: center;
+          padding: 0.45rem 0;
+          color: var(--wh-orange);
         }
 
-        .wsi-model-card-highlight {
-          background: var(--wh-ink);
-          border-color: var(--wh-ink);
+        .wsi-model-card {
+          display: grid;
+          grid-template-columns: 1.15fr 1fr;
+          gap: 1rem 1.5rem;
+          align-items: start;
+          padding: 1.6rem 1.75rem;
+          background: var(--wh-bg);
+          border: 1px solid var(--wh-line);
+          border-left: 5px solid var(--wh-orange);
+          border-radius: 12px;
+          box-shadow: 0 8px 22px rgba(28, 28, 22, 0.05);
+        }
+
+        .wsi-model-head {
+          grid-column: 1 / -1;
+          padding-bottom: 0.9rem;
+          border-bottom: 1px solid var(--wh-line);
+          display: flex;
+          align-items: center;
+          gap: 0.85rem;
         }
 
         .wsi-model-icon {
+          flex-shrink: 0;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 44px;
-          height: 44px;
+          width: 46px;
+          height: 46px;
           border-radius: 50%;
           background: rgba(217, 123, 63, 0.12);
           color: var(--wh-orange-deep);
-          margin-bottom: 1rem;
-        }
-
-        .wsi-model-card-highlight .wsi-model-icon {
-          background: rgba(255, 255, 255, 0.12);
-          color: #fff;
         }
 
         .wsi-model-tag {
@@ -494,52 +511,39 @@ function WeweStayIntroPage() {
           font-size: 0.75rem;
           font-weight: 800;
           letter-spacing: 0.08em;
-          color: var(--wh-teal);
-          margin-bottom: 0.35rem;
-        }
-
-        .wsi-model-card-highlight .wsi-model-tag {
-          color: #f0a875;
+          color: var(--wh-orange-deep);
+          margin-bottom: 0.2rem;
         }
 
         .wsi-model-card h4 {
           color: var(--wh-ink);
           font-size: 1.2rem;
           font-weight: 800;
-          margin-bottom: 1rem;
-        }
-
-        .wsi-model-card-highlight h4 {
-          color: #fff;
+          margin: 0;
         }
 
         .wsi-model-card ul {
-          margin: 0 0 1.2rem;
+          margin: 0;
           padding: 0;
           list-style: none;
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
-          flex: 1;
+          gap: 0.45rem;
         }
 
         .wsi-model-card li {
-          color: var(--wh-ink-soft);
-          font-size: 0.93rem;
+          color: var(--wh-ink);
+          font-size: 0.95rem;
           line-height: 1.6;
           padding-left: 0.95rem;
           position: relative;
-        }
-
-        .wsi-model-card-highlight li {
-          color: rgba(255, 255, 255, 0.88);
         }
 
         .wsi-model-card li::before {
           content: '';
           position: absolute;
           left: 0;
-          top: 0.6rem;
+          top: 0.62rem;
           width: 5px;
           height: 5px;
           border-radius: 50%;
@@ -548,16 +552,12 @@ function WeweStayIntroPage() {
 
         .wsi-model-value {
           margin: 0;
-          padding-top: 1rem;
-          border-top: 1px solid var(--wh-line);
-          font-size: 0.9rem;
+          padding: 0.9rem 1rem;
+          background: rgba(217, 123, 63, 0.07);
+          border-radius: 10px;
+          font-size: 0.92rem;
           color: var(--wh-ink-soft);
           line-height: 1.65;
-        }
-
-        .wsi-model-card-highlight .wsi-model-value {
-          border-top-color: rgba(255, 255, 255, 0.18);
-          color: rgba(255, 255, 255, 0.85);
         }
 
         .wsi-model-value strong {
@@ -566,10 +566,6 @@ function WeweStayIntroPage() {
           margin-bottom: 0.3rem;
           font-size: 0.82rem;
           font-weight: 800;
-        }
-
-        .wsi-model-card-highlight .wsi-model-value strong {
-          color: #f0a875;
         }
 
         .wsi-journey-block {
@@ -845,9 +841,13 @@ function WeweStayIntroPage() {
           }
 
           .wsi-overview-grid,
-          .wsi-model-grid,
           .wsi-risk-grid {
             grid-template-columns: 1fr;
+          }
+
+          .wsi-model-card {
+            grid-template-columns: 1fr;
+            gap: 1rem;
           }
 
           .wsi-journey-row {
