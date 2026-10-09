@@ -37,12 +37,11 @@ const DEFAULT_CONTENT = {
     title: 'WEWE와 함께해 주셔서 감사합니다.',
     body: '지친 목회자와 선교사님들이 다시 일어설 수 있도록, 위로자의 위로자가 되어 함께해 주셔서 감사합니다.',
   },
-  partners: [
+  // (2026-10-09) 협력기관·후원기관 구분 없이 하나의 목록(orgs)으로 합쳤습니다.
+  orgs: [
     { name: '혜성교회', url: 'https://www.hyesung.or.kr/', logo: 'asset:hyesung', bg: '#faf9f6' },
     { name: '엘모즈 비스포크', url: 'https://www.instagram.com/lmods.official/', logo: 'asset:lmods', bg: '#24302a' },
     { name: 'Studio FoU', url: 'https://www.foufilm.com/', logo: 'asset:fou', bg: '#faf9f6' },
-  ],
-  sponsors: [
     { name: 'History in Scent (HIS)', url: 'https://www.instagram.com/history_in_scent/', logo: 'asset:his', bg: '#3a3128' },
   ],
   supporters: [],
@@ -75,8 +74,12 @@ function normalizeContent(data) {
       title: typeof src.intro?.title === 'string' ? src.intro.title : DEFAULT_CONTENT.intro.title,
       body: typeof src.intro?.body === 'string' ? src.intro.body : DEFAULT_CONTENT.intro.body,
     },
-    partners: Array.isArray(src.partners) ? normalizeOrgs(src.partners) : DEFAULT_CONTENT.partners,
-    sponsors: Array.isArray(src.sponsors) ? normalizeOrgs(src.sponsors) : DEFAULT_CONTENT.sponsors,
+    // 이전 형식(partners + sponsors 두 목록)으로 저장된 데이터는 순서대로 이어 붙여 하나로 읽습니다.
+    orgs: Array.isArray(src.orgs)
+      ? normalizeOrgs(src.orgs)
+      : (Array.isArray(src.partners) || Array.isArray(src.sponsors))
+        ? normalizeOrgs([...(src.partners || []), ...(src.sponsors || [])])
+        : DEFAULT_CONTENT.orgs,
     supporters: Array.isArray(src.supporters) ? src.supporters.map((s) => String(s)).filter(Boolean) : [],
   };
 }
@@ -90,15 +93,13 @@ const splitSupporters = (text) => String(text || '')
 const toDraft = (c) => ({
   introTitle: c.intro.title,
   introBody: c.intro.body,
-  partners: c.partners.map((o) => ({ ...o })),
-  sponsors: c.sponsors.map((o) => ({ ...o })),
+  orgs: c.orgs.map((o) => ({ ...o })),
   supportersText: c.supporters.join('; '),
 });
 
 const fromDraft = (d) => ({
   intro: { title: d.introTitle.trim(), body: d.introBody.trim() },
-  partners: d.partners.map((o) => ({ ...o, name: o.name.trim(), url: o.url.trim() })).filter((o) => o.name),
-  sponsors: d.sponsors.map((o) => ({ ...o, name: o.name.trim(), url: o.url.trim() })).filter((o) => o.name),
+  orgs: d.orgs.map((o) => ({ ...o, name: o.name.trim(), url: o.url.trim() })).filter((o) => o.name),
   supporters: splitSupporters(d.supportersText),
 });
 
@@ -282,7 +283,7 @@ function PartnersPage() {
 
   const handleSave = async () => {
     const next = fromDraft(draft);
-    const badUrl = [...next.partners, ...next.sponsors].find((o) => o.url && !isSafeUrl(o.url));
+    const badUrl = next.orgs.find((o) => o.url && !isSafeUrl(o.url));
     if (badUrl) {
       setSaveError(`"${badUrl.name}"의 주소는 http:// 또는 https:// 로 시작해야 합니다.`);
       return;
@@ -350,16 +351,9 @@ function PartnersPage() {
               />
 
               <OrgEditor
-                title="협력기관"
-                list={draft.partners}
-                onChange={(list) => setDraft((p) => ({ ...p, partners: list }))}
-                uploading={uploading}
-                onUpload={handleUpload}
-              />
-              <OrgEditor
-                title="후원기관"
-                list={draft.sponsors}
-                onChange={(list) => setDraft((p) => ({ ...p, sponsors: list }))}
+                title="협력기관 · 후원기관"
+                list={draft.orgs}
+                onChange={(list) => setDraft((p) => ({ ...p, orgs: list }))}
                 uploading={uploading}
                 onUpload={handleUpload}
               />
@@ -426,20 +420,14 @@ function PartnersPage() {
                   <h2 className="wh-h2-center">협력기관 · 후원기관</h2>
                 </Reveal>
 
-                {content.partners.length > 0 && (
+                {/* (2026-10-09) 협력기관·후원기관 구분 없이 한 목록으로 */}
+                {content.orgs.length > 0 && (
                   <Reveal as="div" className="wpp-org-group" delay={40}>
-                    <h3 className="wpp-group-title">협력기관</h3>
                     <div className="wpp-org-grid">
-                      {content.partners.map((org) => <OrgCard key={`p-${org.name}`} org={org} />)}
-                    </div>
-                  </Reveal>
-                )}
-
-                {content.sponsors.length > 0 && (
-                  <Reveal as="div" className="wpp-org-group" delay={80}>
-                    <h3 className="wpp-group-title">후원기관</h3>
-                    <div className="wpp-org-grid">
-                      {content.sponsors.map((org) => <OrgCard key={`s-${org.name}`} org={org} />)}
+                      {content.orgs.map((org, idx) => (
+                        // eslint-disable-next-line react/no-array-index-key
+                        <OrgCard key={`${org.name}-${idx}`} org={org} />
+                      ))}
                     </div>
                   </Reveal>
                 )}
@@ -532,24 +520,6 @@ function PartnersPage() {
 
         .wpp-org-group {
           margin-top: 1.5rem;
-        }
-
-        .wpp-group-title {
-          display: flex;
-          align-items: center;
-          gap: 0.6rem;
-          font-size: 1.05rem;
-          font-weight: 800;
-          color: var(--wh-ink);
-          margin: 0 0 1rem;
-        }
-
-        .wpp-group-title::before {
-          content: '';
-          width: 4px;
-          height: 1.1em;
-          border-radius: 2px;
-          background: var(--wh-orange);
         }
 
         .wpp-org-grid {
