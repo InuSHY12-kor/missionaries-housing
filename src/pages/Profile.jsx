@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../App';
-import { User, Phone, Building2, Save, Bell } from 'lucide-react';
+import { User, Phone, Building2, Save, Bell, Landmark } from 'lucide-react';
+import { PayoutAccountSection } from '../components/PayoutAccountForm';
 import PageHero from '../components/PageHero';
 import { formatPhoneNumber } from '../utils/phone';
 
@@ -345,6 +346,17 @@ function Profile({ userProfile }) {
                 </button>
               </form>
             </div>
+
+            {/* (2026-10-10) 숙소 제공자 지급 계좌 — 페이플 지급대행 */}
+            {userProfile?.role === 'host' && (
+              <div className="section-card">
+                <h2>
+                  <Landmark size={24} />
+                  숙박 실비 지급 계좌
+                </h2>
+                <PayoutAccountSection userId={userProfile.id} />
+              </div>
+            )}
 
             {/* 알림 설정 */}
             <div className="section-card">

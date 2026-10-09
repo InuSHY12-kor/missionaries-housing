@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import RefundPolicy from './pages/RefundPolicy';
+import { ServiceGuidePage, HowItWorksPage, TermsPage, PrivacyPage } from './pages/StayInfo';
 import CompleteProfile from './pages/CompleteProfile';
 import PendingApproval from './pages/PendingApproval';
 import AccountStatus from './pages/AccountStatus';
@@ -323,6 +324,11 @@ function App() {
               <Route path="/reset-password" element={<ResetPassword />} />
               {/* (2026-10-10) 취소·환불 규정 — 누구나 볼 수 있는 공개 페이지(토스 심사·결제 안내용) */}
               <Route path="/refund-policy" element={<RefundPolicy />} />
+              {/* (2026-10-10) 서비스 안내·이용 흐름·이용약관·개인정보처리방침 — 공개 페이지(결제대행사 심사·이용자 안내용) */}
+              <Route path="/guide" element={<ServiceGuidePage />} />
+              <Route path="/how-it-works" element={<HowItWorksPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
 
               {/* 로그인 필요 */}
               {user ? authenticatedRoutes : <Route path="*" element={<Navigate to="/" replace />} />}

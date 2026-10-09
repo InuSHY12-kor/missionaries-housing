@@ -463,7 +463,13 @@ function LandingPage({ noticeBanner = null }) {
           </div>
 
           <div className="footer-copy">
-            <p><Link to="/refund-policy" style={{ color: 'inherit', textDecoration: 'underline' }}>취소·환불 규정</Link></p>
+            <p className="footer-links">
+              <Link to="/guide">서비스 안내</Link>
+              <Link to="/how-it-works">이용 흐름</Link>
+              <Link to="/terms">이용약관</Link>
+              <Link to="/privacy"><b>개인정보처리방침</b></Link>
+              <Link to="/refund-policy">취소·환불 규정</Link>
+            </p>
             <p>&copy; {new Date().getFullYear()} WEWE. All rights reserved.</p>
           </div>
         </div>
@@ -1097,9 +1103,26 @@ function LandingPage({ noticeBanner = null }) {
           line-height: 1.6;
         }
 
+        .footer-copy .footer-links {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+          gap: 0.4rem 1rem;
+          margin: 0 0 0.5rem;
+          color: rgba(255, 255, 255, 0.75);
+          font-size: 0.85rem;
+        }
+
+        .footer-copy .footer-links a {
+          color: inherit;
+          text-decoration: underline;
+        }
+
         .footer-copy {
           display: flex;
+          flex-direction: column;
           align-items: flex-end;
+          justify-content: flex-end;
         }
 
         .footer-copy p {

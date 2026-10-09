@@ -58,6 +58,8 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
   const [expandedMemberId, setExpandedMemberId] = useState(null);
   const [roleChangeBusyId, setRoleChangeBusyId] = useState(null);
   const [allBookings, setAllBookings] = useState([]);
+  // (2026-10-10) 숙소 제공자 지급 계좌 (user_id → 계좌) — 정산 대기 목록에 함께 표시
+  const [payoutAccounts, setPayoutAccounts] = useState({});
   const [bookingStatusBusyId, setBookingStatusBusyId] = useState(null);
   const [posts, setPosts] = useState([]);
   const [postBusyId, setPostBusyId] = useState(null);
@@ -205,6 +207,10 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           .select('*, accommodations(id, title, location, host_id, users(full_name, email)), users(full_name, phone, church_name)')
           .order('created_at', { ascending: false });
         setAllBookings(data || []);
+        const { data: accounts } = await supabase
+          .from('host_payout_accounts')
+          .select('user_id, bank_name, account_number, holder_name, verified_at');
+        setPayoutAccounts(Object.fromEntries((accounts || []).map(a => [a.user_id, a])));
         setCounts(prev => ({ ...prev, bookings: (data || []).length }));
       } else if (activeTab === 'posts') {
         const { data } = await supabase
@@ -1009,6 +1015,12 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
                   {pendingPayouts.map(p => (
                     <li key={p.hostId}>
                       <strong>{p.name}</strong>{p.email ? ` (${p.email})` : ''} — {p.count}건, ₩{p.total.toLocaleString()}
+                      <br />
+                      <span className="payout-account-line">
+                        {payoutAccounts[p.hostId]
+                          ? `지급 계좌: ${payoutAccounts[p.hostId].bank_name} ${payoutAccounts[p.hostId].account_number} (예금주 ${payoutAccounts[p.hostId].holder_name}${payoutAccounts[p.hostId].verified_at ? ', 확인 완료' : ', 예금주 확인 전'})`
+                          : '지급 계좌 미등록 — 숙소 제공자에게 프로필에서 등록을 요청해주세요'}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -1274,6 +1286,11 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           margin: 0 0 0.6rem;
           padding-left: 1.2rem;
           line-height: 1.8;
+        }
+
+        .payout-account-line {
+          font-size: 0.9rem;
+          color: #4a463e;
         }
 
         .payout-hint {
