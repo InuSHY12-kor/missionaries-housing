@@ -5,6 +5,7 @@ import { Upload, AlertCircle } from 'lucide-react';
 import PageHero from '../components/PageHero';
 import { formatPhoneNumber } from '../utils/phone';
 import { readSignupOrigin } from '../components/SignupGuide';
+import { ORG_INFO, PAYMENT_POLICY } from '../data/orgInfo';
 import { PayoutAccountFields, EMPTY_PAYOUT_ACCOUNT, normalizePayoutAccount, savePayoutAccount } from '../components/PayoutAccountForm';
 
 const COMPLETE_PROFILE_HERO_IMAGES = [
@@ -403,7 +404,8 @@ function CompleteProfile() {
               <div className="form-group payout-signup">
                 <label>숙박 실비 지급 계좌</label>
                 <p className="help-text">
-                  선교사님이 입금한 숙박 실비는 입실이 확인된 뒤 페이플(Payple) 지급대행을 통해 아래 계좌로 보내드립니다.
+                  선교사님이 입금한 숙박 실비는 입실이 확인된 뒤 {ORG_INFO.paymentPartner} 정산지급대행을 통해 아래 계좌로 보내드립니다.
+                  지급할 때 <b>정산지급대행 업체가 가져가는 수수료({PAYMENT_POLICY.payoutFeeLabel})는 숙소 제공자 부담</b>으로 실비에서 빼고 지급됩니다.
                   지급 전에 예금주가 맞는지 확인하므로 정확히 입력해주세요. (등록 후 프로필 화면에서 언제든 바꿀 수 있습니다)
                 </p>
                 <label className="payout-later">

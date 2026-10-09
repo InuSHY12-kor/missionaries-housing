@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { StayInfoLayout } from './StayInfo';
-import { ORG_INFO } from '../data/orgInfo';
+import { ORG_INFO, PAYMENT_POLICY } from '../data/orgInfo';
 import { TERMS_EFFECTIVE_DATE } from '../data/termsOfService';
 
 // WEWE STAY 취소·환불 규정 (/stay/refund-policy).
@@ -64,8 +64,8 @@ function RefundPolicy() {
       <section className="si-card">
         <h2>4. 미입금 예약</h2>
         <p>
-          안내된 입금 기한까지 입금되지 않은 예약은 취소될 수 있습니다. 기한이 지난 가상계좌로는 입금되지 않으니
-          다시 예약해주세요.
+          숙박 실비는 계좌이체로만 받으며, 가상계좌 발급일로부터 <b>{PAYMENT_POLICY.depositDays}일 안에</b> 입금되지 않은 예약은
+          자동으로 취소됩니다. 기한이 지난 가상계좌로는 입금되지 않으니 다시 예약해주세요.
         </p>
       </section>
 
@@ -75,6 +75,7 @@ function RefundPolicy() {
           <li>환불은 <b>입금하신 분 본인 명의의 계좌</b>로 이체합니다. 취소 시 환불받을 계좌(은행, 계좌번호, 예금주)를 받습니다.</li>
           <li>환불 요청이 접수되면 영업일 기준 3일 안에 {ORG_INFO.paymentPartner}를 통해 이체합니다.</li>
           <li>입금액보다 많은 금액이 입금된 경우 차액도 함께 환불합니다.</li>
+          <li>환불은 입금하신 금액 전액이며, 정산지급대행 수수료 등 별도 비용을 빼지 않습니다.</li>
           <li>입실이 확인되어 숙소 제공자에게 지급된 이후에는 환불할 수 없으며, 이후 문제는 당사자 간 협의를 원칙으로 WEWE가 조정을 돕습니다.</li>
         </ul>
       </section>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../App';
+import { ORG_INFO, PAYMENT_POLICY } from '../data/orgInfo';
 
 // 숙소 제공자 지급 계좌 입력 (2026-10-10, 페이플 정산지급대행 준비).
 // 페이플은 송금 전에 계좌조회(예금주 실명 확인)를 하며 은행 코드, 계좌번호, 예금주 구분,
@@ -182,7 +183,8 @@ export function PayoutAccountSection({ userId }) {
   return (
     <div className="payout-section">
       <p className="help-text">
-        선교사님이 입금한 숙박 실비는 입실이 확인된 뒤 페이플(Payple) 지급대행을 통해 이 계좌로 보내드립니다.
+        선교사님이 입금한 숙박 실비는 입실이 확인된 뒤 {ORG_INFO.paymentPartner} 정산지급대행을 통해 이 계좌로 보내드립니다.
+        이때 <b>정산지급대행 업체가 가져가는 수수료({PAYMENT_POLICY.payoutFeeLabel})는 숙소 제공자 부담</b>으로, 실비에서 빼고 지급됩니다.
         실비를 받지 않고 무료로만 제공하신다면 등록하지 않으셔도 됩니다.
       </p>
       {!editing && account && (

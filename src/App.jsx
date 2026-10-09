@@ -27,8 +27,6 @@ import HostAccommodations from './pages/HostAccommodations';
 import MyBookings from './pages/MyBookings';
 import BookingDetail from './pages/BookingDetail';
 import BookingCheckout from './pages/BookingCheckout';
-import PaymentSuccess from './pages/PaymentSuccess';
-import PaymentFail from './pages/PaymentFail';
 import HostBookings from './pages/HostBookings';
 import Reviews from './pages/Reviews';
 import Messages from './pages/Messages';
@@ -249,14 +247,6 @@ function App() {
           <Route
             path="/my-bookings/:id/pay"
             element={canSearchAccommodations ? <BookingCheckout userProfile={userProfile} /> : <Navigate to="/dashboard" replace />}
-          />
-          <Route
-            path="/payment/success"
-            element={canSearchAccommodations ? <PaymentSuccess userProfile={userProfile} /> : <Navigate to="/dashboard" replace />}
-          />
-          <Route
-            path="/payment/fail"
-            element={canSearchAccommodations ? <PaymentFail userProfile={userProfile} /> : <Navigate to="/dashboard" replace />}
           />
           <Route
             path="/my-accommodations"

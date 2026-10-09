@@ -6,7 +6,8 @@ import LocationPicker from '../components/LocationPicker';
 import Calendar from '../components/Calendar';
 import AmenityIcon from '../components/AmenityIcon';
 import { AMENITY_GROUPS } from '../utils/amenities';
-import { priceUnit, isPerStay } from '../utils/price';
+import { priceUnit, isPerStay, payoutNet } from '../utils/price';
+import { PAYMENT_POLICY } from '../data/orgInfo';
 import PageHero from '../components/PageHero';
 
 // 내 숙소 관리 페이지 상단 슬라이드 배너 사진
@@ -505,6 +506,10 @@ function HostAccommodations({ userProfile }) {
                     required
                   />
                   <p className="help-text">시세가 아닌, 관리비·청소비 등 최소한의 실비 수준으로 입력해 주세요.</p>
+                  <p className="help-text">
+                    선교사님은 계좌이체로만 입금하며, 지급할 때 정산지급대행 수수료({PAYMENT_POLICY.payoutFeeLabel})는 숙소 제공자 부담으로 빼고 보내드립니다.
+                    {Number(formData.price) > 0 && ` (예상 지급액: ₩${payoutNet(formData.price, PAYMENT_POLICY.payoutFeeRate).toLocaleString()}${formData.price_type === 'per_stay' ? '' : ' / 1박'})`}
+                  </p>
                 </div>
                 <div className="form-group">
                   <label>수용인원 *</label>

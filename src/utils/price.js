@@ -24,3 +24,15 @@ export function totalForStay(accommodation, nights) {
   if (isPerStay(accommodation)) return price;
   return price * (Number(nights) || 0);
 }
+
+// 정산지급대행 수수료(숙소 제공자 부담) — 지급 시 실비에서 빼고 보냅니다.
+// 원 단위 미만은 올림해 수수료가 실제보다 적게 안내되지 않도록 합니다.
+export function payoutFee(amount, rate) {
+  const value = Number(amount) || 0;
+  return Math.ceil(value * rate);
+}
+
+export function payoutNet(amount, rate) {
+  const value = Number(amount) || 0;
+  return value - payoutFee(value, rate);
+}

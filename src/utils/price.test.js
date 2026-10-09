@@ -15,3 +15,11 @@ test('숙박 1회 정액: 박수와 관계없이 실비 그대로', () => {
   expect(priceUnit(acc)).toBe('/1회');
   expect(priceBasis(acc)).toContain('박수 무관');
 });
+
+test('정산지급대행 수수료(숙소 제공자 부담): 1.5%, 원 단위 올림', () => {
+  const { payoutFee, payoutNet } = require('./price');
+  expect(payoutFee(100000, 0.015)).toBe(1500);
+  expect(payoutNet(100000, 0.015)).toBe(98500);
+  expect(payoutFee(33333, 0.015)).toBe(500);
+  expect(payoutNet(0, 0.015)).toBe(0);
+});
