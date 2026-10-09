@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import RefundPolicy from './pages/RefundPolicy';
+import PageViewTracker from './analytics/PageViewTracker';
 import { ServiceGuidePage, HowItWorksPage, TermsPage, PrivacyPage } from './pages/StayInfo';
 import CompleteProfile from './pages/CompleteProfile';
 import PendingApproval from './pages/PendingApproval';
@@ -272,6 +273,7 @@ function App() {
     <BrowserRouter basename="/stay">
       {/* (2026-10-09) 관리자 편집 모드(배너·문구 수정) — src/edit/EditMode.jsx */}
       <EditModeProvider site="stay">
+      <PageViewTracker site="stay" basePath="/stay" />
       <div className="App">
         {autoLogoutMessage && (
           <div className="auto-logout-banner">

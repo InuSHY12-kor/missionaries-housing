@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../App';
 import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_BADGE_CLASS, cancelPaidBooking, formatDateTime } from '../utils/bankTransfer';
 import { payoutFee } from '../utils/price';
+import SiteStats from './SiteStats';
 import { PAYMENT_POLICY } from '../data/orgInfo';
 import { priceUnit, isPerStay } from '../utils/price';
 import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning, Plus, Pencil } from 'lucide-react';
@@ -36,7 +37,7 @@ const MEMBER_FILTERS = [
 
 // 다른 페이지(마이페이지 통계 카드 등)에서 /admin?tab=bookings 처럼 특정 탭으로 바로
 // 이동할 수 있도록 지원하는 탭 키 목록.
-const VALID_TABS = ['users', 'accommodations', 'inquiries', 'deletions', 'members', 'bookings', 'posts'];
+const VALID_TABS = ['users', 'accommodations', 'inquiries', 'deletions', 'members', 'bookings', 'posts', 'stats'];
 const POST_STATUS_LABEL = { draft: '임시저장', published: '발행됨' };
 const POST_STATUS_BADGE = { draft: 'badge-neutral', published: 'badge-success' };
 
@@ -646,7 +647,16 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           >
             사역 소식 ({counts.posts})
           </button>
+          {/* (2026-10-10) WEWE·WEWE STAY 방문 통계 */}
+          <button
+            className={`tab ${activeTab === 'stats' ? 'active' : ''}`}
+            onClick={() => setActiveTab('stats')}
+          >
+            방문 통계
+          </button>
         </div>
+
+        {activeTab === 'stats' && <SiteStats defaultSite="all" />}
 
         {/* 사용자 검토 */}
         {activeTab === 'users' && (
