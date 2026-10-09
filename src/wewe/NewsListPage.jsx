@@ -7,6 +7,7 @@ import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
 import { weweSupabase } from './weweSupabase';
 import HERO_IMAGE_SETS from './heroImages';
+import NewsSubNav from './NewsSubNav';
 import Reveal from './Reveal';
 import './wewe-shared.css';
 import { EditableText } from '../edit/EditMode';
@@ -76,7 +77,9 @@ function NewsListPage() {
         title="사역 소식"
         subtitle="WEWE가 걸어가는 이야기와 사역 현장의 소식을 전합니다."
         images={HERO_IMAGE_SETS.news}
-      />
+      >
+        <NewsSubNav active="/news" />
+      </WevePageHero>
 
       <section className="nl-section">
         <div className="wh-container">

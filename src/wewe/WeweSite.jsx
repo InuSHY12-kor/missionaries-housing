@@ -13,6 +13,7 @@ import CombatUniformPage from './CombatUniformPage';
 import WeweStayIntroPage from './WeweStayIntroPage';
 import NewsListPage from './NewsListPage';
 import NewsDetailPage from './NewsDetailPage';
+import { PrayerLettersListPage, PrayerLetterDetailPage, PrayerLetterEditorPage } from './PrayerLetters';
 import DonatePage from './DonatePage';
 import SignupPage from './SignupPage';
 import SupporterSignup from './SupporterSignup';
@@ -117,6 +118,11 @@ function WeweSite() {
         <Route path="/about/ministries/combat-uniform" element={<CombatUniformPage />} />
         <Route path="/about/ministries/wewe-stay" element={<WeweStayIntroPage />} />
         <Route path="/news" element={<NewsListPage />} />
+        {/* (2026-10-09) 사역 소식 > 기도 편지 게시판 — 정적 경로가 /news/:slug보다 먼저 매칭됩니다 */}
+        <Route path="/news/prayer-letters" element={<PrayerLettersListPage />} />
+        <Route path="/news/prayer-letters/new" element={<PrayerLetterEditorPage />} />
+        <Route path="/news/prayer-letters/:id" element={<PrayerLetterDetailPage />} />
+        <Route path="/news/prayer-letters/:id/edit" element={<PrayerLetterEditorPage />} />
         <Route path="/news/:slug" element={<NewsDetailPage />} />
         <Route path="/donate" element={<DonatePage />} />
         <Route path="/signup" element={<SignupPage />} />
