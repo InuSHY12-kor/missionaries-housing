@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
@@ -21,6 +21,7 @@ import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
+import { useWeweAdmin } from './useWeweAdmin';
 import lmodsGroupPhoto from '../assets/lmods-group.webp';
 import lmodsLogo from '../assets/lmods-logo.png';
 import './wewe-shared.css';
@@ -145,9 +146,10 @@ const fromDraft = (draft) => ({
 });
 
 function CombatUniformPage() {
+  const navigate = useNavigate();
   const [growth, setGrowth] = useState(DEFAULT_GROWTH);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [userId, setUserId] = useState(null);
+  // (2026-10-09) 관리자 확인을 공용 훅으로 — 서버 검증 + 로그인 상태 변화·창 포커스마다 재확인.
+  const { isAdmin, userId, checked: adminChecked } = useWeweAdmin();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -167,23 +169,19 @@ function CombatUniformPage() {
         setGrowth(normalizeGrowth(data.data));
       });
 
-    supabase.auth.getSession().then(async ({ data }) => {
-      const user = data?.session?.user;
-      if (!user) return;
-      const { data: profile } = await supabase
-        .from('users')
-        .select('role, status')
-        .eq('id', user.id)
-        .maybeSingle();
-      if (!mounted) return;
-      setUserId(user.id);
-      setIsAdmin(profile?.role === 'admin' && profile?.status === 'approved');
-    });
-
     return () => {
       mounted = false;
     };
   }, []);
+
+  // 수정 중에 관리자 권한을 잃으면(로그아웃 포함) 수정 화면을 닫고 곧바로 페이지를 벗어납니다.
+  useEffect(() => {
+    if (editing && adminChecked && !isAdmin) {
+      setEditing(false);
+      setDraft(null);
+      navigate('/', { replace: true });
+    }
+  }, [editing, adminChecked, isAdmin, navigate]);
 
   const startEditing = () => {
     setDraft(toDraft(growth));

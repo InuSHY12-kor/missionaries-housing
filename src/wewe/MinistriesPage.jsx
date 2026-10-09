@@ -227,12 +227,20 @@ function MinistriesPage() {
           <div className="wm-goal-grid">
             <div className="wm-goal-card">
               <h4>전인적 회복</h4>
-              <p>사역 현장에서 벗어난 완전한 멈춤, 심리적 안정감, Giver에서 Taker로 영적 자기효능감 회복,
-                회복탄력성 강화</p>
+              <ul className="wm-card-list">
+                <li>사역 현장에서 벗어난 완전한 멈춤</li>
+                <li>심리적 안정감</li>
+                <li>Giver에서 Taker로 — 영적 자기효능감 회복</li>
+                <li>회복탄력성 강화</li>
+              </ul>
             </div>
             <div className="wm-goal-card">
               <h4>연결</h4>
-              <p>초교파적 동료의 지지 기반, 시니어-주니어 목회자 멘토링, 지역별 목회자 자조모임</p>
+              <ul className="wm-card-list">
+                <li>초교파적 동료의 지지 기반</li>
+                <li>시니어–주니어 목회자 멘토링</li>
+                <li>지역별 목회자 자조모임</li>
+              </ul>
             </div>
           </div>
 
@@ -242,15 +250,23 @@ function MinistriesPage() {
               <span className="wm-program-icon"><GraduationCap size={20} /></span>
               <div>
                 <h4>목회자 아카데미</h4>
-                <p>심포지엄 · 목회자 세미나 · 목회자 소진관리 프로그램</p>
+                <ul className="wm-card-list">
+                  <li>심포지엄</li>
+                  <li>목회자 세미나</li>
+                  <li>목회자 소진관리 프로그램</li>
+                </ul>
               </div>
             </div>
             <div className="wm-program-card">
               <span className="wm-program-icon"><UserCheck size={20} /></span>
               <div>
                 <h4>개별 지원</h4>
-                <p>연간 N명의 대상자 선정, 목회자 자기탐색(심리상담 프로그램), 개별 지원(재정 등),
-                  목회자 양성 장학사업</p>
+                <ul className="wm-card-list">
+                  <li>연간 N명의 대상자 선정</li>
+                  <li>목회자 자기탐색 (심리상담 프로그램)</li>
+                  <li>개별 지원 (재정 등)</li>
+                  <li>목회자 양성 장학사업</li>
+                </ul>
               </div>
             </div>
             <div className="wm-program-card wm-program-live">
@@ -311,11 +327,19 @@ function MinistriesPage() {
           <div className="wm-goal-grid">
             <div className="wm-goal-card">
               <h4>생존 인프라 지원</h4>
-              <p>WEWE 스테이 설립, 전국의 선교관·스테이·유휴숙소 네트워크 구축, 필수 활동을 위한 차량 공유</p>
+              <ul className="wm-card-list">
+                <li>WEWE 스테이 설립</li>
+                <li>전국의 선교관·스테이·유휴숙소 네트워크 구축</li>
+                <li>필수 활동을 위한 차량 공유</li>
+              </ul>
             </div>
             <div className="wm-goal-card">
               <h4>환대와 회복</h4>
-              <p>완전한 회복을 위한 리트릿 프로그램, 소진관리를 통한 심리·정서적 회복, 귀국 시 건강검진 지원</p>
+              <ul className="wm-card-list">
+                <li>완전한 회복을 위한 리트릿 프로그램</li>
+                <li>소진관리를 통한 심리·정서적 회복</li>
+                <li>귀국 시 건강검진 지원</li>
+              </ul>
             </div>
           </div>
 
@@ -877,6 +901,149 @@ function MinistriesPage() {
             position: static;
             transform: none;
           }
+        }
+
+        /* ───────────────────────────────────────────────
+           (2026-10-09) 가독성 개편 — 작은 글씨로 길게 이어지던 설명을 키우고(0.95~1rem), 색을 진하게,
+           카드 제목은 굵게. 쉼표로 이어지던 목표·프로그램 설명은 짧은 목록(.wm-card-list)으로 나눴습니다.
+           한글 기울임꼴(인용·프롤로그)은 가독성이 떨어져 쓰지 않습니다.
+           ─────────────────────────────────────────────── */
+        .wewe-ministries-page .wm-subtitle {
+          color: var(--wh-ink);
+          font-size: 1.08rem;
+          font-weight: 600;
+        }
+
+        .wewe-ministries-page .wm-prologue {
+          font-style: normal;
+          color: var(--wh-ink);
+          font-size: 1rem;
+          line-height: 1.9;
+          border-left-width: 4px;
+          border-radius: 0 12px 12px 0;
+        }
+
+        .wewe-ministries-page .wm-project-teal .wm-prologue {
+          background: rgba(20, 107, 113, 0.05);
+          border-left-color: var(--wh-teal);
+        }
+
+        .wewe-ministries-page .wm-project-orange .wm-prologue {
+          background: rgba(217, 123, 63, 0.06);
+          border-left-color: var(--wh-orange);
+        }
+
+        .wewe-ministries-page .wm-project p {
+          color: var(--wh-ink);
+          font-size: 1rem;
+        }
+
+        .wewe-ministries-page .wm-lead-quote {
+          font-style: normal;
+          font-size: 1.08rem;
+          line-height: 1.8;
+        }
+
+        .wewe-ministries-page .wm-ring-label-text {
+          font-size: 0.93rem;
+          color: var(--wh-ink);
+        }
+
+        .wewe-ministries-page .wm-ring-source {
+          font-size: 0.85rem;
+        }
+
+        .wewe-ministries-page .wm-quote-grid blockquote {
+          font-style: normal;
+          font-size: 0.98rem;
+          color: var(--wh-ink);
+          line-height: 1.7;
+          padding: 1.3rem 1.25rem 1.1rem;
+        }
+
+        .wewe-ministries-page .wm-quote-grid cite {
+          font-size: 0.85rem;
+          font-weight: 800;
+        }
+
+        .wewe-ministries-page .wm-issue-list strong,
+        .wewe-ministries-page .wm-issue-list li > span {
+          font-size: 1rem;
+        }
+
+        .wewe-ministries-page .wm-issue-list li > span {
+          color: var(--wh-ink);
+        }
+
+        .wewe-ministries-page .wm-goal-caption {
+          font-size: 1.02rem;
+        }
+
+        .wewe-ministries-page .wm-goal-card,
+        .wewe-ministries-page .wm-program-card {
+          padding: 1.5rem 1.6rem;
+          border-radius: 12px;
+        }
+
+        .wewe-ministries-page .wm-goal-card h4,
+        .wewe-ministries-page .wm-program-card h4 {
+          font-size: 1.12rem;
+          font-weight: 800;
+          margin-bottom: 0.6rem;
+        }
+
+        .wewe-ministries-page .wm-goal-card p,
+        .wewe-ministries-page .wm-program-card p {
+          color: var(--wh-ink);
+          font-size: 0.97rem;
+          line-height: 1.7;
+        }
+
+        .wm-card-list {
+          margin: 0;
+          padding: 0;
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 0.4rem;
+        }
+
+        .wm-card-list li {
+          position: relative;
+          padding-left: 0.95rem;
+          color: var(--wh-ink);
+          font-size: 0.97rem;
+          line-height: 1.6;
+        }
+
+        .wm-card-list li::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0.62rem;
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: var(--wh-orange);
+        }
+
+        .wm-project-teal .wm-card-list li::before {
+          background: var(--wh-teal);
+        }
+
+        .wewe-ministries-page .wm-program-icon {
+          width: 42px;
+          height: 42px;
+        }
+
+        /* PROJECT 1의 핵심 프로그램 3개는 3열이면 칸이 좁아 몇 글자마다 줄이 바뀌어서,
+           한 줄에 하나씩(전체 폭) 쌓아 읽기 쉽게 했습니다. */
+        .wewe-ministries-page .wm-program-grid-3 {
+          grid-template-columns: 1fr;
+        }
+
+        .wewe-ministries-page .wh-ministry-link {
+          font-size: 0.93rem;
         }
       `}</style>
     </div>

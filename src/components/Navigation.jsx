@@ -152,12 +152,15 @@ function Navigation({ user, userProfile, onLogout }) {
                       </Link>
                     </li>
                   )}
-                  <li>
-                    <Link to="/my-bookings" className="nav-btn">
-                      <Calendar className="nav-btn-icon" size={18} />
-                      <span className="nav-btn-label">내 예약</span>
-                    </Link>
-                  </li>
+                  {/* (2026-10-09) 내 예약은 숙소를 이용하는 선교사·관리자에게만 (App.jsx 라우트와 동일) */}
+                  {(userProfile.role === 'admin' || userProfile.role === 'missionary') && (
+                    <li>
+                      <Link to="/my-bookings" className="nav-btn">
+                        <Calendar className="nav-btn-icon" size={18} />
+                        <span className="nav-btn-label">내 예약</span>
+                      </Link>
+                    </li>
+                  )}
                   {(userProfile.role === 'admin' || userProfile.role === 'host') && (
                     <>
                       <li>

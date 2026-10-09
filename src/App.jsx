@@ -233,11 +233,28 @@ function App() {
                 : <Navigate to="/dashboard" replace />
             }
           />
-          <Route path="/my-bookings" element={<MyBookings userProfile={userProfile} />} />
-          <Route path="/my-bookings/:id" element={<BookingDetail userProfile={userProfile} />} />
-          <Route path="/my-bookings/:id/pay" element={<BookingCheckout userProfile={userProfile} />} />
-          <Route path="/payment/success" element={<PaymentSuccess userProfile={userProfile} />} />
-          <Route path="/payment/fail" element={<PaymentFail userProfile={userProfile} />} />
+          {/* (2026-10-09 권한 정리) 예약·결제 화면은 숙소를 이용하는 쪽(선교사)과 관리자만.
+              숙소 제공자는 "예약 관리"(/host-bookings)에서 자기 숙소의 예약을 봅니다. */}
+          <Route
+            path="/my-bookings"
+            element={canSearchAccommodations ? <MyBookings userProfile={userProfile} /> : <Navigate to="/dashboard" replace />}
+          />
+          <Route
+            path="/my-bookings/:id"
+            element={canSearchAccommodations ? <BookingDetail userProfile={userProfile} /> : <Navigate to="/dashboard" replace />}
+          />
+          <Route
+            path="/my-bookings/:id/pay"
+            element={canSearchAccommodations ? <BookingCheckout userProfile={userProfile} /> : <Navigate to="/dashboard" replace />}
+          />
+          <Route
+            path="/payment/success"
+            element={canSearchAccommodations ? <PaymentSuccess userProfile={userProfile} /> : <Navigate to="/dashboard" replace />}
+          />
+          <Route
+            path="/payment/fail"
+            element={canSearchAccommodations ? <PaymentFail userProfile={userProfile} /> : <Navigate to="/dashboard" replace />}
+          />
           <Route
             path="/my-accommodations"
             element={canManageAccommodations ? <HostAccommodations userProfile={userProfile} /> : <Navigate to="/dashboard" replace />}

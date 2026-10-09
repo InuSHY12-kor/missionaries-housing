@@ -630,3 +630,40 @@
     height: 160px;
   }
 }
+
+/* ───────────────────────────────────────────────
+   한국어 줄바꿈 정리 (2026-10-09) — 모바일에서 "잡아드립니/다"처럼 단어 중간이 잘리거나,
+   "숨겨야 / 했던"처럼 한두 단어만 다음 줄로 떨어지는 문제를 사이트 전체에서 정리합니다.
+   - word-break: keep-all → 한국어도 띄어쓰기(어절) 단위로만 줄을 바꿉니다.
+   - overflow-wrap: break-word → 긴 영문·주소·이메일은 화면 밖으로 넘치지 않게 필요할 때만 끊습니다.
+   - text-wrap: balance (제목·배너 문구) → 줄 길이를 고르게 나눠 마지막 줄에 한 단어만 남지 않게.
+   - text-wrap: pretty (본문) → 마지막 줄에 한 단어만 덩그러니 남는 것을 줄입니다.
+   (balance/pretty를 지원하지 않는 오래된 브라우저에서는 기존처럼 보이고, keep-all은 그대로 적용됩니다.)
+   ─────────────────────────────────────────────── */
+.wewe-page {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.wewe-page h1,
+.wewe-page h2,
+.wewe-page h3,
+.wewe-page h4,
+.wewe-page h5,
+.wewe-page [class*='hero'] p,
+.wewe-page [class*='lead'],
+.wewe-page [class*='subtitle'] {
+  text-wrap: balance;
+}
+
+.wewe-page p,
+.wewe-page li,
+.wewe-page blockquote {
+  text-wrap: pretty;
+}
+
+/* 배너 문구를 문장 단위 블록으로 나눌 때 쓰는 줄 (각 문장 안에서 줄 길이를 고르게) */
+.wh-hero-line {
+  display: block;
+  text-wrap: balance;
+}
