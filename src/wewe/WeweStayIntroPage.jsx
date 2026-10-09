@@ -21,6 +21,7 @@ import WevePageHero from './WevePageHero';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import './wewe-shared.css';
+import { EditableText } from '../edit/EditMode';
 
 // "WEWE 스테이 소개" 상세 페이지 (/about/ministries/wewe-stay, 2026-10-03 신설).
 // WEWE_2026_사업계획서 260930.pptx 슬라이드 24-28을 담았습니다. 실제 예약·검색이
@@ -122,16 +123,16 @@ function WeweStayIntroPage() {
       <section className="wcu-section">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">OVERVIEW</span>
-            <h2 className="wh-h2-center">프로젝트 개요</h2>
-            <p className="wcu-lead">유휴 공간을 선교사의 쉼으로 잇는 자산 공유 플랫폼</p>
+            <EditableText id={"OVERVIEW"} as="span" className="wh-eyebrow wh-eyebrow-center">OVERVIEW</EditableText>
+            <EditableText id={"프로젝트 개요"} as="h2" className="wh-h2-center">프로젝트 개요</EditableText>
+            <EditableText id={"유휴 공간을 선교사의 쉼으로 잇는 자산 공유 플랫폼"} className="wcu-lead">유휴 공간을 선교사의 쉼으로 잇는 자산 공유 플랫폼</EditableText>
           </Reveal>
 
           <Reveal as="blockquote" className="wsi-intro-quote" delay={40}>
-            <p>
+            <EditableText id={"새 건물을 짓기 전에, 이미 있는 공간을 먼저 연결합니다. 작게 시작해 검증하고, 검증된 수요 위에 WEWE"}>
               새 건물을 짓기 전에, 이미 있는 공간을 먼저 연결합니다. 작게 시작해 검증하고, 검증된 수요 위에
               WEWE 스테이 직영 공간을 세웁니다.
-            </p>
+            </EditableText>
             <cite>Asset-Sharing MVP</cite>
           </Reveal>
 
@@ -177,9 +178,9 @@ function WeweStayIntroPage() {
       <section className="wcu-section wcu-section-soft">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">SERVICE MODEL</span>
-            <h2 className="wh-h2-center">서비스 모델</h2>
-            <p className="wcu-lead">공간을 가진 성도(Host)와 쉼이 필요한 선교사(Guest)를 잇는 플랫폼</p>
+            <EditableText id={"SERVICE MODEL"} as="span" className="wh-eyebrow wh-eyebrow-center">SERVICE MODEL</EditableText>
+            <EditableText id={"서비스 모델"} as="h2" className="wh-h2-center">서비스 모델</EditableText>
+            <EditableText id={"공간을 가진 성도(Host)와 쉼이 필요한 선교사(Guest)를 잇는 플랫폼"} className="wcu-lead">공간을 가진 성도(Host)와 쉼이 필요한 선교사(Guest)를 잇는 플랫폼</EditableText>
           </Reveal>
 
           <Reveal
@@ -222,9 +223,9 @@ function WeweStayIntroPage() {
       <section className="wcu-section">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">JOURNEY</span>
-            <h2 className="wh-h2-center">이용 프로세스</h2>
-            <p className="wcu-lead">선교사와 호스트 모두가 안심할 수 있는 단계별 절차</p>
+            <EditableText id={"JOURNEY"} as="span" className="wh-eyebrow wh-eyebrow-center">JOURNEY</EditableText>
+            <EditableText id={"이용 프로세스"} as="h2" className="wh-h2-center">이용 프로세스</EditableText>
+            <EditableText id={"선교사와 호스트 모두가 안심할 수 있는 단계별 절차"} className="wcu-lead">선교사와 호스트 모두가 안심할 수 있는 단계별 절차</EditableText>
           </Reveal>
 
           <Reveal
@@ -272,7 +273,7 @@ function WeweStayIntroPage() {
             />
             <div className="wsi-kit-body">
               <span className="wsi-kit-label"><KeyRound size={16} /> 환대 키트</span>
-              <h4>입실하는 날, 문 앞에서 건네는 환영</h4>
+              <EditableText id={"입실하는 날, 문 앞에서 건네는 환영"} as="h4">입실하는 날, 문 앞에서 건네는 환영</EditableText>
               <ul>
                 {WELCOME_KIT.map((it) => <li key={it}>{it}</li>)}
               </ul>
@@ -285,9 +286,9 @@ function WeweStayIntroPage() {
       <section className="wcu-section wcu-section-soft">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">ACTION PLAN</span>
-            <h2 className="wh-h2-center">단계별 추진 로드맵</h2>
-            <p className="wcu-lead">1차 Action Plan — 플랫폼에서 직영 스테이까지</p>
+            <EditableText id={"ACTION PLAN"} as="span" className="wh-eyebrow wh-eyebrow-center">ACTION PLAN</EditableText>
+            <EditableText id={"단계별 추진 로드맵"} as="h2" className="wh-h2-center">단계별 추진 로드맵</EditableText>
+            <EditableText id={"1차 Action Plan — 플랫폼에서 직영 스테이까지"} className="wcu-lead">1차 Action Plan — 플랫폼에서 직영 스테이까지</EditableText>
           </Reveal>
 
           <div className="wsi-roadmap">
@@ -325,9 +326,9 @@ function WeweStayIntroPage() {
       <section className="wcu-section">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">RISK &amp; RESPONSE</span>
-            <h2 className="wh-h2-center">리스크 &amp; 대응 방안</h2>
-            <p className="wcu-lead">신뢰와 안전이 플랫폼의 가장 중요한 자산입니다</p>
+            <EditableText id={"RISK &amp; RESPONSE"} as="span" className="wh-eyebrow wh-eyebrow-center">RISK &amp; RESPONSE</EditableText>
+            <EditableText id={"리스크 &amp; 대응 방안"} as="h2" className="wh-h2-center">리스크 &amp; 대응 방안</EditableText>
+            <EditableText id={"신뢰와 안전이 플랫폼의 가장 중요한 자산입니다"} className="wcu-lead">신뢰와 안전이 플랫폼의 가장 중요한 자산입니다</EditableText>
           </Reveal>
 
           <Reveal
@@ -354,8 +355,8 @@ function WeweStayIntroPage() {
       <section className="wa-cta wa-cta-alt">
         <div className="wh-container wa-cta-inner">
           <div>
-            <h2>지금 바로 WEWE 스테이를 이용해보세요</h2>
-            <p>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼이 이미 운영 중입니다.</p>
+            <EditableText id={"지금 바로 WEWE 스테이를 이용해보세요"} as="h2">지금 바로 WEWE 스테이를 이용해보세요</EditableText>
+            <EditableText id={"선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼이 이미 운영 중입니다."}>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼이 이미 운영 중입니다.</EditableText>
           </div>
           <a href="/stay" className="wh-btn wh-btn-outline">
             WEWE 스테이 바로가기 <ArrowRight size={18} />

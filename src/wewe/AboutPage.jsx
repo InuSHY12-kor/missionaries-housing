@@ -9,6 +9,7 @@ import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import weweLogoColor from '../assets/wewe-logo-color.png';
 import './wewe-shared.css';
+import { EditableText } from '../edit/EditMode';
 
 // (2026-10-03 추가) WEWE_2026_사업계획서 260930.pptx 슬라이드 7(Mission·Vision·Core
 // Values)과 슬라이드 8(사업 구조)을 담았습니다. 네 가지 핵심가치는 PPT의 아이콘 없는
@@ -75,8 +76,8 @@ function AboutPage() {
               Branding Story의 흐름(시작 → 질문 → 응답) 그대로 번호 붙은 세 단계로 나눠 핵심 문장이
               먼저 눈에 들어오도록 했습니다. 문장 내용은 기존과 같습니다. */}
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">BRANDING STORY</span>
-            <h2 className="wh-h2-center">위로자를 바라보시는 하나님의 마음</h2>
+            <EditableText id={"BRANDING STORY"} as="span" className="wh-eyebrow wh-eyebrow-center">BRANDING STORY</EditableText>
+            <EditableText id={"위로자를 바라보시는 하나님의 마음"} as="h2" className="wh-h2-center">위로자를 바라보시는 하나님의 마음</EditableText>
 
             <blockquote className="wh-verse">
               &ldquo;너희 중에 분깃이나 기업이 없는 레위인과 네 성중에 거류하는 객과 및 고아와 과부들이 와서
@@ -90,30 +91,30 @@ function AboutPage() {
               <span className="wa-story-no">01</span>
               <div>
                 <span className="wa-story-label">시작</span>
-                <h3>돌보는 이들의 숨겨진 아픔</h3>
-                <p>
+                <EditableText id={"돌보는 이들의 숨겨진 아픔"} as="h3">돌보는 이들의 숨겨진 아픔</EditableText>
+                <EditableText id={"WEWE는 가장 깊은 상실의 자리에서 시작되었습니다. 누군가의 아픔을 돌보는 이들이 정작 자신의 무너진 마음"}>
                   WEWE는 가장 깊은 상실의 자리에서 시작되었습니다. 누군가의 아픔을 돌보는 이들이 정작 자신의
                   무너진 마음은 숨겨야만 하는 현실, 그리고 그들의 눈물을 기특함과 안타까움으로 바라보시는
                   하나님의 시선을 마주했습니다.
-                </p>
+                </EditableText>
               </div>
             </Reveal>
             <Reveal as="div" className="wa-story-step" delay={80}>
               <span className="wa-story-no">02</span>
               <div>
                 <span className="wa-story-label">질문</span>
-                <h3>&ldquo;누가 그들의 눈물을 닦아주는가?&rdquo;</h3>
-                <p>
+                <EditableText id={"&ldquo;누가 그들의 눈물을 닦아주는가?&rdquo;"} as="h3">&ldquo;누가 그들의 눈물을 닦아주는가?&rdquo;</EditableText>
+                <EditableText id={"이 질문에 대한 답을 성경에서 찾았습니다. 고아와 과부, 나그네를 향한 구제의 손길 이전에, 기업이 없어 공"}>
                   이 질문에 대한 답을 성경에서 찾았습니다. 고아와 과부, 나그네를 향한 구제의 손길 이전에,
                   기업이 없어 공동체의 돌봄이 절실했던 &lsquo;레위인&rsquo;이 있었습니다.
-                </p>
+                </EditableText>
               </div>
             </Reveal>
             <Reveal as="div" className="wa-story-step wa-story-step-answer" delay={120}>
               <span className="wa-story-no">03</span>
               <div>
                 <span className="wa-story-label">응답</span>
-                <h3>현대판 레위인의 위로자</h3>
+                <EditableText id={"현대판 레위인의 위로자"} as="h3">현대판 레위인의 위로자</EditableText>
                 <p>
                   WEWE는 현대판 레위인인 <strong>목회자와 선교사들이 다시 일어설 수 있도록</strong>, 그들의
                   &lsquo;위로자&rsquo;가 되고자 합니다.
@@ -145,19 +146,19 @@ function AboutPage() {
                   The Hands of &lsquo;W&rsquo;
                   <span className="wh-identity-sub">브랜드 심볼의 의미</span>
                 </h3>
-                <p>
+                <EditableText id={"&lsquo;W&rsquo;는 아래에서 위로 향하는 두 손의 모양입니다. 아말렉과의 전쟁에서 모세의 팔이 지"}>
                   &lsquo;W&rsquo;는 아래에서 위로 향하는 두 손의 모양입니다. 아말렉과의 전쟁에서 모세의 팔이
                   지치지 않도록 아론과 훌이 양옆에서 끝까지 붙잡아 주었던 출애굽기의 장면
                   (출애굽기 17:12)에서 그 의미를 가져왔습니다. 위로자의 팔이 꺾이지 않아야 공동체가
                   승리할 수 있습니다 — WEWE는 그들의 팔이 꺾이지 않도록 묵묵히 지지합니다.
-                </p>
-                <p>
+                </EditableText>
+                <EditableText id={"로고를 이루는 두 개의 &lsquo;W&rsquo;는 각각 먼저 아파본 위로자(WE)와 지금 아픈 위로자(W"}>
                   로고를 이루는 두 개의 &lsquo;W&rsquo;는 각각 먼저 아파본 위로자(WE)와 지금 아픈 위로자(WE)를
                   상징합니다. 두 손이 서로 겹치며 만들어내는 하나의 형태는, 위로하는 사람도 결국 누군가의
                   위로가 필요하다는 WEWE의 정체성 &mdash; &lsquo;위로자의 위로자&rsquo; &mdash; 를 시각적으로
                   담아냅니다. 색상 또한 지친 이들을 감싸는 따뜻한 오렌지와, 신뢰와 안정을 뜻하는 짙은
                   틸(teal) 두 가지로 구성되어 있습니다.
-                </p>
+                </EditableText>
               </div>
             </Reveal>
 
@@ -173,10 +174,10 @@ function AboutPage() {
                   WE + WE
                   <span className="wh-identity-sub">나에서 우리로</span>
                 </h3>
-                <p>
+                <EditableText id={"혼자(I) 있던 위로자에게 다가가, 다시 &lsquo;우리(WE)&rsquo;가 되는 연결이 됩니다. 먼저 "}>
                   혼자(I) 있던 위로자에게 다가가, 다시 &lsquo;우리(WE)&rsquo;가 되는 연결이 됩니다. 먼저 아파본
                   위로자(WE)가 지금 아픈 위로자(WE)의 손을 잡아 줍니다.
-                </p>
+                </EditableText>
               </div>
             </Reveal>
           </div>
@@ -187,23 +188,23 @@ function AboutPage() {
       <section className="wa-values">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">MISSION · VISION</span>
-            <h2 className="wh-h2-center">하나님의 마음으로 위로자를 위로합니다</h2>
+            <EditableText id={"MISSION · VISION"} as="span" className="wh-eyebrow wh-eyebrow-center">MISSION · VISION</EditableText>
+            <EditableText id={"하나님의 마음으로 위로자를 위로합니다"} as="h2" className="wh-h2-center">하나님의 마음으로 위로자를 위로합니다</EditableText>
           </Reveal>
 
           <Reveal as="div" className="wa-mv-grid" delay={60}>
             <div className="wa-mv-card">
               <span className="wa-mv-label">MISSION</span>
-              <p>하나님의 마음으로 위로자를 위로한다.</p>
+              <EditableText id={"하나님의 마음으로 위로자를 위로한다."}>하나님의 마음으로 위로자를 위로한다.</EditableText>
             </div>
             <div className="wa-mv-card">
               <span className="wa-mv-label">VISION</span>
-              <p>돌봄받은 위로자가 다시 위로자가 되는 &lsquo;우리(WE)&rsquo;의 선순환 공동체</p>
+              <EditableText id={"돌봄받은 위로자가 다시 위로자가 되는 &lsquo;우리(WE)&rsquo;의 선순환 공동체"}>돌봄받은 위로자가 다시 위로자가 되는 &lsquo;우리(WE)&rsquo;의 선순환 공동체</EditableText>
             </div>
           </Reveal>
 
           <Reveal delay={100}>
-            <span className="wh-eyebrow wh-eyebrow-center wa-cv-eyebrow">CORE VALUES</span>
+            <EditableText id={"CORE VALUES"} as="span" className="wh-eyebrow wh-eyebrow-center wa-cv-eyebrow">CORE VALUES</EditableText>
           </Reveal>
 
           <div className="wa-cv-grid">
@@ -222,8 +223,8 @@ function AboutPage() {
       <section className="wa-structure">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">사업 구조</span>
-            <h2 className="wh-h2-center">위로자의 위로자, WEWE의 두 프로젝트</h2>
+            <EditableText id={"사업 구조"} as="span" className="wh-eyebrow wh-eyebrow-center">사업 구조</EditableText>
+            <EditableText id={"위로자의 위로자, WEWE의 두 프로젝트"} as="h2" className="wh-h2-center">위로자의 위로자, WEWE의 두 프로젝트</EditableText>
           </Reveal>
 
           <Reveal as="div" className="wa-org-chart" delay={80}>
@@ -262,8 +263,8 @@ function AboutPage() {
       <section className="wa-target">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">FOR WHOM</span>
-            <h2 className="wh-h2-center">우리가 위로하는 사람들</h2>
+            <EditableText id={"FOR WHOM"} as="span" className="wh-eyebrow wh-eyebrow-center">FOR WHOM</EditableText>
+            <EditableText id={"우리가 위로하는 사람들"} as="h2" className="wh-h2-center">우리가 위로하는 사람들</EditableText>
             <p className="wa-target-line">
               <span className="wa-flow-chip">WEWE</span>
               <ArrowRight size={18} />
@@ -271,12 +272,12 @@ function AboutPage() {
               <ArrowRight size={18} />
               <span className="wa-flow-chip wa-flow-chip-orange">선교사</span>
             </p>
-            <p>
+            <EditableText id={"WEWE는 여러 분야의 전문가들과 협업하며, 체계적이고 투명한 운영을 지향합니다. 평신도와 기업의 후원이 전"}>
               WEWE는 여러 분야의 전문가들과 협업하며, 체계적이고 투명한 운영을 지향합니다. 평신도와 기업의
               후원이 전문적인 돌봄으로, 다시 교회와 선교현장의 회복으로 이어지는 선순환 구조를 만들어가고
               있습니다. 법인 설립 방향과 재원 조성 계획, 추진 일정 등 WEWE의 지속가능성에 대한 더 자세한
               이야기는 아래에서 확인하실 수 있습니다.
-            </p>
+            </EditableText>
           </Reveal>
 
           <Reveal as="div" className="wa-target-photo" delay={100}>
@@ -293,8 +294,8 @@ function AboutPage() {
       <section className="wa-cta">
         <div className="wh-container wa-cta-inner">
           <div>
-            <h2>WEWE가 하는 일이 궁금하신가요?</h2>
-            <p>레위인의 회복(목회자)과 선교사의 회복, 두 프로젝트를 자세히 소개합니다.</p>
+            <EditableText id={"WEWE가 하는 일이 궁금하신가요?"} as="h2">WEWE가 하는 일이 궁금하신가요?</EditableText>
+            <EditableText id={"레위인의 회복(목회자)과 선교사의 회복, 두 프로젝트를 자세히 소개합니다."}>레위인의 회복(목회자)과 선교사의 회복, 두 프로젝트를 자세히 소개합니다.</EditableText>
           </div>
           <Link to="/about/ministries" className="wh-btn wh-btn-primary">
             사역 소개 보기 <ArrowRight size={18} />
@@ -307,8 +308,8 @@ function AboutPage() {
       <section className="wa-cta wa-cta-soft">
         <div className="wh-container wa-cta-inner">
           <div>
-            <h2>WEWE의 운영과 지속가능성이 궁금하신가요?</h2>
-            <p>법인 설립 방향, 선순환 구조, 재원 조성 계획과 추진 일정을 소개합니다.</p>
+            <EditableText id={"WEWE의 운영과 지속가능성이 궁금하신가요?"} as="h2">WEWE의 운영과 지속가능성이 궁금하신가요?</EditableText>
+            <EditableText id={"법인 설립 방향, 선순환 구조, 재원 조성 계획과 추진 일정을 소개합니다."}>법인 설립 방향, 선순환 구조, 재원 조성 계획과 추진 일정을 소개합니다.</EditableText>
           </div>
           <Link to="/about/sustainability" className="wh-btn wh-btn-outline wa-cta-soft-btn">
             운영 · 지속가능성 보기 <ArrowRight size={18} />

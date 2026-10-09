@@ -21,6 +21,7 @@ import AboutSubNav from './AboutSubNav';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import './wewe-shared.css';
+import { EditableText } from '../edit/EditMode';
 
 // "소개" > "운영·지속가능성" 페이지 (/about/sustainability, 2026-10-03 신설).
 // WEWE_2026_사업계획서 260930.pptx의 PART IV "운영 및 지속가능성"(슬라이드 29-34)을
@@ -110,9 +111,9 @@ function SustainabilityPage() {
       <section className="ws-section">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">LEGAL FOUNDATION</span>
-            <h2 className="wh-h2-center">법인 설립 및 운영 방향</h2>
-            <p className="ws-lead">한 교회의 사역을 넘어, 지속 가능한 돌봄 모델로.</p>
+            <EditableText id={"LEGAL FOUNDATION"} as="span" className="wh-eyebrow wh-eyebrow-center">LEGAL FOUNDATION</EditableText>
+            <EditableText id={"법인 설립 및 운영 방향"} as="h2" className="wh-h2-center">법인 설립 및 운영 방향</EditableText>
+            <EditableText id={"한 교회의 사역을 넘어, 지속 가능한 돌봄 모델로."} className="ws-lead">한 교회의 사역을 넘어, 지속 가능한 돌봄 모델로.</EditableText>
           </Reveal>
 
           <Reveal
@@ -126,15 +127,15 @@ function SustainabilityPage() {
 
           <Reveal as="div" className="ws-limit-box" delay={60}>
             <strong>현재의 한계</strong>
-            <p>지속적인 예산이 필요하고, 한 교회 규모로 진행할 경우 확장에 한계가 있습니다.</p>
+            <EditableText id={"지속적인 예산이 필요하고, 한 교회 규모로 진행할 경우 확장에 한계가 있습니다."}>지속적인 예산이 필요하고, 한 교회 규모로 진행할 경우 확장에 한계가 있습니다.</EditableText>
           </Reveal>
 
           <div className="ws-stage-row">
             <Reveal as="div" className="ws-stage-card" delay={100}>
               <span className="ws-stage-icon"><Sprout size={24} /></span>
               <span className="ws-stage-no">1차</span>
-              <h4>임의단체(임의법인)</h4>
-              <p>조직 구성 · 사업 시범 운영</p>
+              <EditableText id={"임의단체(임의법인)"} as="h4">임의단체(임의법인)</EditableText>
+              <EditableText id={"조직 구성 · 사업 시범 운영"}>조직 구성 · 사업 시범 운영</EditableText>
             </Reveal>
             <Reveal as="div" className="ws-stage-arrow" delay={120}>
               <ArrowRight size={20} />
@@ -142,26 +143,26 @@ function SustainabilityPage() {
             <Reveal as="div" className="ws-stage-card ws-stage-card-final" delay={140}>
               <span className="ws-stage-icon"><Building2 size={24} /></span>
               <span className="ws-stage-no">2차</span>
-              <h4>사단법인 전환</h4>
-              <p>법적 지위 · 기부금 신뢰 확보</p>
+              <EditableText id={"사단법인 전환"} as="h4">사단법인 전환</EditableText>
+              <EditableText id={"법적 지위 · 기부금 신뢰 확보"}>법적 지위 · 기부금 신뢰 확보</EditableText>
             </Reveal>
           </div>
 
           <div className="ws-foundation-grid">
             <Reveal as="div" className="ws-foundation-card" delay={100}>
               <span className="ws-foundation-icon"><Landmark size={20} /></span>
-              <h4>법적 지위 확보</h4>
-              <p>기부금 영수증 · 공신력 · 계약 주체로서의 지위</p>
+              <EditableText id={"법적 지위 확보"} as="h4">법적 지위 확보</EditableText>
+              <EditableText id={"기부금 영수증 · 공신력 · 계약 주체로서의 지위"}>기부금 영수증 · 공신력 · 계약 주체로서의 지위</EditableText>
             </Reveal>
             <Reveal as="div" className="ws-foundation-card" delay={140}>
               <span className="ws-foundation-icon"><Users2 size={20} /></span>
-              <h4>조직의 체계화</h4>
-              <p>다분야 전문가(목회 · 상담 · 의료 · 경영) 협업 구조</p>
+              <EditableText id={"조직의 체계화"} as="h4">조직의 체계화</EditableText>
+              <EditableText id={"다분야 전문가(목회 · 상담 · 의료 · 경영) 협업 구조"}>다분야 전문가(목회 · 상담 · 의료 · 경영) 협업 구조</EditableText>
             </Reveal>
             <Reveal as="div" className="ws-foundation-card" delay={180}>
               <span className="ws-foundation-icon"><ShieldCheck size={20} /></span>
-              <h4>투명한 운영</h4>
-              <p>정기 사업 · 재정 보고로 후원의 신뢰 확보</p>
+              <EditableText id={"투명한 운영"} as="h4">투명한 운영</EditableText>
+              <EditableText id={"정기 사업 · 재정 보고로 후원의 신뢰 확보"}>정기 사업 · 재정 보고로 후원의 신뢰 확보</EditableText>
             </Reveal>
           </div>
 
@@ -175,8 +176,8 @@ function SustainabilityPage() {
             />
             <div className="ws-why-body">
               <span className="ws-why-label"><Megaphone size={16} /> 모금 명분 (Why)</span>
-              <h4>레위인을 지키는 그리스도의 지체들</h4>
-              <p>사례 중심의 스토리와 비영리 모금 전문업체 연계로 모금 명분을 구체화합니다.</p>
+              <EditableText id={"레위인을 지키는 그리스도의 지체들"} as="h4">레위인을 지키는 그리스도의 지체들</EditableText>
+              <EditableText id={"사례 중심의 스토리와 비영리 모금 전문업체 연계로 모금 명분을 구체화합니다."}>사례 중심의 스토리와 비영리 모금 전문업체 연계로 모금 명분을 구체화합니다.</EditableText>
             </div>
           </Reveal>
         </div>
@@ -186,9 +187,9 @@ function SustainabilityPage() {
       <section className="ws-section ws-section-soft">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">VIRTUOUS CYCLE</span>
-            <h2 className="wh-h2-center">선순환 구조</h2>
-            <p className="ws-lead">후원이 회복을 낳고, 회복의 이야기가 다시 후원을 부릅니다.</p>
+            <EditableText id={"VIRTUOUS CYCLE"} as="span" className="wh-eyebrow wh-eyebrow-center">VIRTUOUS CYCLE</EditableText>
+            <EditableText id={"선순환 구조"} as="h2" className="wh-h2-center">선순환 구조</EditableText>
+            <EditableText id={"후원이 회복을 낳고, 회복의 이야기가 다시 후원을 부릅니다."} className="ws-lead">후원이 회복을 낳고, 회복의 이야기가 다시 후원을 부릅니다.</EditableText>
           </Reveal>
 
           <div className="ws-cycle">
@@ -220,8 +221,8 @@ function SustainabilityPage() {
       <section className="ws-section">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">FUNDING PLAN</span>
-            <h2 className="wh-h2-center">재원 조성 계획</h2>
+            <EditableText id={"FUNDING PLAN"} as="span" className="wh-eyebrow wh-eyebrow-center">FUNDING PLAN</EditableText>
+            <EditableText id={"재원 조성 계획"} as="h2" className="wh-h2-center">재원 조성 계획</EditableText>
             <p className="ws-lead">
               다양한 참여 방식으로 안정적 재원을 만듭니다
               <span className="ws-proposal-tag"><BadgePercent size={13} /> 제안안</span>
@@ -256,9 +257,9 @@ function SustainabilityPage() {
       <section className="ws-section ws-section-soft">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">TIMELINE</span>
-            <h2 className="wh-h2-center">추진 일정 (안)</h2>
-            <p className="ws-lead">2026 하반기 ~ 2027</p>
+            <EditableText id={"TIMELINE"} as="span" className="wh-eyebrow wh-eyebrow-center">TIMELINE</EditableText>
+            <EditableText id={"추진 일정 (안)"} as="h2" className="wh-h2-center">추진 일정 (안)</EditableText>
+            <EditableText id={"2026 하반기 ~ 2027"} className="ws-lead">2026 하반기 ~ 2027</EditableText>
           </Reveal>
 
           <Reveal as="div" className="ws-table-wrap" delay={80}>
@@ -283,7 +284,7 @@ function SustainabilityPage() {
               </tbody>
             </table>
           </Reveal>
-          <p className="ws-table-note">검정 : 진행 중 &nbsp;·&nbsp; 노랑 : 핵심 추진 &nbsp;·&nbsp; 회색 : 계획</p>
+          <EditableText id={"검정 : 진행 중 &nbsp;·&nbsp; 노랑 : 핵심 추진 &nbsp;·&nbsp; 회색 : 계획"} className="ws-table-note">검정 : 진행 중 &nbsp;·&nbsp; 노랑 : 핵심 추진 &nbsp;·&nbsp; 회색 : 계획</EditableText>
 
           <Reveal
             as="div"
@@ -299,9 +300,9 @@ function SustainabilityPage() {
       <section className="ws-section">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">EXPECTED OUTCOME</span>
-            <h2 className="wh-h2-center">위로자가 회복되면, 공동체도 살아납니다</h2>
-            <p className="ws-lead">지속 가능한 사역 동력 · 외부 네트워크의 자산화 · 건강한 동역 모델 구축</p>
+            <EditableText id={"EXPECTED OUTCOME"} as="span" className="wh-eyebrow wh-eyebrow-center">EXPECTED OUTCOME</EditableText>
+            <EditableText id={"위로자가 회복되면, 공동체도 살아납니다"} as="h2" className="wh-h2-center">위로자가 회복되면, 공동체도 살아납니다</EditableText>
+            <EditableText id={"지속 가능한 사역 동력 · 외부 네트워크의 자산화 · 건강한 동역 모델 구축"} className="ws-lead">지속 가능한 사역 동력 · 외부 네트워크의 자산화 · 건강한 동역 모델 구축</EditableText>
           </Reveal>
 
           <Reveal
@@ -330,8 +331,8 @@ function SustainabilityPage() {
       <section className="wa-cta">
         <div className="wh-container wa-cta-inner">
           <div>
-            <h2>WEWE의 사역이 더 궁금하신가요?</h2>
-            <p>레위인의 회복(목회자)과 선교사의 회복, 두 프로젝트를 자세히 소개합니다.</p>
+            <EditableText id={"WEWE의 사역이 더 궁금하신가요?"} as="h2">WEWE의 사역이 더 궁금하신가요?</EditableText>
+            <EditableText id={"레위인의 회복(목회자)과 선교사의 회복, 두 프로젝트를 자세히 소개합니다."}>레위인의 회복(목회자)과 선교사의 회복, 두 프로젝트를 자세히 소개합니다.</EditableText>
           </div>
           <Link to="/about/ministries" className="wh-btn wh-btn-primary">
             사역 소개 보기 <ArrowRight size={18} />

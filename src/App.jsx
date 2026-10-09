@@ -31,6 +31,7 @@ import HostBookings from './pages/HostBookings';
 import Reviews from './pages/Reviews';
 import Messages from './pages/Messages';
 import Profile from './pages/Profile';
+import { EditModeProvider } from './edit/EditMode';
 import './App.css';
 
 // Supabase 초기화
@@ -277,6 +278,8 @@ function App() {
 
   return (
     <BrowserRouter basename="/stay">
+      {/* (2026-10-09) 관리자 편집 모드(배너·문구 수정) — src/edit/EditMode.jsx */}
+      <EditModeProvider site="stay">
       <div className="App">
         {autoLogoutMessage && (
           <div className="auto-logout-banner">
@@ -324,6 +327,7 @@ function App() {
           )}
         </Routes>
       </div>
+      </EditModeProvider>
     </BrowserRouter>
   );
 }

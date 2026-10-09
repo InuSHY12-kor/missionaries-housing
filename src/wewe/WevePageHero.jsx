@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useHero, HeroEditButton, renderRich } from '../edit/EditMode';
 
 // /about, /about/ministries, /about/leadership, /donate, /signup, /news 등
 // WEWE 소개 계열 하위 페이지가 공통으로 사용하는 작은 히어로 배너. 히어로 바로
@@ -21,8 +22,18 @@ const DEFAULT_IMAGES = [
   'https://images.unsplash.com/photo-1769366316790-dfcb6a546f05?auto=format&fit=crop&w=1800&q=80' // Oriol Pascual
 ];
 
+// (2026-10-09) 관리자 편집 모드 — 페이지 경로별로 저장된 배너(사진·문구)가 있으면 그것을, 없으면
+// props로 받은 기본값을 보여줍니다(src/edit/EditMode.jsx). 저장된 내용을 불러오기 전에는 사진·글씨를
+// 잠깐 숨겨, 기본 배너가 보였다가 바뀌는 깜빡임을 막습니다.
 function WevePageHero({ eyebrow, title, subtitle, children, images }) {
-  const heroImages = images && images.length > 0 ? images : DEFAULT_IMAGES;
+  const defaults = {
+    eyebrow,
+    title,
+    subtitle,
+    images: images && images.length > 0 ? images : DEFAULT_IMAGES,
+  };
+  const hero = useHero(defaults);
+  const heroImages = hero.images;
   const [slide, setSlide] = useState(0);
 
   useEffect(() => {
@@ -36,25 +47,29 @@ function WevePageHero({ eyebrow, title, subtitle, children, images }) {
 
   return (
     <section className="wp-hero">
-      {heroImages.map((src, idx) => (
+      {hero.ready && heroImages.map((src, idx) => (
         <div
-          key={src}
+          // eslint-disable-next-line react/no-array-index-key
+          key={`${idx}-${src}`}
           className={`wp-hero-slide ${idx === slide ? 'active' : ''}`}
-          style={{ backgroundImage: `url(${src})` }}
+          style={{ backgroundImage: `url("${src}")` }}
         />
       ))}
 
-      <div className="wp-hero-inner">
-        {eyebrow && <span className="wp-hero-eyebrow">{eyebrow}</span>}
-        <h1>{title}</h1>
-        {subtitle && <p>{subtitle}</p>}
+      <div className="wp-hero-inner" style={{ opacity: hero.ready ? 1 : 0, transition: 'opacity 0.25s ease' }}>
+        {hero.eyebrow && <span className="wp-hero-eyebrow">{hero.eyebrow}</span>}
+        <h1>{hero.title}</h1>
+        {hero.subtitle && <p>{renderRich(hero.subtitle)}</p>}
         {children}
       </div>
+
+      <HeroEditButton defaults={defaults} />
 
       {heroImages.length > 1 && (
         <div className="wp-hero-progress">
           {heroImages.map((src, idx) => (
-            <div className="wp-hero-dot-wrap" key={src}>
+            // eslint-disable-next-line react/no-array-index-key
+            <div className="wp-hero-dot-wrap" key={`${idx}-${src}`}>
               <svg className="wp-hero-ring" viewBox="0 0 32 32">
                 <circle className="wp-hero-ring-track" cx="16" cy="16" r="14" />
                 {idx === slide && (
