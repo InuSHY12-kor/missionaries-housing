@@ -6,6 +6,7 @@ import WeweFooter from './WeweFooter';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import { weweSupabase } from './weweSupabase';
+import { useHero, HeroEditButton, renderRich, EditableText } from '../edit/EditMode';
 import './wewe-shared.css';
 
 // WEWE 비영리단체 전체 소개 홈페이지 (최상위 '/').
@@ -43,7 +44,16 @@ function WeweHome() {
   const [newsPosts, setNewsPosts] = useState([]);
   const [newsLoaded, setNewsLoaded] = useState(false);
   const [heroSlide, setHeroSlide] = useState(0);
-  const heroImages = HERO_IMAGE_SETS.home;
+  // (2026-10-09) 관리자 편집 모드 — 저장된 배너(사진·문구)가 있으면 그것을, 없으면 아래 기본값.
+  // 배너 설명은 줄마다(Enter) 한 문장 블록으로 나뉘어 모바일에서도 고르게 줄바꿈됩니다.
+  const heroDefaults = {
+    eyebrow: 'WE + WE, 나에서 우리로',
+    title: '위로자의 위로자, WEWE입니다',
+    subtitle: '사역 현장에서 누군가를 위로하느라 자신의 아픔은 숨겨야 했던 목회자와 선교사님들.\n먼저 아파본 위로자가 지금 아픈 위로자의 손을 잡아드립니다.',
+    images: HERO_IMAGE_SETS.home,
+  };
+  const hero = useHero(heroDefaults);
+  const heroImages = hero.images;
 
   // WEWE 문의 폼 (2026-09-13 이동) — 이전에는 위위스테이 랜딩 페이지(/stay)의 "궁금한 점이
   // 있으신가요?" 섹션 아래에 있었는데, WEWE 자체에 대한 문의이므로 위위 랜딩(여기)의 사역
@@ -97,13 +107,15 @@ function WeweHome() {
     }
   };
 
+  const heroCount = heroImages.length;
   useEffect(() => {
+    setHeroSlide(0);
+    if (heroCount < 2) return undefined;
     const timer = setInterval(() => {
-      setHeroSlide((prev) => (prev + 1) % heroImages.length);
+      setHeroSlide((prev) => (prev + 1) % heroCount);
     }, 3500);
     return () => clearInterval(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [heroCount]);
 
   // 다른 페이지에서 "/#ministries"처럼 해시가 붙은 주소로 들어온 경우, 해당 섹션이
   // 화면에 그려진 뒤에 스크롤해서 보여줍니다(브라우저의 기본 해시 스크롤은 정적
@@ -143,23 +155,28 @@ function WeweHome() {
       {/* 히어로 — 3.5초마다 전환되는 크로스페이드 슬라이드쇼 + 원형 링 진행 인디케이터
           (2026-09-09) WevePageHero.jsx의 하위 페이지 히어로와 동일한 효과를 홈 히어로에도 적용. */}
       <section id="top" className="wh-hero">
-        {heroImages.map((src, idx) => (
+        {hero.ready && heroImages.map((src, idx) => (
           <div
-            key={src}
+            // eslint-disable-next-line react/no-array-index-key
+            key={`${idx}-${src}`}
             className={`wh-hero-slide ${idx === heroSlide ? 'active' : ''}`}
-            style={{ backgroundImage: `url(${src})` }}
+            style={{ backgroundImage: `url("${src}")` }}
           />
         ))}
 
-        <div className="wh-hero-content">
-          <span className="wh-hero-eyebrow">WE + WE, 나에서 우리로</span>
-          <h1>위로자의 위로자, WEWE입니다</h1>
+        <div className="wh-hero-content" style={{ opacity: hero.ready ? 1 : 0, transition: 'opacity 0.25s ease' }}>
+          {hero.eyebrow && <span className="wh-hero-eyebrow">{hero.eyebrow}</span>}
+          <h1>{hero.title}</h1>
           {/* (2026-10-09) <br /> 대신 문장마다 블록으로 나눠, 모바일에서 각 문장의 줄 길이가 고르게
               나뉘도록(text-wrap: balance) 했습니다 — 마지막 줄에 한 단어만 남지 않게. */}
-          <p>
-            <span className="wh-hero-line">사역 현장에서 누군가를 위로하느라 자신의 아픔은 숨겨야 했던 목회자와 선교사님들.</span>
-            <span className="wh-hero-line">먼저 아파본 위로자가 지금 아픈 위로자의 손을 잡아드립니다.</span>
-          </p>
+          {hero.subtitle && (
+            <p>
+              {hero.subtitle.split('\n').filter((line) => line.trim()).map((line, idx) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <span className="wh-hero-line" key={idx}>{renderRich(line)}</span>
+              ))}
+            </p>
+          )}
           <div className="wh-hero-actions">
             <a href="#ministries" className="wh-btn wh-btn-outline">사역 알아보기</a>
             <a href="/stay" className="wh-btn wh-btn-outline">위위 스테이 살펴보기</a>
@@ -169,7 +186,8 @@ function WeweHome() {
         {heroImages.length > 1 && (
           <div className="wp-hero-progress">
             {heroImages.map((src, idx) => (
-              <div className="wp-hero-dot-wrap" key={src}>
+              // eslint-disable-next-line react/no-array-index-key
+              <div className="wp-hero-dot-wrap" key={`${idx}-${src}`}>
                 <svg className="wp-hero-ring" viewBox="0 0 32 32">
                   <circle className="wp-hero-ring-track" cx="16" cy="16" r="14" />
                   {idx === heroSlide && (
@@ -180,6 +198,7 @@ function WeweHome() {
             ))}
           </div>
         )}
+        <HeroEditButton defaults={heroDefaults} />
       </section>
 
       {/* 한눈에 보는 WEWE — PPT 슬라이드 3 "SUMMARY" 요약 (2026-10-03 신규).
@@ -188,8 +207,8 @@ function WeweHome() {
       <section className="wh-snapshot">
         <div className="wh-container">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">SUMMARY</span>
-            <h2 className="wh-h2-center">한눈에 보는 WEWE</h2>
+            <EditableText id={"SUMMARY"} as="span" className="wh-eyebrow wh-eyebrow-center">SUMMARY</EditableText>
+            <EditableText id={"한눈에 보는 WEWE"} as="h2" className="wh-h2-center">한눈에 보는 WEWE</EditableText>
             <p className="wh-snapshot-mission">
               <Target size={16} /> 현대판 레위인인 목회자와 선교사가 다시 일어설 수 있도록, 그들의 위로자가 됩니다.
             </p>
@@ -198,7 +217,7 @@ function WeweHome() {
           <Reveal as="div" className="wh-snapshot-grid" delay={80}>
             <div className="wh-snapshot-card">
               <span className="wh-snapshot-tag wh-snapshot-tag-teal">PROJECT 1 · 목회자</span>
-              <h3>Refresh Pastor Academy</h3>
+              <EditableText id={"Refresh Pastor Academy"} as="h3">Refresh Pastor Academy</EditableText>
               <ul>
                 <li>목회자 아카데미 심포지엄</li>
                 <li>목회자 세미나 · 소진관리</li>
@@ -209,7 +228,7 @@ function WeweHome() {
 
             <div className="wh-snapshot-card">
               <span className="wh-snapshot-tag wh-snapshot-tag-orange">PROJECT 2 · 선교사</span>
-              <h3>Missionary Care</h3>
+              <EditableText id={"Missionary Care"} as="h3">Missionary Care</EditableText>
               <ul>
                 <li>WEWE 스테이 (주거)</li>
                 <li>레위인의 모빌리티 (이동)</li>
@@ -220,7 +239,7 @@ function WeweHome() {
 
             <div className="wh-snapshot-card wh-snapshot-card-foundation">
               <span className="wh-snapshot-tag wh-snapshot-tag-dark">FOUNDATION · 운영 기반</span>
-              <h3>지속 가능한 돌봄 모델</h3>
+              <EditableText id={"지속 가능한 돌봄 모델"} as="h3">지속 가능한 돌봄 모델</EditableText>
               <ul>
                 <li>임의단체 → 사단법인 전환</li>
                 <li>다분야 전문가 협업 · 투명한 운영</li>
@@ -238,8 +257,8 @@ function WeweHome() {
       <section id="about" className="wh-about">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">OUR STORY</span>
-            <h2 className="wh-h2-center">위(WE)로자의 위(WE)로자</h2>
+            <EditableText id={"OUR STORY"} as="span" className="wh-eyebrow wh-eyebrow-center">OUR STORY</EditableText>
+            <EditableText id={"위(WE)로자의 위(WE)로자"} as="h2" className="wh-h2-center">위(WE)로자의 위(WE)로자</EditableText>
 
             <blockquote className="wh-verse">
               &ldquo;너희 중에 분깃이나 기업이 없는 레위인과 네 성중에 거류하는 객과 및 고아와 과부들이 와서
@@ -249,7 +268,7 @@ function WeweHome() {
 
             {/* (2026-10-09 가독성) 한 덩어리였던 소개 문단을 "첫 문장(크게) + 설명(핵심 구절 강조)"으로 나눔 */}
             <div className="wh-about-intro">
-              <p className="wh-about-intro-lead">WEWE는 가장 깊은 상실의 자리에서 시작되었습니다.</p>
+              <EditableText id={"WEWE는 가장 깊은 상실의 자리에서 시작되었습니다."} className="wh-about-intro-lead">WEWE는 가장 깊은 상실의 자리에서 시작되었습니다.</EditableText>
               <p>
                 누군가의 아픔을 돌보는 이들이 정작 자신의 무너진 마음은 숨겨야만 하는 현실 속에서,
                 WEWE는 <strong>현대판 레위인인 목회자와 선교사들의 &lsquo;위로자&rsquo;</strong>가 되고자 합니다.
@@ -275,9 +294,9 @@ function WeweHome() {
       <section id="ministries" className="wh-ministries">
         <div className="wh-container">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">OUR MINISTRIES</span>
-            <h2 className="wh-h2-center">우리가 하는 일</h2>
-            <p className="wh-ministries-lead">Blessed Blessing, 하나님의 영광을 위해 사람을 세웁니다.</p>
+            <EditableText id={"OUR MINISTRIES"} as="span" className="wh-eyebrow wh-eyebrow-center">OUR MINISTRIES</EditableText>
+            <EditableText id={"우리가 하는 일"} as="h2" className="wh-h2-center">우리가 하는 일</EditableText>
+            <EditableText id={"Blessed Blessing, 하나님의 영광을 위해 사람을 세웁니다."} className="wh-ministries-lead">Blessed Blessing, 하나님의 영광을 위해 사람을 세웁니다.</EditableText>
           </Reveal>
 
           <div className="wh-ministry-grid">
@@ -290,9 +309,9 @@ function WeweHome() {
                 aria-label="기도하는 손"
               />
               <span className="wh-ministry-tag">PROJECT 1 · 목회자</span>
-              <h3>Refresh Pastor Academy</h3>
-              <p className="wh-ministry-desc">레위인의 회복 — 성도의 위로가 되어온 목회자님이, 이제는 위로받으실 시간입니다.</p>
-              <p className="wh-ministry-summary">목회자 아카데미(심포지엄·세미나·소진관리)와 개별 지원(심리상담, 재정, 장학사업)으로 구성됩니다.</p>
+              <EditableText id={"Refresh Pastor Academy"} as="h3">Refresh Pastor Academy</EditableText>
+              <EditableText id={"레위인의 회복 — 성도의 위로가 되어온 목회자님이, 이제는 위로받으실 시간입니다."} className="wh-ministry-desc">레위인의 회복 — 성도의 위로가 되어온 목회자님이, 이제는 위로받으실 시간입니다.</EditableText>
+              <EditableText id={"목회자 아카데미(심포지엄·세미나·소진관리)와 개별 지원(심리상담, 재정, 장학사업)으로 구성됩니다."} className="wh-ministry-summary">목회자 아카데미(심포지엄·세미나·소진관리)와 개별 지원(심리상담, 재정, 장학사업)으로 구성됩니다.</EditableText>
               <Link to="/about/ministries" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
             </Reveal>
 
@@ -305,8 +324,8 @@ function WeweHome() {
                 aria-label="맞잡은 두 손, 환대"
               />
               <span className="wh-ministry-tag">PROJECT 2 · 선교사</span>
-              <h3>Missionary Care</h3>
-              <p className="wh-ministry-desc">선교사의 회복 — 열방의 나그네가, 고국에서는 편히 쉬실 수 있도록.</p>
+              <EditableText id={"Missionary Care"} as="h3">Missionary Care</EditableText>
+              <EditableText id={"선교사의 회복 — 열방의 나그네가, 고국에서는 편히 쉬실 수 있도록."} className="wh-ministry-desc">선교사의 회복 — 열방의 나그네가, 고국에서는 편히 쉬실 수 있도록.</EditableText>
 
               <div className="wh-ministry-live">
                 <span className="wh-ministry-icon"><HomeIcon size={18} /></span>
@@ -317,7 +336,7 @@ function WeweHome() {
                 <a href="/stay" className="wh-ministry-link">바로가기 <ArrowRight size={14} /></a>
               </div>
 
-              <p className="wh-ministry-summary">그 외 레위인의 모빌리티(차량 쉐어링), Poiema 돌봄(힐링캠프), WE+WE 커넥트(멤버십)도 준비하고 있습니다.</p>
+              <EditableText id={"그 외 레위인의 모빌리티(차량 쉐어링), Poiema 돌봄(힐링캠프), WE+WE 커넥트(멤버십)도 준비하고"} className="wh-ministry-summary">그 외 레위인의 모빌리티(차량 쉐어링), Poiema 돌봄(힐링캠프), WE+WE 커넥트(멤버십)도 준비하고 있습니다.</EditableText>
               <Link to="/about/ministries#project2" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
             </Reveal>
           </div>
@@ -327,8 +346,8 @@ function WeweHome() {
       {/* 사역 소식 */}
       <section id="news" className="wh-news">
         <div className="wh-container">
-          <span className="wh-eyebrow wh-eyebrow-center">MINISTRY NEWS</span>
-          <h2 className="wh-h2-center">사역 소식</h2>
+          <EditableText id={"MINISTRY NEWS"} as="span" className="wh-eyebrow wh-eyebrow-center">MINISTRY NEWS</EditableText>
+          <EditableText id={"사역 소식"} as="h2" className="wh-h2-center">사역 소식</EditableText>
 
           {newsLoaded && newsPosts.length > 0 ? (
             <>
@@ -367,7 +386,7 @@ function WeweHome() {
             </>
           ) : (
             <div className="wh-news-card">
-              <p>WEWE가 걸어가는 이야기와 사역 현장의 소식을 곧 이곳에서 전해드릴게요.</p>
+              <EditableText id={"WEWE가 걸어가는 이야기와 사역 현장의 소식을 곧 이곳에서 전해드릴게요."}>WEWE가 걸어가는 이야기와 사역 현장의 소식을 곧 이곳에서 전해드릴게요.</EditableText>
               <span className="wh-news-soon">Coming soon</span>
             </div>
           )}
@@ -380,17 +399,17 @@ function WeweHome() {
       <section className="wh-inquiry">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">CONTACT</span>
-            <h2 className="wh-h2-center">위위(WEWE)에 대해 궁금한 점이 있으신가요?</h2>
-            <p className="wh-inquiry-lead">비영리단체 WEWE, 후원, 사역 소개 등 무엇이든 편하게 문의해 주세요.</p>
+            <EditableText id={"CONTACT"} as="span" className="wh-eyebrow wh-eyebrow-center">CONTACT</EditableText>
+            <EditableText id={"위위(WEWE)에 대해 궁금한 점이 있으신가요?"} as="h2" className="wh-h2-center">위위(WEWE)에 대해 궁금한 점이 있으신가요?</EditableText>
+            <EditableText id={"비영리단체 WEWE, 후원, 사역 소개 등 무엇이든 편하게 문의해 주세요."} className="wh-inquiry-lead">비영리단체 WEWE, 후원, 사역 소개 등 무엇이든 편하게 문의해 주세요.</EditableText>
           </Reveal>
 
           <Reveal as="div" className="wh-inquiry-card" delay={80}>
             {inquirySubmitted ? (
               <div className="wh-inquiry-success">
                 <CheckCircle2 size={40} />
-                <h3>문의가 접수되었습니다</h3>
-                <p>남겨주신 연락처로 WEWE 팀이 곧 안내해 드리겠습니다. 감사합니다.</p>
+                <EditableText id={"문의가 접수되었습니다"} as="h3">문의가 접수되었습니다</EditableText>
+                <EditableText id={"남겨주신 연락처로 WEWE 팀이 곧 안내해 드리겠습니다. 감사합니다."}>남겨주신 연락처로 WEWE 팀이 곧 안내해 드리겠습니다. 감사합니다.</EditableText>
               </div>
             ) : (
               <form className="wh-inquiry-form" onSubmit={handleInquirySubmit}>
@@ -459,8 +478,8 @@ function WeweHome() {
       <section className="wh-cta">
         <div className="wh-container wh-cta-inner">
           <div>
-            <h2>위위의 사역에 관심이 있으신가요?</h2>
-            <p>WEWE에 가입하고 위로자의 위로자 공동체와 함께해 주세요.</p>
+            <EditableText id={"위위의 사역에 관심이 있으신가요?"} as="h2">위위의 사역에 관심이 있으신가요?</EditableText>
+            <EditableText id={"WEWE에 가입하고 위로자의 위로자 공동체와 함께해 주세요."}>WEWE에 가입하고 위로자의 위로자 공동체와 함께해 주세요.</EditableText>
           </div>
           <div className="wh-cta-actions">
             <Link to="/signup" className="wh-btn wh-btn-primary">가입하기</Link>

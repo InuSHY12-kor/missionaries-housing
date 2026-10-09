@@ -18,6 +18,7 @@ import AboutSubNav from './AboutSubNav';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import './wewe-shared.css';
+import { EditableText } from '../edit/EditMode';
 
 // "소개" > "사역 소개" 페이지 (/about/ministries).
 // Phase 2에서는 홈페이지 안의 #ministries 섹션에 두 프로젝트를 간략히만 소개했는데,
@@ -159,8 +160,8 @@ function MinistriesPage() {
       <section className="wm-project wm-project-teal">
         <div className="wh-container wh-container-narrow">
           <span className="wm-tag">PROJECT 1 · 목회자</span>
-          <h2>Refresh Pastor Academy</h2>
-          <p className="wm-subtitle">레위인의 회복 — 성도의 위로가 되어온 목회자님이, 이제는 위로받으실 시간입니다.</p>
+          <EditableText id={"Refresh Pastor Academy"} as="h2">Refresh Pastor Academy</EditableText>
+          <EditableText id={"레위인의 회복 — 성도의 위로가 되어온 목회자님이, 이제는 위로받으실 시간입니다."} className="wm-subtitle">레위인의 회복 — 성도의 위로가 되어온 목회자님이, 이제는 위로받으실 시간입니다.</EditableText>
 
           <blockquote className="wm-prologue">
             하나님이 아파하시는 시선을 바라보고 싶었습니다. 처음 우리의 시선은 고아와 과부, 나그네에 머물렀습니다.
@@ -178,11 +179,11 @@ function MinistriesPage() {
             aria-label="기도하는 손"
           />
 
-          <h3 className="wm-h3">배경 및 필요성</h3>
-          <p className="wm-lead-quote">
+          <EditableText id={"배경 및 필요성"} as="h3" className="wm-h3">배경 및 필요성</EditableText>
+          <EditableText id={"&ldquo;우리는 그동안 목사님의 설교에 은혜받고, 목사님의 기도로 위로를 얻었습니다. 하지만, 정작 목사"} className="wm-lead-quote">
             &ldquo;우리는 그동안 목사님의 설교에 은혜받고, 목사님의 기도로 위로를 얻었습니다. 하지만, 정작
             목사님은 누구에게 위로받고 계신지 물어보지 못했습니다.&rdquo;
-          </p>
+          </EditableText>
 
           <Reveal as="div" className="wm-ring-grid">
             <RingChart
@@ -205,13 +206,13 @@ function MinistriesPage() {
             />
           </Reveal>
 
-          <p>
+          <EditableText id={"목회자는 &ldquo;하나님이 다 책임지시니 걱정할 것이 없다&rdquo;고 하기엔, 하나님은 사람을 통해 "}>
             목회자는 &ldquo;하나님이 다 책임지시니 걱정할 것이 없다&rdquo;고 하기엔, 하나님은 사람을 통해
             일하십니다. 지금까지 한국 교회는 열매를 향해 달려왔지만, 이제 뿌리가 타들어 가는 신호가 곳곳에서
             들려옵니다. 목회자의 소진은 개인의 문제가 아니라 교회 전체의 위기입니다. 이제 우리는
             &lsquo;소모&rsquo;하는 방법이 아니라, 함께 &lsquo;성장&rsquo;하는 방법으로 목회자들의 위로자가
             되어야 합니다.
-          </p>
+          </EditableText>
 
           <ul className="wm-issue-list">
             <li><strong>재교육의 부재</strong><span>신학대학원 졸업 후, 급변하는 시대적 요구에 대응할 체계적인
@@ -222,11 +223,11 @@ function MinistriesPage() {
               겪고, 영적 침체와 우울감을 경험합니다.</span></li>
           </ul>
 
-          <h3 className="wm-h3">사업 목표</h3>
-          <p className="wm-goal-caption">Blessed Blessing, 하나님의 영광을 위해 사람을 세우다.</p>
+          <EditableText id={"사업 목표"} as="h3" className="wm-h3">사업 목표</EditableText>
+          <EditableText id={"Blessed Blessing, 하나님의 영광을 위해 사람을 세우다."} className="wm-goal-caption">Blessed Blessing, 하나님의 영광을 위해 사람을 세우다.</EditableText>
           <div className="wm-goal-grid">
             <div className="wm-goal-card">
-              <h4>전인적 회복</h4>
+              <EditableText id={"전인적 회복"} as="h4">전인적 회복</EditableText>
               <ul className="wm-card-list">
                 <li>사역 현장에서 벗어난 완전한 멈춤</li>
                 <li>심리적 안정감</li>
@@ -235,7 +236,7 @@ function MinistriesPage() {
               </ul>
             </div>
             <div className="wm-goal-card">
-              <h4>연결</h4>
+              <EditableText id={"연결"} as="h4">연결</EditableText>
               <ul className="wm-card-list">
                 <li>초교파적 동료의 지지 기반</li>
                 <li>시니어–주니어 목회자 멘토링</li>
@@ -244,12 +245,12 @@ function MinistriesPage() {
             </div>
           </div>
 
-          <h3 className="wm-h3">핵심 프로그램</h3>
+          <EditableText id={"핵심 프로그램"} as="h3" className="wm-h3">핵심 프로그램</EditableText>
           <div className="wm-program-grid wm-program-grid-3 wm-program-grid-icons">
             <div className="wm-program-card">
               <span className="wm-program-icon"><GraduationCap size={20} /></span>
               <div>
-                <h4>목회자 아카데미</h4>
+                <EditableText id={"목회자 아카데미"} as="h4">목회자 아카데미</EditableText>
                 <ul className="wm-card-list">
                   <li>심포지엄</li>
                   <li>목회자 세미나</li>
@@ -260,7 +261,7 @@ function MinistriesPage() {
             <div className="wm-program-card">
               <span className="wm-program-icon"><UserCheck size={20} /></span>
               <div>
-                <h4>개별 지원</h4>
+                <EditableText id={"개별 지원"} as="h4">개별 지원</EditableText>
                 <ul className="wm-card-list">
                   <li>연간 N명의 대상자 선정</li>
                   <li>목회자 자기탐색 (심리상담 프로그램)</li>
@@ -273,8 +274,8 @@ function MinistriesPage() {
               <span className="wm-program-icon"><Shield size={20} /></span>
               <div>
                 <h4>전투복 프로젝트 <span className="wh-progress-badge">진행중</span></h4>
-                <p>지친 목회자님들의 회복과 응원을 위한 프로젝트입니다. 시기별 SNS를 통해 개별 사연 모집을
-                  통해 진행합니다.</p>
+                <EditableText id={"지친 목회자님들의 회복과 응원을 위한 프로젝트입니다. 시기별 SNS를 통해 개별 사연 모집을 통해 진행합니다"}>지친 목회자님들의 회복과 응원을 위한 프로젝트입니다. 시기별 SNS를 통해 개별 사연 모집을
+                  통해 진행합니다.</EditableText>
                 <Link to="/about/ministries/combat-uniform" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
               </div>
             </div>
@@ -286,8 +287,8 @@ function MinistriesPage() {
       <section id="project2" className="wm-project wm-project-orange">
         <div className="wh-container wh-container-narrow">
           <span className="wm-tag">PROJECT 2 · 선교사</span>
-          <h2>Missionary Care</h2>
-          <p className="wm-subtitle">선교사의 회복 — 열방의 나그네가, 고국에서는 편히 쉬실 수 있도록.</p>
+          <EditableText id={"Missionary Care"} as="h2">Missionary Care</EditableText>
+          <EditableText id={"선교사의 회복 — 열방의 나그네가, 고국에서는 편히 쉬실 수 있도록."} className="wm-subtitle">선교사의 회복 — 열방의 나그네가, 고국에서는 편히 쉬실 수 있도록.</EditableText>
 
           <blockquote className="wm-prologue">
             오늘날 이 땅에서 가장 &lsquo;나그네&rsquo;다운 삶을 사는 이는 누구일까요? 우리는 열방을 향해
@@ -306,7 +307,7 @@ function MinistriesPage() {
             aria-label="맞잡은 두 손, 환대"
           />
 
-          <h3 className="wm-h3">배경 및 필요성</h3>
+          <EditableText id={"배경 및 필요성"} as="h3" className="wm-h3">배경 및 필요성</EditableText>
           <div className="wm-quote-grid">
             <blockquote>&ldquo;이제 선교지로 나간 지 10~15년이 지나니 모교회에 와도 낯설어요&rdquo;<cite>선교사 A</cite></blockquote>
             <blockquote>&ldquo;파송교회 장로님이 자녀들 선교지에 잘 있는지 물어보시네요… 이럴 때는 참 외롭습니다&rdquo;<cite>선교사 B</cite></blockquote>
@@ -322,11 +323,11 @@ function MinistriesPage() {
               걸작품이 아닌 소모품으로 전락하는 위기.</span></li>
           </ul>
 
-          <h3 className="wm-h3">사업 목표</h3>
-          <p className="wm-goal-caption">Blessed Blessing, 하나님의 영광을 위해 사람을 세우다.</p>
+          <EditableText id={"사업 목표"} as="h3" className="wm-h3">사업 목표</EditableText>
+          <EditableText id={"Blessed Blessing, 하나님의 영광을 위해 사람을 세우다."} className="wm-goal-caption">Blessed Blessing, 하나님의 영광을 위해 사람을 세우다.</EditableText>
           <div className="wm-goal-grid">
             <div className="wm-goal-card">
-              <h4>생존 인프라 지원</h4>
+              <EditableText id={"생존 인프라 지원"} as="h4">생존 인프라 지원</EditableText>
               <ul className="wm-card-list">
                 <li>WEWE 스테이 설립</li>
                 <li>전국의 선교관·스테이·유휴숙소 네트워크 구축</li>
@@ -334,7 +335,7 @@ function MinistriesPage() {
               </ul>
             </div>
             <div className="wm-goal-card">
-              <h4>환대와 회복</h4>
+              <EditableText id={"환대와 회복"} as="h4">환대와 회복</EditableText>
               <ul className="wm-card-list">
                 <li>완전한 회복을 위한 리트릿 프로그램</li>
                 <li>소진관리를 통한 심리·정서적 회복</li>
@@ -343,13 +344,13 @@ function MinistriesPage() {
             </div>
           </div>
 
-          <h3 className="wm-h3">핵심 프로그램</h3>
+          <EditableText id={"핵심 프로그램"} as="h3" className="wm-h3">핵심 프로그램</EditableText>
           <div className="wm-program-grid wm-program-grid-icons">
             <div className="wm-program-card wm-program-live">
               <span className="wm-program-icon"><HomeIcon size={20} /></span>
               <div>
                 <h4>WEWE 스테이 <span className="wh-live-badge">이용 가능</span></h4>
-                <p>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼 — 지금 바로 이용하실 수 있습니다.</p>
+                <EditableText id={"선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼 — 지금 바로 이용하실 수 있습니다."}>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼 — 지금 바로 이용하실 수 있습니다.</EditableText>
                 <div className="wm-link-row">
                   <Link to="/about/ministries/wewe-stay" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
                   <a href="/stay" className="wh-ministry-link">바로가기 <ArrowRight size={14} /></a>
@@ -359,22 +360,22 @@ function MinistriesPage() {
             <div className="wm-program-card">
               <span className="wm-program-icon"><Car size={20} /></span>
               <div>
-                <h4>레위인의 모빌리티</h4>
-                <p>단기 귀국 선교사를 위한 차량 쉐어링</p>
+                <EditableText id={"레위인의 모빌리티"} as="h4">레위인의 모빌리티</EditableText>
+                <EditableText id={"단기 귀국 선교사를 위한 차량 쉐어링"}>단기 귀국 선교사를 위한 차량 쉐어링</EditableText>
               </div>
             </div>
             <div className="wm-program-card">
               <span className="wm-program-icon"><HeartHandshake size={20} /></span>
               <div>
-                <h4>Poiema 돌봄</h4>
-                <p>선교사 정체성 회복을 위한 전인적 힐링캠프</p>
+                <EditableText id={"Poiema 돌봄"} as="h4">Poiema 돌봄</EditableText>
+                <EditableText id={"선교사 정체성 회복을 위한 전인적 힐링캠프"}>선교사 정체성 회복을 위한 전인적 힐링캠프</EditableText>
               </div>
             </div>
             <div className="wm-program-card">
               <span className="wm-program-icon"><Users2 size={20} /></span>
               <div>
-                <h4>WE+WE 커넥트</h4>
-                <p>후원자·선교사, 선교사·선교사를 이어주는 멤버십 프로그램</p>
+                <EditableText id={"WE+WE 커넥트"} as="h4">WE+WE 커넥트</EditableText>
+                <EditableText id={"후원자·선교사, 선교사·선교사를 이어주는 멤버십 프로그램"}>후원자·선교사, 선교사·선교사를 이어주는 멤버십 프로그램</EditableText>
               </div>
             </div>
           </div>
@@ -385,8 +386,8 @@ function MinistriesPage() {
       <section className="wm-outcome">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">EXPECTED OUTCOME</span>
-            <h2 className="wh-h2-center">기대되는 변화</h2>
+            <EditableText id={"EXPECTED OUTCOME"} as="span" className="wh-eyebrow wh-eyebrow-center">EXPECTED OUTCOME</EditableText>
+            <EditableText id={"기대되는 변화"} as="h2" className="wh-h2-center">기대되는 변화</EditableText>
           </Reveal>
 
           <Reveal
@@ -402,7 +403,7 @@ function MinistriesPage() {
             {/* (2026-10-07) 항목이 눈에 잘 띄도록 — 각 항목을 "굵은 제목 + 설명" 두 줄로 나누고,
                 체크 아이콘·카드 상단 색 띠(목회자=초록, 교회=주황)로 강조했습니다. */}
             <Reveal as="div" className="wm-outcome-card wm-outcome-card-teal">
-              <h4><span className="wm-outcome-card-eyebrow">FOR PASTORS</span>목회자가 경험하는 변화</h4>
+              <h4><EditableText id={"FOR PASTORS"} as="span" className="wm-outcome-card-eyebrow">FOR PASTORS</EditableText>목회자가 경험하는 변화</h4>
               <ul>
                 <li><CheckCircle2 size={20} /><div><strong>사역의 전문성 강화</strong><span>최신 목회 동향 등 전문성 개발</span></div></li>
                 <li><CheckCircle2 size={20} /><div><strong>지지그룹 확보</strong><span>동료그룹과 멘토그룹을 통한 지지체계</span></div></li>
@@ -411,7 +412,7 @@ function MinistriesPage() {
               </ul>
             </Reveal>
             <Reveal as="div" className="wm-outcome-card wm-outcome-card-orange" delay={100}>
-              <h4><span className="wm-outcome-card-eyebrow">FOR CHURCHES</span>교회가 경험하는 변화</h4>
+              <h4><EditableText id={"FOR CHURCHES"} as="span" className="wm-outcome-card-eyebrow">FOR CHURCHES</EditableText>교회가 경험하는 변화</h4>
               <ul>
                 <li><CheckCircle2 size={20} /><div><strong>리더 리스크 관리</strong><span>사역의 연속성 확보</span></div></li>
                 <li><CheckCircle2 size={20} /><div><strong>공동체의 영적·정서적 건강도 상승</strong><span>강단의 생명력 강화</span></div></li>

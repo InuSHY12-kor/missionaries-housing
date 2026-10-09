@@ -9,6 +9,7 @@ import { weweSupabase } from './weweSupabase';
 import HERO_IMAGE_SETS from './heroImages';
 import Reveal from './Reveal';
 import './wewe-shared.css';
+import { EditableText } from '../edit/EditMode';
 
 // 사역 소식 목록 페이지 (/news, Phase 4).
 // 관리자 대시보드(/stay/admin, "사역 소식" 탭)에서 발행(status='published')한 글만
@@ -89,12 +90,12 @@ function NewsListPage() {
           )}
 
           {loading ? (
-            <p className="nl-status">불러오는 중...</p>
+            <EditableText id={"불러오는 중..."} className="nl-status">불러오는 중...</EditableText>
           ) : loadError ? (
             <p className="nl-status">{loadError}</p>
           ) : posts.length === 0 ? (
             <div className="nl-empty">
-              <p>아직 등록된 소식이 없습니다. 곧 새로운 이야기로 찾아올게요.</p>
+              <EditableText id={"아직 등록된 소식이 없습니다. 곧 새로운 이야기로 찾아올게요."}>아직 등록된 소식이 없습니다. 곧 새로운 이야기로 찾아올게요.</EditableText>
             </div>
           ) : (
             <div className="nl-grid">

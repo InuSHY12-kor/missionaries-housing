@@ -25,6 +25,7 @@ import { useWeweAdmin } from './useWeweAdmin';
 import lmodsGroupPhoto from '../assets/lmods-group.webp';
 import lmodsLogo from '../assets/lmods-logo.png';
 import './wewe-shared.css';
+import { EditableText } from '../edit/EditMode';
 
 // "전투복 프로젝트" 상세 페이지 (/about/ministries/combat-uniform, 2026-10-03 신설).
 // WEWE_2026_사업계획서 260930.pptx 슬라이드 16-20을 담았습니다. 기존 /about/ministries
@@ -252,16 +253,16 @@ function CombatUniformPage() {
       <section className="wcu-section">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">OVERVIEW</span>
-            <h2 className="wh-h2-center">프로젝트 개요</h2>
-            <p className="wcu-lead">한 벌의 맞춤 정장으로 전하는 존중과 회복</p>
+            <EditableText id={"OVERVIEW"} as="span" className="wh-eyebrow wh-eyebrow-center">OVERVIEW</EditableText>
+            <EditableText id={"프로젝트 개요"} as="h2" className="wh-h2-center">프로젝트 개요</EditableText>
+            <EditableText id={"한 벌의 맞춤 정장으로 전하는 존중과 회복"} className="wcu-lead">한 벌의 맞춤 정장으로 전하는 존중과 회복</EditableText>
           </Reveal>
 
           <Reveal as="blockquote" className="wcu-intro-quote" delay={40}>
-            <p>
+            <EditableText id={"목회자에게 정장은 매 주일 강단에 서는 &lsquo;전투복&rsquo;입니다. 그 옷을 지어 드림으로 아론과"}>
               목회자에게 정장은 매 주일 강단에 서는 &lsquo;전투복&rsquo;입니다. 그 옷을 지어 드림으로 아론과 훌이
               모세의 팔을 붙들어 올렸듯, 우리는 지친 목회자의 팔을 곁에서 받쳐 드리고자 합니다.
-            </p>
+            </EditableText>
             <cite>연결 사업 — Refresh Pastor Academy · 개별 지원</cite>
           </Reveal>
 
@@ -277,17 +278,17 @@ function CombatUniformPage() {
           <div className="wcu-overview-grid wcu-overview-grid-lg">
             <Reveal as="div" className="wcu-overview-card" delay={60}>
               <span className="wcu-overview-tag">WHAT</span>
-              <p>목회자의 체형과 사역에 맞춘 맞춤 정장(전투복)을 제작 · 전달합니다.</p>
+              <EditableText id={"목회자의 체형과 사역에 맞춘 맞춤 정장(전투복)을 제작 · 전달합니다."}>목회자의 체형과 사역에 맞춘 맞춤 정장(전투복)을 제작 · 전달합니다.</EditableText>
             </Reveal>
             <Reveal as="div" className="wcu-overview-card" delay={100}>
               <span className="wcu-overview-tag">WHY</span>
-              <p>평생 주기만 해온 목회자가 &lsquo;받는 자리&rsquo;에 서는 경험 — 존중, 회복, 그리고 다시 현장으로의
-                파송.</p>
+              <EditableText id={"평생 주기만 해온 목회자가 &lsquo;받는 자리&rsquo;에 서는 경험 — 존중, 회복, 그리고 다시 현"}>평생 주기만 해온 목회자가 &lsquo;받는 자리&rsquo;에 서는 경험 — 존중, 회복, 그리고 다시 현장으로의
+                파송.</EditableText>
             </Reveal>
             <Reveal as="div" className="wcu-overview-card wcu-overview-card-with" delay={140}>
               <div>
                 <span className="wcu-overview-tag">WITH</span>
-                <p>국내 1위 비스포크 테일러링 브랜드 엘모즈와 채촌부터 제작까지 전문 협업합니다.</p>
+                <EditableText id={"국내 1위 비스포크 테일러링 브랜드 엘모즈와 채촌부터 제작까지 전문 협업합니다."}>국내 1위 비스포크 테일러링 브랜드 엘모즈와 채촌부터 제작까지 전문 협업합니다.</EditableText>
               </div>
               <span className="wcu-with-logo">
                 <img src={lmodsLogo} alt="엘모즈 비스포크(L'MODS BESPOKE) 로고" />
@@ -305,9 +306,9 @@ function CombatUniformPage() {
       <section className="wcu-section wcu-section-soft">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">WHY &lsquo;COMBAT UNIFORM&rsquo;</span>
-            <h2 className="wh-h2-center">왜 &lsquo;전투복&rsquo;인가</h2>
-            <p className="wcu-lead">한 벌의 옷에 담긴 세 가지 의미</p>
+            <EditableText id={"WHY &lsquo;COMBAT UNIFORM&rsquo;"} as="span" className="wh-eyebrow wh-eyebrow-center">WHY &lsquo;COMBAT UNIFORM&rsquo;</EditableText>
+            <EditableText id={"왜 &lsquo;전투복&rsquo;인가"} as="h2" className="wh-h2-center">왜 &lsquo;전투복&rsquo;인가</EditableText>
+            <EditableText id={"한 벌의 옷에 담긴 세 가지 의미"} className="wcu-lead">한 벌의 옷에 담긴 세 가지 의미</EditableText>
           </Reveal>
 
           <Reveal
@@ -340,9 +341,9 @@ function CombatUniformPage() {
       <section className="wcu-section">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">HOW IT WORKS</span>
-            <h2 className="wh-h2-center">운영 구조</h2>
-            <p className="wcu-lead">후원자 · WEWE · 엘모즈 · 목회자가 함께 만드는 한 벌</p>
+            <EditableText id={"HOW IT WORKS"} as="span" className="wh-eyebrow wh-eyebrow-center">HOW IT WORKS</EditableText>
+            <EditableText id={"운영 구조"} as="h2" className="wh-h2-center">운영 구조</EditableText>
+            <EditableText id={"후원자 · WEWE · 엘모즈 · 목회자가 함께 만드는 한 벌"} className="wcu-lead">후원자 · WEWE · 엘모즈 · 목회자가 함께 만드는 한 벌</EditableText>
           </Reveal>
 
           {/* 엘모즈 단체 사진 — 원본(정사각형)에서 인물이 잘리지 않도록 3:2 비율로 위(천장)·아래(바닥)
@@ -375,9 +376,9 @@ function CombatUniformPage() {
       <section className="wcu-section wcu-section-soft">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">PROCESS</span>
-            <h2 className="wh-h2-center">진행 프로세스</h2>
-            <p className="wcu-lead">모집부터 후속 케어까지 6단계</p>
+            <EditableText id={"PROCESS"} as="span" className="wh-eyebrow wh-eyebrow-center">PROCESS</EditableText>
+            <EditableText id={"진행 프로세스"} as="h2" className="wh-h2-center">진행 프로세스</EditableText>
+            <EditableText id={"모집부터 후속 케어까지 6단계"} className="wcu-lead">모집부터 후속 케어까지 6단계</EditableText>
           </Reveal>
 
           <div className="wcu-process-grid">
@@ -417,8 +418,8 @@ function CombatUniformPage() {
       <section className="wcu-section">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">GROWTH ROADMAP</span>
-            <h2 className="wh-h2-center">성과관리 &amp; 확장 계획</h2>
+            <EditableText id={"GROWTH ROADMAP"} as="span" className="wh-eyebrow wh-eyebrow-center">GROWTH ROADMAP</EditableText>
+            <EditableText id={"성과관리 &amp; 확장 계획"} as="h2" className="wh-h2-center">성과관리 &amp; 확장 계획</EditableText>
             {!editing && growth.lead && <p className="wcu-lead">{growth.lead}</p>}
           </Reveal>
 
@@ -430,7 +431,7 @@ function CombatUniformPage() {
               </button>
             </div>
           )}
-          {savedNotice && !editing && <p className="wcu-admin-saved">저장되었습니다.</p>}
+          {savedNotice && !editing && <EditableText id={"저장되었습니다."} className="wcu-admin-saved">저장되었습니다.</EditableText>}
 
           {editing && draft ? (
             <div className="wcu-editor">
@@ -443,7 +444,7 @@ function CombatUniformPage() {
                 />
               </label>
 
-              <h4 className="wcu-editor-h">성과 지표 (KPI)</h4>
+              <EditableText id={"성과 지표 (KPI)"} as="h4" className="wcu-editor-h">성과 지표 (KPI)</EditableText>
               {draft.kpi.map((k, idx) => (
                 <div className="wcu-editor-row" key={idx}>
                   <input
@@ -477,7 +478,7 @@ function CombatUniformPage() {
                 <Plus size={15} /> 지표 추가
               </button>
 
-              <h4 className="wcu-editor-h">확장 로드맵</h4>
+              <EditableText id={"확장 로드맵"} as="h4" className="wcu-editor-h">확장 로드맵</EditableText>
               <div className="wcu-editor-stages">
                 {draft.roadmap.map((r, idx) => (
                   <div className="wcu-editor-stage" key={idx}>
@@ -567,8 +568,8 @@ function CombatUniformPage() {
       <section className="wa-cta">
         <div className="wh-container wa-cta-inner">
           <div>
-            <h2>목회자 돌봄 사역이 더 궁금하신가요?</h2>
-            <p>Refresh Pastor Academy의 전체 프로그램을 소개합니다.</p>
+            <EditableText id={"목회자 돌봄 사역이 더 궁금하신가요?"} as="h2">목회자 돌봄 사역이 더 궁금하신가요?</EditableText>
+            <EditableText id={"Refresh Pastor Academy의 전체 프로그램을 소개합니다."}>Refresh Pastor Academy의 전체 프로그램을 소개합니다.</EditableText>
           </div>
           <Link to="/about/ministries" className="wh-btn wh-btn-primary">
             사역 소개로 돌아가기 <ArrowRight size={18} />

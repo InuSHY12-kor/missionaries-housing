@@ -25,6 +25,7 @@ import WeweProfilePage from './WeweProfilePage';
 import WeweAdminPage from './WeweAdminPage';
 import ScrollToTop from './ScrollToTop';
 import SiteTitle from './SiteTitle';
+import { EditModeProvider } from '../edit/EditMode';
 
 // WEWE 전체 홈페이지의 최상위 라우터 (Phase 3, Phase 4에서 /news* 추가, Phase 5에서 /donate 추가,
 // Phase 6에서 /signup, /signup/supporter, /login 추가).
@@ -87,6 +88,8 @@ function WeweSite() {
 
   return (
     <BrowserRouter>
+      {/* (2026-10-09) 관리자 편집 모드(배너·문구 수정) — src/edit/EditMode.jsx */}
+      <EditModeProvider site="wewe">
       <SiteTitle title="WEWE (위로자의 위로자)" />
       <ScrollToTop />
       <RedirectHomeOnSignOut />
@@ -165,6 +168,7 @@ function WeweSite() {
           opacity: 0.7;
         }
       `}</style>
+      </EditModeProvider>
     </BrowserRouter>
   );
 }

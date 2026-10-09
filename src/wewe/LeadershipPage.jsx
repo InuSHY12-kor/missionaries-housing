@@ -10,6 +10,7 @@ import HERO_IMAGE_SETS from './heroImages';
 import weweRepresentative from '../assets/wewe-representative.jpg';
 import weweLogoNew from '../assets/wewe-logo-new.png';
 import './wewe-shared.css';
+import { EditableText } from '../edit/EditMode';
 
 // (2026-10-09) 협력기관·후원기관 목록은 새 "함께하는 사람들" 페이지(/about/partners, PartnersPage.jsx)로
 // 옮겼습니다. 이 페이지 하단에는 그 페이지로 가는 안내만 남깁니다.
@@ -36,21 +37,21 @@ function LeadershipPage() {
       <section className="wl-leader">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">REPRESENTATIVE</span>
-            <h2 className="wh-h2-center">대표 홍현지</h2>
+            <EditableText id={"REPRESENTATIVE"} as="span" className="wh-eyebrow wh-eyebrow-center">REPRESENTATIVE</EditableText>
+            <EditableText id={"대표 홍현지"} as="h2" className="wh-h2-center">대표 홍현지</EditableText>
           </Reveal>
 
           <Reveal as="div" className="wl-leader-card" delay={80}>
             <img src={weweRepresentative} alt="대표 홍현지" className="wl-leader-photo" />
             <div className="wl-leader-body">
-              <p className="wl-leader-degree">간호학(전공) 학사 · 호스피스 전문 간호사(석사)</p>
+              <EditableText id={"간호학(전공) 학사 · 호스피스 전문 간호사(석사)"} className="wl-leader-degree">간호학(전공) 학사 · 호스피스 전문 간호사(석사)</EditableText>
               <ul className="wl-leader-history">
                 <li>현 세브란스 완화의료팀 프로젝트매니저</li>
                 <li>현 상지대학교 아동간호학 강사</li>
                 <li>전 세브란스 완화의료팀 소아전문간호사</li>
                 <li>전 국립암센터 소아암 병동 전문간호사</li>
               </ul>
-              <p className="wl-leader-note">약력은 계속 추가될 예정입니다.</p>
+              <EditableText id={"약력은 계속 추가될 예정입니다."} className="wl-leader-note">약력은 계속 추가될 예정입니다.</EditableText>
             </div>
           </Reveal>
         </div>
@@ -59,8 +60,8 @@ function LeadershipPage() {
       <section className="wl-board">
         <div className="wh-container wh-container-narrow">
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">BOARD OF DIRECTORS</span>
-            <h2 className="wh-h2-center">이사회</h2>
+            <EditableText id={"BOARD OF DIRECTORS"} as="span" className="wh-eyebrow wh-eyebrow-center">BOARD OF DIRECTORS</EditableText>
+            <EditableText id={"이사회"} as="h2" className="wh-h2-center">이사회</EditableText>
           </Reveal>
 
           {/* 대표 홍현지 섹션(wl-leader-card)과 동일하게 왼쪽 이미지 + 오른쪽 내용 배치로
@@ -70,7 +71,7 @@ function LeadershipPage() {
               <img src={weweLogoNew} alt="WEWE" className="wl-board-logo" />
             </div>
             <div className="wl-board-body">
-              <p>WEWE는 임의법인에서 사단법인으로 전환하는 과정에서 이사회를 구성하고 있습니다.</p>
+              <EditableText id={"WEWE는 임의법인에서 사단법인으로 전환하는 과정에서 이사회를 구성하고 있습니다."}>WEWE는 임의법인에서 사단법인으로 전환하는 과정에서 이사회를 구성하고 있습니다.</EditableText>
               <span className="wl-board-soon">구성 중</span>
             </div>
           </Reveal>
@@ -81,9 +82,9 @@ function LeadershipPage() {
         <div className="wh-container wh-container-narrow">
           <Reveal as="div" className="wl-partners-cta">
             <div>
-              <span className="wh-eyebrow">WITH US</span>
-              <h2>WEWE와 함께하는 사람들</h2>
-              <p>협력기관 · 후원기관과 후원자 명단은 &lsquo;함께하는 사람들&rsquo; 페이지에서 보실 수 있습니다.</p>
+              <EditableText id={"WITH US"} as="span" className="wh-eyebrow">WITH US</EditableText>
+              <EditableText id={"WEWE와 함께하는 사람들"} as="h2">WEWE와 함께하는 사람들</EditableText>
+              <EditableText id={"협력기관 · 후원기관과 후원자 명단은 &lsquo;함께하는 사람들&rsquo; 페이지에서 보실 수 있습니다."}>협력기관 · 후원기관과 후원자 명단은 &lsquo;함께하는 사람들&rsquo; 페이지에서 보실 수 있습니다.</EditableText>
             </div>
             <Link to="/about/partners" className="wh-btn wh-btn-primary">
               함께하는 사람들 보기 <ArrowRight size={18} />

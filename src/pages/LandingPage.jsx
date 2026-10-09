@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
+import { useHero, HeroEditButton, renderRich, EditableText } from '../edit/EditMode';
 import { Home, Lock, Users, CheckCircle, Heart, ChevronDown, Send } from 'lucide-react';
 
 const FAQ_ITEMS = [
@@ -62,14 +63,27 @@ const MARQUEE_IMAGES = [
 function LandingPage({ noticeBanner = null }) {
   const [openFaq, setOpenFaq] = useState(0);
 
+  // (2026-10-09) 관리자 편집 모드 — 저장된 배너(사진·문구)가 있으면 그것을, 없으면 아래 기본값.
+  const heroDefaults = {
+    eyebrow: 'MISSIONARY REST & STAY',
+    title: '선교사의 신뢰의 숙소',
+    subtitle: 'WEWE STAY는 선교사가 안전하고 신뢰할 수 있는 숙소를 찾을 수 있도록 전문적인 연결을 제공합니다.\n2단계 승인 시스템을 통해 선교사와 숙소 제공자 사이의 신뢰를 확보합니다.',
+    images: HERO_IMAGES,
+  };
+  const hero = useHero(heroDefaults);
+  const heroImages = hero.images;
+
   // 히어로 슬라이드쇼: 약 3초마다 다음 이미지로 자동 전환
   const [heroSlide, setHeroSlide] = useState(0);
+  const heroCount = heroImages.length;
   useEffect(() => {
+    setHeroSlide(0);
+    if (heroCount < 2) return undefined;
     const timer = setInterval(() => {
-      setHeroSlide((prev) => (prev + 1) % HERO_IMAGES.length);
+      setHeroSlide((prev) => (prev + 1) % heroCount);
     }, 3000);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroCount]);
 
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -123,27 +137,25 @@ function LandingPage({ noticeBanner = null }) {
     <div className="landing-page">
       {/* 히어로 섹션 — 3초마다 자동 전환되는 슬라이드쇼 */}
       <section className="hero">
-        {HERO_IMAGES.map((src, idx) => (
+        {hero.ready && heroImages.map((src, idx) => (
           <div
             key={idx}
             className={`hero-slide ${idx === heroSlide ? 'active' : ''}`}
-            style={{ backgroundImage: `url(${src})` }}
+            style={{ backgroundImage: `url("${src}")` }}
           />
         ))}
 
-        <div className="hero-content">
-          <span className="hero-eyebrow">MISSIONARY REST &amp; STAY</span>
-          <h1>선교사의 신뢰의 숙소</h1>
-          <p>
-            WEWE STAY는 선교사가 안전하고 신뢰할 수 있는 숙소를 찾을 수 있도록 전문적인 연결을 제공합니다.
-            <br />
-            2단계 승인 시스템을 통해 선교사와 숙소 제공자 사이의 신뢰를 확보합니다.
-          </p>
+        <div className="hero-content" style={{ opacity: hero.ready ? 1 : 0, transition: 'opacity 0.25s ease' }}>
+          {hero.eyebrow && <span className="hero-eyebrow">{hero.eyebrow}</span>}
+          <h1>{hero.title}</h1>
+          {hero.subtitle && <p>{renderRich(hero.subtitle)}</p>}
           <Link to="/signup" className="link-cta">지금 시작하기</Link>
         </div>
 
+        <HeroEditButton defaults={heroDefaults} />
+
         <div className="hero-progress">
-          {HERO_IMAGES.map((_, idx) => (
+          {heroImages.map((_, idx) => (
             <div className="hero-dot-wrap" key={idx}>
               <svg className="hero-ring" viewBox="0 0 36 36">
                 <circle className="hero-ring-track" cx="18" cy="18" r="15.5" />
@@ -167,23 +179,23 @@ function LandingPage({ noticeBanner = null }) {
       {/* 우리의 이야기 섹션 */}
       <section className="story">
         <div className="container">
-          <span className="eyebrow center">OUR STORY</span>
-          <h2>우리의 이야기: 위로자의 위로자</h2>
+          <EditableText id={"OUR STORY"} as="span" className="eyebrow center">OUR STORY</EditableText>
+          <EditableText id={"우리의 이야기: 위로자의 위로자"} as="h2">우리의 이야기: 위로자의 위로자</EditableText>
 
           <blockquote className="verse">
             “너희 중에 분깃이나 기업이 없는 레위인과 네 성중에 거류하는 객과 및 고아와 과부들이 와서 먹고 배부르게 하라 그리하면 네 하나님 여호와께서 네 손으로 하는 범사에 네게 복을 주시리라”
             <cite>(신명기 14:29)</cite>
           </blockquote>
 
-          <p>
+          <EditableText id={"WEWE는 '위로자의 위로자'라는 뜻으로, 성경의 가르침을 따라 목회자와 선교사님들이 사역 현장에서 겪는 고"}>
             WEWE는 '위로자의 위로자'라는 뜻으로, 성경의 가르침을 따라 목회자와 선교사님들이 사역 현장에서 겪는 고단함을 보듬기 위해 시작된 비영리 단체입니다.
             우리는 그분들이 다시 일어설 수 있도록 곁에서 묵묵히 지원하며 기도의 손길을 더합니다.
-          </p>
+          </EditableText>
 
-          <p>
+          <EditableText id={"그중 WEWE STAY는 선교사님들이 10~15년 만에 고국으로 돌아온 한국에서도 편안하게 머물 수 있는 '"}>
             그중 WEWE STAY는 선교사님들이 10~15년 만에 고국으로 돌아온 한국에서도 편안하게 머물 수 있는 '생존 인프라 지원' 신뢰의 공유 숙소 플랫폼입니다.
             쉼이 필요한 이들에게 안전하고 따뜻한 보금자리를 연결하는 것이 우리의 사명입니다.
-          </p>
+          </EditableText>
 
           <div className="about-gallery">
             <div className="side left" style={{ backgroundImage: `url(${IMAGES.aboutLeft})` }} />
@@ -199,11 +211,11 @@ function LandingPage({ noticeBanner = null }) {
               aria-label="함께 맞잡은 손"
             />
             <div className="brand-symbol-text">
-              <h3>함께 잡는 손, 브랜드 심볼 'W'의 의미</h3>
-              <p>
+              <EditableText id={"함께 잡는 손, 브랜드 심볼 'W'의 의미"} as="h3">함께 잡는 손, 브랜드 심볼 'W'의 의미</EditableText>
+              <EditableText id={"브랜드 심볼 'W'는 출애굽기에서 모세의 팔이 내려가지 않도록 곁에서 받쳐준 아론과 훌의 손을 상징합니다. "}>
                 브랜드 심볼 'W'는 출애굽기에서 모세의 팔이 내려가지 않도록 곁에서 받쳐준 아론과 훌의 손을 상징합니다.
                 먼저 아파본 위로자가 지금 아픈 위로자의 손을 잡아준다는 사랑의 약속을 담고 있습니다.
-              </p>
+              </EditableText>
             </div>
           </div>
         </div>
@@ -212,8 +224,8 @@ function LandingPage({ noticeBanner = null }) {
       {/* 특징 섹션 */}
       <section className="features">
         <div className="container">
-          <span className="eyebrow center">WHY WEWE STAY</span>
-          <h2>왜 우리를 선택해야 할까요?</h2>
+          <EditableText id={"WHY WEWE STAY"} as="span" className="eyebrow center">WHY WEWE STAY</EditableText>
+          <EditableText id={"왜 우리를 선택해야 할까요?"} as="h2">왜 우리를 선택해야 할까요?</EditableText>
 
           <div className="features-grid">
             {/* 카드 1 */}
@@ -221,8 +233,8 @@ function LandingPage({ noticeBanner = null }) {
               <div className="feature-icon">
                 <Lock size={32} />
               </div>
-              <h3>신뢰할 수 있는 검증</h3>
-              <p>모든 회원이 관리자의 승인 과정을 거치기 때문에 안전하고 신뢰할 수 있습니다.</p>
+              <EditableText id={"신뢰할 수 있는 검증"} as="h3">신뢰할 수 있는 검증</EditableText>
+              <EditableText id={"모든 회원이 관리자의 승인 과정을 거치기 때문에 안전하고 신뢰할 수 있습니다."}>모든 회원이 관리자의 승인 과정을 거치기 때문에 안전하고 신뢰할 수 있습니다.</EditableText>
             </div>
 
             {/* 카드 2 */}
@@ -230,8 +242,8 @@ function LandingPage({ noticeBanner = null }) {
               <div className="feature-icon">
                 <Users size={32} />
               </div>
-              <h3>커뮤니티 중심</h3>
-              <p>선교사 커뮤니티의 일원들만 접근할 수 있는 비공개 플랫폼입니다.</p>
+              <EditableText id={"커뮤니티 중심"} as="h3">커뮤니티 중심</EditableText>
+              <EditableText id={"선교사 커뮤니티의 일원들만 접근할 수 있는 비공개 플랫폼입니다."}>선교사 커뮤니티의 일원들만 접근할 수 있는 비공개 플랫폼입니다.</EditableText>
             </div>
 
             {/* 카드 3 */}
@@ -239,8 +251,8 @@ function LandingPage({ noticeBanner = null }) {
               <div className="feature-icon">
                 <Heart size={32} />
               </div>
-              <h3>함께하는 경험</h3>
-              <p>같은 신앙을 가진 사람들과 의미 있는 연결을 만들어보세요.</p>
+              <EditableText id={"함께하는 경험"} as="h3">함께하는 경험</EditableText>
+              <EditableText id={"같은 신앙을 가진 사람들과 의미 있는 연결을 만들어보세요."}>같은 신앙을 가진 사람들과 의미 있는 연결을 만들어보세요.</EditableText>
             </div>
 
             {/* 카드 4 */}
@@ -248,8 +260,8 @@ function LandingPage({ noticeBanner = null }) {
               <div className="feature-icon">
                 <CheckCircle size={32} />
               </div>
-              <h3>숙소 품질 보증</h3>
-              <p>숙소도 관리자의 검증을 거치므로 일정한 품질을 유지합니다.</p>
+              <EditableText id={"숙소 품질 보증"} as="h3">숙소 품질 보증</EditableText>
+              <EditableText id={"숙소도 관리자의 검증을 거치므로 일정한 품질을 유지합니다."}>숙소도 관리자의 검증을 거치므로 일정한 품질을 유지합니다.</EditableText>
             </div>
 
             {/* 카드 5 */}
@@ -257,8 +269,8 @@ function LandingPage({ noticeBanner = null }) {
               <div className="feature-icon">
                 <Home size={32} />
               </div>
-              <h3>쉬운 예약</h3>
-              <p>간단한 예약 시스템으로 편하게 숙소를 예약하세요.</p>
+              <EditableText id={"쉬운 예약"} as="h3">쉬운 예약</EditableText>
+              <EditableText id={"간단한 예약 시스템으로 편하게 숙소를 예약하세요."}>간단한 예약 시스템으로 편하게 숙소를 예약하세요.</EditableText>
             </div>
 
             {/* 카드 6 */}
@@ -266,8 +278,8 @@ function LandingPage({ noticeBanner = null }) {
               <div className="feature-icon">
                 <Users size={32} />
               </div>
-              <h3>호스트 지원</h3>
-              <p>숙소를 공유하고 싶은 분들도 안전한 환경에서 시작할 수 있습니다.</p>
+              <EditableText id={"호스트 지원"} as="h3">호스트 지원</EditableText>
+              <EditableText id={"숙소를 공유하고 싶은 분들도 안전한 환경에서 시작할 수 있습니다."}>숙소를 공유하고 싶은 분들도 안전한 환경에서 시작할 수 있습니다.</EditableText>
             </div>
           </div>
         </div>
@@ -276,39 +288,39 @@ function LandingPage({ noticeBanner = null }) {
       {/* 프로세스 섹션 */}
       <section className="process">
         <div className="container">
-          <span className="eyebrow center">HOW IT WORKS</span>
-          <h2>시작하는 방법</h2>
+          <EditableText id={"HOW IT WORKS"} as="span" className="eyebrow center">HOW IT WORKS</EditableText>
+          <EditableText id={"시작하는 방법"} as="h2">시작하는 방법</EditableText>
 
           <div className="process-list">
             <div className="process-row">
               <div className="process-num">01</div>
               <div className="process-body">
-                <h3>가입하기</h3>
-                <p>선교사 또는 호스트로 회원가입하고 검증 문서를 제출하세요.</p>
+                <EditableText id={"가입하기"} as="h3">가입하기</EditableText>
+                <EditableText id={"선교사 또는 호스트로 회원가입하고 검증 문서를 제출하세요."}>선교사 또는 호스트로 회원가입하고 검증 문서를 제출하세요.</EditableText>
               </div>
             </div>
 
             <div className="process-row">
               <div className="process-num">02</div>
               <div className="process-body">
-                <h3>승인 대기</h3>
-                <p>관리자가 정보를 검토하고 확인합니다. (1-2일 소요)</p>
+                <EditableText id={"승인 대기"} as="h3">승인 대기</EditableText>
+                <EditableText id={"관리자가 정보를 검토하고 확인합니다. (1-2일 소요)"}>관리자가 정보를 검토하고 확인합니다. (1-2일 소요)</EditableText>
               </div>
             </div>
 
             <div className="process-row">
               <div className="process-num">03</div>
               <div className="process-body">
-                <h3>승인 완료</h3>
-                <p>승인 후 플랫폼의 모든 기능을 이용할 수 있습니다.</p>
+                <EditableText id={"승인 완료"} as="h3">승인 완료</EditableText>
+                <EditableText id={"승인 후 플랫폼의 모든 기능을 이용할 수 있습니다."}>승인 후 플랫폼의 모든 기능을 이용할 수 있습니다.</EditableText>
               </div>
             </div>
 
             <div className="process-row">
               <div className="process-num">04</div>
               <div className="process-body">
-                <h3>숙소 검색/공유</h3>
-                <p>숙소를 검색하거나 등록하여 커뮤니티를 활용하세요.</p>
+                <EditableText id={"숙소 검색/공유"} as="h3">숙소 검색/공유</EditableText>
+                <EditableText id={"숙소를 검색하거나 등록하여 커뮤니티를 활용하세요."}>숙소를 검색하거나 등록하여 커뮤니티를 활용하세요.</EditableText>
               </div>
             </div>
           </div>
@@ -318,8 +330,8 @@ function LandingPage({ noticeBanner = null }) {
       {/* FAQ 섹션 */}
       <section className="faq">
         <div className="container">
-          <span className="eyebrow center">FAQ</span>
-          <h2>자주 묻는 질문</h2>
+          <EditableText id={"FAQ"} as="span" className="eyebrow center">FAQ</EditableText>
+          <EditableText id={"자주 묻는 질문"} as="h2">자주 묻는 질문</EditableText>
 
           <div className="faq-list">
             {FAQ_ITEMS.map((item, idx) => (
@@ -356,21 +368,21 @@ function LandingPage({ noticeBanner = null }) {
 
           <div className="contact-grid">
           <div className="contact-intro">
-            <span className="eyebrow">CONTACT</span>
-            <h2>궁금한 점이 있으신가요?</h2>
-            <p className="contact-lead">위위 스테이에 대해 무엇이든 편하게 문의해 주세요.</p>
-            <p>
+            <EditableText id={"CONTACT"} as="span" className="eyebrow">CONTACT</EditableText>
+            <EditableText id={"궁금한 점이 있으신가요?"} as="h2">궁금한 점이 있으신가요?</EditableText>
+            <EditableText id={"위위 스테이에 대해 무엇이든 편하게 문의해 주세요."} className="contact-lead">위위 스테이에 대해 무엇이든 편하게 문의해 주세요.</EditableText>
+            <EditableText id={"숙소 이용이나 등록 방법, 승인 절차 등 궁금하신 내용을 남겨주시면 위위 스테이 팀이 확인 후 빠르게 안내해"}>
               숙소 이용이나 등록 방법, 승인 절차 등 궁금하신 내용을 남겨주시면 위위 스테이 팀이 확인 후 빠르게 안내해 드리겠습니다.
               정식으로 선교사 또는 숙소 제공자로 가입하시려면 상단의 '가입하기' 메뉴를 이용해 주세요.
-            </p>
+            </EditableText>
           </div>
 
           <div className="contact-form-wrap">
             {submitted ? (
               <div className="contact-success">
                 <CheckCircle size={40} />
-                <h3>문의가 접수되었습니다</h3>
-                <p>남겨주신 연락처로 위위 스테이 팀이 곧 안내해 드리겠습니다. 감사합니다.</p>
+                <EditableText id={"문의가 접수되었습니다"} as="h3">문의가 접수되었습니다</EditableText>
+                <EditableText id={"남겨주신 연락처로 위위 스테이 팀이 곧 안내해 드리겠습니다. 감사합니다."}>남겨주신 연락처로 위위 스테이 팀이 곧 안내해 드리겠습니다. 감사합니다.</EditableText>
               </div>
             ) : (
               <form className="contact-form" onSubmit={handleInquirySubmit}>
@@ -439,15 +451,15 @@ function LandingPage({ noticeBanner = null }) {
         <div className="container footer-inner">
           <div className="footer-brand">
             <span className="footer-logo">WEWE<b>STAY</b></span>
-            <p>위로자의 위로자 — 선교사와 숙소 제공자를 잇는 신뢰의 플랫폼</p>
+            <EditableText id={"위로자의 위로자 — 선교사와 숙소 제공자를 잇는 신뢰의 플랫폼"}>위로자의 위로자 — 선교사와 숙소 제공자를 잇는 신뢰의 플랫폼</EditableText>
           </div>
 
           <div className="footer-info">
-            <p>법인으로 보는 단체 WEWE (위로자의 위로자)</p>
-            <p>대표 홍현지</p>
-            <p>사업자(고유번호) 501-82-75164</p>
-            <p>주소 서울특별시 종로구 대학로12길 61, 5층 501-176A호(동승동, 계우빌딩)</p>
-            <p>전화 010-8339-7740 · 이메일 wewe@wewestay.com</p>
+            <EditableText id={"법인으로 보는 단체 WEWE (위로자의 위로자)"}>법인으로 보는 단체 WEWE (위로자의 위로자)</EditableText>
+            <EditableText id={"대표 홍현지"}>대표 홍현지</EditableText>
+            <EditableText id={"사업자(고유번호) 501-82-75164"}>사업자(고유번호) 501-82-75164</EditableText>
+            <EditableText id={"주소 서울특별시 종로구 대학로12길 61, 5층 501-176A호(동승동, 계우빌딩)"}>주소 서울특별시 종로구 대학로12길 61, 5층 501-176A호(동승동, 계우빌딩)</EditableText>
+            <EditableText id={"전화 010-8339-7740 · 이메일 wewe@wewestay.com"}>전화 010-8339-7740 · 이메일 wewe@wewestay.com</EditableText>
           </div>
 
           <div className="footer-copy">

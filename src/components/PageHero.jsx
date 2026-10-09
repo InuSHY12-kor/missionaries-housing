@@ -1,42 +1,52 @@
 import React, { useState, useEffect } from 'react';
+import { useHero, HeroEditButton, renderRich } from '../edit/EditMode';
 
 /**
  * 랜딩 페이지 히어로와 동일한 느낌(자동 전환 슬라이드 + 원형 링 진행 표시)의
  * 축소판 배너입니다. 로그인 후 각 페이지 상단에 얹어 페이지별 분위기 사진을 보여줍니다.
  * 랜딩 페이지 히어로보다 높이를 절반 정도로 낮춰서 콘텐츠를 가리지 않도록 했습니다.
  */
-function PageHero({ images, eyebrow, title, subtitle }) {
+// (2026-10-09) 관리자 편집 모드 — 페이지 경로별로 저장된 배너(사진·문구)가 있으면 그것을, 없으면 props
+// 기본값을 보여줍니다(src/edit/EditMode.jsx). 저장된 내용을 불러오기 전에는 잠깐 숨겨 깜빡임을 막습니다.
+function PageHero({ images: defaultImages, eyebrow: defaultEyebrow, title: defaultTitle, subtitle: defaultSubtitle }) {
+  const defaults = { images: defaultImages || [], eyebrow: defaultEyebrow, title: defaultTitle, subtitle: defaultSubtitle };
+  const hero = useHero(defaults);
+  const { images, eyebrow, title, subtitle } = hero;
   const [slide, setSlide] = useState(0);
 
+  const imageCount = images ? images.length : 0;
   useEffect(() => {
-    if (!images || images.length < 2) return undefined;
+    setSlide(0);
+    if (imageCount < 2) return undefined;
     const timer = setInterval(() => {
-      setSlide((prev) => (prev + 1) % images.length);
+      setSlide((prev) => (prev + 1) % imageCount);
     }, 3000);
     return () => clearInterval(timer);
-  }, [images]);
+  }, [imageCount]);
 
   if (!images || images.length === 0) return null;
 
   return (
     <section className="page-hero">
-      {images.map((src, idx) => (
+      {hero.ready && images.map((src, idx) => (
         <div
           key={idx}
           className={`page-hero-slide ${idx === slide ? 'active' : ''}`}
-          style={{ backgroundImage: `url(${src})` }}
+          style={{ backgroundImage: `url("${src}")` }}
         />
       ))}
 
       <div className="page-hero-overlay" />
 
       {(eyebrow || title || subtitle) && (
-        <div className="page-hero-content">
+        <div className="page-hero-content" style={{ opacity: hero.ready ? 1 : 0, transition: 'opacity 0.25s ease' }}>
           {eyebrow && <span className="page-hero-eyebrow">{eyebrow}</span>}
           {title && <h2>{title}</h2>}
-          {subtitle && <p>{subtitle}</p>}
+          {subtitle && <p>{renderRich(subtitle)}</p>}
         </div>
       )}
+
+      <HeroEditButton defaults={defaults} />
 
       {images.length > 1 && (
         <div className="page-hero-progress">

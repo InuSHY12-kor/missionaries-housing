@@ -17,6 +17,7 @@ import WevePageHero from './WevePageHero';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import './wewe-shared.css';
+import { EditableText } from '../edit/EditMode';
 
 // 후원이 만드는 변화 / 후원 방법 섹션에 들어가는 사진(2026-09-10 추가).
 // 사역 소개 페이지의 "Refresh Pastor Academy" 하단 사진(.wm-project-photo)과 동일한
@@ -94,8 +95,8 @@ function DonatePage() {
           {/* (2026-10-09 가독성) 제목을 추가하고, 한 덩어리였던 두 문단을 "핵심 문장(크게) → 설명 →
               강조 상자" 순서로 나눴습니다. 문장 내용은 기존과 같습니다. */}
           <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">WHY SUPPORT</span>
-            <h2 className="wh-h2-center">위로자를 위로하는 후원</h2>
+            <EditableText id={"WHY SUPPORT"} as="span" className="wh-eyebrow wh-eyebrow-center">WHY SUPPORT</EditableText>
+            <EditableText id={"위로자를 위로하는 후원"} as="h2" className="wh-h2-center">위로자를 위로하는 후원</EditableText>
 
             <blockquote className="wh-verse">
               &ldquo;너희 중에 분깃이나 기업이 없는 레위인과 네 성중에 거류하는 객과 및 고아와 과부들이 와서
@@ -104,19 +105,19 @@ function DonatePage() {
             </blockquote>
 
             <div className="wd-why-text">
-              <p className="wd-why-lead">
+              <EditableText id={"기업이 없어 공동체의 돌봄이 절실했던 레위인처럼, 오늘의 목회자와 선교사들도 누군가를 위로하는 자리에서 정작"} className="wd-why-lead">
                 기업이 없어 공동체의 돌봄이 절실했던 레위인처럼, 오늘의 목회자와 선교사들도 누군가를 위로하는
                 자리에서 정작 자신은 돌봄받지 못한 채 지쳐갑니다.
-              </p>
+              </EditableText>
               <p>
                 WEWE는 이들을 지키는 그리스도의 지체들과 함께, 평신도와 기업의 후원이{' '}
                 <strong>전문적인 돌봄으로, 다시 교회와 선교현장의 회복으로</strong> 이어지는 선순환을 만들어가고
                 있습니다.
               </p>
-              <p className="wd-why-highlight">
+              <EditableText id={"여러분의 후원은 한 사람의 위로자가 다시 일어서는 데 그치지 않고, 그가 돌보는 공동체 전체에 회복의 파장을"} className="wd-why-highlight">
                 여러분의 후원은 한 사람의 위로자가 다시 일어서는 데 그치지 않고, 그가 돌보는 공동체 전체에
                 회복의 파장을 만듭니다.
-              </p>
+              </EditableText>
             </div>
           </Reveal>
         </div>
@@ -124,8 +125,8 @@ function DonatePage() {
 
       <section className="wd-impact">
         <div className="wh-container wh-container-narrow">
-          <span className="wh-eyebrow wh-eyebrow-center">WHERE IT GOES</span>
-          <h2 className="wh-h2-center">후원이 만드는 변화</h2>
+          <EditableText id={"WHERE IT GOES"} as="span" className="wh-eyebrow wh-eyebrow-center">WHERE IT GOES</EditableText>
+          <EditableText id={"후원이 만드는 변화"} as="h2" className="wh-h2-center">후원이 만드는 변화</EditableText>
 
           <Reveal
             as="div"
@@ -151,12 +152,12 @@ function DonatePage() {
 
       <section className="wd-how">
         <div className="wh-container wh-container-narrow">
-          <span className="wh-eyebrow wh-eyebrow-center">HOW TO GIVE</span>
-          <h2 className="wh-h2-center">후원 방법</h2>
-          <p className="wd-how-lead">
+          <EditableText id={"HOW TO GIVE"} as="span" className="wh-eyebrow wh-eyebrow-center">HOW TO GIVE</EditableText>
+          <EditableText id={"후원 방법"} as="h2" className="wh-h2-center">후원 방법</EditableText>
+          <EditableText id={"아래 두 가지 방법 중 편하신 방법으로 후원해주세요. 기부금 영수증(세액공제)이 필요하신 분은 Mission"} className="wd-how-lead">
             아래 두 가지 방법 중 편하신 방법으로 후원해주세요. 기부금 영수증(세액공제)이 필요하신
             분은 MissionFund를 이용해주세요.
-          </p>
+          </EditableText>
 
           <Reveal
             as="div"
@@ -169,8 +170,8 @@ function DonatePage() {
           <div className="wd-methods">
             <Reveal as="div" className="wd-method-card">
               <div className="wd-method-head">
-                <h3>계좌이체</h3>
-                <p>가장 간단하게, 바로 후원할 수 있는 방법입니다.</p>
+                <EditableText id={"계좌이체"} as="h3">계좌이체</EditableText>
+                <EditableText id={"가장 간단하게, 바로 후원할 수 있는 방법입니다."}>가장 간단하게, 바로 후원할 수 있는 방법입니다.</EditableText>
               </div>
 
               <div className="wd-account-card">
@@ -196,7 +197,7 @@ function DonatePage() {
                   <span className="wd-account-label">예금주</span>
                   <span className="wd-account-value">{ACCOUNT_INFO.holder}</span>
                 </div>
-                {copied && <p className="wd-copied-note">계좌번호가 복사되었습니다.</p>}
+                {copied && <EditableText id={"계좌번호가 복사되었습니다."} className="wd-copied-note">계좌번호가 복사되었습니다.</EditableText>}
               </div>
             </Reveal>
 
@@ -206,15 +207,15 @@ function DonatePage() {
                   <Receipt size={18} />
                   MissionFund
                 </h3>
-                <p>기부금 영수증(세액공제)이 필요하신 분을 위한 후원 방법입니다.</p>
+                <EditableText id={"기부금 영수증(세액공제)이 필요하신 분을 위한 후원 방법입니다."}>기부금 영수증(세액공제)이 필요하신 분을 위한 후원 방법입니다.</EditableText>
               </div>
 
               <div className="wd-missionfund-box">
                 <img src={MISSIONFUND_LOGO} alt="MissionFund" className="wd-missionfund-logo" />
-                <p className="wd-missionfund-desc">
+                <EditableText id={"MissionFund를 통해 후원하시면 정식 기부금 영수증을 발급받으실 수 있습니다. 아래 버튼을 눌러 WE"} className="wd-missionfund-desc">
                   MissionFund를 통해 후원하시면 정식 기부금 영수증을 발급받으실 수 있습니다. 아래
                   버튼을 눌러 WEWE 전용 후원 페이지로 이동해주세요.
-                </p>
+                </EditableText>
                 <a
                   href={MISSIONFUND_URL}
                   target="_blank"
@@ -228,7 +229,7 @@ function DonatePage() {
           </div>
 
           <div className="wd-contact">
-            <p>후원 방법이나 정기후원 관련 문의는 이메일로 편하게 연락해주세요.</p>
+            <EditableText id={"후원 방법이나 정기후원 관련 문의는 이메일로 편하게 연락해주세요."}>후원 방법이나 정기후원 관련 문의는 이메일로 편하게 연락해주세요.</EditableText>
             <a href="mailto:wewe@wewestay.com" className="wh-btn wh-btn-outline">
               <Mail size={16} />
               wewe@wewestay.com
@@ -240,8 +241,8 @@ function DonatePage() {
       <section className="wa-cta">
         <div className="wh-container wa-cta-inner">
           <div>
-            <h2>WEWE가 하는 일이 더 궁금하신가요?</h2>
-            <p>후원이 이어지는 현장, 레위인의 회복(목회자)과 선교사의 회복 두 프로젝트를 소개합니다.</p>
+            <EditableText id={"WEWE가 하는 일이 더 궁금하신가요?"} as="h2">WEWE가 하는 일이 더 궁금하신가요?</EditableText>
+            <EditableText id={"후원이 이어지는 현장, 레위인의 회복(목회자)과 선교사의 회복 두 프로젝트를 소개합니다."}>후원이 이어지는 현장, 레위인의 회복(목회자)과 선교사의 회복 두 프로젝트를 소개합니다.</EditableText>
           </div>
           <Link to="/about/ministries" className="wh-btn wh-btn-primary">
             사역 소개 보기 <ArrowRight size={18} />
