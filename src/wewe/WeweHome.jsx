@@ -6,6 +6,7 @@ import WeweFooter from './WeweFooter';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import { weweSupabase } from './weweSupabase';
+import { supabase } from '../App';
 import { useHero, HeroEditButton, renderRich, EditableText } from '../edit/EditMode';
 import './wewe-shared.css';
 
@@ -44,6 +45,22 @@ function WeweHome() {
   const [newsPosts, setNewsPosts] = useState([]);
   const [newsLoaded, setNewsLoaded] = useState(false);
   const [heroSlide, setHeroSlide] = useState(0);
+  // (2026-10-09) 로그인 여부 — 맨 아래 "가입하기/로그인" 안내 밴드는 로그인하지 않은 방문자에게만
+  // 보여줍니다. 확인 전(null)에는 숨겨 두어, 로그인한 회원에게 잠깐 보였다 사라지는 깜빡임을 막습니다.
+  const [isLoggedIn, setIsLoggedIn] = useState(null);
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (mounted) setIsLoggedIn(!!data?.session?.user);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) setIsLoggedIn(!!session?.user);
+    });
+    return () => {
+      mounted = false;
+      subscription?.unsubscribe();
+    };
+  }, []);
   // (2026-10-09) 관리자 편집 모드 — 저장된 배너(사진·문구)가 있으면 그것을, 없으면 아래 기본값.
   // 배너 설명은 줄마다(Enter) 한 문장 블록으로 나뉘어 모바일에서도 고르게 줄바꿈됩니다.
   const heroDefaults = {
@@ -475,6 +492,7 @@ function WeweHome() {
 
       {/* WEWE CTA 밴드 (2026-09-10 수정) — 이전에는 위위 스테이 회원가입을 안내하는
           문구/링크였는데, 여기는 위위 랜딩 페이지이므로 위위 자체 가입·로그인으로 바꿨습니다. */}
+      {isLoggedIn === false && (
       <section className="wh-cta">
         <div className="wh-container wh-cta-inner">
           <div>
@@ -487,6 +505,7 @@ function WeweHome() {
           </div>
         </div>
       </section>
+      )}
 
       <WeweFooter />
 
