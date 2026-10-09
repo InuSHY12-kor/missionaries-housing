@@ -154,10 +154,11 @@ function WeweHome() {
         <div className="wh-hero-content">
           <span className="wh-hero-eyebrow">WE + WE, 나에서 우리로</span>
           <h1>위로자의 위로자, WEWE입니다</h1>
+          {/* (2026-10-09) <br /> 대신 문장마다 블록으로 나눠, 모바일에서 각 문장의 줄 길이가 고르게
+              나뉘도록(text-wrap: balance) 했습니다 — 마지막 줄에 한 단어만 남지 않게. */}
           <p>
-            사역 현장에서 누군가를 위로하느라 자신의 아픔은 숨겨야 했던 목회자와 선교사님들.
-            <br />
-            먼저 아파본 위로자가 지금 아픈 위로자의 손을 잡아드립니다.
+            <span className="wh-hero-line">사역 현장에서 누군가를 위로하느라 자신의 아픔은 숨겨야 했던 목회자와 선교사님들.</span>
+            <span className="wh-hero-line">먼저 아파본 위로자가 지금 아픈 위로자의 손을 잡아드립니다.</span>
           </p>
           <div className="wh-hero-actions">
             <a href="#ministries" className="wh-btn wh-btn-outline">사역 알아보기</a>
@@ -246,11 +247,14 @@ function WeweHome() {
               <cite>(신명기 14:29)</cite>
             </blockquote>
 
-            <p>
-              WEWE는 가장 깊은 상실의 자리에서 시작되었습니다. 누군가의 아픔을 돌보는 이들이 정작 자신의
-              무너진 마음은 숨겨야만 하는 현실 속에서, WEWE는 현대판 레위인인 목회자와 선교사들의
-              &lsquo;위로자&rsquo;가 되고자 합니다.
-            </p>
+            {/* (2026-10-09 가독성) 한 덩어리였던 소개 문단을 "첫 문장(크게) + 설명(핵심 구절 강조)"으로 나눔 */}
+            <div className="wh-about-intro">
+              <p className="wh-about-intro-lead">WEWE는 가장 깊은 상실의 자리에서 시작되었습니다.</p>
+              <p>
+                누군가의 아픔을 돌보는 이들이 정작 자신의 무너진 마음은 숨겨야만 하는 현실 속에서,
+                WEWE는 <strong>현대판 레위인인 목회자와 선교사들의 &lsquo;위로자&rsquo;</strong>가 되고자 합니다.
+              </p>
+            </div>
           </Reveal>
 
           <Reveal as="div" className="wh-story-gallery" delay={100}>
@@ -657,24 +661,51 @@ function WeweHome() {
           margin-bottom: 1.25rem;
         }
 
+        /* (2026-10-09 가독성) 말씀 인용 — 한글 기울임꼴을 없애고 글씨를 키웠습니다(위위란? 페이지와 동일). */
         .wh-verse {
-          margin: 0 0 2rem;
-          padding: 1.5rem 1.75rem;
-          background: var(--wh-bg-soft);
-          border-left: 3px solid var(--wh-orange);
+          margin: 0 0 2.25rem;
+          padding: 1.75rem 2rem;
+          background: rgba(217, 123, 63, 0.07);
+          border-left: 4px solid var(--wh-orange);
+          border-radius: 0 12px 12px 0;
           color: var(--wh-ink);
           font-weight: 600;
-          line-height: 1.8;
-          font-style: italic;
+          font-size: 1.08rem;
+          line-height: 1.9;
         }
 
         .wh-verse cite {
           display: block;
           margin-top: 0.75rem;
-          color: var(--wh-orange);
+          color: var(--wh-orange-deep);
           font-style: normal;
-          font-weight: 700;
+          font-weight: 800;
           font-size: 0.9rem;
+        }
+
+        .wh-about-intro {
+          text-align: center;
+          max-width: 620px;
+          margin: 0 auto;
+        }
+
+        .wh-about .wh-about-intro p {
+          color: var(--wh-ink);
+          font-size: 1.04rem;
+          line-height: 1.9;
+          margin-bottom: 0.6rem;
+        }
+
+        .wh-about .wh-about-intro .wh-about-intro-lead {
+          font-size: 1.3rem;
+          font-weight: 800;
+          line-height: 1.5;
+          margin-bottom: 0.75rem;
+        }
+
+        .wh-about-intro strong {
+          color: var(--wh-teal);
+          font-weight: 800;
         }
 
         .wh-story-gallery {

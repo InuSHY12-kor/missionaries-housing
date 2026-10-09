@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, Navigate } from 'react-router-dom';
 import { supabase } from '../App';
 import { MapPin, Users, Home, MessageCircle, CheckCircle, Edit, Send, XCircle, AlertTriangle, Trash2 } from 'lucide-react';
 import AccommodationMap from '../components/AccommodationMap';
@@ -334,6 +334,12 @@ function AccommodationDetail({ userProfile }) {
     : 0;
 
   const isOwnHost = !!userProfile && accommodation.host_id === userProfile.id;
+
+  // (2026-10-09 권한 정리) 숙소 제공자(host)는 숙소를 예약하는 쪽이 아니므로, 다른 호스트의 숙소
+  // 상세 화면(예약 UI 포함)에는 들어올 수 없고 자기 숙소만 볼 수 있습니다. 선교사·관리자는 기존과 같습니다.
+  if (userProfile?.role === 'host' && !isOwnHost) {
+    return <Navigate to="/my-accommodations" replace />;
+  }
   // 관리자는 항상 수정 가능. 호스트 본인은 관리자가 완전히 반려(admin_feedback_type === 'rejection')한
   // 숙소는 수정할 수 없고, 삭제 후 재등록만 가능합니다 ("내 숙소" 페이지에서 삭제).
   const canEdit = userProfile && (userProfile.role === 'admin' || (isOwnHost && accommodation.admin_feedback_type !== 'rejection'));

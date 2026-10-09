@@ -964,3 +964,23 @@ p {
     gap: 1.25rem;
   }
 }
+
+/* 한국어 줄바꿈 정리 (2026-10-09) — WEWE 페이지(wewe-shared.css)와 같은 규칙을 위위 스테이에도 적용.
+   단어(어절) 중간에서 줄이 바뀌지 않고, 제목은 줄 길이를 고르게 나눕니다. */
+.App {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.App h1,
+.App h2,
+.App h3,
+.App h4,
+.App .page-hero-content p {
+  text-wrap: balance;
+}
+
+.App p,
+.App li {
+  text-wrap: pretty;
+}

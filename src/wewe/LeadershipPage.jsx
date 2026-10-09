@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
@@ -7,49 +9,10 @@ import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import weweRepresentative from '../assets/wewe-representative.jpg';
 import weweLogoNew from '../assets/wewe-logo-new.png';
-import hyesungChurchLogo from '../assets/hyesung-church-logo.png';
-import hisLogo from '../assets/his-logo.png';
-import lmodsLogo from '../assets/lmods-logo.png';
-import fouLogo from '../assets/fou-logo.png';
 import './wewe-shared.css';
 
-// 협력기관 / 후원기관 목록 (2026-09-13 추가). 로고를 누르면 각 기관의 홈페이지 또는
-// 인스타그램으로 이동합니다. 기관이 늘어나면 이 배열에만 추가하면 됩니다.
-// (2026-09-13, 새 로고로 재교체) 혜성교회 로고를 배경이 투명하게 처리된 새 버전으로
-// 교체하면서, 카드 배경을 어둡게 바꿔주던 임시 처리(`dark` 플래그)는 더 이상 필요하지
-// 않아 제거했습니다.
-const PARTNER_ORGS = [
-  {
-    kind: '협력기관',
-    name: '혜성교회',
-    logo: hyesungChurchLogo,
-    url: 'https://www.hyesung.or.kr/',
-  },
-  // (2026-10-08 추가) 엘모즈 비스포크 — 로고 하단 "L'MODS BESPOKE" 글씨가 밝은 베이지색이라
-  // 밝은 카드 위에서는 잘 안 보여서, 이 카드만 어두운 초록 배경(dark)으로 표시합니다.
-  {
-    kind: '협력기관',
-    name: '엘모즈 비스포크',
-    logo: lmodsLogo,
-    url: 'https://www.instagram.com/lmods.official/',
-    dark: true,
-  },
-  {
-    kind: '협력기관',
-    name: 'Focus on You (FoU)',
-    logo: fouLogo,
-    url: 'https://www.foufilm.com/',
-  },
-];
-
-const SPONSOR_ORGS = [
-  {
-    kind: '후원기관',
-    name: 'History in Scent (HIS)',
-    logo: hisLogo,
-    url: 'https://www.instagram.com/history_in_scent/',
-  },
-];
+// (2026-10-09) 협력기관·후원기관 목록은 새 "함께하는 사람들" 페이지(/about/partners, PartnersPage.jsx)로
+// 옮겼습니다. 이 페이지 하단에는 그 페이지로 가는 안내만 남깁니다.
 
 // "소개" > "대표·이사회" 페이지 (/about/leadership).
 // 대표 홍현지님 소개(claude/wewe-brand-content-2026-09-05.md #7)와,
@@ -116,29 +79,16 @@ function LeadershipPage() {
 
       <section className="wl-partners">
         <div className="wh-container wh-container-narrow">
-          <Reveal>
-            <span className="wh-eyebrow wh-eyebrow-center">PARTNERS &amp; SPONSORS</span>
-            <h2 className="wh-h2-center">협력기관 · 후원기관</h2>
-            <p className="wl-partners-lead">WEWE의 사역에 함께해주시는 기관들입니다.</p>
+          <Reveal as="div" className="wl-partners-cta">
+            <div>
+              <span className="wh-eyebrow">WITH US</span>
+              <h2>WEWE와 함께하는 사람들</h2>
+              <p>협력기관 · 후원기관과 후원자 명단은 &lsquo;함께하는 사람들&rsquo; 페이지에서 보실 수 있습니다.</p>
+            </div>
+            <Link to="/about/partners" className="wh-btn wh-btn-primary">
+              함께하는 사람들 보기 <ArrowRight size={18} />
+            </Link>
           </Reveal>
-
-          <div className="wl-partners-grid">
-            {[...PARTNER_ORGS, ...SPONSOR_ORGS].map((org, idx) => (
-              <Reveal as="div" key={org.name} className="wl-partner-group" delay={idx * 80}>
-                <span className="wl-partner-kind">{org.kind}</span>
-                <a
-                  href={org.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`wl-partner-card${org.dark ? ' wl-partner-card-dark' : ''}`}
-                  aria-label={`${org.name} 바로가기`}
-                >
-                  <img src={org.logo} alt={org.name} className="wl-partner-logo" />
-                </a>
-                <span className="wl-partner-name">{org.name}</span>
-              </Reveal>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -266,71 +216,30 @@ function LeadershipPage() {
           background: var(--wh-bg);
         }
 
-        .wl-partners-lead {
-          text-align: center;
-          color: var(--wh-ink-soft);
-          margin: 0.75rem 0 0;
-        }
-
-        .wl-partners-grid {
+        .wl-partners-cta {
           display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1.5rem;
           flex-wrap: wrap;
-          justify-content: center;
-          gap: 2rem;
-          margin-top: 2.25rem;
-        }
-
-        .wl-partner-group {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.6rem;
-          width: 220px;
-        }
-
-        .wl-partner-kind {
-          font-size: 0.75rem;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          color: var(--wh-orange-deep);
-        }
-
-        .wl-partner-card {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 100%;
-          height: 110px;
-          padding: 1.25rem;
-          background: var(--wh-bg-soft);
+          padding: 1.75rem 2rem;
           border: 1px solid var(--wh-line);
           border-radius: 12px;
-          transition: border-color 0.15s ease, transform 0.15s ease;
+          background: var(--wh-bg-soft);
         }
 
-        .wl-partner-card:hover {
-          border-color: var(--wh-orange);
-          transform: translateY(-2px);
-        }
-
-        .wl-partner-card-dark {
-          background: #24302a;
-          border-color: #24302a;
-          padding: 0.75rem;
-        }
-
-        .wl-partner-logo {
-          max-width: 100%;
-          max-height: 100%;
-          object-fit: contain;
-          display: block;
-        }
-
-        .wl-partner-name {
-          font-size: 0.88rem;
-          font-weight: 600;
+        .wl-partners-cta h2 {
           color: var(--wh-ink);
-          text-align: center;
+          font-size: 1.35rem;
+          margin: 0 0 0.4rem;
+        }
+
+        .wl-partners-cta p {
+          margin: 0;
+          color: var(--wh-ink-soft);
+          font-size: 0.98rem;
+          line-height: 1.7;
+          word-break: keep-all;
         }
 
         @media (max-width: 860px) {

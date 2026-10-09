@@ -8,6 +8,7 @@ import AboutPage from './AboutPage';
 import MinistriesPage from './MinistriesPage';
 import LeadershipPage from './LeadershipPage';
 import SustainabilityPage from './SustainabilityPage';
+import PartnersPage from './PartnersPage';
 import CombatUniformPage from './CombatUniformPage';
 import WeweStayIntroPage from './WeweStayIntroPage';
 import NewsListPage from './NewsListPage';
@@ -107,6 +108,7 @@ function WeweSite() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/about/ministries" element={<MinistriesPage />} />
         <Route path="/about/leadership" element={<LeadershipPage />} />
+        <Route path="/about/partners" element={<PartnersPage />} />
         <Route path="/about/sustainability" element={<SustainabilityPage />} />
         <Route path="/about/ministries/combat-uniform" element={<CombatUniformPage />} />
         <Route path="/about/ministries/wewe-stay" element={<WeweStayIntroPage />} />

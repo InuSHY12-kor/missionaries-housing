@@ -10,6 +10,8 @@ const TABS = [
   { to: '/about', label: '위위란?' },
   { to: '/about/ministries', label: '사역 소개' },
   { to: '/about/leadership', label: '대표·이사회' },
+  // (2026-10-09) 협력기관·후원기관·후원자 명단 페이지 — 대표·이사회와 운영·지속가능성 사이.
+  { to: '/about/partners', label: '함께하는 사람들' },
   { to: '/about/sustainability', label: '운영·지속가능성' },
 ];
 

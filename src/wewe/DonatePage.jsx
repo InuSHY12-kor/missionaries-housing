@@ -91,23 +91,33 @@ function DonatePage() {
 
       <section className="wd-why">
         <div className="wh-container wh-container-narrow">
+          {/* (2026-10-09 가독성) 제목을 추가하고, 한 덩어리였던 두 문단을 "핵심 문장(크게) → 설명 →
+              강조 상자" 순서로 나눴습니다. 문장 내용은 기존과 같습니다. */}
           <Reveal>
+            <span className="wh-eyebrow wh-eyebrow-center">WHY SUPPORT</span>
+            <h2 className="wh-h2-center">위로자를 위로하는 후원</h2>
+
             <blockquote className="wh-verse">
               &ldquo;너희 중에 분깃이나 기업이 없는 레위인과 네 성중에 거류하는 객과 및 고아와 과부들이 와서
               먹고 배부르게 하라&rdquo;
-              <cite>(신명기 14:29)</cite>
+              <cite>신명기 14:29</cite>
             </blockquote>
 
-            <p>
-              기업이 없어 공동체의 돌봄이 절실했던 레위인처럼, 오늘의 목회자와 선교사들도 누군가를 위로하는
-              자리에서 정작 자신은 돌봄받지 못한 채 지쳐갑니다. WEWE는 이들을 지키는 그리스도의 지체들과 함께,
-              평신도와 기업의 후원이 전문적인 돌봄으로, 다시 교회와 선교현장의 회복으로 이어지는 선순환을
-              만들어가고 있습니다.
-            </p>
-            <p>
-              여러분의 후원은 한 사람의 위로자가 다시 일어서는 데 그치지 않고, 그가 돌보는 공동체 전체에
-              회복의 파장을 만듭니다.
-            </p>
+            <div className="wd-why-text">
+              <p className="wd-why-lead">
+                기업이 없어 공동체의 돌봄이 절실했던 레위인처럼, 오늘의 목회자와 선교사들도 누군가를 위로하는
+                자리에서 정작 자신은 돌봄받지 못한 채 지쳐갑니다.
+              </p>
+              <p>
+                WEWE는 이들을 지키는 그리스도의 지체들과 함께, 평신도와 기업의 후원이{' '}
+                <strong>전문적인 돌봄으로, 다시 교회와 선교현장의 회복으로</strong> 이어지는 선순환을 만들어가고
+                있습니다.
+              </p>
+              <p className="wd-why-highlight">
+                여러분의 후원은 한 사람의 위로자가 다시 일어서는 데 그치지 않고, 그가 돌보는 공동체 전체에
+                회복의 파장을 만듭니다.
+              </p>
+            </div>
           </Reveal>
         </div>
       </section>
@@ -521,6 +531,109 @@ function DonatePage() {
             align-items: flex-start;
             text-align: left;
           }
+        }
+
+        /* ───────────────────────────────────────────────
+           (2026-10-09) 가독성 개편 — 작은 회색 글씨로 길게 이어지던 설명을 키우고 진하게,
+           말씀 인용은 한글 기울임꼴 없이, 핵심 문장은 크게·강조 상자로.
+           ─────────────────────────────────────────────── */
+        .wewe-donate-page .wh-verse {
+          font-style: normal;
+          font-size: 1.08rem;
+          line-height: 1.9;
+          padding: 1.75rem 2rem;
+          background: rgba(217, 123, 63, 0.07);
+          border-left: 4px solid var(--wh-orange);
+          border-radius: 0 12px 12px 0;
+        }
+
+        .wewe-donate-page .wh-verse cite {
+          color: var(--wh-orange-deep);
+          font-weight: 800;
+        }
+
+        .wd-why-text {
+          max-width: 640px;
+          margin: 0 auto;
+        }
+
+        .wewe-donate-page .wd-why p {
+          color: var(--wh-ink);
+          font-size: 1.03rem;
+          line-height: 1.9;
+        }
+
+        .wewe-donate-page .wd-why .wd-why-lead {
+          font-size: 1.22rem;
+          font-weight: 800;
+          line-height: 1.6;
+        }
+
+        .wd-why-text strong {
+          color: var(--wh-teal);
+        }
+
+        .wewe-donate-page .wd-why .wd-why-highlight {
+          padding: 1.1rem 1.4rem;
+          border-radius: 12px;
+          background: rgba(20, 107, 113, 0.07);
+          border-left: 4px solid var(--wh-teal);
+          font-weight: 700;
+        }
+
+        .wewe-donate-page .wd-impact-card h3 {
+          font-size: 1.15rem;
+          font-weight: 800;
+        }
+
+        .wewe-donate-page .wd-impact-card p {
+          color: var(--wh-ink);
+          font-size: 0.98rem;
+          line-height: 1.7;
+        }
+
+        .wewe-donate-page .wd-how-lead {
+          color: var(--wh-ink);
+          font-size: 1.02rem;
+          line-height: 1.75;
+        }
+
+        .wewe-donate-page .wd-method-head h3 {
+          font-size: 1.22rem;
+          font-weight: 800;
+        }
+
+        .wewe-donate-page .wd-method-head p {
+          color: var(--wh-ink);
+          font-size: 0.97rem;
+          line-height: 1.65;
+        }
+
+        .wewe-donate-page .wd-account-label {
+          color: var(--wh-ink-soft);
+          font-size: 0.95rem;
+          font-weight: 600;
+        }
+
+        .wewe-donate-page .wd-account-value {
+          font-size: 1.05rem;
+          font-weight: 700;
+        }
+
+        .wewe-donate-page .wd-copied-note {
+          font-size: 0.9rem;
+          font-weight: 700;
+        }
+
+        .wewe-donate-page .wd-missionfund-desc {
+          color: var(--wh-ink);
+          font-size: 0.97rem;
+          line-height: 1.7;
+        }
+
+        .wewe-donate-page .wd-contact p {
+          color: var(--wh-ink);
+          font-size: 1rem;
         }
       `}</style>
     </div>
