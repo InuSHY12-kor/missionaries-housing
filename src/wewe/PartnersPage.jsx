@@ -81,19 +81,25 @@ function normalizeContent(data) {
   };
 }
 
+// 후원자 명단 입력 → 칸 목록. 세미콜론(; 또는 전각 ；)이나 줄바꿈으로 구분하고, 빈 칸은 버립니다.
+const splitSupporters = (text) => String(text || '')
+  .split(/[;；\n]/)
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 const toDraft = (c) => ({
   introTitle: c.intro.title,
   introBody: c.intro.body,
   partners: c.partners.map((o) => ({ ...o })),
   sponsors: c.sponsors.map((o) => ({ ...o })),
-  supportersText: c.supporters.join('\n'),
+  supportersText: c.supporters.join('; '),
 });
 
 const fromDraft = (d) => ({
   intro: { title: d.introTitle.trim(), body: d.introBody.trim() },
   partners: d.partners.map((o) => ({ ...o, name: o.name.trim(), url: o.url.trim() })).filter((o) => o.name),
   sponsors: d.sponsors.map((o) => ({ ...o, name: o.name.trim(), url: o.url.trim() })).filter((o) => o.name),
-  supporters: d.supportersText.split('\n').map((s) => s.trim()).filter(Boolean),
+  supporters: splitSupporters(d.supportersText),
 });
 
 function OrgCard({ org }) {
@@ -360,11 +366,34 @@ function PartnersPage() {
 
               <h4 className="wpp-editor-h">위로자의 위로자 후원자 명단</h4>
               <textarea
-                rows={8}
+                rows={5}
                 value={draft.supportersText}
-                placeholder={'한 줄에 한 분(또는 한 단체)씩 입력해 주세요.\n예) 홍길동\n예) ○○교회 청년부'}
+                placeholder="예) 홍길동; 김철수; ○○교회 청년부"
                 onChange={(e) => setDraft((p) => ({ ...p, supportersText: e.target.value }))}
               />
+              {/* (2026-10-09) 세미콜론(;)으로 한 칸씩 구분 — 입력 아래에 사용법 안내와 미리보기를 보여줍니다. */}
+              <p className="wpp-editor-help">
+                이름 사이에 <strong>세미콜론(;)</strong>을 넣으면 한 칸씩 나뉘어 표시됩니다.
+                예) <code>홍길동; 김철수; ○○교회 청년부</code> → 3칸. 줄을 바꿔 입력해도 한 칸으로 나뉩니다.
+              </p>
+              {(() => {
+                const preview = splitSupporters(draft.supportersText);
+                return (
+                  <div className="wpp-editor-preview-list">
+                    <span className="wpp-editor-preview-label">미리보기 · {preview.length}칸</span>
+                    {preview.length > 0 ? (
+                      <ul className="wpp-supporter-grid">
+                        {preview.map((name, idx) => (
+                          // eslint-disable-next-line react/no-array-index-key
+                          <li key={`${name}-${idx}`}>{name}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="wpp-supporter-empty">아직 입력된 후원자가 없습니다.</p>
+                    )}
+                  </div>
+                );
+              })()}
 
               {saveError && <p className="wpp-editor-error">{saveError}</p>}
 
@@ -813,6 +842,40 @@ function PartnersPage() {
           font-size: 0.85rem;
           font-weight: 600;
           cursor: pointer;
+        }
+
+        .wpp-editor-help {
+          margin: 0.6rem 0 0;
+          padding: 0.75rem 0.95rem;
+          border-radius: 8px;
+          background: rgba(20, 107, 113, 0.06);
+          color: var(--wh-ink-soft);
+          font-size: 0.88rem;
+          line-height: 1.7;
+        }
+
+        .wpp-editor-help strong {
+          color: var(--wh-teal);
+        }
+
+        .wpp-editor-help code {
+          padding: 0.05rem 0.35rem;
+          border-radius: 4px;
+          background: #fff;
+          border: 1px solid var(--wh-line);
+          font-size: 0.85rem;
+        }
+
+        .wpp-editor-preview-list {
+          margin-top: 0.9rem;
+        }
+
+        .wpp-editor-preview-label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-size: 0.82rem;
+          font-weight: 700;
+          color: var(--wh-ink-soft);
         }
 
         .wpp-editor-error {
