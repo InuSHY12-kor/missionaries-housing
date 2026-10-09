@@ -6,6 +6,7 @@ import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
+import { SignupProcessOverview } from '../components/SignupGuide';
 import './wewe-shared.css';
 
 // WEWE 전체 가입 유형 선택 페이지 (/signup, Phase 6).
@@ -28,8 +29,14 @@ function SignupPage() {
 
       <section className="wsg-section">
         <div className="wh-container wh-container-narrow">
+          {/* (2026-10-09) 가입 절차를 먼저 간단히 안내 — 선교사·숙소 제공자는 이메일 인증·관리자 승인 필요.
+              선교사·숙소 제공자 링크의 ?from=wewe는 가입 완료 후 WEWE용 완료 페이지로 돌아오기 위한 표시입니다. */}
+          <Reveal as="div">
+            <SignupProcessOverview roles={['missionary', 'host', 'supporter']} />
+          </Reveal>
+
           <Reveal as="div" className="wsg-cards">
-            <a href="/stay/signup/missionary" className="wsg-card">
+            <a href="/stay/signup/missionary?from=wewe" className="wsg-card">
               <div className="wsg-card-icon">
                 <Users size={32} />
               </div>
@@ -44,7 +51,7 @@ function SignupPage() {
               </span>
             </a>
 
-            <a href="/stay/signup/host" className="wsg-card">
+            <a href="/stay/signup/host?from=wewe" className="wsg-card">
               <div className="wsg-card-icon">
                 <Home size={32} />
               </div>

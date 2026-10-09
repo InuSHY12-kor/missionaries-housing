@@ -4,12 +4,23 @@ import { supabase } from '../App';
 import { Upload, AlertCircle } from 'lucide-react';
 import PageHero from '../components/PageHero';
 import { formatPhoneNumber } from '../utils/phone';
+import { readSignupOrigin } from '../components/SignupGuide';
 
 const COMPLETE_PROFILE_HERO_IMAGES = [
   'https://images.pexels.com/photos/30851143/pexels-photo-30851143.jpeg?auto=compress&cs=tinysrgb&w=1600',
   'https://images.pexels.com/photos/32081456/pexels-photo-32081456.jpeg?auto=compress&cs=tinysrgb&w=1600',
   'https://images.pexels.com/photos/33497885/pexels-photo-33497885.jpeg?auto=compress&cs=tinysrgb&w=1600',
 ];
+
+// (2026-10-09) 가입 완료 페이지를 가입을 시작한 사이트에 맞춰 나눕니다.
+// WEWE(/signup)에서 시작 → WEWE용 /signup/complete, 위위스테이(/stay/signup)에서 시작 → /stay/signup-complete.
+// 시작 사이트는 가입 화면에서 localStorage에 기억해 두고, 이메일 링크로 돌아온 경우를 위해 ?from=wewe도 봅니다.
+function signupCompleteUrl(role) {
+  const fromParam = new URLSearchParams(window.location.search).get('from');
+  const origin = fromParam === 'wewe' ? 'wewe' : readSignupOrigin();
+  const query = role ? `?role=${encodeURIComponent(role)}` : '';
+  return origin === 'wewe' ? `/signup/complete${query}` : `/stay/signup-complete${query}`;
+}
 
 function CompleteProfile() {
   const navigate = useNavigate();
@@ -134,7 +145,7 @@ function CompleteProfile() {
       console.error('알림 메일 발송 오류:', emailErr);
     }
 
-    window.location.href = '/stay/signup-complete?role=supporter';
+    window.location.href = signupCompleteUrl('supporter');
   };
 
   const handleSubmit = async (e) => {
@@ -212,7 +223,7 @@ function CompleteProfile() {
       }
 
       // 프로필 상태를 앱 전체에 반영하기 위해 새로고침하면서 완료 안내 페이지로 이동
-      window.location.href = '/stay/signup-complete';
+      window.location.href = signupCompleteUrl(formData.role);
     } catch (err) {
       setError(err.message);
       setLoading(false);

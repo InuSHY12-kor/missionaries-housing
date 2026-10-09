@@ -16,6 +16,7 @@ import NewsDetailPage from './NewsDetailPage';
 import DonatePage from './DonatePage';
 import SignupPage from './SignupPage';
 import SupporterSignup from './SupporterSignup';
+import SignupCompletePage from './SignupCompletePage';
 import LoginPage from './LoginPage';
 import ForgotPasswordPage from './ForgotPasswordPage';
 import ResetPasswordPage from './ResetPasswordPage';
@@ -117,6 +118,8 @@ function WeweSite() {
         <Route path="/donate" element={<DonatePage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/signup/supporter" element={<SupporterSignup />} />
+        {/* (2026-10-09) WEWE에서 시작한 가입의 완료 안내 — 위위스테이에서 시작한 가입은 /stay/signup-complete */}
+        <Route path="/signup/complete" element={<SignupCompletePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />

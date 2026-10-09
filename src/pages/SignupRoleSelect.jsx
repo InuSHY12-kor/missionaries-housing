@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Home, ArrowRight } from 'lucide-react';
 import PageHero from '../components/PageHero';
+import { SignupProcessOverview } from '../components/SignupGuide';
 
 const ROLE_SELECT_HERO_IMAGES = [
   'https://images.pexels.com/photos/9608654/pexels-photo-9608654.jpeg?auto=compress&cs=tinysrgb&w=1600',
@@ -23,6 +24,9 @@ function SignupRoleSelect() {
         <div className="role-select-box">
           <h1>가입 유형을 선택해주세요</h1>
           <p className="subtitle">회원 유형에 따라 입력하시는 정보와 이용약관이 다릅니다.</p>
+
+          {/* (2026-10-09) 가입 절차 안내 — 이메일 인증·관리자 승인 단계를 미리 알립니다. */}
+          <SignupProcessOverview roles={['missionary', 'host']} />
 
           <div className="role-cards">
             <Link to="/signup/missionary" className="role-card">

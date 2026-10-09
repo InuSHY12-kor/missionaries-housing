@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
 import { AlertCircle } from 'lucide-react';
 import { MISSIONARY_TERMS, HOST_TERMS } from '../data/termsOfService';
 import PageHero from '../components/PageHero';
+import { SignupProcessOverview, rememberSignupOrigin } from '../components/SignupGuide';
 
 const SIGNUP_HERO_IMAGES = [
   'https://images.pexels.com/photos/37913935/pexels-photo-37913935.jpeg?auto=compress&cs=tinysrgb&w=1600',
@@ -26,6 +27,13 @@ const ROLE_META = {
 
 function SignUp({ role }) {
   const navigate = useNavigate();
+  // (2026-10-09) WEWE(/signup)에서 넘어온 가입은 ?from=wewe가 붙어 옵니다. 가입 시작 사이트를 기억해
+  // 두었다가 CompleteProfile.jsx가 가입 완료 후 해당 사이트의 완료 페이지로 보냅니다.
+  const [searchParams] = useSearchParams();
+  const fromWewe = searchParams.get('from') === 'wewe';
+  useEffect(() => {
+    rememberSignupOrigin(fromWewe ? 'wewe' : 'stay');
+  }, [fromWewe]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -75,7 +83,7 @@ function SignUp({ role }) {
         password: formData.password,
         options: {
           // 이메일 인증 링크를 클릭하면 프로필 등록 페이지로 돌아오도록 설정
-          emailRedirectTo: `${window.location.origin}/stay/complete-profile`,
+          emailRedirectTo: `${window.location.origin}/stay/complete-profile${fromWewe ? '?from=wewe' : ''}`,
           data: {
             role
           }
@@ -114,6 +122,9 @@ function SignUp({ role }) {
         <div className="signup-form">
           <h1>{meta.title}</h1>
           <p className="subtitle">{meta.subtitle}</p>
+
+          {/* (2026-10-09) 가입 절차를 처음부터 안내 — 이메일 인증·관리자 승인 단계 강조 */}
+          <SignupProcessOverview roles={[role]} compact />
 
           {error && (
             <div className="alert alert-error">
@@ -197,7 +208,10 @@ function SignUp({ role }) {
           )}
 
           <div className="login-link">
-            <Link to="/signup">← 가입 유형 다시 선택하기</Link>
+            {/* WEWE에서 넘어온 경우 가입 유형 선택도 WEWE(/signup)로 돌아갑니다(다른 라우터라 전체 이동). */}
+            {fromWewe
+              ? <a href="/signup">← 가입 유형 다시 선택하기</a>
+              : <Link to="/signup">← 가입 유형 다시 선택하기</Link>}
             <span className="divider">|</span>
             이미 계정이 있으신가요? <Link to="/login">로그인</Link>
           </div>

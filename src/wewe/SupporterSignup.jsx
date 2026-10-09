@@ -8,6 +8,7 @@ import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
+import { SignupProcessOverview, rememberSignupOrigin } from '../components/SignupGuide';
 import './wewe-shared.css';
 
 // 후원자(supporter) 가입 페이지 (/signup/supporter, Phase 6).
@@ -53,11 +54,14 @@ function SupporterSignup() {
         throw new Error('이용약관에 동의해주세요.');
       }
 
+      // (2026-10-09) WEWE에서 시작한 가입 — 완료 후 WEWE용 가입 완료 페이지(/signup/complete)로 갑니다.
+      rememberSignupOrigin('wewe');
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/stay/complete-profile`,
+          emailRedirectTo: `${window.location.origin}/stay/complete-profile?from=wewe`,
           data: { role: 'supporter' },
         },
       });
@@ -89,7 +93,7 @@ function SupporterSignup() {
       <WevePageHero
         eyebrow="SUPPORT WEWE"
         title="후원자로 가입하기"
-        subtitle="서류 심사 없이 이메일 인증만으로 바로 가입이 완료됩니다."
+        subtitle="서류 심사나 관리자 승인 없이 바로 가입이 완료됩니다."
         images={HERO_IMAGE_SETS.supporterSignup}
       />
 
@@ -99,8 +103,11 @@ function SupporterSignup() {
             <p className="ss-lead">
               후원자 계정은 숙소 예약·제공 기능을 사용하지 않는, WEWE의 소식과 사역을 계속 확인하기
               위한 가벼운 계정입니다. 선교사·호스트 가입과 달리 별도의 증빙 서류나 관리자 승인 없이
-              이메일 인증만 마치면 바로 이용하실 수 있습니다.
+              바로 이용하실 수 있습니다.
             </p>
+
+            {/* (2026-10-09) 가입 절차 안내 */}
+            <SignupProcessOverview roles={['supporter']} compact />
 
             {error && (
               <div className="ss-alert ss-alert-error">
