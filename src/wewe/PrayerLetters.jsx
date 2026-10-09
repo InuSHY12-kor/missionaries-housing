@@ -303,8 +303,8 @@ export function PrayerLetterDetailPage() {
                 </p>
               </header>
 
-              {letter.content && <div className="pl-content">{letter.content}</div>}
-
+              {/* (2026-10-09) 첨부 이미지(A4 편지)를 본문 위에, 한 장씩 본문 폭 가득 세로로 이어서 보여줍니다
+                  (1페이지 → 2페이지 순서). 누르면 기존처럼 확대 보기가 열립니다. */}
               {images.length > 0 && (
                 <div className="pl-images">
                   {images.map((src, idx) => (
@@ -314,14 +314,17 @@ export function PrayerLetterDetailPage() {
                       key={`${idx}-${src}`}
                       className="pl-image"
                       onClick={() => setLightboxIndex(idx)}
-                      aria-label={`이미지 ${idx + 1} 크게 보기`}
+                      aria-label={`${idx + 1}페이지 크게 보기`}
                     >
-                      <img src={src} alt={`기도 편지 이미지 ${idx + 1}`} loading="lazy" />
+                      <img src={src} alt={`기도 편지 ${idx + 1}페이지`} loading={idx === 0 ? 'eager' : 'lazy'} />
+                      {images.length > 1 && <span className="pl-image-page">{idx + 1} / {images.length}</span>}
                       <span className="pl-image-zoom"><Maximize2 size={14} /> 크게 보기</span>
                     </button>
                   ))}
                 </div>
               )}
+
+              {letter.content && <div className="pl-content">{letter.content}</div>}
 
               {isAdmin && (
                 <div className="pl-article-admin">
@@ -805,32 +808,44 @@ function PrayerStyles() {
         margin-bottom: 2.25rem;
       }
 
+      /* 첨부 이미지 — 한 장(A4 한 페이지)씩 본문 폭 가득, 위에서 아래로 이어서 */
       .pl-images {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 1.25rem;
-        margin-bottom: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-bottom: 2.25rem;
       }
 
       .pl-image {
         position: relative;
         display: block;
         width: 100%;
-        aspect-ratio: 210 / 297; /* A4 세로 비율 */
+        min-height: 200px;
         padding: 0;
         border: 1px solid var(--wh-line);
-        border-radius: 8px;
+        border-radius: 6px;
         background: var(--wh-bg-soft);
         overflow: hidden;
         cursor: zoom-in;
-        box-shadow: 0 6px 18px rgba(28, 28, 22, 0.08);
+        box-shadow: 0 8px 24px rgba(28, 28, 22, 0.1);
       }
 
       .pl-image img {
         width: 100%;
-        height: 100%;
-        object-fit: contain;
+        height: auto; /* 잘림 없이 원본 비율 그대로(A4면 A4 비율) */
         display: block;
+      }
+
+      .pl-image-page {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        padding: 0.25rem 0.65rem;
+        border-radius: 999px;
+        background: rgba(28, 28, 26, 0.75);
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 800;
       }
 
       .pl-image-zoom {
