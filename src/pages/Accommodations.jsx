@@ -4,6 +4,7 @@ import { supabase } from '../App';
 import { MapPin, Users, Star, Calendar } from 'lucide-react';
 import SearchMap from '../components/SearchMap';
 import PageHero from '../components/PageHero';
+import { priceUnit } from '../utils/price';
 
 // 숙소 검색 페이지 상단 슬라이드 배너 사진
 const SEARCH_HERO_IMAGES = [
@@ -297,7 +298,7 @@ function Accommodations() {
                     <span><Star size={16} /> 4.5 (12리뷰)</span>
                   </div>
                   <div className="footer">
-                    <p className="price">₩{accommodation.price?.toLocaleString()}/일</p>
+                    <p className="price">₩{accommodation.price?.toLocaleString()}{priceUnit(accommodation)}</p>
                     <p className="host">{accommodation.users?.full_name}</p>
                   </div>
                 </div>

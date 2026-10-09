@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadGoogleMaps } from '../utils/googleMaps';
+import { priceUnit } from '../utils/price';
 
 const KOREA_CENTER = { lat: 36.3, lng: 127.8 };
 // 이 줌 레벨 이상으로 확대하면 빨간 핀 대신 "숙소명 · 가격" 라벨을 바로 표시합니다(아고다 스타일).
@@ -28,7 +29,7 @@ function createLabelOverlayClass(maps) {
       const div = document.createElement('div');
       div.className = 'acc-label-pin';
       const price = this.accommodation.price != null
-        ? `₩${Number(this.accommodation.price).toLocaleString()}`
+        ? `₩${Number(this.accommodation.price).toLocaleString()}${priceUnit(this.accommodation)}`
         : '가격 문의';
       div.innerHTML = `
         <div class="acc-label-pin-inner">
@@ -139,7 +140,7 @@ function SearchMap({ accommodations, onBoundsChange }) {
         const marker = new maps.Marker({
           position: { lat: Number(a.latitude), lng: Number(a.longitude) },
           map: mapObjRef.current,
-          title: `${a.title} · ₩${Number(a.price || 0).toLocaleString()}/박`,
+          title: `${a.title} · ₩${Number(a.price || 0).toLocaleString()}${priceUnit(a)}`,
         });
         marker.addListener('click', () => navigate(`/accommodations/${a.id}`));
         return marker;

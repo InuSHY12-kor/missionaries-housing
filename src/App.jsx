@@ -11,6 +11,7 @@ import SignupComplete from './pages/SignupComplete';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import RefundPolicy from './pages/RefundPolicy';
 import CompleteProfile from './pages/CompleteProfile';
 import PendingApproval from './pages/PendingApproval';
 import AccountStatus from './pages/AccountStatus';
@@ -320,6 +321,8 @@ function App() {
                   들어올 수 있어야 하므로 로그인 필요 라우트보다 앞서 공개 경로로 둡니다. */}
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              {/* (2026-10-10) 취소·환불 규정 — 누구나 볼 수 있는 공개 페이지(토스 심사·결제 안내용) */}
+              <Route path="/refund-policy" element={<RefundPolicy />} />
 
               {/* 로그인 필요 */}
               {user ? authenticatedRoutes : <Route path="*" element={<Navigate to="/" replace />} />}

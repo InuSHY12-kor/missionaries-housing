@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../App';
+import { refundPaidBooking } from '../utils/refundBooking';
 import { MapPin, Calendar, Phone, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
 import PageHero from '../components/PageHero';
 
@@ -77,6 +78,18 @@ function HostBookings({ userProfile }) {
   }, [fetchBookings]);
 
   const updateStatus = async (bookingId, status) => {
+    const target = bookings.find(b => b.id === bookingId);
+    // 결제 완료된 예약을 호스트가 취소하면 시점과 관계없이 게스트에게 전액 환불됩니다.
+    if (status === 'cancelled' && target?.payment_status === 'paid') {
+      if (!window.confirm('이미 결제된 예약입니다. 취소하면 게스트에게 결제 금액 전액이 환불됩니다. 취소하시겠습니까?')) return;
+      try {
+        await refundPaidBooking(bookingId, '숙소 제공자 예약 취소');
+        setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled', payment_status: 'refunded' } : b));
+      } catch (error) {
+        alert('오류: ' + error.message);
+      }
+      return;
+    }
     try {
       const { error } = await supabase
         .from('bookings')
@@ -148,6 +161,16 @@ function HostBookings({ userProfile }) {
           <button className="btn btn-danger" onClick={() => updateStatus(booking.id, 'cancelled')}>
             <XCircle size={16} />
             예약 거절
+          </button>
+        </div>
+      )}
+
+      {/* 확정·결제된 예약을 숙소 사정으로 취소해야 할 때 — 게스트에게 전액 환불 */}
+      {booking.status === 'confirmed' && booking.payment_status === 'paid' && (
+        <div className="booking-item-actions">
+          <button className="btn btn-danger" onClick={() => updateStatus(booking.id, 'cancelled')}>
+            <XCircle size={16} />
+            예약 취소 (전액 환불)
           </button>
         </div>
       )}

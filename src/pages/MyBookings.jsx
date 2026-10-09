@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
+import { refundPaidBooking } from '../utils/refundBooking';
 import { MapPin, Calendar as CalendarIcon, XCircle, Filter, X, Heart, MessageCircle, CreditCard } from 'lucide-react';
 import PageHero from '../components/PageHero';
 
@@ -115,9 +116,21 @@ function MyBookings({ userProfile }) {
   };
 
   const handleCancel = async (bookingId) => {
-    if (!window.confirm('정말 이 예약을 취소하시겠습니까?')) return;
+    const target = bookings.find(b => b.id === bookingId);
+    const isPaid = target?.payment_status === 'paid';
+    // 결제 완료된 예약은 취소와 함께 전액 환불(입실일 전날까지, /refund-policy 참고)
+    const question = isPaid
+      ? '이 예약을 취소하시겠습니까?\n결제하신 금액 전액이 결제 수단으로 환불됩니다(카드사에 따라 3~7영업일 소요).'
+      : '정말 이 예약을 취소하시겠습니까?';
+    if (!window.confirm(question)) return;
 
     try {
+      if (isPaid) {
+        await refundPaidBooking(bookingId, '게스트 예약 취소');
+        setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled', payment_status: 'refunded' } : b));
+        alert('예약이 취소되고 환불이 요청되었습니다.');
+        return;
+      }
       const { error } = await supabase
         .from('bookings')
         .update({ status: 'cancelled' })

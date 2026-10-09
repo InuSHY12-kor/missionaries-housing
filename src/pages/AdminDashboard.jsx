@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../App';
+import { refundPaidBooking } from '../utils/refundBooking';
+import { priceUnit, isPerStay } from '../utils/price';
 import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning, Plus, Pencil } from 'lucide-react';
 import PageHero from '../components/PageHero';
 import WevePageHero from '../wewe/WevePageHero';
@@ -384,9 +386,19 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
   // 관리자가 문제가 생긴 예약을 직접 확정/취소/되돌리기 할 수 있도록 하는 조정 기능.
   const changeBookingStatus = async (booking, newStatus) => {
     if (newStatus === booking.status) return;
-    if (!window.confirm(`이 예약의 상태를 '${BOOKING_STATUS_LABEL[newStatus]}'(으)로 변경하시겠습니까?`)) return;
+    const refunding = newStatus === 'cancelled' && booking.payment_status === 'paid';
+    const question = refunding
+      ? '결제 완료된 예약입니다. 취소하면 토스 결제가 전액 환불됩니다. 진행하시겠습니까?'
+      : `이 예약의 상태를 '${BOOKING_STATUS_LABEL[newStatus]}'(으)로 변경하시겠습니까?`;
+    if (!window.confirm(question)) return;
     setBookingStatusBusyId(booking.id);
     try {
+      if (refunding) {
+        // 결제된 예약은 DB만 바꾸지 않고 실제 카드 결제까지 취소(환불)합니다.
+        await refundPaidBooking(booking.id, '관리자 예약 취소');
+        setAllBookings(allBookings.map(b => (b.id === booking.id ? { ...b, status: 'cancelled', payment_status: 'refunded' } : b)));
+        return;
+      }
       const { error } = await supabase
         .from('bookings')
         .update({ status: newStatus })
@@ -399,6 +411,47 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
       setBookingStatusBusyId(null);
     }
   };
+
+  // 숙소 제공자에게 숙박 실비를 보냈는지(정산) 기록합니다 (2026-10-10).
+  // 실제 송금은 관리자가 따로 하고, 여기서는 완료 여부·날짜·메모만 남깁니다.
+  const togglePayout = async (booking) => {
+    const done = booking.payout_status === 'paid';
+    let memo = booking.payout_memo || null;
+    if (!done) {
+      const input = window.prompt('숙소 제공자에게 정산(송금)을 완료했나요? 메모를 남길 수 있습니다(선택).', memo || '');
+      if (input === null) return;
+      memo = input.trim() || null;
+    } else if (!window.confirm('정산 완료 표시를 취소하고 "정산 대기"로 되돌릴까요?')) {
+      return;
+    }
+    const patch = done
+      ? { payout_status: 'pending', payout_at: null }
+      : { payout_status: 'paid', payout_at: new Date().toISOString(), payout_memo: memo };
+    setBookingStatusBusyId(booking.id);
+    try {
+      const { error } = await supabase.from('bookings').update(patch).eq('id', booking.id);
+      if (error) throw error;
+      setAllBookings(allBookings.map(b => (b.id === booking.id ? { ...b, ...patch } : b)));
+    } catch (error) {
+      alert('오류: ' + error.message);
+    } finally {
+      setBookingStatusBusyId(null);
+    }
+  };
+
+  // 결제 완료·정산 대기 중인 금액을 숙소 제공자별로 묶어 보여줍니다.
+  const pendingPayouts = Object.values(
+    allBookings
+      .filter(b => b.payment_status === 'paid' && b.payout_status !== 'paid')
+      .reduce((acc, b) => {
+        const hostId = b.accommodations?.host_id || 'unknown';
+        const entry = acc[hostId] || { hostId, name: b.accommodations?.users?.full_name || '알 수 없음', email: b.accommodations?.users?.email || '', total: 0, count: 0 };
+        entry.total += Number(b.total_price) || 0;
+        entry.count += 1;
+        acc[hostId] = entry;
+        return acc;
+      }, {})
+  );
 
   // 사역 소식 게시글 발행/발행 취소. published로 바뀌는 순간에만 published_at을 새로 찍고,
   // 이미 한 번 발행됐던 글을 다시 임시저장으로 내려도 published_at은 그대로 남겨둡니다
@@ -643,7 +696,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
                     <div className="accommodation-info">
                       <p><strong>호스트:</strong> {acc.users?.full_name}</p>
                       <p><strong>위치:</strong> {acc.location}</p>
-                      <p><strong>가격:</strong> ₩{acc.price?.toLocaleString()}/일</p>
+                      <p><strong>실비:</strong> ₩{acc.price?.toLocaleString()}{priceUnit(acc)} ({isPerStay(acc) ? '숙박 1회 정액' : '1박 기준'})</p>
                       <p><strong>설명:</strong> {acc.description?.substring(0, 100)}...</p>
                       <p><strong>수용인원:</strong> {acc.capacity}명</p>
                       <p><strong>사진:</strong> {acc.images?.length || 0}장</p>
@@ -947,7 +1000,21 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           <div className="review-section">
             <p className="member-notice">
               모든 호스트의 예약을 확인하고, 문제가 있을 때 상태를 직접 조정할 수 있습니다.
+              결제된 예약을 "취소됨"으로 바꾸면 결제가 전액 환불됩니다.
             </p>
+            {!loading && pendingPayouts.length > 0 && (
+              <div className="card payout-summary">
+                <h3>정산 대기 (숙소 제공자에게 보낼 숙박 실비)</h3>
+                <ul>
+                  {pendingPayouts.map(p => (
+                    <li key={p.hostId}>
+                      <strong>{p.name}</strong>{p.email ? ` (${p.email})` : ''} — {p.count}건, ₩{p.total.toLocaleString()}
+                    </li>
+                  ))}
+                </ul>
+                <p className="payout-hint">송금을 마친 뒤 각 예약 카드의 "정산 완료 표시"를 눌러 기록해주세요.</p>
+              </div>
+            )}
             {loading ? (
               <p>로드 중...</p>
             ) : allBookings.length === 0 ? (
@@ -975,7 +1042,27 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
                       <p><strong>예약자:</strong> {booking.users?.full_name || '알 수 없음'} {booking.users?.phone ? `(${booking.users.phone})` : ''}</p>
                       <p><strong>일정:</strong> {booking.check_in} ~ {booking.check_out}</p>
                       <p><strong>금액:</strong> ₩{booking.total_price?.toLocaleString()}</p>
+                      {booking.payment_status === 'paid' && (
+                        <p>
+                          <strong>정산:</strong>{' '}
+                          {booking.payout_status === 'paid'
+                            ? `완료 (${booking.payout_at ? new Date(booking.payout_at).toLocaleDateString('ko-KR') : '-'})${booking.payout_memo ? ` · ${booking.payout_memo}` : ''}`
+                            : '대기'}
+                        </p>
+                      )}
                     </div>
+                    {booking.payment_status === 'paid' && (
+                      <div className="role-change-row">
+                        <button
+                          type="button"
+                          className={`btn ${booking.payout_status === 'paid' ? 'btn-secondary' : 'btn-success'}`}
+                          disabled={bookingStatusBusyId === booking.id}
+                          onClick={() => togglePayout(booking)}
+                        >
+                          {booking.payout_status === 'paid' ? '정산 대기로 되돌리기' : '정산 완료 표시'}
+                        </button>
+                      </div>
+                    )}
                     <div className="role-change-row">
                       <label>상태 조정:</label>
                       <select
@@ -1171,6 +1258,28 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
 
         .review-section {
           margin-top: 2rem;
+        }
+
+        .payout-summary {
+          margin-bottom: 1.5rem;
+          border: 2px solid #d97b3f;
+        }
+
+        .payout-summary h3 {
+          margin: 0 0 0.6rem;
+          font-size: 1.05rem;
+        }
+
+        .payout-summary ul {
+          margin: 0 0 0.6rem;
+          padding-left: 1.2rem;
+          line-height: 1.8;
+        }
+
+        .payout-hint {
+          margin: 0;
+          font-size: 0.88rem;
+          color: #6b665c;
         }
 
         .user-card, .accommodation-card, .inquiry-card, .booking-admin-card, .post-admin-card {
