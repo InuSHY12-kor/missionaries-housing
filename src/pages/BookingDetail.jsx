@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { MapPin, Calendar as CalendarIcon, ArrowLeft, Info, Phone, User, CreditCard } from 'lucide-react';
+import { MapPin, Calendar as CalendarIcon, ArrowLeft, Info, Phone, User, Landmark } from 'lucide-react';
+import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_BADGE_CLASS } from '../utils/bankTransfer';
 import AccommodationMap from '../components/AccommodationMap';
 import PageHero from '../components/PageHero';
 
@@ -24,18 +25,6 @@ const STATUS_BADGE_CLASS = {
   cancelled: 'badge-danger'
 };
 
-// 예약이 확정(confirmed)된 후, 숙박비 전액 결제가 완료됐는지 여부를 나타내는 배지.
-const PAYMENT_STATUS_LABEL = {
-  unpaid: '미결제',
-  paid: '결제 완료',
-  refunded: '환불됨'
-};
-
-const PAYMENT_STATUS_BADGE_CLASS = {
-  unpaid: 'badge-warning',
-  paid: 'badge-success',
-  refunded: 'badge-info'
-};
 
 function formatDate(dateStr) {
   const d = new Date(dateStr);
@@ -128,7 +117,7 @@ function BookingDetail({ userProfile }) {
             <span className={`badge ${STATUS_BADGE_CLASS[booking.status] || 'badge-info'}`}>
               {STATUS_LABEL[booking.status] || booking.status}
             </span>
-            {booking.status === 'confirmed' && (
+            {(booking.status === 'confirmed' || booking.payment_status !== 'unpaid') && (
               <span className={`badge ${PAYMENT_STATUS_BADGE_CLASS[booking.payment_status] || 'badge-info'}`}>
                 {PAYMENT_STATUS_LABEL[booking.payment_status] || booking.payment_status}
               </span>
@@ -153,7 +142,7 @@ function BookingDetail({ userProfile }) {
             <div className="booking-info-row">
               <span className="booking-info-price">₩</span>
               <div>
-                <p className="label">총 결제 금액</p>
+                <p className="label">숙박 실비 (계좌이체)</p>
                 <p className="value">₩{booking.total_price?.toLocaleString()}</p>
               </div>
             </div>
@@ -176,10 +165,10 @@ function BookingDetail({ userProfile }) {
               </div>
             )}
 
-            {booking.status === 'confirmed' && booking.payment_status !== 'paid' && booking.guest_id === userProfile?.id && (
+            {booking.status === 'confirmed' && booking.payment_status === 'unpaid' && booking.guest_id === userProfile?.id && (
               <Link to={`/my-bookings/${booking.id}/pay`} className="btn btn-primary booking-detail-pay-link">
-                <CreditCard size={16} />
-                숙박비 결제하기
+                <Landmark size={16} />
+                {booking.va_account_number ? '입금 계좌 보기' : '입금 안내 보기'}
               </Link>
             )}
 

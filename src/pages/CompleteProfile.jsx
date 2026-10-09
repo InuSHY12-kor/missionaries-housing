@@ -5,6 +5,8 @@ import { Upload, AlertCircle } from 'lucide-react';
 import PageHero from '../components/PageHero';
 import { formatPhoneNumber } from '../utils/phone';
 import { readSignupOrigin } from '../components/SignupGuide';
+import { ORG_INFO, PAYMENT_POLICY } from '../data/orgInfo';
+import { PayoutAccountFields, EMPTY_PAYOUT_ACCOUNT, normalizePayoutAccount, savePayoutAccount } from '../components/PayoutAccountForm';
 
 const COMPLETE_PROFILE_HERO_IMAGES = [
   'https://images.pexels.com/photos/30851143/pexels-photo-30851143.jpeg?auto=compress&cs=tinysrgb&w=1600',
@@ -29,6 +31,9 @@ function CompleteProfile() {
   const [error, setError] = useState('');
   const [userId, setUserId] = useState(null);
   const [userEmail, setUserEmail] = useState('');
+  // (2026-10-10) 숙소 제공자 지급 계좌 — 페이플 지급대행으로 숙박 실비를 받을 계좌
+  const [payout, setPayout] = useState(EMPTY_PAYOUT_ACCOUNT);
+  const [payoutLater, setPayoutLater] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -167,6 +172,12 @@ function CompleteProfile() {
         throw new Error('검증 문서를 최소 1개 이상 제출해주세요.');
       }
 
+      const wantsPayout = formData.role === 'host' && !payoutLater;
+      if (wantsPayout) {
+        const { error: payoutError } = normalizePayoutAccount(payout);
+        if (payoutError) throw new Error(`지급 계좌: ${payoutError}`);
+      }
+
       // 1. 파일 업로드 (로그인 상태이므로 RLS 통과)
       const uploadedFileUrls = [];
       for (let i = 0; i < formData.verificationFiles.length; i++) {
@@ -201,6 +212,17 @@ function CompleteProfile() {
         });
 
       if (profileError) throw profileError;
+
+      // 3. 숙소 제공자 지급 계좌 (프로필이 이미 만들어졌으므로 실패해도 가입은 계속 진행하고
+      //    프로필 화면에서 다시 등록하도록 안내합니다)
+      if (wantsPayout) {
+        try {
+          await savePayoutAccount(userId, payout);
+        } catch (payoutErr) {
+          console.error('지급 계좌 저장 오류:', payoutErr);
+          alert('지급 계좌 저장에 실패했습니다. 가입 후 프로필 화면에서 다시 등록해주세요.');
+        }
+      }
 
       // 이메일 인증 메일 발송 + 관리자에게 신규 가입 알림 메일 발송 (베스트 에포트).
       // 실패하더라도 프로필 등록(가입) 자체는 이미 완료된 것이므로 다음 단계로 계속 진행합니다.
@@ -378,6 +400,22 @@ function CompleteProfile() {
               />
             </div>
 
+            {formData.role === 'host' && (
+              <div className="form-group payout-signup">
+                <label>숙박 실비 지급 계좌</label>
+                <p className="help-text">
+                  선교사님이 입금한 숙박 실비는 입실이 확인된 뒤 {ORG_INFO.paymentPartner} 정산지급대행을 통해 아래 계좌로 보내드립니다.
+                  지급할 때 <b>정산지급대행 업체가 가져가는 수수료({PAYMENT_POLICY.payoutFeeLabel})는 숙소 제공자 부담</b>으로 실비에서 빼고 지급됩니다.
+                  지급 전에 예금주가 맞는지 확인하므로 정확히 입력해주세요. (등록 후 프로필 화면에서 언제든 바꿀 수 있습니다)
+                </p>
+                <label className="payout-later">
+                  <input type="checkbox" checked={payoutLater} onChange={(e) => setPayoutLater(e.target.checked)} />
+                  {' '}실비를 받지 않고 무료로 제공할 예정이라 지금은 등록하지 않을게요
+                </label>
+                {!payoutLater && <PayoutAccountFields value={payout} onChange={setPayout} disabled={loading} />}
+              </div>
+            )}
+
             <div className="form-group">
               <label>검증 문서 (사진) *</label>
               <p className="help-text">
@@ -435,6 +473,20 @@ function CompleteProfile() {
       </div>
 
       <style>{`
+        .payout-signup {
+          border: 1px solid #e5e2da;
+          border-radius: 10px;
+          padding: 1rem 1.1rem;
+          background: #fcfaf6;
+        }
+
+        .payout-signup .payout-later {
+          display: block;
+          font-weight: 500;
+          margin: 0.4rem 0 0.8rem;
+          cursor: pointer;
+        }
+
         .signup-container {
           flex: 1;
           display: flex;

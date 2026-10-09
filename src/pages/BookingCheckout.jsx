@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { ArrowLeft, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Landmark, Copy, Clock, CheckCircle } from 'lucide-react';
 import PageHero from '../components/PageHero';
+import { ORG_INFO, PAYMENT_POLICY } from '../data/orgInfo';
+import { PAYMENT_STATUS_LABEL, formatDateTime } from '../utils/bankTransfer';
 
 // 결제 페이지 상단 슬라이드 배너 사진 (다른 상세 페이지들과 동일한 테마 적용)
 const BOOKING_CHECKOUT_HERO_IMAGES = [
@@ -11,32 +13,10 @@ const BOOKING_CHECKOUT_HERO_IMAGES = [
   'https://images.pexels.com/photos/4170056/pexels-photo-4170056.jpeg?auto=compress&cs=tinysrgb&w=1600',
 ];
 
-// 토스페이먼츠 결제위젯 — (2026-10-10) 구버전(v1 payment-widget)에서 토스가 권장하는 v2 SDK로 교체.
-// 클라이언트 키는 Netlify 환경변수 REACT_APP_TOSS_CLIENT_KEY(결제위젯 연동 키: test_gck_… / live_gck_…).
-// 실제 결제 승인(confirm-toss-payment)과 환불(cancel-toss-payment)은 서버 함수에서 시크릿 키로 처리합니다.
-const TOSS_SDK_SRC = 'https://js.tosspayments.com/v2/standard';
-const TOSS_CLIENT_KEY = process.env.REACT_APP_TOSS_CLIENT_KEY;
-
-function loadTossSdk() {
-  return new Promise((resolve, reject) => {
-    if (window.TossPayments) {
-      resolve(window.TossPayments);
-      return;
-    }
-    const existing = document.querySelector(`script[src="${TOSS_SDK_SRC}"]`);
-    if (existing) {
-      existing.addEventListener('load', () => resolve(window.TossPayments));
-      existing.addEventListener('error', () => reject(new Error('script load error')));
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = TOSS_SDK_SRC;
-    script.async = true;
-    script.onload = () => resolve(window.TossPayments);
-    script.onerror = () => reject(new Error('script load error'));
-    document.head.appendChild(script);
-  });
-}
+// 숙박 실비 입금 안내 (/my-bookings/:id/pay) — 2026-10-10 토스 카드결제에서 계좌이체 전용으로 전환.
+// 숙박 실비는 페이플(Payple)이 예약마다 발급하는 가상계좌로만 받습니다(카드 결제 없음).
+// 가상계좌 정보(va_*)와 입금 기한(deposit_due_at = 발급 후 7일)은 관리자 또는 페이플 연동이 채우며,
+// 입금이 확인되면 payment_status가 paid로 바뀝니다. 게스트는 여기서 입금자명만 남길 수 있습니다.
 
 function formatDate(dateStr) {
   const d = new Date(dateStr);
@@ -48,10 +28,9 @@ function BookingCheckout({ userProfile }) {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
-  const [widgetError, setWidgetError] = useState('');
-  const [widgetReady, setWidgetReady] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const paymentWidgetRef = useRef(null);
+  const [depositor, setDepositor] = useState('');
+  const [savingDepositor, setSavingDepositor] = useState(false);
+  const [notice, setNotice] = useState('');
 
   const fetchBooking = useCallback(async () => {
     setLoading(true);
@@ -65,76 +44,49 @@ function BookingCheckout({ userProfile }) {
         .single();
       if (error) throw error;
       setBooking(data);
+      setDepositor(data.depositor_name || userProfile.full_name || '');
     } catch (err) {
       setLoadError('예약 정보를 불러올 수 없습니다. 삭제되었거나 접근 권한이 없는 예약일 수 있습니다.');
     } finally {
       setLoading(false);
     }
-  }, [id, userProfile.id]);
+  }, [id, userProfile.id, userProfile.full_name]);
 
   useEffect(() => {
     fetchBooking();
   }, [fetchBooking]);
 
-  const payable = booking && booking.status === 'confirmed' && booking.payment_status !== 'paid';
-
-  useEffect(() => {
-    if (!payable) return;
-    if (!TOSS_CLIENT_KEY) {
-      setWidgetError('결제 기능이 아직 준비 중입니다. 관리자에게 문의해주세요.');
-      return;
-    }
-
-    let cancelled = false;
-    loadTossSdk()
-      .then(async (TossPayments) => {
-        if (cancelled || !TossPayments) return;
-        // customerKey는 사용자별로 고유해야 하므로 회원 id(uuid)를 사용합니다.
-        const widgets = TossPayments(TOSS_CLIENT_KEY).widgets({ customerKey: userProfile.id });
-        paymentWidgetRef.current = widgets;
-        await widgets.setAmount({ currency: 'KRW', value: Number(booking.total_price) });
-        await Promise.all([
-          widgets.renderPaymentMethods({ selector: '#toss-payment-method', variantKey: 'DEFAULT' }),
-          widgets.renderAgreement({ selector: '#toss-agreement', variantKey: 'AGREEMENT' }),
-        ]);
-        if (!cancelled) setWidgetReady(true);
-      })
-      .catch(() => {
-        if (!cancelled) setWidgetError('결제 위젯을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
-      });
-
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [payable, booking?.total_price, userProfile.id]);
-
-  const handlePay = async () => {
-    if (!paymentWidgetRef.current || !booking) return;
-    setSubmitting(true);
+  const copyAccount = async () => {
     try {
-      const orderId = `wewe-${booking.id}-${Date.now()}`;
-      await paymentWidgetRef.current.requestPayment({
-        orderId,
-        orderName: booking.accommodations?.title
-          ? `${booking.accommodations.title} 숙박 실비`
-          : 'WEWE STAY 숙박 실비',
-        successUrl: `${window.location.origin}/stay/payment/success?bookingId=${booking.id}`,
-        failUrl: `${window.location.origin}/stay/payment/fail?bookingId=${booking.id}`,
-        customerEmail: userProfile.email,
-        customerName: userProfile.full_name,
-        customerMobilePhone: userProfile.phone ? userProfile.phone.replace(/[^0-9]/g, '') : undefined,
-      });
+      await navigator.clipboard.writeText(`${booking.va_bank_name} ${booking.va_account_number}`);
+      setNotice('계좌번호를 복사했습니다.');
+    } catch (e) {
+      setNotice('복사하지 못했습니다. 계좌번호를 직접 적어주세요.');
+    }
+  };
+
+  const saveDepositor = async () => {
+    setSavingDepositor(true);
+    setNotice('');
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ depositor_name: depositor.trim() || null })
+        .eq('id', booking.id);
+      if (error) throw error;
+      setNotice('입금자명을 저장했습니다.');
     } catch (err) {
-      // 사용자가 결제창을 닫는 등의 경우에도 여기로 오므로, 별도 안내 없이 버튼만 복구합니다.
-      setSubmitting(false);
+      setNotice('오류: ' + err.message);
+    } finally {
+      setSavingDepositor(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="container">
-        <p>로드 중...</p>
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>예약 정보를 불러오는 중...</p>
       </div>
     );
   }
@@ -150,13 +102,16 @@ function BookingCheckout({ userProfile }) {
     );
   }
 
+  const awaitingDeposit = booking.status === 'confirmed' && booking.payment_status === 'unpaid';
+  const hasAccount = Boolean(booking.va_account_number);
+
   return (
     <div className="booking-checkout">
       <PageHero
         images={BOOKING_CHECKOUT_HERO_IMAGES}
-        eyebrow="PAYMENT"
-        title={booking.accommodations?.title || '숙박 실비 결제'}
-        subtitle="예약이 확정된 숙소의 숙박 실비를 결제합니다"
+        eyebrow="BANK TRANSFER"
+        title={booking.accommodations?.title || '숙박 실비 입금 안내'}
+        subtitle="숙박 실비는 계좌이체(가상계좌)로만 입금받습니다"
       />
       <div className="container">
         <Link to={`/my-bookings/${booking.id}`} className="back-link">
@@ -164,8 +119,11 @@ function BookingCheckout({ userProfile }) {
           예약 상세로 돌아가기
         </Link>
 
-        <h1>숙박 실비 결제</h1>
-        <p className="subtitle">예약이 확정된 숙소의 숙박 실비를 결제합니다. 카드·간편결제 등을 이용하실 수 있습니다.</p>
+        <h1>숙박 실비 입금 안내</h1>
+        <p className="subtitle">
+          WEWE STAY는 <b>계좌이체로만</b> 숙박 실비를 받습니다(신용카드 결제 없음). 예약이 확정되면
+          {' '}{ORG_INFO.paymentPartner}가 이 예약 전용 가상계좌를 발급하며, 발급일로부터 <b>{PAYMENT_POLICY.depositDays}일 안에</b> 입금해주세요.
+        </p>
 
         <div className="card checkout-summary-card">
           <h2>{booking.accommodations?.title || '삭제된 숙소'}</h2>
@@ -176,51 +134,116 @@ function BookingCheckout({ userProfile }) {
             <span>체류 일정</span>
             <span>{formatDate(booking.check_in)} ~ {formatDate(booking.check_out)}</span>
           </div>
+          <div className="checkout-summary-row">
+            <span>입금 상태</span>
+            <span>{booking.status === 'cancelled' ? '취소된 예약' : PAYMENT_STATUS_LABEL[booking.payment_status] || booking.payment_status}</span>
+          </div>
           <div className="checkout-summary-row checkout-summary-total">
-            <span>결제 금액</span>
+            <span>입금할 금액</span>
             <span>₩{booking.total_price?.toLocaleString()}</span>
           </div>
         </div>
 
-        {booking.status !== 'confirmed' ? (
+        {booking.status === 'pending' && (
           <div className="card checkout-notice">
-            <p>예약이 호스트에 의해 확정된 후에만 결제할 수 있습니다.</p>
+            <p>숙소 제공자가 예약을 확정하면 입금 계좌가 발급됩니다. 확정 전에는 입금하지 마세요.</p>
             <Link to={`/my-bookings/${booking.id}`} className="btn btn-secondary">예약 상세로 돌아가기</Link>
-          </div>
-        ) : booking.payment_status === 'paid' ? (
-          <div className="card checkout-notice">
-            <p>이미 결제가 완료된 예약입니다.</p>
-            <Link to={`/my-bookings/${booking.id}`} className="btn btn-secondary">예약 상세로 돌아가기</Link>
-          </div>
-        ) : widgetError ? (
-          <div className="card checkout-notice">
-            <p>{widgetError}</p>
-            <Link to={`/my-bookings/${booking.id}`} className="btn btn-secondary">예약 상세로 돌아가기</Link>
-          </div>
-        ) : (
-          <div className="card checkout-widget-card">
-            <div id="toss-payment-method" />
-            <div id="toss-agreement" />
-            {/* (2026-10-10) 결제 전에 환불 규정을 분명히 안내 */}
-            <div className="checkout-refund-note">
-              <strong>취소·환불 안내</strong>
-              <p>
-                입실일 전날까지 취소하시면 결제하신 금액을 <b>전액 환불</b>해드립니다. 입실일 당일부터는
-                직접 취소·환불이 어려우니 관리자에게 문의해주세요.{' '}
-                <Link to="/refund-policy" target="_blank" rel="noopener noreferrer">환불 규정 전문 보기</Link>
-              </p>
-            </div>
-            <button
-              type="button"
-              className="btn btn-primary checkout-pay-btn"
-              disabled={!widgetReady || submitting}
-              onClick={handlePay}
-            >
-              <ShieldCheck size={18} />
-              {submitting ? '결제 진행 중...' : `₩${booking.total_price?.toLocaleString()} 결제하기`}
-            </button>
           </div>
         )}
+
+        {booking.status === 'cancelled' && (
+          <div className="card checkout-notice">
+            <p>
+              취소된 예약입니다.
+              {booking.payment_status === 'refund_pending' && ' 입금하신 금액은 환불 절차가 진행 중입니다.'}
+              {booking.payment_status === 'refunded' && ' 환불이 완료되었습니다.'}
+            </p>
+            <Link to={`/my-bookings/${booking.id}`} className="btn btn-secondary">예약 상세로 돌아가기</Link>
+          </div>
+        )}
+
+        {booking.status === 'confirmed' && booking.payment_status === 'paid' && (
+          <div className="card checkout-paid">
+            <CheckCircle size={28} />
+            <div>
+              <strong>입금이 확인되었습니다</strong>
+              <p>
+                {booking.paid_at ? `${formatDateTime(booking.paid_at)} 입금 확인. ` : ''}
+                입실이 확인되면 숙박 실비가 숙소 제공자에게 전달됩니다.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {awaitingDeposit && !hasAccount && (
+          <div className="card checkout-va-card checkout-va-waiting">
+            <Clock size={26} />
+            <div>
+              <strong>입금 계좌 발급 준비 중</strong>
+              <p>
+                예약이 확정되었습니다. {ORG_INFO.paymentPartner} 가상계좌가 발급되면 이 화면과 알림으로 안내해드립니다.
+                발급 전에는 입금하지 마세요. 오래 걸리면 {ORG_INFO.phone} 또는 {ORG_INFO.email}로 문의해주세요.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {awaitingDeposit && hasAccount && (
+          <div className="card checkout-va-card">
+            <h2><Landmark size={22} /> 입금 계좌 (가상계좌)</h2>
+            <div className="checkout-va-account">
+              <div>
+                <span className="checkout-va-bank">{booking.va_bank_name}</span>
+                <span className="checkout-va-number">{booking.va_account_number}</span>
+                <span className="checkout-va-holder">예금주 {booking.va_holder_name || ORG_INFO.paymentPartner}</span>
+              </div>
+              <button type="button" className="btn btn-secondary" onClick={copyAccount}>
+                <Copy size={16} /> 복사
+              </button>
+            </div>
+            <div className="checkout-summary-row">
+              <span>입금 금액</span>
+              <span><b>₩{booking.total_price?.toLocaleString()}</b> (정확히 이 금액으로)</span>
+            </div>
+            {booking.deposit_due_at && (
+              <div className="checkout-summary-row checkout-deadline">
+                <span>입금 기한</span>
+                <span>{formatDateTime(booking.deposit_due_at)}까지</span>
+              </div>
+            )}
+
+            <div className="checkout-depositor">
+              <label htmlFor="depositor-name">입금자명 (입금 확인에 사용됩니다)</label>
+              <div>
+                <input
+                  id="depositor-name"
+                  type="text"
+                  value={depositor}
+                  onChange={(e) => setDepositor(e.target.value)}
+                  maxLength={40}
+                  placeholder="입금하실 분 성명"
+                />
+                <button type="button" className="btn btn-primary" onClick={saveDepositor} disabled={savingDepositor}>
+                  {savingDepositor ? '저장 중...' : '저장'}
+                </button>
+              </div>
+            </div>
+            {notice && <p className="checkout-notice-text">{notice}</p>}
+          </div>
+        )}
+
+        <div className="checkout-refund-note">
+          <strong>입금·환불 안내</strong>
+          <ul>
+            <li>숙박 실비는 WEWE 운영 계좌가 아닌, {ORG_INFO.paymentPartner}가 발급한 이 예약 전용 가상계좌로 받습니다.</li>
+            <li>가상계좌 발급 후 {PAYMENT_POLICY.depositDays}일 안에 입금되지 않으면 예약이 자동으로 취소됩니다.</li>
+            <li>입금하신 실비는 입실이 확인된 뒤 {ORG_INFO.paymentPartner} 정산지급대행을 통해 숙소 제공자에게 전달됩니다.</li>
+            <li>
+              입실일 전날까지 취소하시면 <b>전액 환불</b>해드립니다(입금자 본인 계좌로 이체). 입실일 당일부터는 직접 취소가 어려우니 WEWE에 문의해주세요.{' '}
+              <Link to="/refund-policy" target="_blank" rel="noopener noreferrer">취소·환불 규정 보기</Link>
+            </li>
+          </ul>
+        </div>
       </div>
 
       <style>{`
@@ -290,39 +313,15 @@ function BookingCheckout({ userProfile }) {
           margin-bottom: 1rem;
         }
 
-        .checkout-widget-card {
-          margin-top: 1.5rem;
-          padding: 1.5rem;
-        }
 
-        .checkout-pay-btn {
-          width: 100%;
-          margin-top: 1.25rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-          font-size: 1.05rem;
-          padding: 0.9rem;
-        }
 
-        .checkout-pay-btn:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
 
         @media (max-width: 768px) {
           .checkout-summary-row {
             font-size: 0.9rem;
           }
 
-          .checkout-widget-card {
-            padding: 1.25rem;
-          }
 
-          .checkout-pay-btn {
-            font-size: 1rem;
-          }
 
           .checkout-summary-total {
             font-size: 1rem;
@@ -363,22 +362,121 @@ function BookingCheckout({ userProfile }) {
             font-size: 1rem;
           }
 
-          .checkout-widget-card {
-            padding: 0.875rem;
-          }
 
-          .checkout-pay-btn {
-            font-size: 0.95rem;
-            padding: 0.85rem;
-          }
 
           .back-link {
             font-size: 0.85rem;
           }
         }
 
+        .checkout-va-card {
+          margin-top: 1.5rem;
+          padding: 1.5rem;
+          word-break: keep-all;
+        }
+
+        .checkout-va-card h2 {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 1.15rem;
+          margin: 0 0 1rem;
+        }
+
+        .checkout-va-waiting,
+        .checkout-paid {
+          display: flex;
+          gap: 0.9rem;
+          align-items: flex-start;
+          margin-top: 1.5rem;
+          word-break: keep-all;
+        }
+
+        .checkout-va-waiting svg { color: #d97b3f; flex: 0 0 auto; }
+        .checkout-paid svg { color: #2f7d4f; flex: 0 0 auto; }
+
+        .checkout-va-waiting p,
+        .checkout-paid p {
+          margin: 0.3rem 0 0;
+          color: #4a463e;
+          line-height: 1.7;
+        }
+
+        .checkout-va-account {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 1rem;
+          flex-wrap: wrap;
+          background: #faf6ef;
+          border-radius: 10px;
+          padding: 1rem 1.1rem;
+          margin-bottom: 0.6rem;
+        }
+
+        .checkout-va-account > div {
+          display: flex;
+          flex-direction: column;
+          gap: 0.15rem;
+        }
+
+        .checkout-va-bank { color: #6b665c; font-size: 0.92rem; }
+        .checkout-va-number { font-size: 1.35rem; font-weight: 800; letter-spacing: 0.03em; color: #1c1c1a; }
+        .checkout-va-holder { color: #6b665c; font-size: 0.88rem; }
+
+        .checkout-va-account .btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+        }
+
+        .checkout-deadline span:last-child {
+          color: #b3261e;
+          font-weight: 700;
+        }
+
+        .checkout-depositor {
+          margin-top: 1rem;
+        }
+
+        .checkout-depositor label {
+          display: block;
+          font-weight: 600;
+          margin-bottom: 0.4rem;
+          font-size: 0.92rem;
+        }
+
+        .checkout-depositor > div {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .checkout-depositor input {
+          flex: 1;
+          min-width: 0;
+          padding: 0.6rem 0.75rem;
+          border: 1px solid #d8d3c8;
+          border-radius: 8px;
+          font-size: 1rem;
+        }
+
+        .checkout-notice-text {
+          margin: 0.6rem 0 0;
+          font-weight: 600;
+          color: #2f7d4f;
+        }
+
+        .checkout-refund-note ul {
+          margin: 0;
+          padding-left: 1.1rem;
+        }
+
+        .checkout-refund-note li {
+          margin: 0.2rem 0;
+        }
+
         .checkout-refund-note {
-          margin: 1rem 0;
+          margin: 1.5rem 0 0;
           padding: 0.9rem 1rem;
           border-radius: 8px;
           background: #fff8ec;

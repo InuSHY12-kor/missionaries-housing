@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { supabase } from '../App';
-import { User, Phone, Building2, Save, Bell } from 'lucide-react';
+import { User, Phone, Building2, Save, Bell, Landmark } from 'lucide-react';
+import { PayoutAccountSection } from '../components/PayoutAccountForm';
+import { ORG_INFO } from '../data/orgInfo';
 import PageHero from '../components/PageHero';
 import { formatPhoneNumber } from '../utils/phone';
 
@@ -346,6 +348,17 @@ function Profile({ userProfile }) {
               </form>
             </div>
 
+            {/* (2026-10-10) 숙소 제공자 지급 계좌 — 페이플 지급대행 */}
+            {userProfile?.role === 'host' && (
+              <div className="section-card">
+                <h2>
+                  <Landmark size={24} />
+                  숙박 실비 지급 계좌
+                </h2>
+                <PayoutAccountSection userId={userProfile.id} />
+              </div>
+            )}
+
             {/* 알림 설정 */}
             <div className="section-card">
               <h2>
@@ -374,7 +387,11 @@ function Profile({ userProfile }) {
                 <div className="notif-row disabled">
                   <div className="notif-info">
                     <span className="notif-label">카카오톡 알림 <span className="coming-soon">준비 중</span></span>
-                    <span className="notif-desc">카카오톡으로 실시간 알림을 받습니다.</span>
+                    <span className="notif-desc">
+                      카카오톡으로 실시간 알림을 받습니다. 지금은{' '}
+                      <a href={ORG_INFO.kakaoChannel} target="_blank" rel="noopener noreferrer">WEWE 카카오톡 채널</a>
+                      을 추가하시면 소식과 문의를 카카오톡으로 주고받을 수 있어요.
+                    </span>
                   </div>
                   <button type="button" className="toggle-btn" disabled aria-pressed={false}>
                     <span className="toggle-knob" />

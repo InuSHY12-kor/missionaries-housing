@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../App';
-import { refundPaidBooking } from '../utils/refundBooking';
-import { MapPin, Calendar, Phone, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
+import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_BADGE_CLASS, cancelPaidBooking, todayKst, formatDateTime } from '../utils/bankTransfer';
+import { payoutFee, payoutNet } from '../utils/price';
+import { ORG_INFO, PAYMENT_POLICY } from '../data/orgInfo';
+import { MapPin, Calendar, Phone, CheckCircle, XCircle, ChevronDown, DoorOpen } from 'lucide-react';
 import PageHero from '../components/PageHero';
 
 // 예약 관리(호스트) 페이지 상단 슬라이드 배너 사진
@@ -23,18 +25,9 @@ const STATUS_BADGE_CLASS = {
   cancelled: 'badge-danger'
 };
 
-// 예약이 확정(confirmed)된 후, 게스트의 숙박비 결제가 완료됐는지 여부를 호스트가 확인할 수 있는 배지.
-const PAYMENT_STATUS_LABEL = {
-  unpaid: '미결제',
-  paid: '결제 완료',
-  refunded: '환불됨'
-};
-
-const PAYMENT_STATUS_BADGE_CLASS = {
-  unpaid: 'badge-warning',
-  paid: 'badge-success',
-  refunded: 'badge-info'
-};
+// 입금 상태 배지(입금 대기·입금 완료·환불 진행 중·환불 완료)는 utils/bankTransfer.js에서 함께 씁니다.
+// 숙소 제공자는 여기서 선교사님의 입금 여부를 확인하고, 입실일에 "입실 확인"을 누릅니다.
+// 입실이 확인되면 WEWE가 페이플 정산지급대행으로 실비(수수료 차감)를 지급합니다.
 
 function formatDate(dateStr) {
   const d = new Date(dateStr);
@@ -79,12 +72,12 @@ function HostBookings({ userProfile }) {
 
   const updateStatus = async (bookingId, status) => {
     const target = bookings.find(b => b.id === bookingId);
-    // 결제 완료된 예약을 호스트가 취소하면 시점과 관계없이 게스트에게 전액 환불됩니다.
+    // 입금 완료된 예약을 숙소 제공자가 취소하면 시점과 관계없이 선교사님께 전액 환불됩니다.
     if (status === 'cancelled' && target?.payment_status === 'paid') {
-      if (!window.confirm('이미 결제된 예약입니다. 취소하면 게스트에게 결제 금액 전액이 환불됩니다. 취소하시겠습니까?')) return;
+      if (!window.confirm('이미 입금된 예약입니다. 취소하면 선교사님께 입금액 전액이 환불됩니다. 취소하시겠습니까?')) return;
       try {
-        await refundPaidBooking(bookingId, '숙소 제공자 예약 취소');
-        setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled', payment_status: 'refunded' } : b));
+        await cancelPaidBooking(bookingId, '숙소 제공자 예약 취소');
+        setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled', payment_status: 'refund_pending' } : b));
       } catch (error) {
         alert('오류: ' + error.message);
       }
@@ -98,6 +91,22 @@ function HostBookings({ userProfile }) {
 
       if (error) throw error;
       setBookings(bookings.map(b => b.id === bookingId ? { ...b, status } : b));
+    } catch (error) {
+      alert('오류: ' + error.message);
+    }
+  };
+
+  const confirmCheckIn = async (booking) => {
+    if (!window.confirm('선교사님이 숙소에 입실하셨나요? 입실 확인 후 숙박 실비 지급 절차가 시작됩니다.')) return;
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .update({ checked_in_at: new Date().toISOString() })
+        .eq('id', booking.id)
+        .select('checked_in_at')
+        .single();
+      if (error) throw error;
+      setBookings(bookings.map(b => b.id === booking.id ? { ...b, checked_in_at: data.checked_in_at } : b));
     } catch (error) {
       alert('오류: ' + error.message);
     }
@@ -125,7 +134,7 @@ function HostBookings({ userProfile }) {
           <span className={`badge ${STATUS_BADGE_CLASS[booking.status] || 'badge-info'}`}>
             {STATUS_LABEL[booking.status] || booking.status}
           </span>
-          {booking.status === 'confirmed' && (
+          {(booking.status === 'confirmed' || booking.payment_status !== 'unpaid') && (
             <span className={`badge ${PAYMENT_STATUS_BADGE_CLASS[booking.payment_status] || 'badge-info'}`}>
               {PAYMENT_STATUS_LABEL[booking.payment_status] || booking.payment_status}
             </span>
@@ -140,6 +149,33 @@ function HostBookings({ userProfile }) {
         </p>
         <p className="total-price">₩{booking.total_price?.toLocaleString()}</p>
       </div>
+
+      {booking.status === 'confirmed' && (
+        <div className="host-payment-info">
+          {booking.payment_status === 'unpaid' && (
+            <p>
+              {booking.va_account_number
+                ? `선교사님의 입금을 기다리고 있습니다${booking.deposit_due_at ? ` (입금 기한 ${formatDateTime(booking.deposit_due_at)})` : ''}. 기한까지 입금되지 않으면 예약이 자동 취소됩니다.`
+                : '입금 계좌(가상계좌) 발급을 준비하고 있습니다. 발급 후 선교사님이 7일 안에 입금합니다.'}
+            </p>
+          )}
+          {booking.payment_status === 'paid' && (
+            <>
+              <p>
+                입금 완료{booking.paid_at ? ` (${formatDateTime(booking.paid_at)})` : ''}
+                {booking.checked_in_at ? ` · 입실 확인 ${formatDateTime(booking.checked_in_at)}` : ' · 입실일에 "입실 확인"을 눌러주세요'}
+              </p>
+              {Number(booking.total_price) > 0 && (
+                <p className="host-payout-line">
+                  {booking.payout_status === 'paid'
+                    ? `지급 완료 ₩${Number(booking.payout_amount ?? payoutNet(booking.total_price, PAYMENT_POLICY.payoutFeeRate)).toLocaleString()}${booking.payout_at ? ` (${formatDateTime(booking.payout_at)})` : ''}`
+                    : `지급 예정액 ₩${payoutNet(booking.total_price, PAYMENT_POLICY.payoutFeeRate).toLocaleString()} = 실비 ₩${Number(booking.total_price).toLocaleString()} − 정산지급대행 수수료 ₩${payoutFee(booking.total_price, PAYMENT_POLICY.payoutFeeRate).toLocaleString()}(${PAYMENT_POLICY.payoutFeeLabel})`}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       <div className="guest-info">
         <p><strong>예약자:</strong> {booking.users?.full_name || '알 수 없음'}</p>
@@ -165,13 +201,21 @@ function HostBookings({ userProfile }) {
         </div>
       )}
 
-      {/* 확정·결제된 예약을 숙소 사정으로 취소해야 할 때 — 게스트에게 전액 환불 */}
-      {booking.status === 'confirmed' && booking.payment_status === 'paid' && (
+      {/* 입실 확인(입실일부터) / 숙소 사정으로 취소(선교사님께 전액 환불) */}
+      {booking.status === 'confirmed' && booking.payment_status === 'paid' && booking.payout_status !== 'paid' && (
         <div className="booking-item-actions">
-          <button className="btn btn-danger" onClick={() => updateStatus(booking.id, 'cancelled')}>
-            <XCircle size={16} />
-            예약 취소 (전액 환불)
-          </button>
+          {!booking.checked_in_at && todayKst() >= booking.check_in && (
+            <button className="btn btn-success" onClick={() => confirmCheckIn(booking)}>
+              <DoorOpen size={16} />
+              입실 확인
+            </button>
+          )}
+          {!booking.checked_in_at && (
+            <button className="btn btn-danger" onClick={() => updateStatus(booking.id, 'cancelled')}>
+              <XCircle size={16} />
+              예약 취소 (전액 환불)
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -188,6 +232,14 @@ function HostBookings({ userProfile }) {
       <div className="container">
         <h1>예약 관리</h1>
         <p className="subtitle">내 숙소에 들어온 예약 요청을 확인하고 확정/거절할 수 있습니다.</p>
+        <div className="host-fee-notice">
+          <strong>숙박 실비 지급 안내</strong>
+          <p>
+            선교사님은 예약 확정 후 발급되는 {ORG_INFO.paymentPartner} 가상계좌로 {PAYMENT_POLICY.depositDays}일 안에 계좌이체로 입금합니다.
+            입실이 확인되면 {ORG_INFO.paymentPartner} 정산지급대행을 통해 등록하신 지급 계좌로 실비를 보내드리며,
+            이때 <b>정산지급대행 업체가 가져가는 수수료({PAYMENT_POLICY.payoutFeeLabel})는 숙소 제공자 부담</b>으로 실비에서 빼고 지급됩니다.
+          </p>
+        </div>
 
         {loading ? (
           <p>로드 중...</p>
@@ -231,6 +283,48 @@ function HostBookings({ userProfile }) {
       </div>
 
       <style>{`
+        .host-fee-notice {
+          margin: 0 0 1.5rem;
+          padding: 1rem 1.1rem;
+          border-radius: 10px;
+          background: #fff8ec;
+          border: 1px solid #f0c48f;
+          word-break: keep-all;
+        }
+
+        .host-fee-notice strong {
+          display: block;
+          color: #8a5a12;
+          margin-bottom: 0.3rem;
+        }
+
+        .host-fee-notice p {
+          margin: 0;
+          color: #4a3a22;
+          line-height: 1.7;
+          font-size: 0.93rem;
+        }
+
+        .host-payment-info {
+          margin: 0.6rem 0;
+          padding: 0.7rem 0.9rem;
+          border-radius: 8px;
+          background: #faf6ef;
+          word-break: keep-all;
+        }
+
+        .host-payment-info p {
+          margin: 0.15rem 0;
+          font-size: 0.9rem;
+          color: #3a3a36;
+          line-height: 1.6;
+        }
+
+        .host-payout-line {
+          font-weight: 600;
+          color: #2f7d4f !important;
+        }
+
         .host-bookings {
           flex: 1;
         }

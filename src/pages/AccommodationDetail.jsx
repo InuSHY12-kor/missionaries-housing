@@ -8,6 +8,7 @@ import Calendar from '../components/Calendar';
 import AmenityIcon from '../components/AmenityIcon';
 import { AMENITY_MAP } from '../utils/amenities';
 import { totalForStay, priceBasis, isPerStay } from '../utils/price';
+import { PAYMENT_POLICY } from '../data/orgInfo';
 import PageHero from '../components/PageHero';
 
 const ACCOMMODATION_DETAIL_HERO_IMAGES = [
@@ -648,6 +649,10 @@ function AccommodationDetail({ userProfile }) {
                   </button>
 
                   <p className="note">예약 후 호스트의 승인이 필요합니다.</p>
+                  <p className="note">
+                    숙박 실비는 <b>계좌이체로만</b> 받습니다(카드 결제 없음). 예약이 확정되면 발급되는 가상계좌로
+                    {' '}{PAYMENT_POLICY.depositDays}일 안에 입금해주세요. <Link to="/how-it-works">이용 흐름 보기</Link>
+                  </p>
                 </>
               )}
             </div>

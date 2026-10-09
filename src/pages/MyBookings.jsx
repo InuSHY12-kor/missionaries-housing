@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../App';
-import { refundPaidBooking } from '../utils/refundBooking';
-import { MapPin, Calendar as CalendarIcon, XCircle, Filter, X, Heart, MessageCircle, CreditCard } from 'lucide-react';
+import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_BADGE_CLASS, cancelPaidBooking, saveRefundAccount, todayKst } from '../utils/bankTransfer';
+import RefundAccountModal from '../components/RefundAccountModal';
+import { MapPin, Calendar as CalendarIcon, XCircle, Filter, X, Heart, MessageCircle, Landmark } from 'lucide-react';
 import PageHero from '../components/PageHero';
 
 // 내 예약 페이지 상단 슬라이드 배너 사진
@@ -24,18 +25,7 @@ const STATUS_BADGE_CLASS = {
   cancelled: 'badge-danger'
 };
 
-// 예약이 확정(confirmed)된 후, 숙박비 전액 결제가 완료됐는지 여부를 나타내는 배지.
-const PAYMENT_STATUS_LABEL = {
-  unpaid: '미결제',
-  paid: '결제 완료',
-  refunded: '환불됨'
-};
-
-const PAYMENT_STATUS_BADGE_CLASS = {
-  unpaid: 'badge-warning',
-  paid: 'badge-success',
-  refunded: 'badge-info'
-};
+// 입금 상태 배지(입금 대기·입금 완료·환불 진행 중·환불 완료)는 utils/bankTransfer.js에서 함께 씁니다.
 
 const TABS = [
   { key: 'active', label: '예약중' },
@@ -62,6 +52,9 @@ function MyBookings({ userProfile }) {
   const [reviewDrafts, setReviewDrafts] = useState({});
   const [openReviewFormId, setOpenReviewFormId] = useState(null);
   const [reviewSubmittingId, setReviewSubmittingId] = useState(null);
+  // (2026-10-10) 계좌이체 환불: 환불 계좌 입력 창과, 환불 계좌를 이미 낸 예약 목록
+  const [refundModal, setRefundModal] = useState(null); // { booking, mode: 'cancel' | 'account' }
+  const [refundAccountIds, setRefundAccountIds] = useState(new Set());
 
   const fetchBookings = useCallback(async () => {
     setLoading(true);
@@ -74,6 +67,8 @@ function MyBookings({ userProfile }) {
 
       if (error) throw error;
       setBookings(data || []);
+      const { data: accounts } = await supabase.from('booking_refund_accounts').select('booking_id');
+      setRefundAccountIds(new Set((accounts || []).map(a => a.booking_id)));
     } catch (error) {
       console.error('예약 로드 오류:', error);
     } finally {
@@ -117,20 +112,18 @@ function MyBookings({ userProfile }) {
 
   const handleCancel = async (bookingId) => {
     const target = bookings.find(b => b.id === bookingId);
-    const isPaid = target?.payment_status === 'paid';
-    // 결제 완료된 예약은 취소와 함께 전액 환불(입실일 전날까지, /refund-policy 참고)
-    const question = isPaid
-      ? '이 예약을 취소하시겠습니까?\n결제하신 금액 전액이 결제 수단으로 환불됩니다(카드사에 따라 3~7영업일 소요).'
-      : '정말 이 예약을 취소하시겠습니까?';
-    if (!window.confirm(question)) return;
-
-    try {
-      if (isPaid) {
-        await refundPaidBooking(bookingId, '게스트 예약 취소');
-        setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled', payment_status: 'refunded' } : b));
-        alert('예약이 취소되고 환불이 요청되었습니다.');
+    // 입금 완료된 예약은 환불 계좌를 받아 취소 + 환불 요청(입실일 전날까지, /refund-policy 참고)
+    if (target?.payment_status === 'paid') {
+      if (todayKst() >= target.check_in) {
+        alert('입실일 당일부터는 직접 취소·환불할 수 없습니다. WEWE에 문의해주세요.');
         return;
       }
+      setRefundModal({ booking: target, mode: 'cancel' });
+      return;
+    }
+    if (!window.confirm('정말 이 예약을 취소하시겠습니까?')) return;
+
+    try {
       const { error } = await supabase
         .from('bookings')
         .update({ status: 'cancelled' })
@@ -141,6 +134,20 @@ function MyBookings({ userProfile }) {
     } catch (error) {
       alert('오류: ' + error.message);
     }
+  };
+
+  const submitRefund = async (account) => {
+    const { booking, mode } = refundModal;
+    if (mode === 'cancel') {
+      await cancelPaidBooking(booking.id, '게스트 예약 취소', account);
+      setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: 'cancelled', payment_status: 'refund_pending' } : b));
+      alert('예약이 취소되었습니다. 영업일 기준 3일 안에 입력하신 계좌로 환불해드립니다.');
+    } else {
+      await saveRefundAccount(booking.id, userProfile.id, account);
+      alert('환불 계좌를 저장했습니다. 영업일 기준 3일 안에 이체해드립니다.');
+    }
+    setRefundAccountIds(prev => new Set([...prev, booking.id]));
+    setRefundModal(null);
   };
 
   const tabFiltered = useMemo(() => {
@@ -244,7 +251,7 @@ function MyBookings({ userProfile }) {
                       <span className={`badge ${STATUS_BADGE_CLASS[booking.status] || 'badge-info'}`}>
                         {STATUS_LABEL[booking.status] || booking.status}
                       </span>
-                      {booking.status === 'confirmed' && (
+                      {(booking.status === 'confirmed' || booking.payment_status !== 'unpaid') && (
                         <span className={`badge ${PAYMENT_STATUS_BADGE_CLASS[booking.payment_status] || 'badge-info'}`}>
                           {PAYMENT_STATUS_LABEL[booking.payment_status] || booking.payment_status}
                         </span>
@@ -265,16 +272,31 @@ function MyBookings({ userProfile }) {
 
                 {booking.status !== 'cancelled' && (
                   <div className="booking-item-actions">
-                    {booking.status === 'confirmed' && booking.payment_status !== 'paid' && (
+                    {booking.status === 'confirmed' && booking.payment_status === 'unpaid' && (
                       <Link to={`/my-bookings/${booking.id}/pay`} className="btn btn-primary">
-                        <CreditCard size={16} />
-                        결제하기
+                        <Landmark size={16} />
+                        {booking.va_account_number ? '입금 계좌 보기' : '입금 안내'}
                       </Link>
                     )}
                     <button className="btn btn-danger" onClick={() => handleCancel(booking.id)}>
                       <XCircle size={16} />
                       예약 취소
                     </button>
+                  </div>
+                )}
+
+                {booking.payment_status === 'refund_pending' && (
+                  <div className="booking-refund-status">
+                    {refundAccountIds.has(booking.id) ? (
+                      <p>환불 진행 중입니다. 입력하신 계좌로 영업일 기준 3일 안에 이체해드립니다.</p>
+                    ) : (
+                      <>
+                        <p>예약이 취소되어 입금액을 전액 환불해드립니다. 환불 받을 계좌를 입력해주세요.</p>
+                        <button type="button" className="btn btn-primary" onClick={() => setRefundModal({ booking, mode: 'account' })}>
+                          환불 계좌 입력
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -335,7 +357,36 @@ function MyBookings({ userProfile }) {
         )}
       </div>
 
+      {refundModal && (
+        <RefundAccountModal
+          mode={refundModal.mode}
+          amount={refundModal.booking.total_price}
+          onSubmit={submitRefund}
+          onClose={() => setRefundModal(null)}
+        />
+      )}
+
       <style>{`
+        .booking-refund-status {
+          margin-top: 0.75rem;
+          padding: 0.8rem 1rem;
+          border-radius: 8px;
+          background: #fff8ec;
+          border: 1px solid #f0c48f;
+          word-break: keep-all;
+        }
+
+        .booking-refund-status p {
+          margin: 0 0 0.5rem;
+          color: #4a3a22;
+          font-size: 0.92rem;
+          line-height: 1.6;
+        }
+
+        .booking-refund-status p:last-child {
+          margin-bottom: 0;
+        }
+
         .my-bookings {
           flex: 1;
         }

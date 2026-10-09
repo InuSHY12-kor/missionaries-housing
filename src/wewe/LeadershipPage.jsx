@@ -34,16 +34,35 @@ function LeadershipPage() {
         <AboutSubNav active="/about/leadership" />
       </WevePageHero>
 
+      {/* (2026-10-10) 대표 인사말을 먼저 보여주고, 약력은 그 아래 카드로 옮겼습니다. */}
       <section className="wl-leader">
-        <div className="wh-container wh-container-narrow">
+        <div className="wh-container">
           <Reveal>
-            <EditableText id={"REPRESENTATIVE"} as="span" className="wh-eyebrow wh-eyebrow-center">REPRESENTATIVE</EditableText>
-            <EditableText id={"대표 홍현지"} as="h2" className="wh-h2-center">대표 홍현지</EditableText>
+            <EditableText id={"GREETING"} as="span" className="wh-eyebrow wh-eyebrow-center">GREETING</EditableText>
+            <EditableText id={"대표 인사말"} as="h2" className="wh-h2-center">대표 인사말</EditableText>
           </Reveal>
 
-          <Reveal as="div" className="wl-leader-card" delay={80}>
-            <img src={weweRepresentative} alt="대표 홍현지" className="wl-leader-photo" />
+          <Reveal as="div" className="wl-greeting" delay={80}>
+            <figure className="wl-greeting-photo">
+              <img src={weweRepresentative} alt="위위(WEWE) 대표 홍현지" />
+              <figcaption>위위(WEWE) 대표 <b>홍현지</b></figcaption>
+            </figure>
+            <div className="wl-greeting-letter">
+              <EditableText id={"인사말 제목"} as="h3" className="wl-greeting-title">위로하는 이들에게도, 위로가 필요합니다.</EditableText>
+              <EditableText id={"인사말 1"}>{"안녕하세요. 위위(WEWE) 대표 홍현지입니다."}</EditableText>
+              <EditableText id={"인사말 2"}>{"목회자와 선교사, 그리고 하나님 나라를 위해 일하는 사역자들은 늘 누군가의 곁을 지킵니다. 아픈 이를 찾아가고, 지친 이의 이야기를 듣고, 무너진 자리에 다시 소망을 세웁니다. 그런데 정작 그 손을 붙잡아 줄 사람은 많지 않습니다. 위로하는 이들이 가장 위로받기 어려운 자리에 서 있다는 것, 위위는 그 질문에서 시작되었습니다."}</EditableText>
+              <EditableText id={"인사말 3"}>{"신명기 14장 29절은 기업이 없는 레위인과 객, 고아와 과부가 와서 먹고 배부르게 하라고 말씀합니다. 하나님께서는 섬기는 자들이 홀로 남겨지지 않도록 공동체에 그 책임을 맡기셨습니다. 위위는 이 말씀을 오늘의 자리에서 살아내고자 합니다."}</EditableText>
+              <EditableText id={"인사말 4"}>{"출애굽기의 아말렉 전투에서 모세의 손이 피곤하여 내려올 때, 아론과 훌이 양쪽에서 그 손을 붙들었습니다. 싸움의 승패는 모세 한 사람의 힘이 아니라, 곁에서 함께 버틴 손들에 달려 있었습니다. 위위는 그 '곁의 손'이 되고 싶습니다."}</EditableText>
+              <EditableText id={"인사말 5"}>{"하나님의 일은 하나님께서 이뤄가십니다.\n쉼이 필요한 선교사님께 머물 곳을 잇고, 지친 사역자의 이야기에 귀 기울이며, 혼자가 아닌 '우리'로 함께 걷는 길을 만들어 가고 있습니다."}</EditableText>
+              <EditableText id={"인사말 6"}>{"이 길에 여러분을 초대합니다. 기도로, 후원으로, 그리고 따뜻한 관심으로 함께해 주신다면, 위로자의 손을 붙드는 손이 하나 더 늘어날 것입니다."}</EditableText>
+              <EditableText id={"인사말 7"}>{"나에서 우리로, 위로자의 위로자, 위위가 함께하겠습니다."}</EditableText>
+              <EditableText id={"인사말 서명"} className="wl-greeting-sign">위위(WEWE) 대표 홍현지 드림</EditableText>
+            </div>
+          </Reveal>
+
+          <Reveal as="div" className="wl-leader-card" delay={120}>
             <div className="wl-leader-body">
+              <EditableText id={"대표 약력"} as="h3" className="wl-leader-title">대표 홍현지 약력</EditableText>
               <EditableText id={"간호학(전공) 학사 · 호스피스 전문 간호사(석사)"} className="wl-leader-degree">간호학(전공) 학사 · 호스피스 전문 간호사(석사)</EditableText>
               <ul className="wl-leader-history">
                 <li>현 세브란스 완화의료팀 프로젝트매니저</li>
@@ -101,23 +120,83 @@ function LeadershipPage() {
           background: var(--wh-bg);
         }
 
-        .wl-leader-card {
+        .wl-greeting {
           display: grid;
-          grid-template-columns: 140px 1fr;
-          gap: 2rem;
-          align-items: center;
-          padding: 2rem;
+          grid-template-columns: minmax(220px, 300px) 1fr;
+          gap: 3rem;
+          align-items: start;
+          max-width: 1000px;
+          margin: 0 auto 2.5rem;
+        }
+
+        .wl-greeting-photo {
+          margin: 0;
+          position: sticky;
+          top: 110px;
+        }
+
+        .wl-greeting-photo img {
+          width: 100%;
+          aspect-ratio: 3 / 4;
+          object-fit: cover;
+          object-position: center top;
+          border-radius: 14px;
+          display: block;
+          box-shadow: 0 18px 40px rgba(28, 28, 26, 0.14);
+        }
+
+        .wl-greeting-photo figcaption {
+          margin-top: 0.9rem;
+          text-align: center;
+          color: var(--wh-ink-soft);
+          font-size: 0.95rem;
+        }
+
+        .wl-greeting-photo figcaption b {
+          color: var(--wh-ink);
+        }
+
+        .wl-greeting-letter {
+          word-break: keep-all;
+        }
+
+        .wl-greeting-title {
+          font-size: clamp(1.45rem, 2.6vw, 1.95rem);
+          line-height: 1.45;
+          color: var(--wh-ink);
+          margin: 0 0 1.6rem;
+          padding-left: 1rem;
+          border-left: 4px solid var(--wh-orange);
+        }
+
+        .wl-greeting-letter p {
+          color: var(--wh-ink-soft);
+          font-size: 1.04rem;
+          line-height: 1.95;
+          margin: 0 0 1.15rem;
+          white-space: pre-line;
+        }
+
+        .wl-greeting-letter p.wl-greeting-sign {
+          margin-top: 2rem;
+          text-align: right;
+          color: var(--wh-ink);
+          font-weight: 700;
+        }
+
+        .wl-leader-card {
+          max-width: 1000px;
+          margin: 0 auto;
+          padding: 2rem 2.25rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
           border-radius: 12px;
         }
 
-        .wl-leader-photo {
-          width: 100%;
-          aspect-ratio: 2 / 3;
-          object-fit: cover;
-          border-radius: 10px;
-          display: block;
+        .wl-leader-title {
+          font-size: 1.15rem;
+          color: var(--wh-ink);
+          margin: 0 0 0.8rem;
         }
 
         .wl-leader-degree {
@@ -244,7 +323,25 @@ function LeadershipPage() {
         }
 
         @media (max-width: 860px) {
-          .wl-leader-card,
+          .wl-greeting {
+            grid-template-columns: 1fr;
+            gap: 1.75rem;
+          }
+
+          .wl-greeting-photo {
+            position: static;
+            max-width: 240px;
+            margin: 0 auto;
+          }
+
+          .wl-greeting-letter p {
+            font-size: 1rem;
+          }
+
+          .wl-leader-card {
+            padding: 1.5rem;
+          }
+
           .wl-board-card {
             grid-template-columns: 72px 1fr;
             padding: 1.5rem;
