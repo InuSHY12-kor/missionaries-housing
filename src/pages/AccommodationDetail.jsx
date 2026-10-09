@@ -7,6 +7,7 @@ import ImageCarousel from '../components/ImageCarousel';
 import Calendar from '../components/Calendar';
 import AmenityIcon from '../components/AmenityIcon';
 import { AMENITY_MAP } from '../utils/amenities';
+import { totalForStay, priceBasis, isPerStay } from '../utils/price';
 import PageHero from '../components/PageHero';
 
 const ACCOMMODATION_DETAIL_HERO_IMAGES = [
@@ -181,7 +182,7 @@ function AccommodationDetail({ userProfile }) {
       const checkIn = new Date(bookingData.checkIn);
       const checkOut = new Date(bookingData.checkOut);
       const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-      const totalPrice = nights * accommodation.price;
+      const totalPrice = totalForStay(accommodation, nights);
 
       const { data: { user: authUser } } = await supabase.auth.getUser();
 
@@ -591,7 +592,7 @@ function AccommodationDetail({ userProfile }) {
             <div className="booking-card">
               <div className="price-header">
                 <p className="price">₩{accommodation.price?.toLocaleString()}</p>
-                <p className="per-night">1박 숙박 실비</p>
+                <p className="per-night">{priceBasis(accommodation)}</p>
               </div>
 
               {bookingSuccess ? (
@@ -630,12 +631,12 @@ function AccommodationDetail({ userProfile }) {
                   {nights > 0 && (
                     <div className="price-summary">
                       <div className="summary-row">
-                        <span>₩{accommodation.price?.toLocaleString()} × {nights}박</span>
-                        <span>₩{(accommodation.price * nights).toLocaleString()}</span>
+                        <span>{isPerStay(accommodation) ? `숙박 1회 정액 (${nights}박)` : `₩${accommodation.price?.toLocaleString()} × ${nights}박`}</span>
+                        <span>₩{totalForStay(accommodation, nights).toLocaleString()}</span>
                       </div>
                       <div className="summary-total">
                         <span>합계</span>
-                        <span>₩{(accommodation.price * nights).toLocaleString()}</span>
+                        <span>₩{totalForStay(accommodation, nights).toLocaleString()}</span>
                       </div>
                     </div>
                   )}

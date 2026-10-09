@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../App';
 import { refundPaidBooking } from '../utils/refundBooking';
+import { priceUnit, isPerStay } from '../utils/price';
 import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning, Plus, Pencil } from 'lucide-react';
 import PageHero from '../components/PageHero';
 import WevePageHero from '../wewe/WevePageHero';
@@ -695,7 +696,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
                     <div className="accommodation-info">
                       <p><strong>호스트:</strong> {acc.users?.full_name}</p>
                       <p><strong>위치:</strong> {acc.location}</p>
-                      <p><strong>가격:</strong> ₩{acc.price?.toLocaleString()}/일</p>
+                      <p><strong>실비:</strong> ₩{acc.price?.toLocaleString()}{priceUnit(acc)} ({isPerStay(acc) ? '숙박 1회 정액' : '1박 기준'})</p>
                       <p><strong>설명:</strong> {acc.description?.substring(0, 100)}...</p>
                       <p><strong>수용인원:</strong> {acc.capacity}명</p>
                       <p><strong>사진:</strong> {acc.images?.length || 0}장</p>

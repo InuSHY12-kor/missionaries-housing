@@ -6,6 +6,7 @@ import LocationPicker from '../components/LocationPicker';
 import Calendar from '../components/Calendar';
 import AmenityIcon from '../components/AmenityIcon';
 import { AMENITY_GROUPS } from '../utils/amenities';
+import { priceUnit, isPerStay } from '../utils/price';
 import PageHero from '../components/PageHero';
 
 // 내 숙소 관리 페이지 상단 슬라이드 배너 사진
@@ -20,6 +21,7 @@ const EMPTY_FORM = {
   description: '',
   location: '',
   price: '',
+  price_type: 'per_night',
   capacity: '',
   bedrooms: '',
   bathrooms: '',
@@ -173,6 +175,7 @@ function HostAccommodations({ userProfile }) {
       description: accommodation.description,
       location: accommodation.location,
       price: accommodation.price.toString(),
+      price_type: accommodation.price_type || 'per_night',
       capacity: accommodation.capacity.toString(),
       bedrooms: accommodation.bedrooms?.toString() || '',
       bathrooms: accommodation.bathrooms?.toString() || '',
@@ -316,6 +319,7 @@ function HostAccommodations({ userProfile }) {
         description: formData.description,
         location: formData.location,
         price: parseFloat(formData.price),
+        price_type: formData.price_type === 'per_stay' ? 'per_stay' : 'per_night',
         capacity: parseInt(formData.capacity, 10),
         bedrooms: parseInt(formData.bedrooms, 10) || null,
         bathrooms: parseInt(formData.bathrooms, 10) || null,
@@ -480,7 +484,19 @@ function HostAccommodations({ userProfile }) {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>1박 숙박 실비 (₩) *</label>
+                  <label>실비 방식 *</label>
+                  <select name="price_type" value={formData.price_type} onChange={handleInputChange}>
+                    <option value="per_night">1박 기준 (박수만큼 곱해서 받기)</option>
+                    <option value="per_stay">숙박 1회 정액 (박수와 관계없이 한 번만 받기)</option>
+                  </select>
+                  <p className="help-text">
+                    {formData.price_type === 'per_stay'
+                      ? '며칠을 머물든 아래 금액을 한 번만 받습니다.'
+                      : '아래 금액 × 숙박일수가 결제 금액이 됩니다.'}
+                  </p>
+                </div>
+                <div className="form-group">
+                  <label>{formData.price_type === 'per_stay' ? '숙박 1회 실비' : '1박 숙박 실비'} (₩) *</label>
                   <input
                     type="number"
                     name="price"
@@ -682,7 +698,7 @@ function HostAccommodations({ userProfile }) {
 
                 <div className="item-details">
                   <p><strong>설명:</strong> {accommodation.description.substring(0, 100)}...</p>
-                  <p><strong>가격:</strong> ₩{accommodation.price.toLocaleString()}/일</p>
+                  <p><strong>실비:</strong> ₩{accommodation.price.toLocaleString()}{priceUnit(accommodation)} ({isPerStay(accommodation) ? '숙박 1회 정액' : '1박 기준'})</p>
                   <p><strong>수용인원:</strong> {accommodation.capacity}명</p>
                   <p><strong>침실:</strong> {accommodation.bedrooms}, <strong>욕실:</strong> {accommodation.bathrooms}</p>
                   <p><strong>사진:</strong> {accommodation.images?.length || 0}장</p>
