@@ -591,7 +591,7 @@ function AccommodationDetail({ userProfile }) {
             <div className="booking-card">
               <div className="price-header">
                 <p className="price">₩{accommodation.price?.toLocaleString()}</p>
-                <p className="per-night">1박 기준</p>
+                <p className="per-night">1박 숙박 실비</p>
               </div>
 
               {bookingSuccess ? (

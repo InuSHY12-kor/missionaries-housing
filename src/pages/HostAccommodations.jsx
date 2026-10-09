@@ -427,7 +427,7 @@ function HostAccommodations({ userProfile }) {
               <h4>등록 전에 꼭 확인해주세요</h4>
               <ul>
                 <li>숙소는 다른 이용자와 완전히 분리된 <strong>독립된 공간</strong>이어야 합니다.</li>
-                <li>1박 가격은 영리 목적의 숙박료가 아니라, <strong>최소한의 관리비·청소비 수준</strong>으로만 책정해 주세요.</li>
+                <li>1박 숙박 실비는 영리 목적의 숙박료가 아니라, <strong>최소한의 관리비·청소비 수준</strong>으로만 책정해 주세요. 게스트가 결제한 실비는 WEWE가 확인 후 숙소 제공자님께 전달(정산)해드립니다.</li>
                 <li>사진은 <strong>최소 10장 이상</strong> 등록해 주세요. 건물 외부(입구 포함), 화장실, 현관, 그리고 방이 여러 개라면 방마다 사진을 꼭 포함해 주세요.</li>
               </ul>
             </div>
@@ -480,7 +480,7 @@ function HostAccommodations({ userProfile }) {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>1박 가격 (₩) *</label>
+                  <label>1박 숙박 실비 (₩) *</label>
                   <input
                     type="number"
                     name="price"

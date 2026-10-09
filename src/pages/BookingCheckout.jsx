@@ -11,26 +11,28 @@ const BOOKING_CHECKOUT_HERO_IMAGES = [
   'https://images.pexels.com/photos/4170056/pexels-photo-4170056.jpeg?auto=compress&cs=tinysrgb&w=1600',
 ];
 
-// 토스페이먼츠 결제위젯(v1) SDK. 이미 로드되어 있으면 재사용하고, 아니면 한 번만 로드합니다.
-const TOSS_WIDGET_SCRIPT_SRC = 'https://js.tosspayments.com/v1/payment-widget';
+// 토스페이먼츠 결제위젯 — (2026-10-10) 구버전(v1 payment-widget)에서 토스가 권장하는 v2 SDK로 교체.
+// 클라이언트 키는 Netlify 환경변수 REACT_APP_TOSS_CLIENT_KEY(결제위젯 연동 키: test_gck_… / live_gck_…).
+// 실제 결제 승인(confirm-toss-payment)과 환불(cancel-toss-payment)은 서버 함수에서 시크릿 키로 처리합니다.
+const TOSS_SDK_SRC = 'https://js.tosspayments.com/v2/standard';
 const TOSS_CLIENT_KEY = process.env.REACT_APP_TOSS_CLIENT_KEY;
 
-function loadTossWidgetScript() {
+function loadTossSdk() {
   return new Promise((resolve, reject) => {
-    if (window.PaymentWidget) {
-      resolve(window.PaymentWidget);
+    if (window.TossPayments) {
+      resolve(window.TossPayments);
       return;
     }
-    const existing = document.querySelector(`script[src="${TOSS_WIDGET_SCRIPT_SRC}"]`);
+    const existing = document.querySelector(`script[src="${TOSS_SDK_SRC}"]`);
     if (existing) {
-      existing.addEventListener('load', () => resolve(window.PaymentWidget));
+      existing.addEventListener('load', () => resolve(window.TossPayments));
       existing.addEventListener('error', () => reject(new Error('script load error')));
       return;
     }
     const script = document.createElement('script');
-    script.src = TOSS_WIDGET_SCRIPT_SRC;
+    script.src = TOSS_SDK_SRC;
     script.async = true;
-    script.onload = () => resolve(window.PaymentWidget);
+    script.onload = () => resolve(window.TossPayments);
     script.onerror = () => reject(new Error('script load error'));
     document.head.appendChild(script);
   });
@@ -84,15 +86,18 @@ function BookingCheckout({ userProfile }) {
     }
 
     let cancelled = false;
-    loadTossWidgetScript()
-      .then((PaymentWidget) => {
-        if (cancelled || !PaymentWidget) return;
-        // customerKey는 사용자별로 고유해야 하므로 회원 id를 사용합니다.
-        const widget = PaymentWidget(TOSS_CLIENT_KEY, userProfile.id);
-        paymentWidgetRef.current = widget;
-        widget.renderPaymentMethods('#toss-payment-method', { value: booking.total_price }, { variantKey: 'DEFAULT' });
-        widget.renderAgreement('#toss-agreement', { variantKey: 'AGREEMENT' });
-        setWidgetReady(true);
+    loadTossSdk()
+      .then(async (TossPayments) => {
+        if (cancelled || !TossPayments) return;
+        // customerKey는 사용자별로 고유해야 하므로 회원 id(uuid)를 사용합니다.
+        const widgets = TossPayments(TOSS_CLIENT_KEY).widgets({ customerKey: userProfile.id });
+        paymentWidgetRef.current = widgets;
+        await widgets.setAmount({ currency: 'KRW', value: Number(booking.total_price) });
+        await Promise.all([
+          widgets.renderPaymentMethods({ selector: '#toss-payment-method', variantKey: 'DEFAULT' }),
+          widgets.renderAgreement({ selector: '#toss-agreement', variantKey: 'AGREEMENT' }),
+        ]);
+        if (!cancelled) setWidgetReady(true);
       })
       .catch(() => {
         if (!cancelled) setWidgetError('결제 위젯을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
@@ -112,8 +117,8 @@ function BookingCheckout({ userProfile }) {
       await paymentWidgetRef.current.requestPayment({
         orderId,
         orderName: booking.accommodations?.title
-          ? `${booking.accommodations.title} 숙박비`
-          : 'WEWE STAY 숙박비',
+          ? `${booking.accommodations.title} 숙박 실비`
+          : 'WEWE STAY 숙박 실비',
         successUrl: `${window.location.origin}/stay/payment/success?bookingId=${booking.id}`,
         failUrl: `${window.location.origin}/stay/payment/fail?bookingId=${booking.id}`,
         customerEmail: userProfile.email,
@@ -150,8 +155,8 @@ function BookingCheckout({ userProfile }) {
       <PageHero
         images={BOOKING_CHECKOUT_HERO_IMAGES}
         eyebrow="PAYMENT"
-        title={booking.accommodations?.title || '숙박비 결제'}
-        subtitle="예약이 확정된 숙소의 숙박비 전액을 결제합니다"
+        title={booking.accommodations?.title || '숙박 실비 결제'}
+        subtitle="예약이 확정된 숙소의 숙박 실비를 결제합니다"
       />
       <div className="container">
         <Link to={`/my-bookings/${booking.id}`} className="back-link">
@@ -159,8 +164,8 @@ function BookingCheckout({ userProfile }) {
           예약 상세로 돌아가기
         </Link>
 
-        <h1>숙박비 결제</h1>
-        <p className="subtitle">예약이 확정된 숙소의 숙박비 전액을 결제합니다.</p>
+        <h1>숙박 실비 결제</h1>
+        <p className="subtitle">예약이 확정된 숙소의 숙박 실비를 결제합니다. 카드·간편결제 등을 이용하실 수 있습니다.</p>
 
         <div className="card checkout-summary-card">
           <h2>{booking.accommodations?.title || '삭제된 숙소'}</h2>
@@ -196,6 +201,15 @@ function BookingCheckout({ userProfile }) {
           <div className="card checkout-widget-card">
             <div id="toss-payment-method" />
             <div id="toss-agreement" />
+            {/* (2026-10-10) 결제 전에 환불 규정을 분명히 안내 */}
+            <div className="checkout-refund-note">
+              <strong>취소·환불 안내</strong>
+              <p>
+                입실일 전날까지 취소하시면 결제하신 금액을 <b>전액 환불</b>해드립니다. 입실일 당일부터는
+                직접 취소·환불이 어려우니 관리자에게 문의해주세요.{' '}
+                <Link to="/refund-policy" target="_blank" rel="noopener noreferrer">환불 규정 전문 보기</Link>
+              </p>
+            </div>
             <button
               type="button"
               className="btn btn-primary checkout-pay-btn"
@@ -361,6 +375,33 @@ function BookingCheckout({ userProfile }) {
           .back-link {
             font-size: 0.85rem;
           }
+        }
+
+        .checkout-refund-note {
+          margin: 1rem 0;
+          padding: 0.9rem 1rem;
+          border-radius: 8px;
+          background: #fff8ec;
+          border: 1px solid #f0c48f;
+          font-size: 0.92rem;
+          line-height: 1.65;
+          color: #4a3a22;
+          word-break: keep-all;
+        }
+
+        .checkout-refund-note strong {
+          display: block;
+          margin-bottom: 0.25rem;
+          color: #8a5a12;
+        }
+
+        .checkout-refund-note p {
+          margin: 0;
+        }
+
+        .checkout-refund-note a {
+          color: #b8622c;
+          font-weight: 700;
         }
       `}</style>
     </div>

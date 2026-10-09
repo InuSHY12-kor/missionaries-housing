@@ -463,6 +463,7 @@ function LandingPage({ noticeBanner = null }) {
           </div>
 
           <div className="footer-copy">
+            <p><Link to="/refund-policy" style={{ color: 'inherit', textDecoration: 'underline' }}>취소·환불 규정</Link></p>
             <p>&copy; {new Date().getFullYear()} WEWE. All rights reserved.</p>
           </div>
         </div>
