@@ -156,6 +156,16 @@ function App() {
     && userProfile.role === 'supporter'
   );
 
+  // (2026-10-10) 탈퇴 처리·관리자 삭제 대기·가입 거절 계정도 후원자처럼 공개 페이지 라우트를 건너뜁니다.
+  // 그렇지 않으면 로그인 직후 이동하는 "/"(랜딩)가 "*" 안내 화면보다 먼저 매칭되어, 관리자가 삭제한
+  // 회원이 삭제 사유를 확인하는 안내(AccountStatus)를 보지 못하고 일반 랜딩 화면만 보게 됩니다.
+  const isAccountLockedScreen = !!(
+    user
+    && !profileLoading
+    && userProfile
+    && ['withdrawn', 'deletion_pending', 'rejected'].includes(userProfile.status)
+  );
+
   // 로그인 상태에서 렌더링할 경로들을 상태에 따라 하나로 결정 (동시에 여러 "*" 라우트가
   // 매칭되는 것을 방지하기 위해 우선순위대로 분기)
   let authenticatedRoutes = null;
@@ -292,7 +302,7 @@ function App() {
         <Navigation user={user} userProfile={userProfile} onLogout={handleLogout} />
 
         <Routes>
-          {isSupporterHome ? (
+          {isSupporterHome || isAccountLockedScreen ? (
             // 후원자는 공개 페이지 라우트와 경로 경쟁이 없는 완전히 별도의 <Routes>로
             // 렌더링해서, 어떤 URL로 들어오든(정확히 "/stay"인 경우 포함) 항상
             // SupporterHome만 보이도록 합니다.
