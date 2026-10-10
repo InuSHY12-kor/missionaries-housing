@@ -8,6 +8,7 @@ import WevePageHero from './WevePageHero';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import { formatPhoneNumber } from '../utils/phone';
+import TestEmailButton from '../components/TestEmailButton';
 import './wewe-shared.css';
 
 // WEWE 프로필 페이지 (/profile, 2026-09-09 추가).
@@ -345,6 +346,7 @@ function WeweProfilePage() {
                   <Save size={16} />
                   {notifSaving ? '저장 중...' : '알림 설정 저장'}
                 </button>
+                {userProfile?.role === 'admin' && userProfile?.status === 'approved' && <TestEmailButton />}
               </Reveal>
             </div>
           </div>
