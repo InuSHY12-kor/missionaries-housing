@@ -6,10 +6,10 @@ import {
   Mail,
   ExternalLink,
   Receipt,
-  Home as HomeIcon,
-  Car,
+  Church,
+  Globe2,
+  Users,
   HeartHandshake,
-  Users2,
 } from 'lucide-react';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
@@ -41,30 +41,32 @@ const ACCOUNT_INFO = {
 const MISSIONFUND_URL = 'https://go.missionfund.org/WEWE2026';
 const MISSIONFUND_LOGO = 'https://missionfund.org/assets/logo/main_logo.png';
 
-// 아이콘은 사역 소개 페이지의 "핵심 프로그램" 섹션과 동일한 4가지 프로그램을 가리키므로
-// 그곳과 같은 아이콘을 재사용해 두 페이지에서 같은 프로그램은 같은 아이콘으로 보이도록 합니다.
-const IMPACT_ITEMS = [
+// (2026-10-10) "후원이 만드는 변화"를 2026 사업계획서(07 운영 계획) 슬라이드 내용으로 다시 구성 —
+// 위로자가 회복되면 목회자·선교사·교회·후원자(성도) 모두에게 돌아오는 변화.
+const IMPACT_GROUPS = [
   {
-    title: 'WEWE 스테이',
-    desc: '한국에 돌아온 선교사님이 안심하고 머물 수 있는 공유 숙소 네트워크를 넓혀갑니다.',
-    icon: HomeIcon,
+    title: '목회자',
+    icon: Church,
+    points: ['사역의 연속성 확보, 리더십 위기 예방', '최신 목회 동향 등 전문성 강화', '소진관리를 통한 회복탄력성 강화'],
   },
   {
-    title: '레위인의 모빌리티',
-    desc: '단기 귀국한 선교사님의 병원 진료, 사역지 방문을 위한 차량 쉐어링을 지원합니다.',
-    icon: Car,
+    title: '선교사',
+    icon: Globe2,
+    points: ['안정적인 귀국 체류, 비용 부담 경감', '정서·영적 회복과 정체성 회복', '동료·교회와의 지지 체계'],
   },
   {
-    title: 'Poiema 돌봄',
-    desc: '선교사님이 하나님의 작품(Poiema)으로 다시 세워지는 전인적 회복 프로그램·힐링캠프를 엽니다.',
+    title: '교회',
+    icon: Users,
+    points: ['강단의 생명력 회복, 공동체 건강도 상승', '유휴 자산의 선교적 활용', '건강한 동역 모델 구축'],
+  },
+  {
+    title: '후원자 · 성도',
     icon: HeartHandshake,
-  },
-  {
-    title: 'WE+WE 커넥트',
-    desc: '후원자와 선교사, 선교사와 선교사를 잇는 멤버십 프로그램으로 고립감을 해소합니다.',
-    icon: Users2,
+    points: ['구체적이고 투명한 섬김의 통로', '평신도 섬김의 기회 확대'],
   },
 ];
+
+const IMPACT_OUTCOMES = ['지속 가능한 사역 동력', '외부 네트워크의 자산화', '건강한 동역 모델 구축'];
 
 function DonatePage() {
   const [copied, setCopied] = React.useState(false);
@@ -124,7 +126,7 @@ function DonatePage() {
       </section>
 
       <section className="wd-impact">
-        <div className="wh-container wh-container-narrow">
+        <div className="wh-container wd-impact-container">
           <EditableText id={"WHERE IT GOES"} as="span" className="wh-eyebrow wh-eyebrow-center">WHERE IT GOES</EditableText>
           <EditableText id={"후원이 만드는 변화"} as="h2" className="wh-h2-center">후원이 만드는 변화</EditableText>
 
@@ -136,17 +138,29 @@ function DonatePage() {
             aria-label="함께 손을 맞잡은 사람들"
           />
 
+          <EditableText id={"위로자가 회복되면, 공동체도 살아납니다."} as="h3" className="wd-impact-headline">위로자가 회복되면, 공동체도 살아납니다.</EditableText>
+          <EditableText id={"목회자, 선교사, 교회, 성도 모두에게 돌아오는 변화"} className="wd-impact-sub">목회자, 선교사, 교회, 성도 모두에게 돌아오는 변화</EditableText>
+
           <div className="wd-impact-grid">
-            {IMPACT_ITEMS.map(({ title, desc, icon: Icon }, idx) => (
+            {IMPACT_GROUPS.map(({ title, points, icon: Icon }, idx) => (
               <Reveal as="div" key={title} className="wd-impact-card" delay={idx * 80}>
-                <span className="wd-impact-icon"><Icon size={20} /></span>
-                <div>
-                  <h3>{title}</h3>
-                  <p>{desc}</p>
-                </div>
+                <span className="wd-impact-icon"><Icon size={26} /></span>
+                <h3>{title}</h3>
+                <ul>
+                  {points.map((p) => <li key={p}>{p}</li>)}
+                </ul>
               </Reveal>
             ))}
           </div>
+
+          <Reveal as="div" className="wd-impact-outcomes" delay={160}>
+            {IMPACT_OUTCOMES.map((o, i) => (
+              <React.Fragment key={o}>
+                {i > 0 && <span className="wd-impact-dot" aria-hidden="true">·</span>}
+                <span>{o}</span>
+              </React.Fragment>
+            ))}
+          </Reveal>
         </div>
       </section>
 
@@ -230,7 +244,7 @@ function DonatePage() {
 
           <div className="wd-contact">
             <EditableText id={"후원 방법이나 정기후원 관련 문의는 이메일로 편하게 연락해주세요."}>후원 방법이나 정기후원 관련 문의는 이메일로 편하게 연락해주세요.</EditableText>
-            <a href="mailto:wewe@wewestay.com" className="wh-btn wh-btn-outline">
+            <a href="mailto:wewe@wewestay.com" className="wh-btn wd-contact-btn">
               <Mail size={16} />
               wewe@wewestay.com
             </a>
@@ -300,46 +314,92 @@ function DonatePage() {
           background-position: center;
         }
 
+        .wd-impact-container {
+          max-width: 1080px;
+        }
+
+        .wd-impact-headline {
+          text-align: center;
+          font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+          font-weight: 800;
+          color: var(--wh-ink);
+          margin: 0 0 0.5rem;
+          word-break: keep-all;
+        }
+
+        .wd-impact-sub {
+          text-align: center;
+          color: var(--wh-ink-soft);
+          margin: 0 0 2rem;
+          word-break: keep-all;
+        }
+
         .wd-impact-grid {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 1.25rem;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 1rem;
         }
 
         .wd-impact-card {
-          display: flex;
-          align-items: flex-start;
-          gap: 0.9rem;
-          padding: 1.75rem;
+          padding: 1.6rem 1.4rem;
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 14px;
+          word-break: keep-all;
         }
 
-        /* 사역 소개 페이지 "핵심 프로그램" 아이콘(.wm-program-icon)과 동일한 스타일 */
         .wd-impact-icon {
-          flex-shrink: 0;
-          width: 38px;
-          height: 38px;
+          width: 56px;
+          height: 56px;
           border-radius: 50%;
-          background: rgba(217, 123, 63, 0.12);
-          color: var(--wh-orange-deep);
+          background: #f6c343;
+          color: #1c1c1a;
           display: flex;
           align-items: center;
           justify-content: center;
+          margin-bottom: 1rem;
         }
 
         .wd-impact-card h3 {
           color: var(--wh-ink);
-          margin-bottom: 0.6rem;
-          font-size: 1.05rem;
+          margin: 0 0 0.8rem;
+          font-size: 1.15rem;
         }
 
-        .wd-impact-card p {
+        .wd-impact-card ul {
           margin: 0;
-          color: var(--wh-ink-soft);
-          font-size: 0.92rem;
-          line-height: 1.7;
+          padding-left: 1.05rem;
+        }
+
+        .wd-impact-card li {
+          color: var(--wh-ink);
+          font-size: 0.95rem;
+          line-height: 1.65;
+          margin-bottom: 0.55rem;
+        }
+
+        .wd-impact-outcomes {
+          margin-top: 1.25rem;
+          padding: 1.25rem 1.5rem;
+          border-radius: 14px;
+          background: #fdf3cf;
+          text-align: center;
+          font-weight: 800;
+          color: var(--wh-ink);
+          font-size: 1.02rem;
+          line-height: 1.8;
+          word-break: keep-all;
+        }
+
+        .wd-impact-dot {
+          margin: 0 0.7rem;
+          color: #c9971a;
+        }
+
+        @media (max-width: 1080px) {
+          .wd-impact-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
         }
 
         .wd-how {
@@ -498,6 +558,18 @@ function DonatePage() {
           margin-bottom: 1rem;
         }
 
+        /* (2026-10-10) 밝은 배경 위 이메일 문의 버튼 — 어두운 배경용 흰색 테두리 버튼(wh-btn-outline)을
+           쓰고 있어 글씨가 보이지 않던 문제 수정 */
+        .wd-contact-btn {
+          color: var(--wh-orange-deep);
+          border: 1.5px solid var(--wh-orange);
+          background: #fff;
+        }
+
+        .wd-contact-btn:hover {
+          background: rgba(217, 123, 63, 0.08);
+        }
+
         .wa-cta {
           padding: 4rem 0;
           background: var(--wh-ink);
@@ -585,12 +657,6 @@ function DonatePage() {
         .wewe-donate-page .wd-impact-card h3 {
           font-size: 1.15rem;
           font-weight: 800;
-        }
-
-        .wewe-donate-page .wd-impact-card p {
-          color: var(--wh-ink);
-          font-size: 0.98rem;
-          line-height: 1.7;
         }
 
         .wewe-donate-page .wd-how-lead {

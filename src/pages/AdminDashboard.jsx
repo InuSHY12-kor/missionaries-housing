@@ -4,9 +4,11 @@ import { supabase } from '../App';
 import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_BADGE_CLASS, cancelPaidBooking, formatDateTime } from '../utils/bankTransfer';
 import { payoutFee } from '../utils/price';
 import SiteStats from './SiteStats';
+import AdminOverview from './AdminOverview';
+import AnnouncementMail from './AnnouncementMail';
 import { PAYMENT_POLICY } from '../data/orgInfo';
 import { priceUnit, isPerStay } from '../utils/price';
-import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning, Plus, Pencil } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning, Plus, Pencil, LayoutDashboard, UserCheck, Home as HomeIcon, MessageSquare, UserX, Users, CalendarCheck, Newspaper, ArrowLeft } from 'lucide-react';
 import PageHero from '../components/PageHero';
 import WevePageHero from '../wewe/WevePageHero';
 import AmenityIcon from '../components/AmenityIcon';
@@ -37,7 +39,20 @@ const MEMBER_FILTERS = [
 
 // 다른 페이지(마이페이지 통계 카드 등)에서 /admin?tab=bookings 처럼 특정 탭으로 바로
 // 이동할 수 있도록 지원하는 탭 키 목록.
-const VALID_TABS = ['users', 'accommodations', 'inquiries', 'deletions', 'members', 'bookings', 'posts', 'stats'];
+const VALID_TABS = ['home', 'users', 'accommodations', 'inquiries', 'deletions', 'members', 'bookings', 'posts', 'stats', 'mail'];
+
+// (2026-10-10) 상단 탭을 마이페이지처럼 "아이콘 + 이름 + 숫자" 네모 타일로. 첫 타일 "한눈에 보기"가 첫 화면.
+// 방문 통계(stats)와 공지 메일(mail)은 타일이 아니라 "한눈에 보기" 안의 별도 섹션에서 들어갑니다.
+const ADMIN_TILES = [
+  { key: 'home', label: '한눈에 보기', icon: LayoutDashboard },
+  { key: 'users', label: '승인 대기 회원', icon: UserCheck, countKey: 'users' },
+  { key: 'accommodations', label: '승인 대기 숙소', icon: HomeIcon, countKey: 'accommodations' },
+  { key: 'inquiries', label: '문의', icon: MessageSquare, countKey: 'inquiries' },
+  { key: 'deletions', label: '계정 삭제 요청', icon: UserX, countKey: 'deletions' },
+  { key: 'members', label: '전체 회원', icon: Users, countKey: 'members' },
+  { key: 'bookings', label: '전체 예약', icon: CalendarCheck, countKey: 'bookings' },
+  { key: 'posts', label: '사역 소식', icon: Newspaper, countKey: 'posts' },
+];
 const POST_STATUS_LABEL = { draft: '임시저장', published: '발행됨' };
 const POST_STATUS_BADGE = { draft: 'badge-neutral', published: 'badge-success' };
 
@@ -48,7 +63,7 @@ const POST_STATUS_BADGE = { draft: 'badge-neutral', published: 'badge-success' }
 function AdminDashboard({ userProfile, site = 'stay' }) {
   const isWeweSite = site === 'wewe';
   const [searchParams] = useSearchParams();
-  const initialTab = VALID_TABS.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'users';
+  const initialTab = VALID_TABS.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'home';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [users, setUsers] = useState([]);
   const [accommodations, setAccommodations] = useState([]);
@@ -603,60 +618,37 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
       <div className="container">
         <h1>관리자 대시보드</h1>
 
-        {/* 탭 */}
-        <div className="admin-tabs">
-          <button
-            className={`tab ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveTab('users')}
-          >
-            승인 대기 사용자 ({counts.users})
-          </button>
-          <button
-            className={`tab ${activeTab === 'accommodations' ? 'active' : ''}`}
-            onClick={() => setActiveTab('accommodations')}
-          >
-            승인 대기 숙소 ({counts.accommodations})
-          </button>
-          <button
-            className={`tab ${activeTab === 'inquiries' ? 'active' : ''}`}
-            onClick={() => setActiveTab('inquiries')}
-          >
-            문의 ({counts.inquiries})
-          </button>
-          <button
-            className={`tab ${activeTab === 'deletions' ? 'active' : ''}`}
-            onClick={() => setActiveTab('deletions')}
-          >
-            계정 삭제 요청 ({counts.deletions})
-          </button>
-          <button
-            className={`tab ${activeTab === 'members' ? 'active' : ''}`}
-            onClick={() => setActiveTab('members')}
-          >
-            전체 회원 ({counts.members})
-          </button>
-          <button
-            className={`tab ${activeTab === 'bookings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('bookings')}
-          >
-            전체 예약 ({counts.bookings})
-          </button>
-          <button
-            className={`tab ${activeTab === 'posts' ? 'active' : ''}`}
-            onClick={() => setActiveTab('posts')}
-          >
-            사역 소식 ({counts.posts})
-          </button>
-          {/* (2026-10-10) WEWE·WEWE STAY 방문 통계 */}
-          <button
-            className={`tab ${activeTab === 'stats' ? 'active' : ''}`}
-            onClick={() => setActiveTab('stats')}
-          >
-            방문 통계
-          </button>
+        {/* 메뉴 타일 (마이페이지 상단 통계 박스와 같은 모양) */}
+        <div className="admin-tiles" role="tablist" aria-label="관리 메뉴">
+          {ADMIN_TILES.map(({ key, label, icon: Icon, countKey }) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === key}
+              className={`admin-tile ${activeTab === key ? 'active' : ''}`}
+              onClick={() => setActiveTab(key)}
+            >
+              <Icon size={24} />
+              <span className="admin-tile-label">{label}</span>
+              <span className="admin-tile-count">{countKey ? (counts[countKey] ?? 0).toLocaleString() : '홈'}</span>
+            </button>
+          ))}
         </div>
 
-        {activeTab === 'stats' && <SiteStats defaultSite="all" />}
+        {activeTab === 'home' && <AdminOverview counts={counts} onOpen={setActiveTab} />}
+
+        {activeTab === 'stats' && (
+          <div className="admin-subpage">
+            <button type="button" className="admin-back" onClick={() => setActiveTab('home')}>
+              <ArrowLeft size={16} /> 한눈에 보기로 돌아가기
+            </button>
+            <h2 className="admin-subpage-title">방문 통계</h2>
+            <SiteStats defaultSite="all" />
+          </div>
+        )}
+
+        {activeTab === 'mail' && <AnnouncementMail onBack={() => setActiveTab('home')} />}
 
         {/* 사용자 검토 */}
         {activeTab === 'users' && (
@@ -1365,6 +1357,98 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           gap: 1rem;
           margin: 2rem 0;
           border-bottom: 2px solid #ecf0f1;
+        }
+
+        .admin-tiles {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+          gap: 0.75rem;
+          margin: 1.5rem 0 0.5rem;
+        }
+
+        .admin-tile {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 0.35rem;
+          padding: 1rem 0.6rem;
+          background: #fff;
+          border: 1.5px solid #ece7dd;
+          border-radius: 14px;
+          cursor: pointer;
+          color: #b8622c;
+          transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+        }
+
+        .admin-tile:hover {
+          border-color: #e9a06d;
+          transform: translateY(-1px);
+        }
+
+        .admin-tile.active {
+          border-color: #d97b3f;
+          background: #fff4ea;
+          box-shadow: 0 6px 16px rgba(217, 123, 63, 0.18);
+        }
+
+        .admin-tile-label {
+          color: #3a3a36;
+          font-weight: 700;
+          font-size: 0.88rem;
+          text-align: center;
+          word-break: keep-all;
+        }
+
+        .admin-tile-count {
+          color: #1c1c1a;
+          font-weight: 800;
+          font-size: 1.35rem;
+          line-height: 1.1;
+        }
+
+        .admin-tile.active .admin-tile-count {
+          color: #d97b3f;
+        }
+
+        .admin-subpage {
+          margin-top: 1.5rem;
+        }
+
+        .admin-back {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          background: none;
+          border: none;
+          color: #7f8c8d;
+          cursor: pointer;
+          padding: 0;
+          font-size: 0.92rem;
+        }
+
+        .admin-back:hover {
+          color: #d97b3f;
+        }
+
+        .admin-subpage-title {
+          margin: 0.75rem 0 0;
+          font-size: 1.35rem;
+        }
+
+        @media (max-width: 600px) {
+          .admin-tiles {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.5rem;
+          }
+
+          .admin-tile {
+            padding: 0.8rem 0.5rem;
+          }
+
+          .admin-tile-count {
+            font-size: 1.15rem;
+          }
         }
 
         .tab {
