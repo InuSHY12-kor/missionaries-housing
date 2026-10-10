@@ -237,6 +237,13 @@
   color: var(--wh-orange);
 }
 
+/* 인스타그램 아래 줄에 카카오톡 채널 */
+.wh-footer-kakao {
+  display: flex;
+  width: fit-content;
+  margin-top: 0.45rem;
+}
+
 .wh-footer-info p {
   color: rgba(255, 255, 255, 0.55);
   font-size: 0.85rem;
