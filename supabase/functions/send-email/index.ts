@@ -11,6 +11,10 @@ import nodemailer from "npm:nodemailer@6.9.10";
 //      생길 때 DB 트리거(pg_net)가 이 함수를 호출해, 같은 내용을 해당 관리자에게 메일로도
 //      보냅니다(새 숙소 등록, 예약/확정/취소, 리뷰 등 위 1)에 없는 모든 변동 사항).
 //      위 1)에서 이미 자세한 메일을 보내는 종류는 중복 발송하지 않습니다.
+//   3) (2026-10-10) "admin_notification"을 관리자뿐 아니라 승인된 모든 회원(선교사·숙소 제공자)에게도 —
+//      회원 승인, 새 예약 요청, 예약 확정·취소, 숙소 승인, 리뷰 등 종 알림을 메일로도 받습니다
+//      (위위스테이 이메일 알림 설정을 켠 경우). 관리자 전용 메일 테스트(type "test_email") 추가.
+//      sendMail이 Gmail의 수락 결과를 로그로 남깁니다.
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -286,19 +290,25 @@ async function sendMail({ to, subject, text, html, fromName = "WEWE STAY" }) {
   });
 
   try {
-    await transport.sendMail({
+    const info = await transport.sendMail({
       from: `"${fromName}" <${user}>`,
       to,
       subject,
       text,
       ...(html ? { html } : {}),
     });
+    console.log("mail sent", JSON.stringify({ subject, accepted: info.accepted, rejected: info.rejected, response: info.response }));
+    return {
+      accepted: info.accepted || [],
+      rejected: info.rejected || [],
+      response: info.response || "",
+      // Gmail은 보내는 계정 자신에게 보낸 메일을 받은편지함이 아니라 "보낸편지함/전체보관함"에만 둡니다.
+      sameAsSender: String(to).trim().toLowerCase() === String(user).trim().toLowerCase(),
+    };
   } catch (err) {
     console.error("Gmail SMTP error", err);
     throw new Error(`Gmail SMTP error: ${err?.message || String(err)}`);
   }
-
-  return { ok: true };
 }
 
 function getBearerJwt(req) {
@@ -371,11 +381,37 @@ Deno.serve(async (req) => {
         .select("email, full_name, role, status, notification_email, notification_email_wewe")
         .eq("id", claimed.recipient_id)
         .maybeSingle();
-      if (!recipient || recipient.role !== "admin" || recipient.status !== "approved") {
-        return jsonResponse({ success: true, skipped: "recipient is not an approved admin" });
+      if (!recipient || recipient.status !== "approved") {
+        return jsonResponse({ success: true, skipped: "recipient is not an approved member" });
       }
-      if (!wantsEmail(recipient) || !isDeliverableEmail(recipient.email)) {
-        return jsonResponse({ success: true, skipped: "recipient opted out or undeliverable" });
+      if (!isDeliverableEmail(recipient.email)) {
+        return jsonResponse({ success: true, skipped: "undeliverable address" });
+      }
+
+      // (2026-10-10) 관리자가 아닌 회원(선교사·숙소 제공자 등): 위위스테이 이메일 알림 설정을 따릅니다.
+      if (recipient.role !== "admin") {
+        if (recipient.notification_email === false) {
+          return jsonResponse({ success: true, skipped: "recipient opted out" });
+        }
+        const memberTitle = claimed.title || "새 알림";
+        const memberHtml = buildBrandedEmailHtml({
+          title: memberTitle,
+          bodyHtml: `
+        <p style="margin:0 0 14px;">${escapeHtml(recipient.full_name ? `${recipient.full_name}님, ` : "")}${escapeHtml(claimed.body || "")}</p>
+        <p style="margin:0 0 16px;font-size:12.5px;color:#93877c;">${escapeHtml(new Date(claimed.created_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }))}</p>
+        <p style="margin:0;font-size:12px;color:#93877c;">이메일 알림은 위위스테이 프로필 &gt; 알림 설정에서 끌 수 있습니다.</p>`,
+          ctaUrl: notificationLinkToUrl(claimed.link || "/dashboard"),
+          ctaText: "위위스테이에서 확인",
+          isAdmin: false,
+          brand: "stay",
+        });
+        const memberText = `${memberTitle}\n${claimed.body || ""}\n\n${notificationLinkToUrl(claimed.link || "/dashboard")}`;
+        await sendMail({ to: recipient.email, subject: `[WEWE STAY] ${memberTitle}`, text: memberText, html: memberHtml });
+        return jsonResponse({ success: true });
+      }
+
+      if (!wantsEmail(recipient)) {
+        return jsonResponse({ success: true, skipped: "recipient opted out" });
       }
 
       const emailTitle = claimed.title || "새 알림";
@@ -393,6 +429,44 @@ Deno.serve(async (req) => {
       const text = `${emailTitle}\n${claimed.body || ""}\n\n${notificationLinkToUrl(claimed.link)}`;
       await sendMail({ to: recipient.email, subject: `[WEWE 관리자] ${emailTitle}`, text, html, fromName: "WEWE" });
       return jsonResponse({ success: true });
+    }
+
+    // ── (2026-10-10) 메일 발송 테스트 — 승인된 관리자만, 로그인한 본인 주소로 보내고 Gmail의 결과를 돌려줍니다.
+    if (type === "test_email") {
+      const jwt = getBearerJwt(req);
+      if (!jwt) return jsonResponse({ error: "Authorization required" }, 401);
+      const supabaseUser = createClient(
+        Deno.env.get("SUPABASE_URL"),
+        Deno.env.get("SUPABASE_ANON_KEY"),
+        { global: { headers: { Authorization: `Bearer ${jwt}` } } },
+      );
+      const { data: userData, error: userErr } = await supabaseUser.auth.getUser(jwt);
+      if (userErr || !userData?.user) return jsonResponse({ error: "Invalid session" }, 401);
+      const { data: me } = await supabaseAdmin
+        .from("users")
+        .select("email, full_name, role, status")
+        .eq("id", userData.user.id)
+        .maybeSingle();
+      if (!me || me.role !== "admin" || me.status !== "approved") return jsonResponse({ error: "Forbidden" }, 403);
+
+      const sentAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
+      const html = buildBrandedEmailHtml({
+        title: "메일 발송 테스트",
+        bodyHtml: `<p style="margin:0 0 14px;">이 메일이 받은편지함에 보이면 WEWE 알림 메일이 정상적으로 도착하는 것입니다.</p>
+        <p style="margin:0;font-size:12.5px;color:#93877c;">${escapeHtml(sentAt)} 발송</p>`,
+        ctaUrl: "https://wewestay.com/admin",
+        ctaText: "관리자 페이지 열기",
+        isAdmin: true,
+        brand: "wewe",
+      });
+      const result = await sendMail({
+        to: me.email,
+        subject: "[WEWE] 메일 발송 테스트",
+        text: `메일 발송 테스트 (${sentAt})`,
+        html,
+        fromName: "WEWE",
+      });
+      return jsonResponse({ success: true, to: me.email, ...result });
     }
 
     // ── 문의 접수 (관리자 알림) — WEWE STAY 서비스(숙소 검색/예약) 자체 문의 폼. STAY 브랜딩 유지.

@@ -3,6 +3,7 @@ import { supabase } from '../App';
 import { User, Phone, Building2, Save, Bell, Landmark } from 'lucide-react';
 import { PayoutAccountSection } from '../components/PayoutAccountForm';
 import { ORG_INFO } from '../data/orgInfo';
+import TestEmailButton from '../components/TestEmailButton';
 import PageHero from '../components/PageHero';
 import { formatPhoneNumber } from '../utils/phone';
 
@@ -420,6 +421,8 @@ function Profile({ userProfile }) {
                 <Save size={18} />
                 {notifSaving ? '저장 중...' : '알림 설정 저장'}
               </button>
+
+              {userProfile?.role === 'admin' && <TestEmailButton />}
             </div>
 
           </div>
