@@ -66,6 +66,33 @@ function RedirectHomeOnSignOut() {
   return null;
 }
 
+// (2026-10-10) 관리자가 삭제 처리한 회원(deletion_pending)·탈퇴 처리된 회원(withdrawn)·가입이 거절된
+// 회원(rejected)이 WEWE 홈페이지에서 로그인하면, 삭제 사유 확인 등 계정 안내가 있는 위위스테이(/stay)
+// 안내 화면(AccountStatus)으로 보냅니다. 전에는 WEWE에서 로그인하면 그냥 홈에 머물러 안내가 뜨지 않았습니다.
+const ACCOUNT_LOCKED_STATUSES = ['withdrawn', 'deletion_pending', 'rejected'];
+
+function RedirectLockedAccount() {
+  useEffect(() => {
+    let mounted = true;
+    const check = async (userId) => {
+      if (!userId) return;
+      const { data } = await supabase.from('users').select('status').eq('id', userId).maybeSingle();
+      if (mounted && data && ACCOUNT_LOCKED_STATUSES.includes(data.status)) {
+        window.location.replace('/stay');
+      }
+    };
+    supabase.auth.getSession().then(({ data }) => check(data?.session?.user?.id));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') check(session?.user?.id);
+    });
+    return () => {
+      mounted = false;
+      subscription?.unsubscribe();
+    };
+  }, []);
+  return null;
+}
+
 function WeweSite() {
   // 위위 스테이(App.jsx)와 동일한 규칙(유휴 2시간 자동 로그아웃 + 같은 브라우저 내 로그인
   // 상태 유지)을 위위 홈페이지에서도 지키기 위해, 여기서도 로그인 여부를 직접 추적하고
@@ -96,6 +123,7 @@ function WeweSite() {
       <SiteTitle title="WEWE (위로자의 위로자)" />
       <ScrollToTop />
       <RedirectHomeOnSignOut />
+      <RedirectLockedAccount />
       {autoLogoutMessage && (
         <div className="wewe-auto-logout-banner">
           <AlertCircle size={18} />
