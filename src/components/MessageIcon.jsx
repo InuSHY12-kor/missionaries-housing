@@ -6,7 +6,8 @@ import { supabase } from '../App';
 // 30초마다 폴링해서 읽지 않은 메시지 개수를 갱신 (종 아이콘 알림 폴링과 동일한 방식)
 const POLL_INTERVAL_MS = 30000;
 
-function MessageIcon({ userProfile }) {
+// linkBase: 위위스테이 밖(WEWE 사이트, 별도 라우터)에서 쓸 때 "/stay" — 쪽지함으로 전체 페이지 이동합니다.
+function MessageIcon({ userProfile, linkBase = '' }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
 
@@ -36,7 +37,7 @@ function MessageIcon({ userProfile }) {
     <button
       type="button"
       className="message-icon-btn"
-      onClick={() => navigate('/messages')}
+      onClick={() => (linkBase ? window.location.assign(`${linkBase}/messages`) : navigate('/messages'))}
       aria-label="메시지함"
     >
       <Mail size={20} />

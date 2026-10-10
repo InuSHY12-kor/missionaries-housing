@@ -17,7 +17,8 @@ function timeAgo(dateStr) {
   return `${day}일 전`;
 }
 
-function NotificationBell({ userProfile }) {
+// linkBase: 위위스테이 밖(WEWE 사이트, 별도 라우터)에서 쓸 때 "/stay" — 알림 링크를 전체 페이지 이동으로 엽니다.
+function NotificationBell({ userProfile, linkBase = '' }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -113,7 +114,8 @@ function NotificationBell({ userProfile }) {
     }
     setOpen(false);
     if (notification.link) {
-      navigate(notification.link);
+      if (linkBase) window.location.assign(`${linkBase}${notification.link}`);
+      else navigate(notification.link);
     }
   };
 
