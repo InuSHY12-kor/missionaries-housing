@@ -15,6 +15,8 @@ import nodemailer from "npm:nodemailer@6.9.10";
 //      회원 승인, 새 예약 요청, 예약 확정·취소, 숙소 승인, 리뷰 등 종 알림을 메일로도 받습니다
 //      (위위스테이 이메일 알림 설정을 켠 경우). 관리자 전용 메일 테스트(type "test_email") 추가.
 //      sendMail이 Gmail의 수락 결과를 로그로 남깁니다.
+//   4) (2026-10-10) 관리자 메일을 동시에 보내지 않고 한 명씩 차례로 보냅니다(동시 SMTP 접속 제한 회피).
+//      수신자별 결과를 로그에 남기고, 일부만 실패해도 로그에 남깁니다. test_email에 allAdmins 옵션 추가.
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -83,14 +85,23 @@ async function getAdminRecipients(supabaseAdmin) {
   return [...set.values()];
 }
 
-// 같은 메일을 여러 관리자에게 각각 보냅니다(서로의 주소가 노출되지 않도록 1명씩).
+// 같은 메일을 여러 관리자에게 각각 보냅니다(서로의 주소가 노출되지 않도록 1명씩, 차례로).
 async function sendToAdmins(supabaseAdmin, mail) {
   const recipients = await getAdminRecipients(supabaseAdmin);
   if (recipients.length === 0) throw new Error("No admin recipients (ADMIN_NOTIFY_EMAIL / admin users)");
-  const results = await Promise.allSettled(recipients.map((to) => sendMail({ ...mail, to })));
-  const failed = results.filter((r) => r.status === "rejected");
-  if (failed.length === recipients.length) throw failed[0].reason;
-  return { sent: recipients.length - failed.length, failed: failed.length };
+  const results = [];
+  for (const to of recipients) {
+    try {
+      const r = await sendMail({ ...mail, to });
+      results.push({ to, ok: true, response: r.response, rejected: r.rejected });
+    } catch (err) {
+      console.error("admin mail failed", to, String(err?.message || err));
+      results.push({ to, ok: false, error: String(err?.message || err) });
+    }
+  }
+  const failed = results.filter((r) => !r.ok);
+  if (failed.length === recipients.length) throw new Error(failed[0].error);
+  return { sent: recipients.length - failed.length, failed: failed.length, results };
 }
 
 // ─────────────────────────────────────────────
@@ -459,13 +470,13 @@ Deno.serve(async (req) => {
         isAdmin: true,
         brand: "wewe",
       });
-      const result = await sendMail({
-        to: me.email,
-        subject: "[WEWE] 메일 발송 테스트",
-        text: `메일 발송 테스트 (${sentAt})`,
-        html,
-        fromName: "WEWE",
-      });
+      const mail = { subject: "[WEWE] 메일 발송 테스트", text: `메일 발송 테스트 (${sentAt})`, html, fromName: "WEWE" };
+      // allAdmins: 관리자 알림 메일과 똑같은 경로(ADMIN_NOTIFY_EMAIL + 승인된 관리자)로 보내고 수신자별 결과를 돌려줍니다.
+      if (body.allAdmins) {
+        const summary = await sendToAdmins(supabaseAdmin, mail);
+        return jsonResponse({ success: true, allAdmins: true, ...summary });
+      }
+      const result = await sendMail({ ...mail, to: me.email });
       return jsonResponse({ success: true, to: me.email, ...result });
     }
 
