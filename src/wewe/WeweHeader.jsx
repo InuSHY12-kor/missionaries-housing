@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { supabase } from '../App';
 import weweIconWhite from '../assets/wewe-icon-white.png';
+import NotificationBell from '../components/NotificationBell';
+import MessageIcon from '../components/MessageIcon';
 
 // 위위 스테이 상단바(Navigation.jsx)의 "등급 + 반갑습니다, ○○님" 표시와 동일하게, 여기서도
 // 로그인한 회원의 역할(회원 등급)을 사람이 읽는 이름으로 보여줍니다(2026-09-10 추가).
@@ -39,7 +41,7 @@ function WeweHeader() {
     let mounted = true;
 
     const loadProfile = async (userId) => {
-      const { data } = await supabase.from('users').select('role, status, full_name').eq('id', userId).maybeSingle();
+      const { data } = await supabase.from('users').select('id, role, status, full_name, email_verified_at').eq('id', userId).maybeSingle();
       if (mounted) setUserProfile(data || null);
     };
 
@@ -65,6 +67,10 @@ function WeweHeader() {
   }, []);
 
   const isAdmin = isLoggedIn && userProfile?.role === 'admin' && userProfile?.status === 'approved';
+  // (2026-10-10) 위위스테이 상단바와 같은 조건(승인·이메일 인증 완료, 후원자 제외)으로 알림·쪽지 아이콘을 보여줍니다.
+  // 알림·쪽지 데이터는 위위스테이와 같은 것이고, 누르면 위위스테이(/stay)의 해당 화면으로 이동합니다.
+  const showInbox = isLoggedIn && userProfile?.status === 'approved' && !!userProfile?.email_verified_at
+    && userProfile?.role !== 'supporter';
 
   const closeMobileNav = () => document.body.classList.remove('wewe-nav-open');
 
@@ -124,6 +130,7 @@ function WeweHeader() {
           </span>
         </Link>
 
+        <div className="wewe-header-actions">
         <button
           type="button"
           ref={toggleRef}
@@ -173,6 +180,14 @@ function WeweHeader() {
             </>
           )}
         </nav>
+
+        {showInbox && (
+          <div className="wewe-header-icons">
+            <NotificationBell userProfile={userProfile} linkBase="/stay" />
+            <MessageIcon userProfile={userProfile} linkBase="/stay" />
+          </div>
+        )}
+        </div>
       </div>
 
       <style>{`
@@ -274,6 +289,29 @@ function WeweHeader() {
           gap: 1.4rem;
         }
 
+        .wewe-header-actions {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .wewe-header-icons {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+
+        /* 위위스테이의 알림·쪽지 아이콘을 어두운 배너 위에서 흰색으로 */
+        .wewe-header .notification-bell-btn,
+        .wewe-header .message-icon-btn {
+          color: #fff;
+        }
+
+        .wewe-header .notification-bell-btn:hover,
+        .wewe-header .message-icon-btn:hover {
+          background: rgba(255, 255, 255, 0.14);
+        }
+
         .wewe-nav .wewe-nav-link {
           white-space: nowrap;
         }
@@ -358,6 +396,15 @@ function WeweHeader() {
 
           .wewe-nav-toggle {
             display: flex;
+            order: 2;
+          }
+
+          .wewe-header-icons {
+            order: 1;
+          }
+
+          .wewe-header-actions {
+            gap: 0.35rem;
           }
 
           .wewe-nav {

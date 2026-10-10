@@ -226,6 +226,19 @@ body {
   display: none;
 }
 
+/* (2026-10-10) "위위" 메뉴의 WEWE 로고 아이콘(흰색 PNG) — 다른 메뉴 아이콘(18px)과 같은 크기.
+   배너 위 투명 상단바에서는 흰색 그대로, 흰 배경 상단바에서는 글씨색에 맞춰 어둡게 보이게 합니다. */
+img.nav-btn-logo {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: brightness(0.2);
+}
+
+.navbar-transparent img.nav-btn-logo {
+  filter: none;
+}
+
 .navbar-nav a.nav-btn-outline,
 .navbar-nav button.nav-btn-outline {
   background: transparent;

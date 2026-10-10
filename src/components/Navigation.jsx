@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LogOut, Home, MapPin, Calendar, Building2, CalendarClock, Star, Shield, User } from 'lucide-react';
 import wewelogo from '../assets/wewe-icon.png';
+import weweIconWhite from '../assets/wewe-icon-white.png';
 import NotificationBell from './NotificationBell';
 import MessageIcon from './MessageIcon';
 
@@ -123,6 +124,7 @@ function Navigation({ user, userProfile, onLogout }) {
                   {/* 후원자는 숙소 검색/예약 등 실제 서비스 메뉴를 이용하지 않으므로
                       WEWE 전체 홈페이지로 돌아가는 링크만 보여줍니다. */}
                   <a href="/" className="nav-btn">
+                    <img src={weweIconWhite} alt="" className="nav-btn-icon nav-btn-logo" aria-hidden="true" />
                     <span className="nav-btn-label">위위 소개 보기</span>
                   </a>
                 </li>
@@ -141,6 +143,8 @@ function Navigation({ user, userProfile, onLogout }) {
                         여기는 별도로 마운트된 앱(basename="/stay")이므로 React Router가 아닌
                         일반 링크(전체 페이지 이동)로 최상위 WEWE 홈으로 돌아갑니다. */}
                     <a href="/" className="nav-btn">
+                      {/* (2026-10-10) 다른 메뉴처럼 아이콘을 붙여 모바일 타일 크기를 맞춤 — 흰색 WEWE 로고 */}
+                      <img src={weweIconWhite} alt="" className="nav-btn-icon nav-btn-logo" aria-hidden="true" />
                       <span className="nav-btn-label">위위</span>
                     </a>
                   </li>
