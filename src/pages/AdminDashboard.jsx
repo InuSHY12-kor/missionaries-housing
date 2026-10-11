@@ -6,6 +6,7 @@ import { payoutFee } from '../utils/price';
 import SiteStats from './SiteStats';
 import AdminOverview from './AdminOverview';
 import AnnouncementMail from './AnnouncementMail';
+import MemberContactModal from '../components/MemberContactModal';
 import { PAYMENT_POLICY } from '../data/orgInfo';
 import { priceUnit, isPerStay } from '../utils/price';
 import { CheckCircle, XCircle, Eye, Mail, FileText, Trash2, Shield, ChevronDown, ChevronUp, MailWarning, Plus, Pencil, LayoutDashboard, UserCheck, Home as HomeIcon, MessageSquare, UserX, Users, CalendarCheck, Newspaper, ArrowLeft } from 'lucide-react';
@@ -73,6 +74,8 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
   const [memberFilter, setMemberFilter] = useState('all');
   const [expandedMemberId, setExpandedMemberId] = useState(null);
   const [roleChangeBusyId, setRoleChangeBusyId] = useState(null);
+  // (2026-10-11) 회원에게 개별 쪽지·메일 보내기 — { member, mode: 'message' | 'mail' }
+  const [contactTarget, setContactTarget] = useState(null);
   const [allBookings, setAllBookings] = useState([]);
   // (2026-10-10) 숙소 제공자 지급 계좌 (user_id → 계좌) — 정산 대기 목록에 함께 표시
   const [payoutAccounts, setPayoutAccounts] = useState({});
@@ -949,6 +952,9 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
                           <span className={`badge role-badge role-${member.role}`}>
                             {ROLE_LABEL[member.role] || member.role}
                           </span>
+                          <span className={`badge ${member.email_verified_at ? 'badge-success' : 'badge-warning'}`}>
+                            {member.email_verified_at ? '이메일 인증됨' : '이메일 미인증'}
+                          </span>
                           <span className={`badge ${
                             member.status === 'approved' ? 'badge-success' :
                             member.status === 'pending' ? 'badge-warning' :
@@ -972,6 +978,12 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
                             <p><strong>전화:</strong> {member.phone || '미입력'}</p>
                             <p><strong>소개:</strong> {member.bio || '미입력'}</p>
                             <p><strong>가입일:</strong> {new Date(member.created_at).toLocaleDateString()}</p>
+                            <p>
+                              <strong>이메일 인증:</strong>{' '}
+                              {member.email_verified_at
+                                ? `완료 (${new Date(member.email_verified_at).toLocaleDateString()})`
+                                : '아직 인증하지 않았습니다'}
+                            </p>
                             {member.deletion_requested_at && member.status !== 'withdrawn' && member.status !== 'deletion_pending' && (
                               <p className="member-deletion-notice">
                                 <strong>⚠️ 탈퇴 요청됨(유예기간 중):</strong> {new Date(member.deletion_requested_at).toLocaleDateString()}
@@ -1013,6 +1025,33 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
                                   </li>
                                 ))}
                               </ul>
+                            </div>
+                          )}
+
+                          {/* (2026-10-11) 인증 메일 재발송 · 개별 쪽지/메일 */}
+                          {!isSelf && member.status !== 'withdrawn' && member.status !== 'deletion_pending' && (
+                            <div className="member-contact-row">
+                              {!member.email_verified_at && (
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary btn-small"
+                                  disabled={resendBusyId === member.id}
+                                  onClick={() => resendVerificationEmail(member)}
+                                >
+                                  <MailWarning size={14} />
+                                  {resendBusyId === member.id ? '발송 중...' : '인증 메일 다시 보내기'}
+                                </button>
+                              )}
+                              {member.role !== 'supporter' && member.status === 'approved' && (
+                                <button type="button" className="btn btn-secondary btn-small" onClick={() => setContactTarget({ member, mode: 'message' })}>
+                                  <MessageSquare size={14} /> 쪽지 보내기
+                                </button>
+                              )}
+                              <button type="button" className="btn btn-secondary btn-small" onClick={() => setContactTarget({ member, mode: 'mail' })}>
+                                <Mail size={14} /> 메일 보내기
+                              </button>
+                              {resendResult[member.id] === 'success' && <span className="member-contact-note ok">인증 메일을 다시 보냈습니다.</span>}
+                              {resendResult[member.id] === 'error' && <span className="member-contact-note error">인증 메일을 보내지 못했습니다.</span>}
                             </div>
                           )}
 
@@ -1059,6 +1098,15 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
               </div>
             )}
           </div>
+        )}
+
+        {contactTarget && (
+          <MemberContactModal
+            member={contactTarget.member}
+            mode={contactTarget.mode}
+            adminProfile={userProfile}
+            onClose={() => setContactTarget(null)}
+          />
         )}
 
         {/* 전체 예약 관리 (문제 발생 시 관리자가 직접 확정/취소/조정) */}
@@ -1358,6 +1406,28 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           margin: 2rem 0;
           border-bottom: 2px solid #ecf0f1;
         }
+
+        .member-contact-row {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 0.5rem;
+          margin: 0.9rem 0;
+        }
+
+        .member-contact-row .btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+        }
+
+        .member-contact-note {
+          font-size: 0.88rem;
+          font-weight: 600;
+        }
+
+        .member-contact-note.ok { color: #2f7d4f; }
+        .member-contact-note.error { color: #b3261e; }
 
         .admin-tiles {
           display: grid;

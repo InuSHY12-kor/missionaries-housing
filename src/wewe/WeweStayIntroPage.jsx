@@ -355,8 +355,8 @@ function WeweStayIntroPage() {
       <section className="wa-cta wa-cta-alt">
         <div className="wh-container wa-cta-inner">
           <div>
-            <EditableText id={"지금 바로 WEWE 스테이를 이용해보세요"} as="h2">지금 바로 WEWE 스테이를 이용해보세요</EditableText>
-            <EditableText id={"선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼이 이미 운영 중입니다."}>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼이 이미 운영 중입니다.</EditableText>
+            <EditableText id={"10월 말, WEWE 스테이가 문을 엽니다"} as="h2">10월 말, WEWE 스테이가 문을 엽니다</EditableText>
+            <EditableText id={"선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼이 10월 말 정식 오픈합니다. 지금 미리 둘러보고 가입해두세요."}>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼이 10월 말 정식 오픈합니다. 지금 미리 둘러보고 가입해두세요.</EditableText>
           </div>
           <a href="/stay" className="wh-btn wh-btn-outline">
             WEWE 스테이 바로가기 <ArrowRight size={18} />

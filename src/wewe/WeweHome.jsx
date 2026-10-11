@@ -347,7 +347,7 @@ function WeweHome() {
               <div className="wh-ministry-live">
                 <span className="wh-ministry-icon"><HomeIcon size={18} /></span>
                 <div>
-                  <strong>WEWE 스테이 <span className="wh-live-badge">이용 가능</span></strong>
+                  <strong>WEWE 스테이 <span className="wh-live-badge">10월 말 오픈</span></strong>
                   <span>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼</span>
                 </div>
                 <a href="/stay" className="wh-ministry-link">바로가기 <ArrowRight size={14} /></a>

@@ -9,6 +9,8 @@ import nodemailer from "npm:nodemailer@6.9.10";
 //   - 이메일 알림을 끈 회원은 제외합니다(후원자: notification_email_wewe, 그 외: notification_email).
 //   - previewOnly: 실제로 보내지 않고 완성된 메일 HTML과 받는 사람 수만 돌려줍니다.
 //   - testOnly: 요청한 관리자 본인에게만 보냅니다.
+//   - userIds(2026-10-11): 관리자 페이지 회원 목록의 "메일 보내기" — 지정한 회원(최대 20명)에게 개별 안내 메일.
+//     1:1 업무 연락이라 이메일 알림 설정과 관계없이 보내며, 프레임 문구도 "공지" 대신 "안내"로 바뀝니다.
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -40,7 +42,11 @@ function sanitizeHtml(html) {
 }
 
 // send-email의 buildBrandedEmailHtml(brand "wewe", 일반 회원용)과 같은 프레임
-function buildFrame(title, bodyHtml) {
+function buildFrame(title, bodyHtml, direct = false) {
+  const eyebrow = direct ? "WEWE 안내" : "WEWE 공지";
+  const footer = direct
+    ? "이 메일은 WEWE(wewestay.com) 관리자가 회원님께 개별로 보내드리는 안내입니다.<br/>문의는 이 메일에 회신하시거나 wewe@wewestay.com으로 보내주세요."
+    : "이 메일은 WEWE(wewestay.com) 회원께 보내드리는 공지입니다.<br/>메일 수신을 원하지 않으시면 프로필 &gt; 알림 설정에서 이메일 알림을 꺼주세요.";
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef0ee;padding:28px 14px;">
 <tr><td align="center">
 <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;">
@@ -52,7 +58,7 @@ function buildFrame(title, bodyHtml) {
   </tr>
   <tr>
     <td style="padding:22px 32px 0 32px;">
-      <div style="font-size:11px;font-weight:800;letter-spacing:0.18em;color:#b8622c;margin-bottom:10px;${FONT}">WEWE 공지</div>
+      <div style="font-size:11px;font-weight:800;letter-spacing:0.18em;color:#b8622c;margin-bottom:10px;${FONT}">${eyebrow}</div>
       <p style="margin:0 0 18px;font-size:17px;font-weight:700;color:#20180f;line-height:1.5;${FONT}">${escapeHtml(title)}</p>
     </td>
   </tr>
@@ -68,7 +74,7 @@ function buildFrame(title, bodyHtml) {
   </tr>
   <tr>
     <td style="padding:16px 32px;background:#faf6ef;border-top:1px solid #eee2d3;">
-      <p style="margin:0;font-size:11.5px;color:#a89c8f;line-height:1.7;${FONT}">이 메일은 WEWE(wewestay.com) 회원께 보내드리는 공지입니다.<br/>메일 수신을 원하지 않으시면 프로필 &gt; 알림 설정에서 이메일 알림을 꺼주세요.</p>
+      <p style="margin:0;font-size:11.5px;color:#a89c8f;line-height:1.7;${FONT}">${footer}</p>
     </td>
   </tr>
 </table>
@@ -119,16 +125,22 @@ Deno.serve(async (req) => {
 
   const subject = String(body?.subject || "").trim().slice(0, 150);
   const roles = (Array.isArray(body?.roles) ? body.roles : []).filter((r) => ROLES.includes(r));
+  const userIds = (Array.isArray(body?.userIds) ? body.userIds : []).filter((id) => typeof id === "string").slice(0, 20);
+  const direct = userIds.length > 0;
   const contentHtml = sanitizeHtml(body?.html);
   if (!subject) return jsonResponse({ error: "제목을 입력해주세요." }, 400);
   if (!htmlToText(contentHtml) && !/<img/i.test(contentHtml)) return jsonResponse({ error: "내용을 입력해주세요." }, 400);
-  if (!body?.testOnly && roles.length === 0) return jsonResponse({ error: "받는 대상을 하나 이상 선택해주세요." }, 400);
+  if (!body?.testOnly && !direct && roles.length === 0) return jsonResponse({ error: "받는 대상을 하나 이상 선택해주세요." }, 400);
 
-  const html = buildFrame(subject, contentHtml);
+  const html = buildFrame(subject, contentHtml, direct);
 
   // 받는 사람: 선택한 역할의 승인된 회원 중 이메일 알림을 켠 사람(중복 제거)
   let recipients = [];
-  if (roles.length > 0) {
+  if (direct) {
+    const { data: targets, error } = await admin.from("users").select("email").in("id", userIds);
+    if (error) return jsonResponse({ error: error.message }, 500);
+    recipients = [...new Set((targets || []).map((t) => t.email).filter(isDeliverable))];
+  } else if (roles.length > 0) {
     const { data: members, error } = await admin
       .from("users")
       .select("email, role, notification_email, notification_email_wewe")
@@ -171,6 +183,6 @@ Deno.serve(async (req) => {
     }
   }
   transport.close();
-  console.log("announcement", JSON.stringify({ subject, roles, sent, failed: failed.length, test: !!body?.testOnly }));
+  console.log("announcement", JSON.stringify({ subject, roles, direct, sent, failed: failed.length, test: !!body?.testOnly }));
   return jsonResponse({ success: true, sent, failed: failed.length, failedRecipients: failed, test: !!body?.testOnly });
 });

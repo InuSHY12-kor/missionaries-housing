@@ -349,8 +349,8 @@ function MinistriesPage() {
             <div className="wm-program-card wm-program-live">
               <span className="wm-program-icon"><HomeIcon size={20} /></span>
               <div>
-                <h4>WEWE 스테이 <span className="wh-live-badge">이용 가능</span></h4>
-                <EditableText id={"선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼 — 지금 바로 이용하실 수 있습니다."}>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼 — 지금 바로 이용하실 수 있습니다.</EditableText>
+                <h4>WEWE 스테이 <span className="wh-live-badge">10월 말 오픈</span></h4>
+                <EditableText id={"선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼 — 10월 말 정식 오픈합니다. 지금 미리 둘러보세요."}>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼 — 10월 말 정식 오픈합니다. 지금 미리 둘러보세요.</EditableText>
                 <div className="wm-link-row">
                   <Link to="/about/ministries/wewe-stay" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
                   <a href="/stay" className="wh-ministry-link">바로가기 <ArrowRight size={14} /></a>
