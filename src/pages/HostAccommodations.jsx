@@ -17,6 +17,14 @@ const HOST_ACCOMMODATIONS_HERO_IMAGES = [
   'https://images.pexels.com/photos/31015267/pexels-photo-31015267.jpeg?auto=compress&cs=tinysrgb&w=1600'
 ];
 
+// (2026-10-12) 숙소 목록 상태별 탭. "승인 대기"에는 관리자 수정 요청을 받아 다시 제출을 기다리는 숙소도 포함됩니다.
+const STATUS_TABS = [
+  { key: 'all', label: '전체', test: () => true },
+  { key: 'approved', label: '승인됨', test: (a) => a.status === 'approved' },
+  { key: 'pending', label: '승인 대기', test: (a) => a.status === 'pending' },
+  { key: 'rejected', label: '거절됨', test: (a) => a.status === 'rejected' },
+];
+
 const EMPTY_FORM = {
   title: '',
   description: '',
@@ -125,6 +133,9 @@ function AvailabilityManager({ accommodationId }) {
 function HostAccommodations({ userProfile }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [accommodations, setAccommodations] = useState([]);
+  const [statusTab, setStatusTab] = useState('all');
+  const [hostFilter, setHostFilter] = useState('all');
+  const [groupByHost, setGroupByHost] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -358,8 +369,14 @@ function HostAccommodations({ userProfile }) {
     }
   };
 
+  // (2026-10-12) 숙소를 지우면 목록에서 완전히 사라지고, 올려둔 사진 파일도 저장소에서 함께 지웁니다.
+  // 그 숙소에 대해 오간 쪽지는 남습니다(숙소 연결만 비워짐).
   const handleDelete = async (id) => {
-    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+    const target = accommodations.find(a => a.id === id);
+    const question = target?.status === 'rejected'
+      ? '거절된 숙소를 삭제하면 목록에서 완전히 지워지고 사진도 함께 삭제됩니다. 삭제할까요?'
+      : '정말 삭제하시겠습니까? 숙소와 사진이 완전히 삭제됩니다.';
+    if (!window.confirm(question)) return;
 
     try {
       const { error } = await supabase
@@ -368,7 +385,14 @@ function HostAccommodations({ userProfile }) {
         .eq('id', id);
 
       if (error) throw error;
-      fetchAccommodations();
+      const marker = '/accommodation-images/';
+      const paths = (target?.images || [])
+        .map(url => (typeof url === 'string' && url.includes(marker) ? decodeURIComponent(url.split(marker)[1].split('?')[0]) : null))
+        .filter(Boolean);
+      if (paths.length) {
+        await supabase.storage.from('accommodation-images').remove(paths).catch(() => {});
+      }
+      setAccommodations(prev => prev.filter(a => a.id !== id));
     } catch (error) {
       alert('오류: ' + error.message);
     }
@@ -391,6 +415,102 @@ function HostAccommodations({ userProfile }) {
       default: return status;
     }
   };
+
+  // (2026-10-12) 상태별 탭과 관리자용 호스트별 보기
+  const hostScoped = isAdmin && hostFilter !== 'all'
+    ? accommodations.filter(a => a.host_id === hostFilter)
+    : accommodations;
+  const activeStatusTab = STATUS_TABS.find(t => t.key === statusTab) || STATUS_TABS[0];
+  const visibleAccommodations = hostScoped.filter(activeStatusTab.test);
+  const hostOptions = Object.values(accommodations.reduce((acc, a) => {
+    const id = a.host_id;
+    if (!acc[id]) acc[id] = { id, name: a.users?.full_name || '이름 없음', email: a.users?.email || '', count: 0 };
+    acc[id].count += 1;
+    return acc;
+  }, {})).sort((x, y) => x.name.localeCompare(y.name, 'ko'));
+  const groupedByHost = hostOptions
+    .map(h => ({ ...h, items: visibleAccommodations.filter(a => a.host_id === h.id) }))
+    .filter(g => g.items.length > 0);
+
+  const renderAccommodationItem = (accommodation) => (
+              <div key={accommodation.id} className="accommodation-item">
+                <div className="item-header">
+                  <div>
+                    <h3>{accommodation.title}</h3>
+                    <p>{accommodation.location}</p>
+                    {isAdmin && accommodation.users && (
+                      <p className="admin-host-hint">호스트: {accommodation.users.full_name} ({accommodation.users.email})</p>
+                    )}
+                  </div>
+                  <span
+                    className="status-badge"
+                    style={{ background: getStatusColor(accommodation.status) }}
+                  >
+                    {getStatusText(accommodation.status)}
+                  </span>
+                </div>
+
+                <div className="item-details">
+                  <p><strong>설명:</strong> {accommodation.description.substring(0, 100)}...</p>
+                  <p><strong>실비:</strong> ₩{accommodation.price.toLocaleString()}{priceUnit(accommodation)} ({isPerStay(accommodation) ? '숙박 1회 정액' : '1박 기준'})</p>
+                  <p><strong>수용인원:</strong> {accommodation.capacity}명</p>
+                  <p><strong>침실:</strong> {accommodation.bedrooms}, <strong>욕실:</strong> {accommodation.bathrooms}</p>
+                  <p><strong>사진:</strong> {accommodation.images?.length || 0}장</p>
+                  <p>
+                    <strong>지도 위치:</strong>{' '}
+                    {accommodation.latitude != null && accommodation.longitude != null
+                      ? '등록됨'
+                      : '미등록 (수정에서 추가해주세요)'}
+                  </p>
+                </div>
+
+                {accommodation.rejection_reason && (
+                  <div className={`rejection-notice ${accommodation.admin_feedback_type === 'revision' ? 'revision-notice' : ''}`}>
+                    <strong>{accommodation.admin_feedback_type === 'revision' ? '관리자 수정 요청' : '관리자 거절 사유'}:</strong>{' '}
+                    {accommodation.rejection_reason}
+                    <p className="rejection-notice-hint">
+                      {accommodation.admin_feedback_type === 'revision'
+                        ? '아래 "수정" 버튼으로 내용을 반영해 다시 제출하시면 검토가 재진행됩니다. 승인 전까지는 계속 승인 대기중 상태로 유지됩니다.'
+                        : '반려된 숙소는 더 이상 수정할 수 없습니다. 아래 "삭제" 버튼으로 삭제한 뒤, 반려 사유를 반영해 새로 등록해주세요.'}
+                    </p>
+                  </div>
+                )}
+
+                <div className="item-actions">
+                  <Link to={`/accommodations/${accommodation.id}`} className="btn btn-secondary">
+                    <Eye size={16} />
+                    보기
+                  </Link>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setDateManagerId(dateManagerId === accommodation.id ? null : accommodation.id)}
+                  >
+                    <CalendarClock size={16} />
+                    날짜 관리
+                  </button>
+                  {accommodation.admin_feedback_type !== 'rejection' && (
+                    <button
+                      className="btn btn-warning"
+                      onClick={() => handleEdit(accommodation)}
+                    >
+                      <Edit size={16} />
+                      수정
+                    </button>
+                  )}
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => handleDelete(accommodation.id)}
+                  >
+                    <Trash2 size={16} />
+                    삭제
+                  </button>
+                </div>
+
+                {dateManagerId === accommodation.id && (
+                  <AvailabilityManager accommodationId={accommodation.id} />
+                )}
+              </div>
+  );
 
   return (
     <div className="host-accommodations">
@@ -676,92 +796,74 @@ function HostAccommodations({ userProfile }) {
           </div>
         )}
 
+        {/* (2026-10-12) 상태별 탭 + (관리자) 호스트별 보기 */}
+        {!loading && accommodations.length > 0 && (
+          <div className="acc-filters">
+            <div className="acc-tabs" role="tablist" aria-label="숙소 상태">
+              {STATUS_TABS.map(t => (
+                <button
+                  key={t.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={statusTab === t.key}
+                  className={`acc-tab ${statusTab === t.key ? 'active' : ''}`}
+                  onClick={() => setStatusTab(t.key)}
+                >
+                  {t.label} <span>{hostScoped.filter(t.test).length}</span>
+                </button>
+              ))}
+            </div>
+            {isAdmin && (
+              <div className="acc-host-filter">
+                <label>
+                  호스트별 보기
+                  <select value={hostFilter} onChange={(e) => setHostFilter(e.target.value)}>
+                    <option value="all">전체 호스트 ({accommodations.length})</option>
+                    {hostOptions.map(h => (
+                      <option key={h.id} value={h.id}>{h.name} ({h.count})</option>
+                    ))}
+                  </select>
+                </label>
+                {hostFilter === 'all' && (
+                  <label className="acc-group-toggle">
+                    <input type="checkbox" checked={groupByHost} onChange={(e) => setGroupByHost(e.target.checked)} />
+                    호스트별로 묶어 보기
+                  </label>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {statusTab === 'rejected' && visibleAccommodations.length > 0 && (
+          <p className="acc-rejected-hint">
+            거절된 숙소는 더 이상 수정할 수 없습니다. 거절 사유를 확인한 뒤 "삭제"를 누르면 목록에서 완전히 지워집니다(숙소 사진도 함께 삭제).
+          </p>
+        )}
+
         {/* 숙소 목록 */}
         {loading ? (
           <p>로드 중...</p>
         ) : accommodations.length === 0 ? (
           <p className="empty-message">등록된 숙소가 없습니다.</p>
+        ) : visibleAccommodations.length === 0 ? (
+          <p className="empty-message">이 분류에 해당하는 숙소가 없습니다.</p>
+        ) : isAdmin && hostFilter === 'all' && groupByHost ? (
+          <div className="acc-host-groups">
+            {groupedByHost.map(group => (
+              <section key={group.id} className="acc-host-group">
+                <h3 className="acc-host-group-title">
+                  {group.name} <span>{group.email}</span> <em>{group.items.length}개</em>
+                </h3>
+                <div className="accommodations-list">
+                  {group.items.map(renderAccommodationItem)}
+                </div>
+              </section>
+            ))}
+          </div>
         ) : (
           <div className="accommodations-list">
-            {accommodations.map(accommodation => (
-              <div key={accommodation.id} className="accommodation-item">
-                <div className="item-header">
-                  <div>
-                    <h3>{accommodation.title}</h3>
-                    <p>{accommodation.location}</p>
-                    {isAdmin && accommodation.users && (
-                      <p className="admin-host-hint">호스트: {accommodation.users.full_name} ({accommodation.users.email})</p>
-                    )}
-                  </div>
-                  <span
-                    className="status-badge"
-                    style={{ background: getStatusColor(accommodation.status) }}
-                  >
-                    {getStatusText(accommodation.status)}
-                  </span>
-                </div>
-
-                <div className="item-details">
-                  <p><strong>설명:</strong> {accommodation.description.substring(0, 100)}...</p>
-                  <p><strong>실비:</strong> ₩{accommodation.price.toLocaleString()}{priceUnit(accommodation)} ({isPerStay(accommodation) ? '숙박 1회 정액' : '1박 기준'})</p>
-                  <p><strong>수용인원:</strong> {accommodation.capacity}명</p>
-                  <p><strong>침실:</strong> {accommodation.bedrooms}, <strong>욕실:</strong> {accommodation.bathrooms}</p>
-                  <p><strong>사진:</strong> {accommodation.images?.length || 0}장</p>
-                  <p>
-                    <strong>지도 위치:</strong>{' '}
-                    {accommodation.latitude != null && accommodation.longitude != null
-                      ? '등록됨'
-                      : '미등록 (수정에서 추가해주세요)'}
-                  </p>
-                </div>
-
-                {accommodation.rejection_reason && (
-                  <div className={`rejection-notice ${accommodation.admin_feedback_type === 'revision' ? 'revision-notice' : ''}`}>
-                    <strong>{accommodation.admin_feedback_type === 'revision' ? '관리자 수정 요청' : '관리자 거절 사유'}:</strong>{' '}
-                    {accommodation.rejection_reason}
-                    <p className="rejection-notice-hint">
-                      {accommodation.admin_feedback_type === 'revision'
-                        ? '아래 "수정" 버튼으로 내용을 반영해 다시 제출하시면 검토가 재진행됩니다. 승인 전까지는 계속 승인 대기중 상태로 유지됩니다.'
-                        : '반려된 숙소는 더 이상 수정할 수 없습니다. 아래 "삭제" 버튼으로 삭제한 뒤, 반려 사유를 반영해 새로 등록해주세요.'}
-                    </p>
-                  </div>
-                )}
-
-                <div className="item-actions">
-                  <Link to={`/accommodations/${accommodation.id}`} className="btn btn-secondary">
-                    <Eye size={16} />
-                    보기
-                  </Link>
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => setDateManagerId(dateManagerId === accommodation.id ? null : accommodation.id)}
-                  >
-                    <CalendarClock size={16} />
-                    날짜 관리
-                  </button>
-                  {accommodation.admin_feedback_type !== 'rejection' && (
-                    <button
-                      className="btn btn-warning"
-                      onClick={() => handleEdit(accommodation)}
-                    >
-                      <Edit size={16} />
-                      수정
-                    </button>
-                  )}
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleDelete(accommodation.id)}
-                  >
-                    <Trash2 size={16} />
-                    삭제
-                  </button>
-                </div>
-
-                {dateManagerId === accommodation.id && (
-                  <AvailabilityManager accommodationId={accommodation.id} />
-                )}
-              </div>
-            ))}
+            {visibleAccommodations.map(renderAccommodationItem)}
           </div>
         )}
       </div>
@@ -1046,6 +1148,110 @@ function HostAccommodations({ userProfile }) {
         .accommodations-list {
           display: grid;
           gap: 1.5rem;
+        }
+
+        .acc-filters {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.75rem;
+          margin: 1rem 0 1.25rem;
+        }
+
+        .acc-tabs {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.4rem;
+        }
+
+        .acc-tab {
+          padding: 0.5rem 0.95rem;
+          border-radius: 999px;
+          border: 1.5px solid #e1dbcf;
+          background: #fff;
+          font-weight: 700;
+          font-size: 0.9rem;
+          color: #3a3a36;
+          cursor: pointer;
+        }
+
+        .acc-tab span {
+          margin-left: 0.2rem;
+          color: #b8622c;
+        }
+
+        .acc-tab.active {
+          background: #d97b3f;
+          border-color: #d97b3f;
+          color: #fff;
+        }
+
+        .acc-tab.active span {
+          color: #fff;
+        }
+
+        .acc-host-filter {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 0.75rem;
+          font-size: 0.9rem;
+          font-weight: 600;
+        }
+
+        .acc-host-filter select {
+          margin-left: 0.45rem;
+          padding: 0.45rem 0.6rem;
+          border: 1px solid #ddd6c8;
+          border-radius: 8px;
+          max-width: 240px;
+        }
+
+        .acc-group-toggle {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          cursor: pointer;
+        }
+
+        .acc-rejected-hint {
+          background: #fdf0ee;
+          border-left: 4px solid #e74c3c;
+          padding: 0.75rem 1rem;
+          border-radius: 0 8px 8px 0;
+          color: #7a2a20;
+          font-size: 0.92rem;
+          margin: 0 0 1rem;
+          word-break: keep-all;
+        }
+
+        .acc-host-groups {
+          display: grid;
+          gap: 2rem;
+        }
+
+        .acc-host-group-title {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: baseline;
+          gap: 0.5rem;
+          margin: 0 0 0.9rem;
+          padding-bottom: 0.5rem;
+          border-bottom: 2px solid #f0dcc0;
+          font-size: 1.1rem;
+        }
+
+        .acc-host-group-title span {
+          color: #7f8c8d;
+          font-size: 0.88rem;
+          font-weight: 500;
+        }
+
+        .acc-host-group-title em {
+          font-style: normal;
+          color: #b8622c;
+          font-size: 0.9rem;
         }
 
         .accommodation-item {
