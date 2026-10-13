@@ -7,6 +7,7 @@ import TestEmailButton from '../components/TestEmailButton';
 import PageHero from '../components/PageHero';
 import { formatPhoneNumber } from '../utils/phone';
 
+import { passwordProblem, authErrorMessage, PASSWORD_HINT } from '../utils/passwordRules';
 // 프로필 페이지 상단 슬라이드 배너 사진
 const PROFILE_HERO_IMAGES = [
   'https://images.pexels.com/photos/164645/pexels-photo-164645.jpeg?auto=compress&cs=tinysrgb&w=1600',
@@ -163,17 +164,28 @@ function Profile({ userProfile }) {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
+    if (!passwordData.currentPassword) {
+      alert('현재 비밀번호를 입력해주세요.');
+      return;
+    }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert('새 비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    const pwProblem = passwordProblem(passwordData.newPassword);
+    if (pwProblem) {
+      alert(pwProblem);
       return;
     }
 
     setLoading(true);
 
     try {
+      // 현재 비밀번호를 함께 보내 서버(Supabase Auth: Require current password)에서 확인합니다.
       const { error } = await supabase.auth.updateUser({
-        password: passwordData.newPassword
+        password: passwordData.newPassword,
+        current_password: passwordData.currentPassword,
       });
 
       if (error) throw error;
@@ -184,7 +196,7 @@ function Profile({ userProfile }) {
         confirmPassword: ''
       });
     } catch (error) {
-      alert('오류: ' + error.message);
+      alert('오류: ' + authErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -322,13 +334,26 @@ function Profile({ userProfile }) {
 
               <form onSubmit={handleChangePassword}>
                 <div className="form-group">
+                  <label>현재 비밀번호</label>
+                  <input
+                    type="password"
+                    name="currentPassword"
+                    value={passwordData.currentPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="지금 사용 중인 비밀번호"
+                    autoComplete="current-password"
+                  />
+                </div>
+
+                <div className="form-group">
                   <label>새 비밀번호</label>
                   <input
                     type="password"
+                    autoComplete="new-password"
                     name="newPassword"
                     value={passwordData.newPassword}
                     onChange={handlePasswordChange}
-                    placeholder="8자 이상"
+                    placeholder={PASSWORD_HINT}
                   />
                 </div>
 
@@ -337,6 +362,7 @@ function Profile({ userProfile }) {
                   <input
                     type="password"
                     name="confirmPassword"
+                    autoComplete="new-password"
                     value={passwordData.confirmPassword}
                     onChange={handlePasswordChange}
                     placeholder="비밀번호 재입력"

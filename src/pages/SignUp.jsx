@@ -6,6 +6,7 @@ import { MISSIONARY_TERMS, HOST_TERMS } from '../data/termsOfService';
 import PageHero from '../components/PageHero';
 import { SignupProcessOverview, rememberSignupOrigin } from '../components/SignupGuide';
 
+import { passwordProblem, authErrorMessage, PASSWORD_HINT } from '../utils/passwordRules';
 const SIGNUP_HERO_IMAGES = [
   'https://images.pexels.com/photos/37913935/pexels-photo-37913935.jpeg?auto=compress&cs=tinysrgb&w=1600',
   'https://images.pexels.com/photos/30135556/pexels-photo-30135556.jpeg?auto=compress&cs=tinysrgb&w=1600',
@@ -70,8 +71,9 @@ function SignUp({ role }) {
         throw new Error('비밀번호가 일치하지 않습니다.');
       }
 
-      if (formData.password.length < 8) {
-        throw new Error('비밀번호는 8자 이상이어야 합니다.');
+      const pwProblem = passwordProblem(formData.password);
+      if (pwProblem) {
+        throw new Error(pwProblem);
       }
 
       if (!agreed) {
@@ -103,7 +105,7 @@ function SignUp({ role }) {
         );
       }
     } catch (err) {
-      setError(err.message);
+      setError(authErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -160,7 +162,7 @@ function SignUp({ role }) {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  placeholder="8자 이상"
+                  placeholder={PASSWORD_HINT}
                   required
                 />
               </div>

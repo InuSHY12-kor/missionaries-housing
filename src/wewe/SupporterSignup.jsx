@@ -9,6 +9,7 @@ import WevePageHero from './WevePageHero';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import { SignupProcessOverview, rememberSignupOrigin } from '../components/SignupGuide';
+import { passwordProblem, authErrorMessage, PASSWORD_HINT } from '../utils/passwordRules';
 import './wewe-shared.css';
 
 // 후원자(supporter) 가입 페이지 (/signup/supporter, Phase 6).
@@ -47,8 +48,9 @@ function SupporterSignup() {
       if (formData.password !== formData.passwordConfirm) {
         throw new Error('비밀번호가 일치하지 않습니다.');
       }
-      if (formData.password.length < 8) {
-        throw new Error('비밀번호는 8자 이상이어야 합니다.');
+      const pwProblem = passwordProblem(formData.password);
+      if (pwProblem) {
+        throw new Error(pwProblem);
       }
       if (!agreed) {
         throw new Error('이용약관에 동의해주세요.');
@@ -80,7 +82,7 @@ function SupporterSignup() {
         `${formData.email} 주소로 인증 메일을 보내드렸습니다. 메일함(스팸함 포함)을 확인하고 인증 링크를 클릭해주세요. 인증 후 자동으로 다음 단계(정보 등록)로 이동하며, 별도의 승인 절차 없이 바로 이용하실 수 있습니다.`
       );
     } catch (err) {
-      setError(err.message);
+      setError(authErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -141,7 +143,7 @@ function SupporterSignup() {
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    placeholder="8자 이상"
+                    placeholder={PASSWORD_HINT}
                     required
                   />
                 </div>
