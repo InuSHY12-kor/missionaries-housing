@@ -7,6 +7,7 @@ import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
+import { passwordProblem, authErrorMessage, PASSWORD_MIN_LENGTH } from '../utils/passwordRules';
 import './wewe-shared.css';
 
 // 위위 새 비밀번호 설정 (/reset-password, 2026-09-10 추가).
@@ -49,8 +50,9 @@ function ResetPasswordPage() {
     e.preventDefault();
     setError('');
 
-    if (password.length < 6) {
-      setError('비밀번호는 6자 이상 입력해주세요.');
+    const pwProblem = passwordProblem(password);
+    if (pwProblem) {
+      setError(pwProblem);
       return;
     }
     if (password !== confirmPassword) {
@@ -66,7 +68,7 @@ function ResetPasswordPage() {
       await supabase.auth.signOut();
       navigate('/login', { state: { passwordResetDone: true } });
     } catch (err) {
-      setError(err.message);
+      setError(authErrorMessage(err));
       setLoading(false);
     }
   };
@@ -111,7 +113,7 @@ function ResetPasswordPage() {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      minLength={6}
+                      minLength={PASSWORD_MIN_LENGTH}
                       required
                     />
                   </div>
@@ -123,7 +125,7 @@ function ResetPasswordPage() {
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      minLength={6}
+                      minLength={PASSWORD_MIN_LENGTH}
                       required
                     />
                   </div>

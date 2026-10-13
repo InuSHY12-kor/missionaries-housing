@@ -9,6 +9,7 @@ import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import { formatPhoneNumber } from '../utils/phone';
 import TestEmailButton from '../components/TestEmailButton';
+import { passwordProblem, authErrorMessage, PASSWORD_HINT } from '../utils/passwordRules';
 import './wewe-shared.css';
 
 // WEWE 프로필 페이지 (/profile, 2026-09-09 추가).
@@ -124,6 +125,11 @@ function WeweProfilePage() {
       alert('새 비밀번호가 일치하지 않습니다.');
       return;
     }
+    const pwProblem = passwordProblem(passwordData.newPassword);
+    if (pwProblem) {
+      alert(pwProblem);
+      return;
+    }
     setLoading(true);
     try {
       const { error } = await supabase.auth.updateUser({ password: passwordData.newPassword });
@@ -131,7 +137,7 @@ function WeweProfilePage() {
       alert('비밀번호가 변경되었습니다!');
       setPasswordData({ newPassword: '', confirmPassword: '' });
     } catch (error) {
-      alert('오류: ' + error.message);
+      alert('오류: ' + authErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -264,7 +270,7 @@ function WeweProfilePage() {
                       name="newPassword"
                       value={passwordData.newPassword}
                       onChange={handlePasswordChange}
-                      placeholder="8자 이상"
+                      placeholder={PASSWORD_HINT}
                     />
                   </div>
                   <div className="wprof-field">

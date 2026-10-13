@@ -4,6 +4,7 @@ import { AlertCircle } from 'lucide-react';
 import { supabase } from '../App';
 import PageHero from '../components/PageHero';
 
+import { passwordProblem, authErrorMessage, PASSWORD_MIN_LENGTH } from '../utils/passwordRules';
 const RESET_PASSWORD_HERO_IMAGES = [
   'https://images.pexels.com/photos/38466430/pexels-photo-38466430.jpeg?auto=compress&cs=tinysrgb&w=1600',
   'https://images.pexels.com/photos/31372128/pexels-photo-31372128.jpeg?auto=compress&cs=tinysrgb&w=1600',
@@ -48,8 +49,9 @@ function ResetPassword() {
     e.preventDefault();
     setError('');
 
-    if (password.length < 6) {
-      setError('비밀번호는 6자 이상 입력해주세요.');
+    const pwProblem = passwordProblem(password);
+    if (pwProblem) {
+      setError(pwProblem);
       return;
     }
     if (password !== confirmPassword) {
@@ -65,7 +67,7 @@ function ResetPassword() {
       await supabase.auth.signOut();
       navigate('/login', { state: { passwordResetDone: true } });
     } catch (err) {
-      setError(err.message);
+      setError(authErrorMessage(err));
       setLoading(false);
     }
   };
@@ -104,7 +106,7 @@ function ResetPassword() {
                 <form onSubmit={handleSubmit}>
                   <div className="form-group">
                     <label>새 비밀번호 *</label>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required />
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={PASSWORD_MIN_LENGTH} required />
                   </div>
 
                   <div className="form-group">
@@ -113,7 +115,7 @@ function ResetPassword() {
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      minLength={6}
+                      minLength={PASSWORD_MIN_LENGTH}
                       required
                     />
                   </div>

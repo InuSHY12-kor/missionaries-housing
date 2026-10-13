@@ -7,6 +7,7 @@ import TestEmailButton from '../components/TestEmailButton';
 import PageHero from '../components/PageHero';
 import { formatPhoneNumber } from '../utils/phone';
 
+import { passwordProblem, authErrorMessage, PASSWORD_HINT } from '../utils/passwordRules';
 // 프로필 페이지 상단 슬라이드 배너 사진
 const PROFILE_HERO_IMAGES = [
   'https://images.pexels.com/photos/164645/pexels-photo-164645.jpeg?auto=compress&cs=tinysrgb&w=1600',
@@ -168,6 +169,11 @@ function Profile({ userProfile }) {
       alert('새 비밀번호가 일치하지 않습니다.');
       return;
     }
+    const pwProblem = passwordProblem(passwordData.newPassword);
+    if (pwProblem) {
+      alert(pwProblem);
+      return;
+    }
 
     setLoading(true);
 
@@ -184,7 +190,7 @@ function Profile({ userProfile }) {
         confirmPassword: ''
       });
     } catch (error) {
-      alert('오류: ' + error.message);
+      alert('오류: ' + authErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -328,7 +334,7 @@ function Profile({ userProfile }) {
                     name="newPassword"
                     value={passwordData.newPassword}
                     onChange={handlePasswordChange}
-                    placeholder="8자 이상"
+                    placeholder={PASSWORD_HINT}
                   />
                 </div>
 
