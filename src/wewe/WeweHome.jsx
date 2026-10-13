@@ -251,7 +251,7 @@ function WeweHome() {
                 <li>레위인의 모빌리티 (이동)</li>
                 <li>Poiema 돌봄 · WE+WE 커넥트</li>
               </ul>
-              <span className="wh-progress-badge">진행 중 · WEWE 스테이</span>
+              <span className="wh-progress-badge">10월 말 오픈 예정 · WEWE 스테이</span>
             </div>
 
             <div className="wh-snapshot-card wh-snapshot-card-foundation">
