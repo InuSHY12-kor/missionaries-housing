@@ -20,6 +20,9 @@ import nodemailer from "npm:nodemailer@6.9.10";
 //   5) (2026-10-13 보안) email_verification: 화면이 보낸 link를 쓰지 않고, 이 함수가 인증 토큰을 직접 만들어
 //      메일로만 보냅니다(토큰이 화면에 노출되지 않으므로 메일 확인 없이 인증하는 우회가 불가능).
 //      같은 회원에게 1분 안에 다시 요청하면 보내지 않습니다.
+//   6) (2026-10-13 보안) 인증 없이 부를 수 있는 관리자 대상 메일(admin_new_signup, admin_email_verified, inquiry)은
+//      DB의 "이미 보냄" 칸(users.admin_signup_emailed_at / admin_verified_emailed_at, inquiries.admin_emailed_at)을
+//      먼저 채우는 방식으로 한 번만 보냅니다(같은 ID로 반복 호출해도 메일이 다시 나가지 않음).
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -50,12 +53,6 @@ function escapeHtml(str) {
   return String(str ?? "").replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
   }[c]));
-}
-
-// 최근(기본 30분 이내) 시각인지 — 누구나 호출 가능한 관리자 대상 메일의 반복 발송 방지용.
-function isRecent(ts, minutes = 30) {
-  if (!ts) return false;
-  return Date.now() - new Date(ts).getTime() <= minutes * 60 * 1000;
 }
 
 function isDeliverableEmail(email) {
@@ -488,16 +485,17 @@ Deno.serve(async (req) => {
       const { inquiryId } = body;
       if (!inquiryId) return jsonResponse({ error: "inquiryId required" }, 400);
 
+      // 30분 안에 접수됐고 아직 메일을 보내지 않은 문의만 "선점"해서 한 번만 보냅니다.
       const { data: inquiry, error } = await supabaseAdmin
         .from("inquiries")
-        .select("*")
+        .update({ admin_emailed_at: new Date().toISOString() })
         .eq("id", inquiryId)
-        .single();
-      if (error || !inquiry) return jsonResponse({ error: "Inquiry not found" }, 404);
-      // (2026-10-07) 관리자 전원에게 가는 메일이라, 오래된 문의 id로 반복 호출하는 남용을 막습니다.
-      if (inquiry.created_at && !isRecent(inquiry.created_at)) {
-        return jsonResponse({ success: true, skipped: "inquiry is not recent" });
-      }
+        .is("admin_emailed_at", null)
+        .gte("created_at", new Date(Date.now() - 30 * 60 * 1000).toISOString())
+        .select("*")
+        .maybeSingle();
+      if (error) return jsonResponse({ error: error.message }, 500);
+      if (!inquiry) return jsonResponse({ success: true, skipped: "not found, not recent, or already emailed" });
 
       const bodyHtml = `
         <p style="margin:0 0 16px;">새로운 문의가 접수되었습니다. 아래 내용을 확인해주세요.</p>
@@ -678,10 +676,8 @@ Deno.serve(async (req) => {
       }
       if (!allowed) return jsonResponse({ error: "Forbidden" }, 403);
 
-      // 1분 안에 이미 보낸 경우 다시 보내지 않음(반복 발송 방지).
-      // 배포 전환기 동안 예전 화면(토큰을 먼저 만들고 link를 함께 보냄)의 요청은 이 검사를 건너뜁니다 —
-      // 예전 화면이 만든 토큰 때문에 메일이 안 나가는 일을 막기 위함이며, link 값 자체는 쓰지 않습니다.
-      const { data: recentToken } = body.link ? { data: null } : await supabaseAdmin
+      // 1분 안에 이미 보낸 경우 다시 보내지 않음(반복 발송 방지)
+      const { data: recentToken } = await supabaseAdmin
         .from("email_verification_tokens")
         .select("id")
         .eq("user_id", userId)
@@ -711,21 +707,20 @@ Deno.serve(async (req) => {
       const { userId } = body;
       if (!userId) return jsonResponse({ error: "userId required" }, 400);
 
+      // 누구나 호출할 수 있는 함수라, 최근(30분 이내) 가입·인증한 회원에 대해 아직 보내지 않은 경우에만
+      // "이미 보냄" 칸을 먼저 채우고(선점) 한 번만 보냅니다.
+      const markColumn = type === "admin_new_signup" ? "admin_signup_emailed_at" : "admin_verified_emailed_at";
+      const timeColumn = type === "admin_new_signup" ? "created_at" : "email_verified_at";
       const { data: targetUser, error: targetErr } = await supabaseAdmin
         .from("users")
-        .select("full_name, email, role, email_verified_at, created_at")
+        .update({ [markColumn]: new Date().toISOString() })
         .eq("id", userId)
-        .single();
-      if (targetErr || !targetUser) return jsonResponse({ error: "User not found" }, 404);
-
-      // (2026-10-07) 누구나 호출할 수 있는 함수라, 관리자 전원에게 메일이 반복 발송되는 남용을 막기
-      // 위해 최근(30분 이내) 가입한 회원에 대해서만 "새 가입 신청" 메일을 보냅니다.
-      if (type === "admin_new_signup" && !isRecent(targetUser.created_at)) {
-        return jsonResponse({ success: true, skipped: "signup is not recent" });
-      }
-      if (type === "admin_email_verified" && !isRecent(targetUser.email_verified_at)) {
-        return jsonResponse({ success: true, skipped: "verification is not recent" });
-      }
+        .is(markColumn, null)
+        .gte(timeColumn, new Date(Date.now() - 30 * 60 * 1000).toISOString())
+        .select("full_name, email, role, email_verified_at, created_at")
+        .maybeSingle();
+      if (targetErr) return jsonResponse({ error: targetErr.message }, 500);
+      if (!targetUser) return jsonResponse({ success: true, skipped: "not found, not recent, or already emailed" });
 
       const roleLabel = ROLE_LABEL[targetUser.role] || targetUser.role;
       // (Phase 6) 후원자는 서류 심사·관리자 승인 없이 즉시 승인되므로, 신규 가입 알림 메일의
