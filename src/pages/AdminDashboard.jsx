@@ -307,14 +307,9 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
     setResendBusyId(user.id);
     setResendResult(prev => ({ ...prev, [user.id]: null }));
     try {
-      const { data: token, error: tokenError } = await supabase.rpc('create_email_verification_token', {
-        p_user_id: user.id
-      });
-      if (tokenError) throw tokenError;
-
-      const link = `${window.location.origin}/stay/verify-email?token=${token}`;
+      // (2026-10-13 보안) 인증 토큰은 서버(send-email)가 직접 만들어 메일로만 보냅니다.
       const { error: emailError } = await supabase.functions.invoke('send-email', {
-        body: { type: 'email_verification', userId: user.id, link }
+        body: { type: 'email_verification', userId: user.id }
       });
       if (emailError) throw emailError;
 

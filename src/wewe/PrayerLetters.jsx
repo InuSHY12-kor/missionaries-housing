@@ -5,6 +5,7 @@ import {
   Maximize2, Minimize2, PenSquare, Pencil, Save, Trash2, X,
 } from 'lucide-react';
 import { supabase } from '../App';
+import { checkUploadFile, contentTypeFor, acceptFor } from '../utils/uploadRules';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
 import WevePageHero from './WevePageHero';
@@ -426,6 +427,11 @@ export function PrayerLetterEditorPage() {
       setError(`"${tooBig.name}" 파일이 너무 큽니다. 이미지는 15MB 이하로 올려주세요.`);
       return;
     }
+    const problems = files.map((f) => checkUploadFile(f, 'site-assets')).filter(Boolean);
+    if (problems.length) {
+      setError(problems.join(' '));
+      return;
+    }
     setUploading(true);
     setError('');
     try {
@@ -434,7 +440,7 @@ export function PrayerLetterEditorPage() {
         const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
         const path = `prayer-letters/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
         // eslint-disable-next-line no-await-in-loop
-        const { error: upErr } = await supabase.storage.from('site-assets').upload(path, file, { contentType: file.type });
+        const { error: upErr } = await supabase.storage.from('site-assets').upload(path, file, { contentType: contentTypeFor(file) });
         if (upErr) throw upErr;
         urls.push(supabase.storage.from('site-assets').getPublicUrl(path).data.publicUrl);
       }
@@ -580,7 +586,7 @@ export function PrayerLetterEditorPage() {
                   <ImagePlus size={18} /> {uploading ? '올리는 중...' : '이미지 올리기 (여러 장 선택 가능)'}
                   <input
                     type="file"
-                    accept="image/png,image/jpeg,image/webp"
+                    accept={acceptFor('site-assets')}
                     multiple
                     disabled={uploading}
                     onChange={(e) => { const files = e.target.files; uploadFiles(files); e.target.value = ''; }}

@@ -25,14 +25,9 @@ function PendingApproval({ userProfile }) {
     setResendMessage('');
     setResendError(false);
     try {
-      const { data: token, error } = await supabase.rpc('create_email_verification_token', {
-        p_user_id: userProfile.id
-      });
-      if (error) throw error;
-
-      const link = `${window.location.origin}/stay/verify-email?token=${token}`;
+      // (2026-10-13 보안) 인증 토큰은 서버(send-email)가 직접 만들어 메일로만 보냅니다.
       const { error: fnError } = await supabase.functions.invoke('send-email', {
-        body: { type: 'email_verification', userId: userProfile.id, link }
+        body: { type: 'email_verification', userId: userProfile.id }
       });
       if (fnError) throw fnError;
 
