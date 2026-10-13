@@ -1,0 +1,18 @@
+# 의존성 보안 업데이트 알림 (2026-10-13 보안 점검 B)
+# 매주 월요일 npm 패키지와 GitHub Actions를 확인해 업데이트 PR을 만듭니다. 병합은 사람이 확인 후 진행합니다.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Asia/Seoul
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
