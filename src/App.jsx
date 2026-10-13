@@ -99,11 +99,8 @@ function App() {
     try {
       // maybeSingle() 사용: 프로필이 아직 없는(이메일 인증만 마친) 신규 사용자의 경우
       // 에러 없이 data: null 을 반환하도록 하여 "프로필 등록 필요" 상태를 구분할 수 있게 함.
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
+      // (보안 점검 B6) 본인 전체 정보는 서버 함수로 받습니다(users 표에서는 공개용 칸만 읽을 수 있음).
+      const { data, error } = await supabase.rpc('get_my_profile').maybeSingle();
 
       if (error) throw error;
       setUserProfile(data);

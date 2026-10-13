@@ -10,6 +10,7 @@ import { priceUnit, isPerStay, payoutNet } from '../utils/price';
 import { PAYMENT_POLICY } from '../data/orgInfo';
 import { checkUploadFile, contentTypeFor, acceptFor } from '../utils/uploadRules';
 import PageHero from '../components/PageHero';
+import { fetchMemberContacts, withContact } from '../utils/memberContacts';
 
 // 내 숙소 관리 페이지 상단 슬라이드 배너 사진
 const HOST_ACCOMMODATIONS_HERO_IMAGES = [
@@ -153,7 +154,7 @@ function HostAccommodations({ userProfile }) {
     try {
       let query = supabase
         .from('accommodations')
-        .select(isAdmin ? '*, users(full_name, email)' : '*')
+        .select(isAdmin ? '*, users(full_name)' : '*')
         .order('created_at', { ascending: false });
 
       if (!isAdmin) {
@@ -163,7 +164,9 @@ function HostAccommodations({ userProfile }) {
       const { data, error } = await query;
 
       if (error) throw error;
-      setAccommodations(data || []);
+      // (보안 점검 B6) 관리자 화면의 호스트 이메일은 연락처 함수로 받아 붙입니다.
+      const contacts = isAdmin ? await fetchMemberContacts(supabase, (data || []).map(a => a.host_id)) : {};
+      setAccommodations((data || []).map(a => (isAdmin ? { ...a, users: withContact(a.users, contacts[a.host_id]) } : a)));
     } catch (error) {
       console.error('숙소 로드 오류:', error);
     } finally {

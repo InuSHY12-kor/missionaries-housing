@@ -14,6 +14,7 @@ import PageHero from '../components/PageHero';
 import WevePageHero from '../wewe/WevePageHero';
 import AmenityIcon from '../components/AmenityIcon';
 import { AMENITY_MAP } from '../utils/amenities';
+import { fetchMemberContacts, withContact } from '../utils/memberContacts';
 
 const ADMIN_HERO_IMAGES = [
   'https://images.pexels.com/photos/8353764/pexels-photo-8353764.jpeg?auto=compress&cs=tinysrgb&w=1600',
@@ -153,11 +154,11 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
   const fetchAllCounts = async () => {
     try {
       const [usersRes, accRes, inqRes, delRes, memRes, bookRes, postRes] = await Promise.all([
-        supabase.from('users').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.rpc('admin_list_users', {}, { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('accommodations').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('inquiries').select('*', { count: 'exact', head: true }),
-        supabase.from('users').select('*', { count: 'exact', head: true }).not('deletion_requested_at', 'is', null).not('status', 'in', '(withdrawn,deletion_pending)'),
-        supabase.from('users').select('*', { count: 'exact', head: true }),
+        supabase.rpc('admin_list_users', {}, { count: 'exact', head: true }).not('deletion_requested_at', 'is', null).not('status', 'in', '(withdrawn,deletion_pending)'),
+        supabase.rpc('admin_list_users', {}, { count: 'exact', head: true }),
         supabase.from('bookings').select('*', { count: 'exact', head: true }),
         supabase.from('ministry_posts').select('*', { count: 'exact', head: true })
       ]);
@@ -180,8 +181,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
     try {
       if (activeTab === 'users') {
         const { data } = await supabase
-          .from('users')
-          .select('*')
+          .rpc('admin_list_users')
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
         setUsers(data || []);
@@ -206,8 +206,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         // 관리자가 승인해 이미 탈퇴(withdrawn) 처리된 회원은 "전체 회원" 탭의 '탈퇴 회원'
         // 필터에서 확인할 수 있습니다.
         const { data } = await supabase
-          .from('users')
-          .select('*')
+          .rpc('admin_list_users')
           .not('deletion_requested_at', 'is', null)
           .not('status', 'in', '(withdrawn,deletion_pending)')
           .order('deletion_requested_at', { ascending: true });
@@ -215,8 +214,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         setCounts(prev => ({ ...prev, deletions: (data || []).length }));
       } else if (activeTab === 'members') {
         const { data } = await supabase
-          .from('users')
-          .select('*')
+          .rpc('admin_list_users')
           .order('role', { ascending: true })
           .order('full_name', { ascending: true });
         setMembers(data || []);
@@ -225,9 +223,15 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         // 문제가 생겼을 때 관리자가 직접 확인/조정할 수 있도록 모든 예약을 조회.
         const { data } = await supabase
           .from('bookings')
-          .select('*, accommodations(id, title, location, host_id, users(full_name, email)), users(full_name, phone, church_name)')
+          .select('*, accommodations(id, title, location, host_id, users(full_name)), users(full_name, church_name)')
           .order('created_at', { ascending: false });
-        setAllBookings(data || []);
+        // (보안 점검 B6) 이메일·전화는 연락처 함수로 따로 받아 붙입니다.
+        const contacts = await fetchMemberContacts(supabase, (data || []).flatMap(b => [b.guest_id, b.accommodations?.host_id]));
+        setAllBookings((data || []).map(b => ({
+          ...b,
+          users: withContact(b.users, contacts[b.guest_id]),
+          accommodations: b.accommodations && { ...b.accommodations, users: withContact(b.accommodations.users, contacts[b.accommodations.host_id]) },
+        })));
         const { data: accounts } = await supabase
           .from('host_payout_accounts')
           .select('user_id, bank_name, account_number, holder_name, verified_at');

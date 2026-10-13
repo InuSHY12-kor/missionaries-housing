@@ -27,6 +27,8 @@ jest.mock('../App', () => {
   return {
     supabase: {
       from: () => chain(),
+      // (보안 점검 B6) 관리자 화면의 호스트 이메일은 연락처 함수로 받습니다.
+      rpc: () => Promise.resolve({ data: [{ id: 'h1', email: 'k@x.com', phone: null }, { id: 'h2', email: 'l@x.com', phone: null }], error: null }),
       storage: { from: () => ({ remove: (...args) => mockRemove(...args) }) },
     },
   };

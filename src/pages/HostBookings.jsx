@@ -5,6 +5,7 @@ import { payoutFee, payoutNet } from '../utils/price';
 import { ORG_INFO, PAYMENT_POLICY } from '../data/orgInfo';
 import { MapPin, Calendar, Phone, CheckCircle, XCircle, ChevronDown, DoorOpen } from 'lucide-react';
 import PageHero from '../components/PageHero';
+import { fetchMemberContacts, withContact } from '../utils/memberContacts';
 
 // 예약 관리(호스트) 페이지 상단 슬라이드 배너 사진
 const HOST_BOOKINGS_HERO_IMAGES = [
@@ -53,12 +54,14 @@ function HostBookings({ userProfile }) {
       // host_id로 명시적으로 필터링합니다. (전체 예약 현황은 관리 탭 > 전체 예약에서 확인)
       const { data, error } = await supabase
         .from('bookings')
-        .select('*, accommodations!inner(title, location, host_id), users(full_name, phone, church_name)')
+        .select('*, accommodations!inner(title, location, host_id), users(full_name, church_name)')
         .eq('accommodations.host_id', userProfile.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setBookings(data || []);
+      // (보안 점검 B6) 게스트 전화번호는 연락처 함수로 받아 붙입니다(내 숙소 예약의 게스트만).
+      const contacts = await fetchMemberContacts(supabase, (data || []).map(b => b.guest_id));
+      setBookings((data || []).map(b => ({ ...b, users: withContact(b.users, contacts[b.guest_id]) })));
     } catch (error) {
       console.error('예약 로드 오류:', error);
     } finally {

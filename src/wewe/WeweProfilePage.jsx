@@ -65,11 +65,7 @@ function WeweProfilePage() {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc('get_my_profile').maybeSingle();
 
       if (!mounted) return;
 

@@ -55,7 +55,7 @@ function AccommodationDetail({ userProfile }) {
         try {
                 const { data, error } = await supabase
                   .from('accommodations')
-                  .select('*, users(id, full_name, church_name, phone)')
+                  .select('*, users(id, full_name, church_name)')
                   .eq('id', id)
                   .single();
 

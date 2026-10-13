@@ -20,7 +20,7 @@ jest.mock('@supabase/supabase-js', () => {
   return {
     createClient: () => ({
       from: (table) => query(table),
-      rpc: () => Promise.resolve({ data: null, error: null }),
+      rpc: (fn) => (fn === 'get_my_profile' ? query('users') : Promise.resolve({ data: null, error: null })),
       functions: { invoke: () => Promise.resolve({ data: null, error: null }) },
       storage: { from: () => ({ getPublicUrl: () => ({ data: { publicUrl: '' } }) }) },
       auth: {
