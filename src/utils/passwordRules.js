@@ -16,6 +16,9 @@ export function passwordProblem(password) {
 export function authErrorMessage(error) {
   const code = error?.code || '';
   const msg = String(error?.message || error || '');
+  if (code === 'current_password_required' || code === 'current_password_mismatch' || /current password required/i.test(msg)) {
+    return '현재 비밀번호가 맞지 않습니다. 다시 확인해주세요.';
+  }
   // "same password" 문구에도 "password should"가 들어 있으므로 먼저 확인합니다.
   if (code === 'same_password' || /different from the old password/i.test(msg)) {
     return '새 비밀번호가 지금 비밀번호와 같습니다. 다른 비밀번호를 입력해주세요.';

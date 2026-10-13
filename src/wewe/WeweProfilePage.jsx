@@ -47,6 +47,7 @@ function WeweProfilePage() {
   });
 
   const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
@@ -121,6 +122,10 @@ function WeweProfilePage() {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
+    if (!passwordData.currentPassword) {
+      alert('현재 비밀번호를 입력해주세요.');
+      return;
+    }
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert('새 비밀번호가 일치하지 않습니다.');
       return;
@@ -132,10 +137,14 @@ function WeweProfilePage() {
     }
     setLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password: passwordData.newPassword });
+      // 현재 비밀번호를 함께 보내 서버(Supabase Auth: Require current password)에서 확인합니다.
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword,
+        current_password: passwordData.currentPassword,
+      });
       if (error) throw error;
       alert('비밀번호가 변경되었습니다!');
-      setPasswordData({ newPassword: '', confirmPassword: '' });
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
       alert('오류: ' + authErrorMessage(error));
     } finally {
@@ -264,9 +273,21 @@ function WeweProfilePage() {
                 <h2>비밀번호 변경</h2>
                 <form onSubmit={handleChangePassword}>
                   <div className="wprof-field">
+                    <label>현재 비밀번호</label>
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      value={passwordData.currentPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="지금 사용 중인 비밀번호"
+                      autoComplete="current-password"
+                    />
+                  </div>
+                  <div className="wprof-field">
                     <label>새 비밀번호</label>
                     <input
                       type="password"
+                      autoComplete="new-password"
                       name="newPassword"
                       value={passwordData.newPassword}
                       onChange={handlePasswordChange}
@@ -278,6 +299,7 @@ function WeweProfilePage() {
                     <input
                       type="password"
                       name="confirmPassword"
+                      autoComplete="new-password"
                       value={passwordData.confirmPassword}
                       onChange={handlePasswordChange}
                       placeholder="비밀번호 재입력"
