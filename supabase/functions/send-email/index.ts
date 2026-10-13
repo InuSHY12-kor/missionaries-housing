@@ -17,6 +17,9 @@ import nodemailer from "npm:nodemailer@6.9.10";
 //      sendMail이 Gmail의 수락 결과를 로그로 남깁니다.
 //   4) (2026-10-10) 관리자 메일을 동시에 보내지 않고 한 명씩 차례로 보냅니다(동시 SMTP 접속 제한 회피).
 //      수신자별 결과를 로그에 남기고, 일부만 실패해도 로그에 남깁니다. test_email에 allAdmins 옵션 추가.
+//   5) (2026-10-13 보안) email_verification: 화면이 보낸 link를 쓰지 않고, 이 함수가 인증 토큰을 직접 만들어
+//      메일로만 보냅니다(토큰이 화면에 노출되지 않으므로 메일 확인 없이 인증하는 우회가 불가능).
+//      같은 회원에게 1분 안에 다시 요청하면 보내지 않습니다.
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -642,8 +645,8 @@ Deno.serve(async (req) => {
 
     // ── 이메일 인증 — (Phase 7) 가입/온보딩 단계의 첫 메일이라 WEWE 전체 브랜딩 적용.
     if (type === "email_verification") {
-      const { userId, link } = body;
-      if (!userId || !link) return jsonResponse({ error: "userId and link required" }, 400);
+      const { userId } = body;
+      if (!userId) return jsonResponse({ error: "userId required" }, 400);
 
       const jwt = getBearerJwt(req);
       if (!jwt) return jsonResponse({ error: "Authorization required" }, 401);
@@ -674,6 +677,26 @@ Deno.serve(async (req) => {
         allowed = caller?.role === "admin" && caller?.status === "approved";
       }
       if (!allowed) return jsonResponse({ error: "Forbidden" }, 403);
+
+      // 1분 안에 이미 보낸 경우 다시 보내지 않음(반복 발송 방지).
+      // 배포 전환기 동안 예전 화면(토큰을 먼저 만들고 link를 함께 보냄)의 요청은 이 검사를 건너뜁니다 —
+      // 예전 화면이 만든 토큰 때문에 메일이 안 나가는 일을 막기 위함이며, link 값 자체는 쓰지 않습니다.
+      const { data: recentToken } = body.link ? { data: null } : await supabaseAdmin
+        .from("email_verification_tokens")
+        .select("id")
+        .eq("user_id", userId)
+        .gte("created_at", new Date(Date.now() - 60 * 1000).toISOString())
+        .limit(1)
+        .maybeSingle();
+      if (recentToken) return jsonResponse({ success: true, skipped: "sent within the last minute" });
+
+      const tokenBytes = crypto.getRandomValues(new Uint8Array(24));
+      const token = Array.from(tokenBytes, (b) => b.toString(16).padStart(2, "0")).join("");
+      const { error: tokenErr } = await supabaseAdmin
+        .from("email_verification_tokens")
+        .insert({ user_id: userId, token });
+      if (tokenErr) return jsonResponse({ error: tokenErr.message }, 500);
+      const link = `https://wewestay.com/stay/verify-email?token=${token}`;
 
       const subject = "[WEWE] 이메일 주소를 인증해주세요";
       const text = `${targetUser.full_name}님, 반갑습니다. WEWE와 함께해주셔서 감사합니다.\n\n아래 링크를 눌러 이메일 인증을 완료해주세요:\n${link}\n\n인증을 완료해야 관리자 승인 절차가 진행됩니다. (링크는 48시간 동안 유효합니다)\n\n이 메일은 WEWE(wewestay.com)에서 발송되었습니다.`;

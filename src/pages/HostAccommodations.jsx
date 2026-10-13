@@ -8,6 +8,7 @@ import AmenityIcon from '../components/AmenityIcon';
 import { AMENITY_GROUPS } from '../utils/amenities';
 import { priceUnit, isPerStay, payoutNet } from '../utils/price';
 import { PAYMENT_POLICY } from '../data/orgInfo';
+import { checkUploadFile, contentTypeFor, acceptFor } from '../utils/uploadRules';
 import PageHero from '../components/PageHero';
 
 // 내 숙소 관리 페이지 상단 슬라이드 배너 사진
@@ -269,6 +270,13 @@ function HostAccommodations({ userProfile }) {
       return;
     }
 
+    const problems = files.map(f => checkUploadFile(f, 'accommodation-images')).filter(Boolean);
+    if (problems.length) {
+      alert(problems.join('\n'));
+      e.target.value = '';
+      return;
+    }
+
     setUploadingImages(true);
     try {
       const uploadedUrls = [];
@@ -278,7 +286,7 @@ function HostAccommodations({ userProfile }) {
 
         const { error: uploadError } = await supabase.storage
           .from('accommodation-images')
-          .upload(path, file);
+          .upload(path, file, { contentType: contentTypeFor(file) });
 
         if (uploadError) throw uploadError;
 
@@ -689,7 +697,7 @@ function HostAccommodations({ userProfile }) {
                     type="file"
                     id="accommodation-image-input"
                     multiple
-                    accept="image/*"
+                    accept={acceptFor('accommodation-images')}
                     onChange={handleImageUpload}
                     disabled={uploadingImages || formData.images.length >= MAX_IMAGES}
                   />

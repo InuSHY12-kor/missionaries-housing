@@ -4,6 +4,7 @@ import {
   Link as LinkIcon, Image as ImageIcon, Eraser,
 } from 'lucide-react';
 import { supabase } from '../App';
+import { checkUploadFile, contentTypeFor, acceptFor } from '../utils/uploadRules';
 
 // 메일 본문 서식 편집기 (2026-10-10, 공지 메일·회원 개별 메일 공용).
 // 별도 라이브러리 없이 브라우저 기본 편집 기능(contentEditable)으로 글자 크기·굵기·색, 목록, 정렬,
@@ -49,19 +50,16 @@ const RichEmailEditor = forwardRef(function RichEmailEditor({ placeholder, minHe
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      onError?.('이미지 파일만 넣을 수 있습니다.');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      onError?.('이미지는 5MB 이하로 올려주세요.');
+    const problem = checkUploadFile(file, 'site-assets');
+    if (problem) {
+      onError?.(problem);
       return;
     }
     setUploading(true);
     try {
       const ext = (file.name.split('.').pop() || 'png').toLowerCase().replace(/[^a-z0-9]/g, '');
       const path = `mail/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from('site-assets').upload(path, file, { contentType: file.type });
+      const { error } = await supabase.storage.from('site-assets').upload(path, file, { contentType: contentTypeFor(file) });
       if (error) throw error;
       const { data } = supabase.storage.from('site-assets').getPublicUrl(path);
       exec('insertHTML', `<img src="${data.publicUrl}" alt="" style="max-width:100%;height:auto;border-radius:8px;" />`);
@@ -102,7 +100,7 @@ const RichEmailEditor = forwardRef(function RichEmailEditor({ placeholder, minHe
         <button type="button" title="링크" onMouseDown={keep} onClick={addLink}><LinkIcon size={16} /></button>
         <button type="button" title="이미지 넣기" onClick={() => fileRef.current?.click()} disabled={uploading}><ImageIcon size={16} /></button>
         <button type="button" title="서식 지우기" onMouseDown={keep} onClick={() => exec('removeFormat')}><Eraser size={16} /></button>
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={uploadImage} />
+        <input ref={fileRef} type="file" accept={acceptFor('site-assets')} hidden onChange={uploadImage} />
       </div>
       <div
         ref={editorRef}

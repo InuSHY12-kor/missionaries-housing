@@ -10,14 +10,13 @@ import HERO_IMAGE_SETS from './heroImages';
 import './wewe-shared.css';
 
 // 위위 비밀번호 찾기 (/forgot-password, 2026-09-10 추가).
-// 가입 당시 입력한 이메일·전화번호·이름이 모두 일치하는지 먼저 서버(RPC
-// verify_reset_identity, SECURITY DEFINER)에 확인한 뒤에만 비밀번호 재설정 메일을
-// 보냅니다 — anon 키로 회원 목록을 직접 조회하지 않고도 본인 확인을 할 수 있습니다.
+// (2026-10-13) 이메일만 입력받아 재설정 메일을 요청합니다 — 이름·전화 대조(회원 존재 여부가
+// 드러나던 방식)는 없앴습니다. 가입 여부와 관계없이 같은 안내를 보여줍니다.
 // 재설정 링크는 위위 안에서만 이어지도록 redirectTo를 "/reset-password"(WeweSite 안의
 // 경로)로 지정합니다 — 위위스테이 쪽 비밀번호 찾기(src/pages/ForgotPassword.jsx)는
 // "/stay/reset-password"로 별도로 보냅니다.
 function ForgotPasswordPage() {
-  const [formData, setFormData] = useState({ email: '', phone: '', fullName: '' });
+  const [formData, setFormData] = useState({ email: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
@@ -33,25 +32,21 @@ function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      if (!formData.email || !formData.phone || !formData.fullName) {
-        throw new Error('이메일, 전화번호, 이름을 모두 입력해주세요.');
+      if (!formData.email) {
+        throw new Error('이메일을 입력해주세요.');
       }
 
-      const { data: matched, error: rpcError } = await supabase.rpc('verify_reset_identity', {
-        p_email: formData.email,
-        p_phone: formData.phone,
-        p_full_name: formData.fullName,
-      });
-      if (rpcError) throw rpcError;
-
-      if (!matched) {
-        throw new Error('입력하신 정보와 일치하는 계정을 찾을 수 없습니다. 이메일, 전화번호, 이름을 다시 확인해주세요.');
-      }
-
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(formData.email, {
+      // (2026-10-13 보안) 이름·전화번호 대조(회원 존재 여부가 드러나던 방식)를 없앴습니다.
+      // 가입 여부와 관계없이 같은 안내를 보여주고, 재설정 링크는 가입된 이메일에만 실제로 도착합니다.
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(formData.email.trim(), {
         redirectTo: `${window.location.origin}/reset-password`,
       });
-      if (resetError) throw resetError;
+      if (resetError) {
+        if (/rate|seconds|too many/i.test(resetError.message)) {
+          throw new Error('잠시 후 다시 시도해주세요. 재설정 메일은 짧은 시간에 여러 번 보낼 수 없습니다.');
+        }
+        throw resetError;
+      }
 
       setSent(true);
     } catch (err) {
@@ -68,7 +63,7 @@ function ForgotPasswordPage() {
       <WevePageHero
         eyebrow="RESET PASSWORD"
         title="비밀번호 찾기"
-        subtitle="가입 당시 입력한 정보로 본인을 확인해주세요"
+        subtitle="가입한 이메일로 재설정 링크를 보내드립니다"
         images={HERO_IMAGE_SETS.login}
       />
 
@@ -78,10 +73,10 @@ function ForgotPasswordPage() {
             {sent ? (
               <div className="wfp-sent">
                 <CheckCircle2 size={40} />
-                <h3>재설정 링크를 보내드렸습니다</h3>
+                <h3>재설정 메일을 요청했습니다</h3>
                 <p>
-                  <strong>{formData.email}</strong>로 비밀번호 재설정 링크를 보내드렸어요. 메일함(스팸함 포함)을 확인한 뒤
-                  링크를 눌러 새 비밀번호를 설정해주세요.
+                  <strong>{formData.email}</strong> 주소가 가입된 이메일이라면 비밀번호 재설정 링크가 도착합니다. 메일함(스팸함 포함)을 확인한 뒤
+                  링크를 눌러 새 비밀번호를 설정해주세요. 메일이 오지 않으면 가입한 이메일 주소가 맞는지 확인해주세요.
                 </p>
                 <Link to="/login" className="wh-btn wh-btn-outline">로그인 페이지로 돌아가기</Link>
               </div>
@@ -100,26 +95,8 @@ function ForgotPasswordPage() {
                     <input id="wfp-email" type="email" name="email" value={formData.email} onChange={handleChange} required />
                   </div>
 
-                  <div className="wl-field">
-                    <label htmlFor="wfp-phone">전화번호 *</label>
-                    <input
-                      id="wfp-phone"
-                      type="tel"
-                      name="phone"
-                      placeholder="가입 시 입력한 전화번호"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="wl-field">
-                    <label htmlFor="wfp-name">이름 *</label>
-                    <input id="wfp-name" type="text" name="fullName" value={formData.fullName} onChange={handleChange} required />
-                  </div>
-
                   <button type="submit" className="wh-btn wh-btn-primary wl-submit" disabled={loading}>
-                    {loading ? '확인 중...' : '비밀번호 재설정 링크 받기'}
+                    {loading ? '요청 중...' : '비밀번호 재설정 링크 받기'}
                   </button>
                 </form>
 

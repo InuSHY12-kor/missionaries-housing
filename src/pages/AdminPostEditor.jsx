@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../App';
+import { checkUploadFile, contentTypeFor, acceptFor } from '../utils/uploadRules';
 import { AlertCircle, Upload, X, ArrowLeft, ArrowRight } from 'lucide-react';
 import PageHero from '../components/PageHero';
 import WevePageHero from '../wewe/WevePageHero';
@@ -150,6 +151,13 @@ function AdminPostEditor({ userProfile, site = 'stay' }) {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
+    const problems = files.map(f => checkUploadFile(f, 'ministry-post-images')).filter(Boolean);
+    if (problems.length) {
+      alert(problems.join('\n'));
+      e.target.value = '';
+      return;
+    }
+
     setUploadingImage(true);
     try {
       const uploadedUrls = [];
@@ -159,7 +167,7 @@ function AdminPostEditor({ userProfile, site = 'stay' }) {
 
         const { error: uploadError } = await supabase.storage
           .from('ministry-post-images')
-          .upload(path, file);
+          .upload(path, file, { contentType: contentTypeFor(file) });
         if (uploadError) throw uploadError;
 
         const { data: urlData } = supabase.storage
@@ -406,7 +414,7 @@ function AdminPostEditor({ userProfile, site = 'stay' }) {
                 <div className="image-upload">
                   <input
                     type="file"
-                    accept="image/*"
+                    accept={acceptFor('ministry-post-images')}
                     multiple
                     id="post-cover-image-input"
                     onChange={handleImageUpload}

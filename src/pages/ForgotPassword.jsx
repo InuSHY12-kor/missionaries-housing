@@ -10,12 +10,11 @@ const FORGOT_PASSWORD_HERO_IMAGES = [
 ];
 
 // 위위 스테이 비밀번호 찾기 (/stay/forgot-password, 2026-09-10 추가).
-// 가입 당시 입력한 이메일·전화번호·이름이 모두 일치하는지 RPC(verify_reset_identity)로
-// 먼저 확인한 뒤에만 비밀번호 재설정 메일을 보냅니다. 재설정 링크는 위위 스테이 안에서만
+// (2026-10-13) 이메일만 입력받아 재설정 메일을 요청합니다(이름·전화 대조 제거 — 회원 존재 여부 노출 방지). 재설정 링크는 위위 스테이 안에서만
 // 이어지도록 redirectTo를 "/stay/reset-password"로 지정합니다 — 위위 홈페이지 쪽 비밀번호
 // 찾기(src/wewe/ForgotPasswordPage.jsx)는 "/reset-password"로 별도로 보냅니다.
 function ForgotPassword() {
-  const [formData, setFormData] = useState({ email: '', phone: '', fullName: '' });
+  const [formData, setFormData] = useState({ email: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
@@ -31,25 +30,21 @@ function ForgotPassword() {
     setLoading(true);
 
     try {
-      if (!formData.email || !formData.phone || !formData.fullName) {
-        throw new Error('이메일, 전화번호, 이름을 모두 입력해주세요.');
+      if (!formData.email) {
+        throw new Error('이메일을 입력해주세요.');
       }
 
-      const { data: matched, error: rpcError } = await supabase.rpc('verify_reset_identity', {
-        p_email: formData.email,
-        p_phone: formData.phone,
-        p_full_name: formData.fullName,
-      });
-      if (rpcError) throw rpcError;
-
-      if (!matched) {
-        throw new Error('입력하신 정보와 일치하는 계정을 찾을 수 없습니다. 이메일, 전화번호, 이름을 다시 확인해주세요.');
-      }
-
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(formData.email, {
+      // (2026-10-13 보안) 이름·전화번호 대조(회원 존재 여부가 드러나던 방식)를 없앴습니다.
+      // 가입 여부와 관계없이 같은 안내를 보여주고, 재설정 링크는 가입된 이메일에만 실제로 도착합니다.
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(formData.email.trim(), {
         redirectTo: `${window.location.origin}/stay/reset-password`,
       });
-      if (resetError) throw resetError;
+      if (resetError) {
+        if (/rate|seconds|too many/i.test(resetError.message)) {
+          throw new Error('잠시 후 다시 시도해주세요. 재설정 메일은 짧은 시간에 여러 번 보낼 수 없습니다.');
+        }
+        throw resetError;
+      }
 
       setSent(true);
     } catch (err) {
@@ -65,7 +60,7 @@ function ForgotPassword() {
         images={FORGOT_PASSWORD_HERO_IMAGES}
         eyebrow="RESET PASSWORD"
         title="비밀번호 찾기"
-        subtitle="가입 당시 입력한 정보로 본인을 확인해주세요"
+        subtitle="가입한 이메일로 재설정 링크를 보내드립니다"
       />
       <div className="signup-container">
         <div className="container">
@@ -73,17 +68,17 @@ function ForgotPassword() {
             {sent ? (
               <div className="fp-sent">
                 <CheckCircle2 size={40} />
-                <h1>재설정 링크를 보내드렸습니다</h1>
+                <h1>재설정 메일을 요청했습니다</h1>
                 <p className="subtitle">
-                  <strong>{formData.email}</strong>로 비밀번호 재설정 링크를 보내드렸어요. 메일함(스팸함 포함)을 확인한 뒤
-                  링크를 눌러 새 비밀번호를 설정해주세요.
+                  <strong>{formData.email}</strong> 주소가 가입된 이메일이라면 비밀번호 재설정 링크가 도착합니다. 메일함(스팸함 포함)을 확인한 뒤
+                  링크를 눌러 새 비밀번호를 설정해주세요. 메일이 오지 않으면 가입한 이메일 주소가 맞는지 확인해주세요.
                 </p>
                 <Link to="/login" className="btn btn-secondary">로그인 페이지로 돌아가기</Link>
               </div>
             ) : (
               <>
                 <h1>비밀번호 찾기</h1>
-                <p className="subtitle">이메일, 전화번호, 이름을 입력해주세요</p>
+                <p className="subtitle">가입할 때 사용한 이메일을 입력해주세요</p>
 
                 {error && (
                   <div className="alert alert-error">
@@ -98,25 +93,8 @@ function ForgotPassword() {
                     <input type="email" name="email" value={formData.email} onChange={handleChange} required />
                   </div>
 
-                  <div className="form-group">
-                    <label>전화번호 *</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      placeholder="가입 시 입력한 전화번호"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>이름 *</label>
-                    <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required />
-                  </div>
-
                   <button type="submit" className="btn btn-primary" disabled={loading}>
-                    {loading ? '확인 중...' : '비밀번호 재설정 링크 받기'}
+                    {loading ? '요청 중...' : '비밀번호 재설정 링크 받기'}
                   </button>
                 </form>
 

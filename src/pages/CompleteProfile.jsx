@@ -5,6 +5,7 @@ import { Upload, AlertCircle } from 'lucide-react';
 import PageHero from '../components/PageHero';
 import { formatPhoneNumber } from '../utils/phone';
 import { readSignupOrigin } from '../components/SignupGuide';
+import { checkUploadFile, contentTypeFor, acceptFor } from '../utils/uploadRules';
 import { ORG_INFO, PAYMENT_POLICY } from '../data/orgInfo';
 import { PayoutAccountFields, EMPTY_PAYOUT_ACCOUNT, normalizePayoutAccount, savePayoutAccount } from '../components/PayoutAccountForm';
 
@@ -94,7 +95,11 @@ function CompleteProfile() {
   };
 
   const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
+    const picked = Array.from(e.target.files);
+    e.target.value = '';
+    const problems = picked.map(f => checkUploadFile(f, 'verification-docs')).filter(Boolean);
+    if (problems.length) alert(problems.join('\n'));
+    const files = picked.filter(f => !checkUploadFile(f, 'verification-docs'));
     setFormData(prev => ({
       ...prev,
       verificationFiles: [...prev.verificationFiles, ...files]
@@ -187,7 +192,7 @@ function CompleteProfile() {
 
         const { error: uploadError } = await supabase.storage
           .from('verification-docs')
-          .upload(fileName, file);
+          .upload(fileName, file, { contentType: contentTypeFor(file) });
 
         if (uploadError) throw uploadError;
 
@@ -228,15 +233,10 @@ function CompleteProfile() {
       // 실패하더라도 프로필 등록(가입) 자체는 이미 완료된 것이므로 다음 단계로 계속 진행합니다.
       // (관리자 대시보드의 "인증 메일 재발송" 버튼으로 언제든 다시 보낼 수 있습니다.)
       try {
-        const { data: token, error: tokenError } = await supabase.rpc('create_email_verification_token', {
-          p_user_id: userId
+        // (2026-10-13 보안) 인증 토큰은 서버(send-email)가 직접 만들어 메일로만 보냅니다.
+        await supabase.functions.invoke('send-email', {
+          body: { type: 'email_verification', userId }
         });
-        if (!tokenError && token) {
-          const link = `${window.location.origin}/stay/verify-email?token=${token}`;
-          await supabase.functions.invoke('send-email', {
-            body: { type: 'email_verification', userId, link }
-          });
-        }
         await supabase.functions.invoke('send-email', {
           body: { type: 'admin_new_signup', userId }
         });
@@ -429,7 +429,7 @@ function CompleteProfile() {
                   type="file"
                   id="file-input"
                   multiple
-                  accept="image/*"
+                  accept={acceptFor('verification-docs')}
                   onChange={handleFileChange}
                   disabled={formData.verificationFiles.length >= 5}
                 />

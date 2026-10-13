@@ -171,7 +171,7 @@ function OrgEditor({ title, list, onChange, uploading, onUpload }) {
                   <ImagePlus size={15} /> {uploading === `${title}-${idx}` ? '올리는 중...' : '로고 올리기'}
                   <input
                     type="file"
-                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    accept="image/png,image/jpeg,image/webp"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       e.target.value = '';
@@ -263,6 +263,11 @@ function PartnersPage() {
   const handleUpload = async (file, slot, onDone) => {
     if (file.size > 3 * 1024 * 1024) {
       setSaveError('로고 이미지는 3MB 이하로 올려주세요.');
+      return;
+    }
+    // (2026-10-13 보안) SVG는 스크립트를 담을 수 있어 받지 않습니다.
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      setSaveError('로고는 PNG·JPG·WEBP 이미지만 올릴 수 있습니다.');
       return;
     }
     setUploading(slot);
