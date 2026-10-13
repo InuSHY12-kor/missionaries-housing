@@ -41,7 +41,7 @@ function MyPage() {
         return;
       }
 
-      const { data } = await supabase.from('users').select('*').eq('id', user.id).maybeSingle();
+      const { data } = await supabase.rpc('get_my_profile').maybeSingle();
       if (mounted) {
         setUserProfile(data || null);
         setLoadingProfile(false);

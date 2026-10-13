@@ -5,6 +5,7 @@ import { MapPin, Calendar as CalendarIcon, ArrowLeft, Info, Phone, User, Landmar
 import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_BADGE_CLASS } from '../utils/bankTransfer';
 import AccommodationMap from '../components/AccommodationMap';
 import PageHero from '../components/PageHero';
+import { fetchMemberContacts, withContact } from '../utils/memberContacts';
 
 // 예약 상세 페이지 상단 슬라이드 배너 사진 (다른 상세 페이지들과 동일한 테마 적용)
 const BOOKING_DETAIL_HERO_IMAGES = [
@@ -45,7 +46,7 @@ function BookingDetail({ userProfile }) {
     try {
       let query = supabase
         .from('bookings')
-        .select('*, accommodations(id, title, location, images, usage_guide, latitude, longitude, host_id, users(full_name, phone, church_name))')
+        .select('*, accommodations(id, title, location, images, usage_guide, latitude, longitude, host_id, users(full_name, church_name))')
         .eq('id', id);
 
       // 관리자가 아니면 본인이 예약한 건만 조회할 수 있습니다.
@@ -55,7 +56,12 @@ function BookingDetail({ userProfile }) {
 
       const { data, error: fetchError } = await query.single();
       if (fetchError) throw fetchError;
-      setBooking(data);
+      // (보안 점검 B6) 숙소 제공자 전화번호는 예약으로 연결된 경우에만 연락처 함수로 받습니다.
+      const hostId = data?.accommodations?.host_id;
+      const contacts = await fetchMemberContacts(supabase, [hostId]);
+      setBooking(data?.accommodations
+        ? { ...data, accommodations: { ...data.accommodations, users: withContact(data.accommodations.users, contacts[hostId]) } }
+        : data);
     } catch (err) {
       setError('예약 정보를 불러올 수 없습니다. 삭제되었거나 접근 권한이 없는 예약일 수 있습니다.');
     } finally {
