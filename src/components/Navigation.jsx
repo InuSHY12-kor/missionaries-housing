@@ -123,7 +123,7 @@ function Navigation({ user, userProfile, onLogout }) {
                 <li>
                   {/* 후원자는 숙소 검색/예약 등 실제 서비스 메뉴를 이용하지 않으므로
                       WEWE 전체 홈페이지로 돌아가는 링크만 보여줍니다. */}
-                  <a href="/" className="nav-btn">
+                  <a href="/" target="_blank" rel="noopener" className="nav-btn">
                     <img src={weweIconWhite} alt="" className="nav-btn-icon nav-btn-logo" aria-hidden="true" />
                     <span className="nav-btn-label">위위 소개 보기</span>
                   </a>
@@ -142,7 +142,7 @@ function Navigation({ user, userProfile, onLogout }) {
                     {/* 위위 스테이는 이제 WEWE 전체 홈페이지 안의 하위 사이트입니다.
                         여기는 별도로 마운트된 앱(basename="/stay")이므로 React Router가 아닌
                         일반 링크(전체 페이지 이동)로 최상위 WEWE 홈으로 돌아갑니다. */}
-                    <a href="/" className="nav-btn">
+                    <a href="/" target="_blank" rel="noopener" className="nav-btn">
                       {/* (2026-10-10) 다른 메뉴처럼 아이콘을 붙여 모바일 타일 크기를 맞춤 — 흰색 WEWE 로고 */}
                       <img src={weweIconWhite} alt="" className="nav-btn-icon nav-btn-logo" aria-hidden="true" />
                       <span className="nav-btn-label">위위</span>
@@ -239,7 +239,7 @@ function Navigation({ user, userProfile, onLogout }) {
               <li><Link to="/" className="nav-btn">홈</Link></li>
               <li>
                 {/* 최상위 WEWE 홈페이지로 돌아가는 링크 — 별도로 마운트된 앱이므로 일반 링크 사용 */}
-                <a href="/" className="nav-btn">위위</a>
+                <a href="/" target="_blank" rel="noopener" className="nav-btn">위위</a>
               </li>
               <li><Link to="/login" className="nav-btn">로그인</Link></li>
               <li><Link to="/signup" className="nav-btn">가입하기</Link></li>

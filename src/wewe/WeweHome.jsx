@@ -196,7 +196,7 @@ function WeweHome() {
           )}
           <div className="wh-hero-actions">
             <a href="#ministries" className="wh-btn wh-btn-outline">사역 알아보기</a>
-            <a href="/stay" className="wh-btn wh-btn-outline">위위 스테이 살펴보기</a>
+            <a href="/stay" target="_blank" rel="noopener" className="wh-btn wh-btn-outline">위위 스테이 살펴보기</a>
           </div>
         </div>
 
@@ -350,7 +350,7 @@ function WeweHome() {
                   <strong>WEWE 스테이 <span className="wh-live-badge">10월 말 오픈</span></strong>
                   <span>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼</span>
                 </div>
-                <a href="/stay" className="wh-ministry-link">바로가기 <ArrowRight size={14} /></a>
+                <a href="/stay" target="_blank" rel="noopener" className="wh-ministry-link">바로가기 <ArrowRight size={14} /></a>
               </div>
 
               <EditableText id={"그 외 레위인의 모빌리티(차량 쉐어링), Poiema 돌봄(힐링캠프), WE+WE 커넥트(멤버십)도 준비하고"} className="wh-ministry-summary">그 외 레위인의 모빌리티(차량 쉐어링), Poiema 돌봄(힐링캠프), WE+WE 커넥트(멤버십)도 준비하고 있습니다.</EditableText>
