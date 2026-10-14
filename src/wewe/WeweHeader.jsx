@@ -162,7 +162,7 @@ function WeweHeader() {
               )}
               <Link to="/profile" className="wewe-nav-link" onClick={closeMobileNav}>프로필</Link>
               <Link to="/donate" className="wewe-nav-link" onClick={closeMobileNav}>후원하기</Link>
-              <a href="/stay" className="wewe-nav-link" onClick={closeMobileNav}>위위 스테이</a>
+              <a href="/stay" target="_blank" rel="noopener" className="wewe-nav-link" onClick={closeMobileNav}>위위 스테이</a>
               <button type="button" className="wewe-nav-link wewe-nav-logout-btn" onClick={handleLogout}>
                 <LogOut size={15} />
                 <span>로그아웃</span>
@@ -173,7 +173,7 @@ function WeweHeader() {
               <Link to="/" className="wewe-nav-link" onClick={closeMobileNav}>홈</Link>
               <Link to="/about" className="wewe-nav-link" onClick={closeMobileNav}>소개</Link>
               <Link to="/news" className="wewe-nav-link" onClick={closeMobileNav}>사역 소식</Link>
-              <a href="/stay" className="wewe-nav-link" onClick={closeMobileNav}>위위 스테이</a>
+              <a href="/stay" target="_blank" rel="noopener" className="wewe-nav-link" onClick={closeMobileNav}>위위 스테이</a>
               <Link to="/login" className="wewe-nav-link" onClick={closeMobileNav}>로그인</Link>
               <Link to="/signup" className="wewe-nav-link" onClick={closeMobileNav}>가입하기</Link>
               <Link to="/donate" className="wewe-nav-link" onClick={closeMobileNav}>후원하기</Link>

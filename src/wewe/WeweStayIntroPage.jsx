@@ -358,7 +358,7 @@ function WeweStayIntroPage() {
             <EditableText id={"10월 말, WEWE 스테이가 문을 엽니다"} as="h2">10월 말, WEWE 스테이가 문을 엽니다</EditableText>
             <EditableText id={"선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼이 10월 말 정식 오픈합니다. 지금 미리 둘러보고 가입해두세요."}>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼이 10월 말 정식 오픈합니다. 지금 미리 둘러보고 가입해두세요.</EditableText>
           </div>
-          <a href="/stay" className="wh-btn wh-btn-outline">
+          <a href="/stay" target="_blank" rel="noopener" className="wh-btn wh-btn-outline">
             WEWE 스테이 바로가기 <ArrowRight size={18} />
           </a>
         </div>
