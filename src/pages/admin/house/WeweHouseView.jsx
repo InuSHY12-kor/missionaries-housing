@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { RefreshCw, Wifi, WifiOff, Play } from 'lucide-react';
-import HouseScene from './HouseScene';
-import ActivityFeed from './ActivityFeed';
+import OfficeScene from './OfficeScene';
+import ActivityFeed, { timeAgo } from './ActivityFeed';
+import useRepoActivity, { DEV_ACTIVE_MIN } from './useRepoActivity';
 import useHouseActivity from './useHouseActivity';
 import {
   ROOMS, ROOM_ORDER, COUNTER_LABELS, UNIFORM_STATS, EVENT_TYPES, QUEUE_MAX, ANIM_MS, POLL_MS,
@@ -36,7 +37,7 @@ function usePrefersReducedMotion() {
 const fmtTime = (d) => (d ? new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(d) : '-');
 const fmtNum = (n) => Number(n || 0).toLocaleString();
 
-function RoomDetail({ roomId, counters }) {
+function RoomDetail({ roomId, counters, devActivity }) {
   const room = ROOMS[roomId];
   if (!room) {
     return (
@@ -65,6 +66,20 @@ function RoomDetail({ roomId, counters }) {
           ))}
         </dl>
       )}
+      {roomId === 'web' && (
+        <div className="whh-dev">
+          <p className={`whh-dev-state${devActivity?.working ? ' is-on' : ''}`}>
+            {devActivity?.working ? 'Claude와 작업 중' : '대기 중'}
+          </p>
+          {devActivity?.label && (
+            <p className="whh-muted">
+              최근 작업: {devActivity.label}{devActivity.at ? ` · ${timeAgo(devActivity.at.toISOString())}` : ''}
+            </p>
+          )}
+          {devActivity?.error && <p className="whh-note">GitHub 활동을 확인하지 못했어요({devActivity.error}).</p>}
+          <p className="whh-note">※ 저장소의 최근 브랜치 푸시·PR 시각 기준(최근 {DEV_ACTIVE_MIN}분), 3분마다 확인</p>
+        </div>
+      )}
       {roomId === 'tailor' && (
         <>
           <dl className="whh-stats">
@@ -78,7 +93,7 @@ function RoomDetail({ roomId, counters }) {
   );
 }
 
-function CounterSummary({ counters }) {
+function CounterSummary({ counters, devActivity }) {
   return (
     <section className="whh-card" aria-labelledby="whh-counter-title">
       <h2 id="whh-counter-title" className="whh-card-title">방별 현황</h2>
@@ -88,6 +103,8 @@ function CounterSummary({ counters }) {
           const live = room.status === 'live';
           let value;
           if (!live) value = '준비 중';
+          else if (id === 'ceo') value = '홍현지 · 근무 중';
+          else if (id === 'web') value = devActivity?.working ? '김바름 · Claude와 작업 중' : '김바름 · 대기';
           else if (id === 'tailor') value = `수혜 ${fmtNum(UNIFORM_STATS.served)} · 추천 ${fmtNum(UNIFORM_STATS.recommended)}`;
           else value = room.counters.map((k) => `${COUNTER_LABELS[k]} ${counters ? fmtNum(counters[k]) : '-'}`).join(' · ');
           return (
@@ -103,7 +120,7 @@ function CounterSummary({ counters }) {
   );
 }
 
-function WeweHouseView({ fetcher, pollMs = POLL_MS, backLink = null }) {
+function WeweHouseView({ fetcher, pollMs = POLL_MS, backLink = null, repoFetchJson }) {
   const reduced = usePrefersReducedMotion();
   const reducedRef = useRef(reduced);
   reducedRef.current = reduced;
@@ -141,6 +158,7 @@ function WeweHouseView({ fetcher, pollMs = POLL_MS, backLink = null }) {
   }, [enqueue]);
 
   const { data, error, status, lastUpdated, refresh } = useHouseActivity({ fetcher, onNewEvents, pollMs });
+  const devActivity = useRepoActivity(repoFetchJson ? { fetchJson: repoFetchJson } : undefined);
 
   // 대기열 재생: 하나씩, 화면이 보일 때만
   const paused = hidden || !inView;
@@ -195,7 +213,7 @@ function WeweHouseView({ fetcher, pollMs = POLL_MS, backLink = null }) {
             {backLink}
             <p className="whh-eyebrow">ADMIN · LIVE</p>
             <h1 className="whh-title">WEWE 하우스</h1>
-            <p className="whh-subtitle">WEWE의 사역을 방 하나하나로 보여주는 집입니다. 실제 활동이 생기면 해당 방에서 손님을 맞이해요.</p>
+            <p className="whh-subtitle">WEWE 사람들과 사역이 함께 일하는 사무실입니다. 실제 활동이 생기면 해당 구역에서 손님을 맞이해요.</p>
           </div>
           <div className="whh-toolbar">
             <span className={`whh-conn ${connected ? 'is-ok' : status === 'error' ? 'is-error' : ''}`}>
@@ -214,7 +232,14 @@ function WeweHouseView({ fetcher, pollMs = POLL_MS, backLink = null }) {
         <div className="whh-layout">
           <div className="whh-main">
             <div className="whh-scene-wrap" ref={sceneRef}>
-              <HouseScene playing={playing} selectedRoom={selectedRoom} onSelectRoom={setSelectedRoom} paused={paused} />
+              <OfficeScene
+                playing={playing}
+                selectedRoom={selectedRoom}
+                onSelectRoom={setSelectedRoom}
+                paused={paused}
+                counters={data?.counters}
+                devActivity={devActivity}
+              />
               {playing && (
                 <p className="whh-now-playing">
                   {playing.preview ? '미리보기 · ' : ''}{playing.config.label}
@@ -239,8 +264,8 @@ function WeweHouseView({ fetcher, pollMs = POLL_MS, backLink = null }) {
           </div>
 
           <aside className="whh-side">
-            <RoomDetail roomId={selectedRoom} counters={counters} />
-            <CounterSummary counters={counters} />
+            <RoomDetail roomId={selectedRoom} counters={counters} devActivity={devActivity} />
+            <CounterSummary counters={counters} devActivity={devActivity} />
             <ActivityFeed events={data?.events} freshKeys={freshKeys} now={now} />
             <section className="whh-card">
               <h2 className="whh-card-title">연출 미리보기</h2>

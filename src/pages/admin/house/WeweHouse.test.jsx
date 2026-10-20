@@ -4,6 +4,7 @@ import { act } from 'react-dom/test-utils';
 import WeweHouseView from './WeweHouseView';
 import { diffNewEvents } from './useHouseActivity';
 import { timeAgo } from './ActivityFeed';
+import { summarizeRepo } from './useRepoActivity';
 
 // WEWE 하우스 (2026-10-20): 새 이벤트 감지, 첫 응답은 연출 없이 피드에만, 이후 새 이벤트만 방 연출
 const E = (type, at) => ({ type, occurred_at: at });
@@ -28,6 +29,19 @@ test('시각은 "N분 전" 수준으로만', () => {
   expect(timeAgo('2026-10-17T10:00:00Z', now)).toBe('3일 전');
 });
 
+test('김바름 웹 관리실: 최근 20분 안의 PR·푸시가 있으면 작업 중', () => {
+  const now = new Date('2026-10-20T10:00:00Z');
+  const pulls = [{ number: 90, title: 'WEWE 하우스', updated_at: '2026-10-20T09:50:00Z' }];
+  const activity = [{ timestamp: '2026-10-20T09:55:00Z', ref: 'refs/heads/feature/wewe-house-admin', activity_type: 'push' }];
+  const on = summarizeRepo(pulls, activity, now);
+  expect(on.working).toBe(true);
+  expect(on.label).toBe('feature/wewe-house-admin 푸시');
+  const off = summarizeRepo([{ ...pulls[0], updated_at: '2026-10-20T08:00:00Z' }], [], now);
+  expect(off.working).toBe(false);
+  expect(off.label).toBe('PR #90 WEWE 하우스');
+  expect(summarizeRepo([], [], now).working).toBe(false);
+});
+
 test('첫 응답은 연출 없이 피드·카운터만, 새로고침으로 생긴 새 이벤트만 방 연출', async () => {
   const first = {
     counters: { approved_stays: 2, bookings_this_month: 1, confirmed_bookings: 3, approved_missionaries: 4, approved_hosts: 3, supporters: 0, published_posts: 7 },
@@ -41,7 +55,12 @@ test('첫 응답은 연출 없이 피드·카운터만, 새로고침으로 생�
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
-  await act(async () => root.render(<WeweHouseView fetcher={fetcher} pollMs={600000} />));
+  const repoFetchJson = (url) => Promise.resolve(url.includes('/pulls')
+    ? [{ number: 90, title: 'WEWE 하우스', updated_at: new Date().toISOString() }]
+    : []);
+  await act(async () => root.render(<WeweHouseView fetcher={fetcher} pollMs={600000} repoFetchJson={repoFetchJson} />));
+  expect(container.textContent).toContain('김바름 · Claude와 작업 중');
+  expect(container.textContent).toContain('대표 홍현지');
 
   expect(container.querySelectorAll('.whh-feed-item').length).toBe(2);
   expect(container.querySelector('.whh-now-playing')).toBeNull();

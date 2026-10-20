@@ -1,10 +1,26 @@
-// WEWE 하우스(관리자 전용 라이브 대시보드) 설정 (2026-10-20)
+// WEWE 하우스(관리자 전용 라이브 대시보드) 설정 (2026-10-20, 같은 날 아이소메트릭 사무실로 개편)
 //
 // 방의 켜짐/꺼짐은 ROOMS의 status로만 관리합니다('live' = 진행 중, 'planned' = 기획 예정).
 // 사업이 시작되면 해당 방의 status를 'live'로 바꾸고, 필요하면 EVENT_TYPES에 이벤트·연출을 추가하세요.
 // 데이터는 서버 함수 get_house_activity()가 돌려주는 익명 집계(카운터 + {type, occurred_at})만 씁니다.
 
 export const ROOMS = {
+  ceo: {
+    id: 'ceo',
+    name: '대표이사실',
+    ministry: '대표 홍현지',
+    status: 'live',
+    description: 'WEWE 대표 홍현지가 일하는 방이에요. WEWE의 모든 사역이 이 방에서 시작됩니다.',
+    counters: [],
+  },
+  web: {
+    id: 'web',
+    name: '웹 관리실',
+    ministry: '김바름 · WEWE 홈페이지 관리',
+    status: 'live',
+    description: 'Claude와 함께 WEWE 홈페이지를 만들고 고치는 공간이에요. GitHub 저장소에 최근 20분 안에 작업(브랜치 푸시·PR)이 있으면 작업 중으로 바뀝니다.',
+    counters: [],
+  },
   guest: {
     id: 'guest',
     name: '게스트룸',
@@ -47,7 +63,7 @@ export const ROOMS = {
   },
 };
 
-export const ROOM_ORDER = ['guest', 'tailor', 'porch', 'living', 'garage'];
+export const ROOM_ORDER = ['ceo', 'web', 'guest', 'tailor', 'porch', 'living', 'garage'];
 
 export const COUNTER_LABELS = {
   approved_stays: '승인된 숙소',
