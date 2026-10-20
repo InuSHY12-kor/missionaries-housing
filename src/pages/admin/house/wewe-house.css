@@ -16,9 +16,16 @@
   color: var(--wh-ink);
   font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
   min-height: 70vh;
-  padding: 2rem 0 3rem;
+  padding: 0 0 3rem;
   word-break: keep-all;
+  font-size: 1rem;
+  line-height: 1.6;
 }
+
+/* 배너 아래 도구줄(뒤로가기 · 연결 상태 · 새로고침) — 버튼은 사이트 공용 .btn 크기 */
+.whh-toolbar-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; margin: 1.4rem 0 1.1rem; }
+.whh-toolbar-left { display: flex; align-items: center; gap: 0.6rem; }
+.whh-btn-std { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; text-decoration: none; white-space: nowrap; font-weight: 700; }
 
 .whh-container { max-width: 1240px; margin: 0 auto; padding: 0 16px; }
 
@@ -57,8 +64,8 @@
 
 .whh-side { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 1rem; min-width: 0; align-items: start; }
 .whh-card { background: #fff; border: 1px solid var(--wh-line); border-radius: 14px; padding: 1.1rem 1.2rem; }
-.whh-card-title { margin: 0 0 0.6rem; font-size: 1.02rem; }
-.whh-muted { margin: 0; color: var(--wh-ink-soft); font-size: 0.88rem; line-height: 1.6; }
+.whh-card-title { margin: 0 0 0.7rem; font-size: 1.12rem; font-weight: 800; }
+.whh-muted { margin: 0; color: var(--wh-ink-soft); font-size: 0.95rem; line-height: 1.65; }
 .whh-note { margin: 0.6rem 0 0; color: var(--wh-stone); font-size: 0.78rem; }
 
 .whh-room-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
@@ -99,8 +106,8 @@
 .whh-feed-item + .whh-feed-item { border-top: 1px solid #f1eee8; }
 .whh-feed-item.is-fresh { background: #fff4ea; }
 .whh-feed-text { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
-.whh-feed-text strong { font-size: 0.88rem; }
-.whh-feed-meta { color: var(--wh-stone); font-size: 0.78rem; }
+.whh-feed-text strong { font-size: 0.95rem; }
+.whh-feed-meta { color: #6b665c; font-size: 0.85rem; }
 
 .whh-preview { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
 .whh-preview select { flex: 1 1 160px; min-width: 0; border: 1px solid #ddd6c8; border-radius: 10px; padding: 0.45rem 0.6rem; font-size: 0.86rem; background: #fff; color: var(--wh-ink); }
@@ -117,10 +124,12 @@
 /* ── SVG 단면도 ───────────────────────────────────────────── */
 .hh-scene text { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif; }
 .iso-scene { background: var(--wh-bg-soft); }
-.iso-card-title { font-size: 12px; font-weight: 800; fill: var(--wh-ink); }
-.iso-card-sub { font-size: 10px; font-weight: 600; fill: var(--wh-stone); }
-.iso-bubble-text { font-size: 12px; font-weight: 700; fill: var(--wh-ink); }
+/* 이름표 글자: 크고 굵게, 진한 색으로(가독성) */
+.iso-card-title { font-size: 14.5px; font-weight: 800; fill: #141412; letter-spacing: -0.01em; }
+.iso-card-sub { font-size: 11.5px; font-weight: 700; fill: #4f4b44; }
+.iso-bubble-text { font-size: 13.5px; font-weight: 800; fill: #141412; }
 .iso-wall-logo { font-size: 13px; font-weight: 900; letter-spacing: 0.16em; fill: var(--wh-teal); }
+.iso-wall-logo--light { fill: #f0c9a0; }
 .iso-plaque { font-size: 9px; font-weight: 800; letter-spacing: 0.14em; fill: var(--wh-teal); }
 
 .iso-hit { fill: transparent; cursor: pointer; }

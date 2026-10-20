@@ -1,7 +1,7 @@
 import React from 'react';
 import { ROOMS } from './houseConfig';
 import { Character, CharacterDefs, Suitcase, WelcomeKit, Letter, Paper, Heart } from './Characters';
-import { P, pts, Floor, Box, WallRect, Desk, Monitor, Chair, Plant, NameCard, Bubble, Card } from './iso';
+import { P, pts, Floor, Box, WallRect, GlassWall, Desk, Monitor, Chair, Plant, NameCard, Bubble, Card, IsoDefs } from './iso';
 
 // WEWE 하우스 — 사역별 룸으로 나눈 아이소메트릭 사무실(2026-10-20 2차 개편).
 // 룸 구성은 claude/wewe-projects-and-roles-2026-10-20.md와 같습니다(한 룸 = 한 사역 = 담당자 1명).
@@ -22,10 +22,14 @@ export const ZONES = {
   garage: { x: 18, y: 19, w: 18, d: 8 },
 };
 
-const FLOOR_TINT = {
-  ceo: '#e9e0d2', web: '#e3eeec', donation: '#f6e8dc', tailor: '#efe6da', academy: '#e8e4dc',
-  pastorcare: '#ece4dd', guest: '#f3e9da', poiema: '#e4ece2', porch: '#efe7db', connect: '#e9e6ef', garage: '#dcd7cd',
+// 룸 바닥 재질: wood(원목 마루) · carpet(카펫) · concrete(콘크리트 그대로)
+const FLOOR = {
+  ceo: ['wood', '#c9a27a'], web: ['carpet', '#c9cfd2'], donation: ['carpet', '#d9cbbd'], tailor: ['wood', '#d2b08a'],
+  academy: ['carpet', '#c9c6be'], pastorcare: ['wood', '#c49d76'], guest: ['wood', '#d4b48e'], poiema: ['carpet', '#c9d3c3'],
+  porch: ['wood', '#c79f78'], connect: ['carpet', '#d8c98f'], garage: ['concrete', null],
 };
+// 창이 있는 뒤쪽 벽 구간(y = 0 벽) — 햇빛이 바닥으로 들어옵니다
+const WINDOW_BAYS = [[0.4, 3.6], [3.6, 6.8], [6.8, 10.0], [26.4, 29.6], [29.6, 32.8], [32.8, 35.6]];
 
 const at = (x, y, z = 0) => {
   const [sx, sy] = P(x, y, z);
@@ -39,23 +43,71 @@ const delta = (a, b) => {
 
 // ── 건물 ─────────────────────────────────────────────────────
 function Shell() {
-  const planks = [];
-  for (let j = 1; j < 27; j += 1) {
-    const a = P(0, j);
-    const b = P(36, j);
-    planks.push(<line key={j} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke="#e2cfb1" strokeWidth={1} />);
+  const windows = WINDOW_BAYS.map(([a, b]) => {
+    const panes = [];
+    const mid = (a + b) / 2;
+    [[a, mid], [mid, b]].forEach(([s, e]) => {
+      [[0.6, 3.2], [3.2, 5.6]].forEach(([z0, z1]) => {
+        panes.push(<polygon key={`${s}-${z0}`} points={pts(P(s, 0.03, z0), P(e, 0.03, z0), P(e, 0.03, z1), P(s, 0.03, z1))} fill="url(#isoSky)" stroke="#2a2a2e" strokeWidth={2.2} />);
+      });
+    });
+    return (
+      <g key={a}>
+        {panes}
+        <polygon points={pts(P(a + 0.2, 0.04, 0.8), P(a + 0.9, 0.04, 0.8), P(a + 1.6, 0.04, 5.4), P(a + 0.9, 0.04, 5.4))} fill="#ffffff" opacity={0.28} />
+      </g>
+    );
+  });
+  return (
+    <g>
+      {/* 벽: 흰 벽 + 큰 창(오른쪽 위 벽) + 콘크리트 기둥 */}
+      <polygon points={pts(P(0, 0, 0), P(0, 27, 0), P(0, 27, 6), P(0, 0, 6))} fill="#ecebe8" />
+      <polygon points={pts(P(0, 0, 0), P(0, 27, 0), P(0, 27, 6), P(0, 0, 6))} fill="url(#isoShadeLeft)" />
+      <polygon points={pts(P(0, 0, 0), P(36, 0, 0), P(36, 0, 6), P(0, 0, 6))} fill="#f6f5f2" />
+      {windows}
+      <polygon points={pts(P(0, 0, 6), P(36, 0, 6), P(36, -0.45, 6), P(-0.45, -0.45, 6), P(-0.45, 27, 6), P(0, 27, 6))} fill="#cfccc6" />
+      {/* 콘크리트 바닥 */}
+      <polygon points={pts(P(0, 0), P(36, 0), P(36, 27), P(0, 27))} fill="#d7d5d1" filter="url(#isoConcrete)" />
+      <polygon points={pts(P(0, 27), P(36, 27), P(36, 27, -0.5), P(0, 27, -0.5))} fill="#b9b6b0" />
+      <polygon points={pts(P(36, 0), P(36, 27), P(36, 27, -0.5), P(36, 0, -0.5))} fill="#a8a59f" />
+      {/* 벽과 바닥이 만나는 곳의 그늘 */}
+      <polygon points={pts(P(0, 0), P(36, 0), P(36, 0.9), P(0, 0.9))} fill="rgba(40,34,28,0.16)" filter="url(#isoSoftShadow)" />
+      <polygon points={pts(P(0, 0), P(0, 27), P(0.9, 27), P(0.9, 0))} fill="rgba(40,34,28,0.12)" filter="url(#isoSoftShadow)" />
+      {[[0, 9.0], [0, 18.0], [11.0, 0], [25.4, 0]].map(([x, y]) => (
+        <Box key={`${x}-${y}`} x={x} y={y} w={0.7} d={0.7} h={6} top="#c9c6c0" left="#dedcd8" right="#c4c1bb" />
+      ))}
+    </g>
+  );
+}
+
+// 창으로 들어오는 햇빛(바닥 위 밝은 띠)
+function Sunlight() {
+  return (
+    <g className="iso-sun" aria-hidden="true" style={{ mixBlendMode: 'screen' }} opacity={0.5}>
+      {WINDOW_BAYS.map(([a, b]) => (
+        <polygon key={a} points={pts(P(a + 0.3, 0.4), P(b - 0.3, 0.4), P(b + 1.6, 7.6), P(a + 2.2, 7.6))} fill="#fff1cf" filter="url(#isoSunBlur)" />
+      ))}
+    </g>
+  );
+}
+
+function RoomFloor({ id }) {
+  const z = ZONES[id];
+  const [kind, color] = FLOOR[id] || ['concrete', null];
+  if (kind === 'concrete') return null;
+  const lines = [];
+  if (kind === 'wood') {
+    for (let j = z.y + 0.6; j < z.y + z.d - 0.2; j += 0.6) {
+      const a = P(z.x + 0.15, j);
+      const b = P(z.x + z.w - 0.15, j);
+      lines.push(<line key={j} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke="rgba(90,60,30,0.16)" strokeWidth={1} />);
+    }
   }
   return (
     <g>
-      <polygon points={pts(P(0, 0, 0), P(0, 27, 0), P(0, 27, 6), P(0, 0, 6))} fill="#e9e5de" />
-      <polygon points={pts(P(0, 0, 0), P(36, 0, 0), P(36, 0, 6), P(0, 0, 6))} fill="#f3f0ea" />
-      <polygon points={pts(P(0, 0, 6), P(36, 0, 6), P(36, -0.4, 6), P(-0.4, -0.4, 6), P(-0.4, 27, 6), P(0, 27, 6))} fill="#dcd6cc" />
-      <polygon points={pts(P(0, 0), P(36, 0), P(36, 27), P(0, 27))} fill="#ecdcc2" />
-      {planks}
-      <polygon points={pts(P(0, 27), P(36, 27), P(36, 27, -0.5), P(0, 27, -0.5))} fill="#d9c7a8" />
-      <polygon points={pts(P(36, 0), P(36, 27), P(36, 27, -0.5), P(36, 0, -0.5))} fill="#cbb894" />
-      <polygon points={pts(P(0, 0, 0), P(36, 0, 0), P(36, 0, 0.25), P(0, 0, 0.25))} fill="#e3ded5" />
-      <polygon points={pts(P(0, 0, 0), P(0, 27, 0), P(0, 27, 0.25), P(0, 0, 0.25))} fill="#dbd5cb" />
+      <Floor x={z.x + 0.15} y={z.y + 0.15} w={z.w - 0.3} d={z.d - 0.3} fill={color} filter={kind === 'carpet' ? 'url(#isoConcrete)' : undefined} />
+      {lines}
+      <Floor x={z.x + 0.15} y={z.y + 0.15} w={z.w - 0.3} d={z.d - 0.3} fill="url(#isoSheenTop)" />
     </g>
   );
 }
@@ -64,12 +116,13 @@ function Shell() {
 function RoomShell({ id, live }) {
   const z = ZONES[id];
   const [cx, cy] = P(z.x + z.w / 2, z.y + z.d / 2);
+  // 뒤쪽 두 면은 검은 프레임 유리벽(바깥벽에 붙은 면 제외)
   return (
     <g>
-      <Floor x={z.x + 0.15} y={z.y + 0.15} w={z.w - 0.3} d={z.d - 0.3} fill={FLOOR_TINT[id]} />
+      <RoomFloor id={id} />
       {live && <ellipse cx={cx} cy={cy} rx={z.w * 9 + 40} ry={z.d * 5 + 24} fill="url(#roomGlow)" />}
-      {z.y > 0 && <Box x={z.x} y={z.y - 0.1} w={z.w} d={0.2} h={1.9} top="#d6d0c5" left="#ece8e1" right="#e0dbd2" />}
-      {z.x > 0 && <Box x={z.x - 0.1} y={z.y} w={0.2} d={z.d} h={1.9} top="#d6d0c5" left="#ece8e1" right="#e0dbd2" />}
+      {z.y > 0 && <GlassWall axis="x" at={z.y} a={z.x} b={z.x + z.w} h={3.2} />}
+      {z.x > 0 && <GlassWall axis="y" at={z.x} a={z.y} b={z.y + z.d} h={3.2} />}
     </g>
   );
 }
@@ -106,7 +159,7 @@ function Walker({ kind, from, to, dur, delay = 0, title, sub }) {
     <g transform={at(from[0], from[1])}>
       <g className="sd-route" style={style}>
         <Character kind={kind} className="sd-walker" />
-        <Card title={title} sub={sub} dy={-76} />
+        <Card title={title} sub={sub} dy={-90} />
       </g>
     </g>
   );
@@ -126,9 +179,12 @@ function CeoOffice() {
   return (
     <g>
       <Floor x={1.6} y={5.2} w={9.4} d={2.4} fill="#d9cdbb" opacity={0.7} />
-      <WallRect wall="back-right" a={2} z={1.8} len={4} h={2.8} fill="#dcecee" stroke="#c9b79c" strokeWidth={3} />
-      <WallRect wall="back-right" a={7.4} z={2.4} len={3} h={1.9} fill="#ffffff" stroke="#c89b6d" strokeWidth={3} />
-      <g transform={at(8.9, 0.05, 3.1)}><text textAnchor="middle" className="iso-wall-logo">WEWE</text></g>
+      {/* 원목 루버 벽 + WEWE 액자(왼쪽 벽) */}
+      {[4.8, 5.1, 5.4, 5.7, 6.0, 6.3, 6.6, 6.9, 7.2].map((y) => (
+        <polygon key={y} points={pts(P(0.03, y, 0.3), P(0.03, y + 0.18, 0.3), P(0.03, y + 0.18, 5.4), P(0.03, y, 5.4))} fill="#b98a5c" />
+      ))}
+      <WallRect wall="back-left" a={5.2} z={2.6} len={1.8} h={1.4} inset={0.05} fill="#1c1c20" stroke="#0f0f12" />
+      <g transform={at(0.06, 6.1, 3.2)}><text textAnchor="middle" className="iso-wall-logo iso-wall-logo--light">WEWE</text></g>
       <Box x={0.05} y={0.8} w={0.8} d={3.6} h={4.4} top="#c89b6d" left="#b5865a" right="#a87a4f" />
       {books}
       {[1.0, 2.2, 3.4, 4.4].map((z) => <polygon key={z} points={pts(P(0.86, 0.8, z), P(0.86, 4.4, z))} stroke="#8a6a4a" strokeWidth={2} fill="none" />)}
@@ -161,15 +217,12 @@ function CeoOffice() {
   );
 }
 
+// 대표이사실 앞쪽 유리벽(가운데 출입문 틈)
 function CeoGlass() {
-  const panel = (p) => <polygon points={pts(...p)} fill="rgba(205,228,232,0.3)" stroke="#a9bfc2" strokeWidth={1.4} />;
   return (
     <g aria-hidden="true">
-      {panel([P(0, 8, 0), P(3.5, 8, 0), P(3.5, 8, 3.3), P(0, 8, 3.3)])}
-      {panel([P(3.5, 8, 0), P(6, 8, 0), P(6, 8, 3.3), P(3.5, 8, 3.3)])}
-      {panel([P(8.2, 8, 0), P(12, 8, 0), P(12, 8, 3.3), P(8.2, 8, 3.3)])}
-      {panel([P(12, 0, 0), P(12, 4, 0), P(12, 4, 3.3), P(12, 0, 3.3)])}
-      {panel([P(12, 4, 0), P(12, 8, 0), P(12, 8, 3.3), P(12, 4, 3.3)])}
+      <GlassWall axis="x" at={8} a={0} b={6} h={3.4} />
+      <GlassWall axis="x" at={8} a={8.2} b={12} h={3.4} />
     </g>
   );
 }
@@ -280,8 +333,6 @@ function TailorRoom() {
   });
   return (
     <g>
-      <WallRect wall="back-right" a={31} z={0.4} len={1.5} h={3.8} fill="#dfe9ea" stroke="#c89b6d" strokeWidth={3} />
-      <WallRect wall="back-right" a={33.1} z={1.9} len={2.4} h={2.6} fill="#dcecee" stroke="#c9b79c" strokeWidth={3} />
       <Box x={27.0} y={0.8} w={3.6} d={0.5} h={0.12} top="#a87a4f" left="#8a6a4a" right="#8a6a4a" />
       <Box x={27.0} y={1.0} w={0.1} d={0.1} h={3.7} top="#8a6a4a" left="#8a6a4a" right="#6b5038" />
       <Box x={30.5} y={1.0} w={0.1} d={0.1} h={3.7} top="#8a6a4a" left="#8a6a4a" right="#6b5038" />
@@ -389,13 +440,23 @@ function PoiemaRoom() {
 }
 
 function ConnectRoom() {
-  const stools = [[11.6, 21.4, '#f2b8b8'], [15.6, 21.6, '#c9d1dc'], [12.2, 24.6, '#f6e3a1'], [15.8, 24.4, '#c9d1dc']];
+  // 빈백(레퍼런스의 컬러 빈백)
+  const beans = [[11.4, 21.0, ['#6cc06a', '#2f8a3a']], [15.8, 21.2, ['#f08a6a', '#c0492f']], [11.6, 24.4, ['#5a7ad0', '#2a4aa0']], [16.2, 24.2, ['#f2c94c', '#c9962a']]];
   return (
     <g>
-      {stools.map(([x, y, c]) => (
+      <defs>
+        {beans.map(([x, , c]) => (
+          <radialGradient key={x} id={`bean-${x}`} cx="0.35" cy="0.3" r="0.8">
+            <stop offset="0%" stopColor={c[0]} />
+            <stop offset="100%" stopColor={c[1]} />
+          </radialGradient>
+        ))}
+      </defs>
+      {beans.map(([x, y]) => (
         <g key={`${x}-${y}`} transform={at(x, y, 0)}>
-          <rect x={-2} y={-14} width={4} height={14} fill="#bdb8ae" />
-          <ellipse cy={-14} rx={10} ry={5} fill={c} />
+          <ellipse cx={3} cy={2} rx={20} ry={7} fill="rgba(30,24,18,0.25)" filter="url(#isoSoftShadow)" />
+          <path d="M-18 0 Q-22 -14 -10 -24 Q0 -30 10 -24 Q22 -14 18 0 Q0 6 -18 0 Z" fill={`url(#bean-${x})`} />
+          <path d="M-8 -20 Q0 -24 8 -19" stroke="#ffffff" strokeWidth={2} fill="none" opacity={0.3} strokeLinecap="round" />
         </g>
       ))}
       <g transform={at(13.8, 23.0, 0)}>
@@ -433,9 +494,20 @@ function Lobby({ flagRaised }) {
       <WallRect wall="back-left" a={22.1} z={2.2} len={1.3} h={0.9} fill="#dcecee" stroke="#0f5a5f" strokeWidth={1} />
       <g transform={at(0.05, 23.6, 1.8)}><circle r={2.5} fill="#f0c9a0" /></g>
       <g transform={at(0.05, 22.75, 4.2)}><text textAnchor="middle" className="iso-plaque">WEWE</text></g>
-      <Floor x={0.3} y={21.6} w={2.2} d={2.5} fill="#d97b3f" opacity={0.65} />
-      <Box x={3.4} y={19.6} w={3.0} d={0.9} h={0.8} top="#dcbd93" left="#b98a5c" right="#a87a4f" />
-      <Plant x={8.3} y={19.8} />
+      <Floor x={0.3} y={21.6} w={2.2} d={2.5} fill="#8a6a4a" opacity={0.55} />
+      {/* 커피 바(원목 + 콘크리트 상판) */}
+      <Box x={3.2} y={19.5} w={4.4} d={1.0} h={1.6} top="#b9b6b0" left="#b98a5c" right="#a87a4f" />
+      <Box x={3.2} y={19.5} z={1.6} w={4.4} d={1.0} h={0.1} top="#cfcdc8" left="#bdbab4" right="#aeaba5" />
+      <Box x={3.5} y={19.6} z={1.7} w={0.8} d={0.6} h={0.75} top="#3a3a3e" left="#2b2b2e" right="#222225" />
+      <Box x={5.0} y={19.7} z={1.7} w={0.35} d={0.35} h={0.45} top="#f1ede6" left="#e0dbd2" right="#d4cfc5" />
+      {[4.0, 5.4, 6.8].map((x) => (
+        <g key={x} transform={at(x, 21.3, 0)}>
+          <line x1={-5} y1={0} x2={-3} y2={-24} stroke="#8a6a4a" strokeWidth={2} />
+          <line x1={5} y1={0} x2={3} y2={-24} stroke="#8a6a4a" strokeWidth={2} />
+          <ellipse cy={-25} rx={8} ry={3.6} fill="#c89b6d" />
+        </g>
+      ))}
+      <Plant x={8.3} y={19.8} scale={1.15} />
       <Box x={6.85} y={25.35} w={0.15} d={0.15} h={1.8} top="#8a6a4a" left="#8a6a4a" right="#6b5038" />
       <Box x={6.4} y={25.05} z={1.8} w={1.05} d={0.7} h={0.55} top="#e9a06d" left="#d97b3f" right="#b8622c" />
       <g transform={at(7.45, 25.4, 2.05)}>
@@ -545,6 +617,7 @@ function OfficeScene({ playing, selectedRoom, onSelectRoom, paused, counters, de
       aria-label={`WEWE 하우스 사무실: ${summary}. 김바름 ${devActive ? 'Claude와 작업 중' : '대기'}.`}
     >
       <defs>
+        <IsoDefs />
         <CharacterDefs />
         <radialGradient id="hhLampGlow">
           <stop offset="0%" stopColor="#ffd98a" stopOpacity="0.7" />
@@ -558,9 +631,6 @@ function OfficeScene({ playing, selectedRoom, onSelectRoom, paused, counters, de
           <stop offset="0%" stopColor="#fff3d6" stopOpacity="0.75" />
           <stop offset="100%" stopColor="#fff3d6" stopOpacity="0" />
         </radialGradient>
-        <filter id="isoCardShadow" x="-20%" y="-30%" width="140%" height="180%">
-          <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#3a3226" floodOpacity="0.16" />
-        </filter>
         {/* 준비 중인 룸: 채도를 낮추고 밝기를 절반으로(조명이 꺼진 느낌) */}
         <filter id="roomDark">
           <feColorMatrix type="saturate" values="0.45" />
@@ -589,6 +659,8 @@ function OfficeScene({ playing, selectedRoom, onSelectRoom, paused, counters, de
       <Room id="connect"><ConnectRoom /></Room>
       <Room id="garage"><Garage /></Room>
 
+      <Sunlight />
+
       {Object.entries(ZONES).map(([id, z]) => (
         <Pendant key={`lamp-${id}`} x={z.x + z.w / 2} y={z.y + z.d / 2} lit={ROOMS[id]?.status === 'live'} />
       ))}
@@ -604,14 +676,14 @@ function OfficeScene({ playing, selectedRoom, onSelectRoom, paused, counters, de
       ))}
 
       {/* 이름표: 자리에 앉은 사람·고정 룸 */}
-      <NameCard x={7.1} y={3.45} z={4.3} title="대표 홍현지" sub="대표이사실 · 근무 중" highlight />
-      <Bubble x={7.1} y={3.45} z={6.2} text="• • •" className="iso-typing-bubble" />
-      <NameCard x={14.85} y={3.0} z={4.45} title="김바름" sub={devActive ? '웹 관리실 · 작업 중' : '웹 관리실 · 대기'} />
-      {devActive && <Bubble x={14.85} y={3.0} z={6.1} text="Claude와 작업 중" className="iso-dev-bubble" />}
+      <NameCard x={7.1} y={3.45} z={4.9} title="대표 홍현지" sub="대표이사실 · 근무 중" highlight />
+      <Bubble x={7.1} y={3.45} z={7.3} text="• • •" className="iso-typing-bubble" />
+      <NameCard x={14.85} y={3.0} z={5.0} title="김바름" sub={devActive ? '웹 관리실 · 작업 중' : '웹 관리실 · 대기'} />
+      {devActive && <Bubble x={14.85} y={3.0} z={7.4} text="Claude와 작업 중" className="iso-dev-bubble" />}
       <NameCard x={4.4} y={23.4} z={3.0} title="로비 · 우편함" sub={`사역 소식 ${n('published_posts')}`} />
       {plannedCards.map((r) => {
         const z = ZONES[r.id];
-        return <NameCard key={`card-${r.id}`} x={z.x + z.w / 2} y={z.y + z.d / 2} z={2.6} title={r.name} sub={`${r.ministry} · 준비 중`} dim />;
+        return <NameCard key={`card-${r.id}`} x={z.x + z.w / 2} y={z.y + z.d * 0.62} z={1.4} title={r.name} sub="준비 중" dim />;
       })}
 
       {Object.entries(ZONES).map(([id, z]) => (
