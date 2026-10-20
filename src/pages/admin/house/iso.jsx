@@ -5,8 +5,8 @@ import React from 'react';
 // 뒤쪽 벽은 y = 0(오른쪽 위 벽)과 x = 0(왼쪽 위 벽)에 있습니다.
 
 export const S = 22; // 1칸의 화면 크기
-export const OX = 500; // (0,0) 바닥 꼭짓점의 화면 위치
-export const OY = 150;
+export const OX = 545; // (0,0) 바닥 꼭짓점의 화면 위치(바닥 36 × 27칸 기준)
+export const OY = 165;
 const C = 0.866;
 
 export function P(x, y, z = 0) {
@@ -102,14 +102,23 @@ export function Plant({ x, y, scale = 1 }) {
 }
 
 // 이름표(레퍼런스의 흰 말풍선 카드). (x, y, z)는 붙일 위치, 카드는 그 위에 가운데 정렬
-export function NameCard({ x, y, z = 3.6, title, sub, highlight = false, className = '' }) {
-  const [cx, cy] = P(x, y, z);
+// 카드 본체(현재 좌표계의 (0, dy) 위에 그림) — 돌아다니는 캐릭터 머리 위에 붙일 때 씁니다
+export function Card({ title, sub, dy = 0, highlight = false, dim = false, className = '' }) {
   const width = Math.max(title.length * 12.5, (sub || '').length * 9.5) + 22;
   return (
-    <g className={`iso-card ${className}`} transform={`translate(${cx},${cy})`}>
-      <rect x={-width / 2} y={-34} width={width} height={sub ? 36 : 24} rx={7} fill="#ffffff" stroke={highlight ? '#2b2f36' : 'rgba(0,0,0,0.08)'} strokeWidth={highlight ? 2 : 1} filter="url(#isoCardShadow)" />
+    <g className={`iso-card ${className}`} transform={`translate(0,${dy})`}>
+      <rect x={-width / 2} y={-34} width={width} height={sub ? 36 : 24} rx={7} fill={dim ? '#e9e6e0' : '#ffffff'} stroke={highlight ? '#2b2f36' : 'rgba(0,0,0,0.08)'} strokeWidth={highlight ? 2 : 1} filter="url(#isoCardShadow)" />
       <text x={0} y={-17} textAnchor="middle" className="iso-card-title">{title}</text>
       {sub && <text x={0} y={-4} textAnchor="middle" className="iso-card-sub">{sub}</text>}
+    </g>
+  );
+}
+
+export function NameCard({ x, y, z = 3.6, ...rest }) {
+  const [cx, cy] = P(x, y, z);
+  return (
+    <g transform={`translate(${cx},${cy})`}>
+      <Card {...rest} />
     </g>
   );
 }

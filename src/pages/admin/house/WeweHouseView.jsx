@@ -54,8 +54,14 @@ function RoomDetail({ roomId, counters, devActivity }) {
         <h2 className="whh-card-title">{room.name}</h2>
         <span className={`whh-status ${live ? 'is-live' : 'is-planned'}`}>{live ? '진행 중' : '준비 중'}</span>
       </div>
-      <p className="whh-room-ministry">{room.ministry}</p>
+      <p className="whh-room-ministry">{room.group} · {room.ministry}</p>
       <p className="whh-muted">{room.description}</p>
+      <p className="whh-owner">담당: <strong>{room.owner}</strong></p>
+      {room.duties?.length > 0 && (
+        <ul className="whh-duties">
+          {room.duties.map((d) => <li key={d}>{d}</li>)}
+        </ul>
+      )}
       {room.counters.length > 0 && (
         <dl className="whh-stats">
           {room.counters.map((k) => (
