@@ -126,7 +126,7 @@ function CounterSummary({ counters, devActivity }) {
   );
 }
 
-function WeweHouseView({ fetcher, pollMs = POLL_MS, backLink = null, repoFetchJson }) {
+function WeweHouseView({ fetcher, pollMs = POLL_MS, backLink = null, hero = null, repoFetchJson }) {
   const reduced = usePrefersReducedMotion();
   const reducedRef = useRef(reduced);
   reducedRef.current = reduced;
@@ -213,25 +213,22 @@ function WeweHouseView({ fetcher, pollMs = POLL_MS, backLink = null, repoFetchJs
 
   return (
     <div className="whh-page">
+      {/* 상단 배너(랜딩 페이지와 같은 스타일) — 페이지(WeweHouse.jsx)가 넘겨줍니다 */}
+      {hero}
       <div className="whh-container">
-        <header className="whh-top">
-          <div>
-            {backLink}
-            <p className="whh-eyebrow">ADMIN · LIVE</p>
-            <h1 className="whh-title">WEWE 하우스</h1>
-            <p className="whh-subtitle">WEWE 사람들과 사역이 함께 일하는 사무실입니다. 실제 활동이 생기면 해당 구역에서 손님을 맞이해요.</p>
-          </div>
+        <div className="whh-toolbar-row">
+          <div className="whh-toolbar-left">{backLink}</div>
           <div className="whh-toolbar">
             <span className={`whh-conn ${connected ? 'is-ok' : status === 'error' ? 'is-error' : ''}`}>
               {connected ? <Wifi size={16} aria-hidden="true" /> : <WifiOff size={16} aria-hidden="true" />}
               {connected ? '연결됨' : status === 'error' ? '연결 끊김' : '연결 중'}
             </span>
             <span className="whh-updated">마지막 갱신 {fmtTime(lastUpdated)}</span>
-            <button type="button" className="whh-btn" onClick={refresh}>
+            <button type="button" className="btn btn-secondary whh-btn-std" onClick={refresh}>
               <RefreshCw size={16} aria-hidden="true" /> 새로고침
             </button>
           </div>
-        </header>
+        </div>
 
         {error && <p className="whh-error" role="alert">활동을 불러오지 못했습니다. ({error})</p>}
 
@@ -282,7 +279,7 @@ function WeweHouseView({ fetcher, pollMs = POLL_MS, backLink = null, repoFetchJs
                     <option key={t} value={t}>{EVENT_TYPES[t].label}</option>
                   ))}
                 </select>
-                <button type="button" className="whh-btn whh-btn-primary" onClick={playPreview} disabled={reduced}>
+                <button type="button" className="btn btn-primary whh-btn-std" onClick={playPreview} disabled={reduced}>
                   <Play size={16} aria-hidden="true" /> 재생
                 </button>
               </div>
