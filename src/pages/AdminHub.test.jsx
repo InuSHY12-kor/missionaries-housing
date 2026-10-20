@@ -52,6 +52,7 @@ test('한눈에 보기: 처리할 일 숫자, 방문 통계 요약, 자세히 �
   expect(container.querySelector('.ao-stat-nums').textContent).toContain('120');
   act(() => container.querySelector('.ao-more').click());
   expect(onOpen).toHaveBeenCalledWith('stats');
+  expect(container.querySelector('.ao-house-btn').getAttribute('href')).toBe('/stay/admin/house');
   act(() => container.querySelector('.ao-mail-btn').click());
   expect(onOpen).toHaveBeenCalledWith('mail');
 });

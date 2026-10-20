@@ -22,6 +22,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminPostEditor from './pages/AdminPostEditor';
+import WeweHouse from './pages/admin/WeweHouse';
 import Accommodations from './pages/Accommodations';
 import AccommodationDetail from './pages/AccommodationDetail';
 import HostAccommodations from './pages/HostAccommodations';
@@ -224,6 +225,8 @@ function App() {
                   아래처럼 "/admin/*" 바로 위/아래 어디에 두어도 이 두 경로가 먼저 매칭됩니다. */}
               <Route path="/admin/posts/new" element={<AdminPostEditor userProfile={userProfile} />} />
               <Route path="/admin/posts/:id/edit" element={<AdminPostEditor userProfile={userProfile} />} />
+              {/* (2026-10-20) WEWE 하우스 — 관리자 전용 라이브 대시보드(공개 사이트에는 연결하지 않음) */}
+              <Route path="/admin/house" element={<WeweHouse />} />
               <Route path="/admin/*" element={<AdminDashboard userProfile={userProfile} />} />
             </>
           )}

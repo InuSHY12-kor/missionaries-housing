@@ -13,3 +13,11 @@
 # 빌드된 JS·CSS는 파일 이름에 내용 해시가 붙으므로 오래 캐시해도 안전합니다.
 /static/*
   Cache-Control: public, max-age=31536000, immutable
+
+# 관리자 화면은 검색엔진에 노출하지 않습니다(WEWE 하우스 등, 2026-10-20).
+/stay/admin/*
+  X-Robots-Tag: noindex, nofollow
+/admin
+  X-Robots-Tag: noindex, nofollow
+/admin/*
+  X-Robots-Tag: noindex, nofollow

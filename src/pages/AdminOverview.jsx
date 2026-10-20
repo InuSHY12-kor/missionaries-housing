@@ -89,6 +89,17 @@ function AdminOverview({ counts, onOpen }) {
         )}
       </section>
 
+      {/* (2026-10-20) WEWE 하우스 — 위위스테이 앱의 관리자 전용 화면이라 WEWE(/admin)에서도 전체 페이지 이동으로 엽니다 */}
+      <section className="ao-card ao-mail ao-house">
+        <div>
+          <h2 className="ao-title"><Home size={20} /> WEWE 하우스</h2>
+          <p className="ao-muted">사역별 방으로 이루어진 집에서 숙소 승인·예약·회원·소식 활동을 실시간으로 봅니다(관리자 전용).</p>
+        </div>
+        <a href="/stay/admin/house" className="btn btn-primary ao-house-btn">
+          <Home size={16} /> WEWE 하우스 열기
+        </a>
+      </section>
+
       <section className="ao-card ao-mail">
         <div>
           <h2 className="ao-title"><Mail size={20} /> 공지 메일</h2>
@@ -126,7 +137,8 @@ function AdminOverview({ counts, onOpen }) {
         .ao-mini-col span { font-size: 0.7rem; color: #8a857b; margin-top: 4px; }
         .ao-mail { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; background: #fffaf3; }
         .ao-mail .ao-title { margin-bottom: 0.35rem; }
-        .ao-mail-btn { display: inline-flex; align-items: center; gap: 0.4rem; }
+        .ao-mail-btn, .ao-house-btn { display: inline-flex; align-items: center; gap: 0.4rem; }
+        .ao-house { background: #f2f8f7; }
         @media (max-width: 860px) {
           .ao-todos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .ao-stats-body { grid-template-columns: 1fr; }
