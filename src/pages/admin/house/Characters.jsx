@@ -172,6 +172,14 @@ export function Character({ kind = 'missionary', className = '', suit = false, s
           <Leg side="r" shoe={v.shoe} />
         </>
       )}
+      {/* 등을 보일 때(back)는 팔이 몸 앞(모니터 쪽)에 있으므로 몸통보다 먼저 그려 몸 뒤로 숨깁니다 —
+          옆구리로 팔꿈치만 살짝 보이며 움직입니다(손이 등 위로 올라와 보이지 않도록). */}
+      {back && (
+        <g className="hc-arms-front">
+          <Arm side="l" kind={k} />
+          <Arm side="r" kind={k} />
+        </g>
+      )}
       {/* 몸통(래글런 티셔츠) */}
       <path d="M-12.5 -15 Q-13.5 -31.5 0 -32.5 Q13.5 -31.5 12.5 -15 Q0 -12 -12.5 -15 Z" fill={`url(#sd-shirt-${k})`} />
       <path d="M-12.5 -17.5 Q0 -14.5 12.5 -17.5 L12.5 -15 Q0 -12 -12.5 -15 Z" fill="rgba(0,0,0,0.14)" />
@@ -190,8 +198,8 @@ export function Character({ kind = 'missionary', className = '', suit = false, s
         </g>
       )}
       <ellipse cx={-5} cy={-25} rx={4.5} ry={3.2} fill="#ffffff" opacity={0.14} />
-      <Arm side="l" kind={k} />
-      <Arm side="r" kind={k} />
+      {!back && <Arm side="l" kind={k} />}
+      {!back && <Arm side="r" kind={k} />}
       <g className="hc-head">
         <ellipse cx={0} cy={-31.5} rx={7} ry={2.4} fill="rgba(0,0,0,0.16)" />
         {!back && <circle cx={-18} cy={-45} r={3.6} fill="url(#sd-skin)" />}
