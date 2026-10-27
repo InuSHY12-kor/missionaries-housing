@@ -203,7 +203,7 @@ end;
 $function$;
 
 -- 카드 결제는 환불 계좌 없이 취소(포트원 결제 취소로 전액 환불) — 가상계좌 결제만 환불 계좌를 받습니다.
-create or replace function public.cancel_paid_booking(p_booking_id uuid, p_reason text, p_bank_code text, p_bank_name text, p_account_number text, p_holder_name text)
+create or replace function public.cancel_paid_booking(p_booking_id uuid, p_reason text default null, p_bank_code text default null, p_bank_name text default null, p_account_number text default null, p_holder_name text default null)
 returns void
 language plpgsql
 security definer
