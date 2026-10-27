@@ -638,7 +638,7 @@ function HostAccommodations({ userProfile }) {
                   />
                   <p className="help-text">시세가 아닌, 관리비·청소비 등 최소한의 실비 수준으로 입력해 주세요.</p>
                   <p className="help-text">
-                    선교사님은 계좌이체로만 입금하며, 지급할 때 정산지급대행 수수료({PAYMENT_POLICY.payoutFeeLabel})는 숙소 제공자 부담으로 빼고 보내드립니다.
+                    선교사님은 카드 또는 가상계좌로 결제하며, 지급할 때 정산지급대행 수수료({PAYMENT_POLICY.payoutFeeLabel})는 숙소 제공자 부담으로 빼고 보내드립니다.
                     {Number(formData.price) > 0 && ` (예상 지급액: ₩${payoutNet(formData.price, PAYMENT_POLICY.payoutFeeRate).toLocaleString()}${formData.price_type === 'per_stay' ? '' : ' / 1박'})`}
                   </p>
                 </div>

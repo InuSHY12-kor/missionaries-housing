@@ -1,13 +1,14 @@
 import { supabase } from '../App';
 import { BANKS } from '../components/PayoutAccountForm';
+import { refundCardPayment } from './portonePayment';
 
-// 숙박 실비 계좌이체(페이플 가상계좌) 흐름 공용 도우미 (2026-10-10).
-// DB: bookings.payment_status = unpaid(입금 대기) / paid(입금 완료) / refund_pending(환불 진행 중) / refunded(환불 완료)
+// 숙박 실비 결제 흐름 공용 도우미 (2026-10-10, 2026-10-27 포트원 카드·가상계좌 결제로 전환).
+// DB: bookings.payment_status = unpaid(결제 대기) / paid(결제 완료) / refund_pending(환불 진행 중) / refunded(환불 완료)
 // 입금 후 취소는 RPC cancel_paid_booking(환불 요청)으로만 할 수 있습니다.
 
 export const PAYMENT_STATUS_LABEL = {
-  unpaid: '입금 대기',
-  paid: '입금 완료',
+  unpaid: '결제 대기',
+  paid: '결제 완료',
   refund_pending: '환불 진행 중',
   refunded: '환불 완료',
 };
@@ -23,8 +24,21 @@ function rpcErrorMessage(error) {
   return error?.message || '처리 중 오류가 발생했습니다.';
 }
 
-// account: { bank_code, account_number, holder_name } (게스트는 필수, 숙소 제공자·관리자는 생략)
+// account: { bank_code, account_number, holder_name } (가상계좌로 결제한 게스트는 필수, 카드 결제·숙소 제공자·관리자는 생략)
+// 취소(환불 요청) 후 카드 결제는 포트원 결제 취소까지 바로 진행합니다. 결과: { cardRefunded }
 export async function cancelPaidBooking(bookingId, reason, account) {
+  await requestRefund(bookingId, reason, account);
+  try {
+    await refundCardPayment(bookingId, reason);
+    return { cardRefunded: true };
+  } catch (e) {
+    // 가상계좌 결제는 환불 계좌로 이체(관리자 처리) — 카드 취소 대상이 아님
+    if (/카드 결제만/.test(e.message)) return { cardRefunded: false };
+    throw new Error('예약 취소와 환불 요청은 접수되었지만, 카드 결제 취소를 바로 끝내지 못했습니다. WEWE가 확인 후 처리해드립니다.');
+  }
+}
+
+async function requestRefund(bookingId, reason, account) {
   const bank = account ? BANKS.find(([code]) => code === account.bank_code) : null;
   const { error } = await supabase.rpc('cancel_paid_booking', {
     p_booking_id: bookingId,

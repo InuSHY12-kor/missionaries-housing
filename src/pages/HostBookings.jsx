@@ -28,7 +28,7 @@ const STATUS_BADGE_CLASS = {
 
 // 입금 상태 배지(입금 대기·입금 완료·환불 진행 중·환불 완료)는 utils/bankTransfer.js에서 함께 씁니다.
 // 숙소 제공자는 여기서 선교사님의 입금 여부를 확인하고, 입실일에 "입실 확인"을 누릅니다.
-// 입실이 확인되면 WEWE가 페이플 정산지급대행으로 실비(수수료 차감)를 지급합니다.
+// 입실이 확인되면 WEWE가 실비(수수료 차감)를 지급합니다(2026-10-27 결제는 포트원 카드·가상계좌).
 
 function formatDate(dateStr) {
   const d = new Date(dateStr);
@@ -75,12 +75,12 @@ function HostBookings({ userProfile }) {
 
   const updateStatus = async (bookingId, status) => {
     const target = bookings.find(b => b.id === bookingId);
-    // 입금 완료된 예약을 숙소 제공자가 취소하면 시점과 관계없이 선교사님께 전액 환불됩니다.
+    // 결제 완료된 예약을 숙소 제공자가 취소하면 시점과 관계없이 선교사님께 전액 환불됩니다(카드는 결제 취소).
     if (status === 'cancelled' && target?.payment_status === 'paid') {
-      if (!window.confirm('이미 입금된 예약입니다. 취소하면 선교사님께 입금액 전액이 환불됩니다. 취소하시겠습니까?')) return;
+      if (!window.confirm('이미 결제된 예약입니다. 취소하면 선교사님께 결제액 전액이 환불됩니다. 취소하시겠습니까?')) return;
       try {
-        await cancelPaidBooking(bookingId, '숙소 제공자 예약 취소');
-        setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled', payment_status: 'refund_pending' } : b));
+        const { cardRefunded } = await cancelPaidBooking(bookingId, '숙소 제공자 예약 취소');
+        setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled', payment_status: cardRefunded ? 'refunded' : 'refund_pending' } : b));
       } catch (error) {
         alert('오류: ' + error.message);
       }
@@ -158,14 +158,14 @@ function HostBookings({ userProfile }) {
           {booking.payment_status === 'unpaid' && (
             <p>
               {booking.va_account_number
-                ? `선교사님의 입금을 기다리고 있습니다${booking.deposit_due_at ? ` (입금 기한 ${formatDateTime(booking.deposit_due_at)})` : ''}. 기한까지 입금되지 않으면 예약이 자동 취소됩니다.`
-                : '입금 계좌(가상계좌) 발급을 준비하고 있습니다. 발급 후 선교사님이 7일 안에 입금합니다.'}
+                ? `선교사님이 가상계좌 입금을 준비하고 있습니다${booking.deposit_due_at ? ` (기한 ${formatDateTime(booking.deposit_due_at)})` : ''}. 기한까지 입금되지 않으면 예약이 자동 취소됩니다.`
+                : `선교사님의 결제를 기다리고 있습니다${booking.deposit_due_at ? ` (결제 기한 ${formatDateTime(booking.deposit_due_at)})` : ''}. 결제되면 알림으로 알려드립니다.`}
             </p>
           )}
           {booking.payment_status === 'paid' && (
             <>
               <p>
-                입금 완료{booking.paid_at ? ` (${formatDateTime(booking.paid_at)})` : ''}
+                결제 완료{booking.paid_at ? ` (${formatDateTime(booking.paid_at)})` : ''}
                 {booking.checked_in_at ? ` · 입실 확인 ${formatDateTime(booking.checked_in_at)}` : ' · 입실일에 "입실 확인"을 눌러주세요'}
               </p>
               {Number(booking.total_price) > 0 && (
@@ -238,9 +238,9 @@ function HostBookings({ userProfile }) {
         <div className="host-fee-notice">
           <strong>숙박 실비 지급 안내</strong>
           <p>
-            선교사님은 예약 확정 후 발급되는 {ORG_INFO.paymentPartner} 가상계좌로 {PAYMENT_POLICY.depositDays}일 안에 계좌이체로 입금합니다.
-            입실이 확인되면 {ORG_INFO.paymentPartner} 정산지급대행을 통해 등록하신 지급 계좌로 실비를 보내드리며,
-            이때 <b>정산지급대행 업체가 가져가는 수수료({PAYMENT_POLICY.payoutFeeLabel})는 숙소 제공자 부담</b>으로 실비에서 빼고 지급됩니다.
+            선교사님은 예약 확정 후 {PAYMENT_POLICY.depositDays}일 안에 {ORG_INFO.paymentPartner}를 통해 카드 또는 가상계좌로 결제합니다.
+            결제가 완료되면 알림으로 알려드리고, 입실이 확인되면 등록하신 지급 계좌로 실비를 보내드리며,
+            이때 <b>정산지급대행 수수료({PAYMENT_POLICY.payoutFeeLabel})는 숙소 제공자 부담</b>으로 실비에서 빼고 지급됩니다.
           </p>
         </div>
 

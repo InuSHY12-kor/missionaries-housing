@@ -118,6 +118,19 @@ function MyBookings({ userProfile }) {
         alert('입실일 당일부터는 직접 취소·환불할 수 없습니다. WEWE에 문의해주세요.');
         return;
       }
+      // (2026-10-27) 카드 결제는 환불 계좌 없이 결제 취소로 전액 환불
+      if (target.pg_method === 'card') {
+        if (!window.confirm('예약을 취소하시겠습니까? 카드 결제가 전액 취소됩니다(카드사에 따라 3~7영업일 안에 반영).')) return;
+        try {
+          const { cardRefunded } = await cancelPaidBooking(target.id, '게스트 예약 취소', null);
+          setBookings(prev => prev.map(b => b.id === target.id ? { ...b, status: 'cancelled', payment_status: cardRefunded ? 'refunded' : 'refund_pending' } : b));
+          alert('예약이 취소되고 카드 결제가 취소되었습니다.');
+        } catch (error) {
+          alert(error.message);
+          fetchBookings();
+        }
+        return;
+      }
       setRefundModal({ booking: target, mode: 'cancel' });
       return;
     }
@@ -275,7 +288,7 @@ function MyBookings({ userProfile }) {
                     {booking.status === 'confirmed' && booking.payment_status === 'unpaid' && (
                       <Link to={`/my-bookings/${booking.id}/pay`} className="btn btn-primary">
                         <Landmark size={16} />
-                        {booking.va_account_number ? '입금 계좌 보기' : '입금 안내'}
+                        {booking.va_account_number ? '입금 계좌 보기' : '결제하기'}
                       </Link>
                     )}
                     <button className="btn btn-danger" onClick={() => handleCancel(booking.id)}>
@@ -287,7 +300,9 @@ function MyBookings({ userProfile }) {
 
                 {booking.payment_status === 'refund_pending' && (
                   <div className="booking-refund-status">
-                    {refundAccountIds.has(booking.id) ? (
+                    {booking.pg_method === 'card' ? (
+                      <p>카드 결제 취소를 진행하고 있습니다. 카드사에 따라 3~7영업일 안에 반영됩니다.</p>
+                    ) : refundAccountIds.has(booking.id) ? (
                       <p>환불 진행 중입니다. 입력하신 계좌로 영업일 기준 3일 안에 이체해드립니다.</p>
                     ) : (
                       <>

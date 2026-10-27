@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../App';
 import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_BADGE_CLASS, cancelPaidBooking, formatDateTime } from '../utils/bankTransfer';
+import { refundCardPayment, PAY_METHOD_LABEL } from '../utils/portonePayment';
 import { payoutFee } from '../utils/price';
 import SiteStats from './SiteStats';
 import AdminOverview from './AdminOverview';
@@ -413,19 +414,35 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
   const activeMemberFilter = MEMBER_FILTERS.find(f => f.key === memberFilter) || MEMBER_FILTERS[0];
   const visibleMembers = members.filter(activeMemberFilter.test);
 
+  // (2026-10-27) 카드 결제 환불: 포트원 결제 취소(전액). 자동 취소가 실패해 "환불 진행 중"으로 남은 건에 씁니다.
+  const runCardRefund = async (booking) => {
+    if (!window.confirm(`₩${Number(booking.total_price).toLocaleString()} 카드 결제를 전액 취소할까요?`)) return;
+    setBookingStatusBusyId(booking.id);
+    try {
+      await refundCardPayment(booking.id, '관리자 환불 처리');
+      setAllBookings(allBookings.map(b => (b.id === booking.id ? { ...b, payment_status: 'refunded', refunded_at: new Date().toISOString() } : b)));
+    } catch (error) {
+      alert('오류: ' + error.message);
+    } finally {
+      setBookingStatusBusyId(null);
+    }
+  };
+
   // 관리자가 문제가 생긴 예약을 직접 확정/취소/되돌리기 할 수 있도록 하는 조정 기능.
   const changeBookingStatus = async (booking, newStatus) => {
     if (newStatus === booking.status) return;
     const refunding = newStatus === 'cancelled' && booking.payment_status === 'paid';
     const question = refunding
-      ? '입금 완료된 예약입니다. 취소하면 "환불 진행 중"이 되고, 선교사님이 입력한 계좌로 환불 이체가 필요합니다. 진행하시겠습니까?'
+      ? (booking.pg_method === 'card'
+        ? '카드로 결제된 예약입니다. 취소하면 카드 결제가 전액 취소됩니다. 진행하시겠습니까?'
+        : '결제 완료된 예약입니다. 취소하면 "환불 진행 중"이 되고, 선교사님이 입력한 계좌로 환불 이체가 필요합니다. 진행하시겠습니까?')
       : `이 예약의 상태를 '${BOOKING_STATUS_LABEL[newStatus]}'(으)로 변경하시겠습니까?`;
     if (!window.confirm(question)) return;
     setBookingStatusBusyId(booking.id);
     try {
       if (refunding) {
-        await cancelPaidBooking(booking.id, '관리자 예약 취소');
-        setAllBookings(allBookings.map(b => (b.id === booking.id ? { ...b, status: 'cancelled', payment_status: 'refund_pending' } : b)));
+        const { cardRefunded } = await cancelPaidBooking(booking.id, '관리자 예약 취소');
+        setAllBookings(allBookings.map(b => (b.id === booking.id ? { ...b, status: 'cancelled', payment_status: cardRefunded ? 'refunded' : 'refund_pending' } : b)));
         return;
       }
       const { error } = await supabase
@@ -1112,9 +1129,10 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         {activeTab === 'bookings' && (
           <div className="review-section">
             <p className="member-notice">
-              모든 호스트의 예약을 확인하고 조정합니다. 숙박 실비는 계좌이체(페이플 가상계좌)로만 받으며,
-              순서는 가상계좌 입력 → 입금 확인 → 입실 확인 → 지급(수수료 {PAYMENT_POLICY.payoutFeeLabel} 숙소 제공자 부담)입니다.
-              입금된 예약을 "취소됨"으로 바꾸면 "환불 진행 중"이 되고, 환불 이체 후 "환불 완료 처리"를 눌러주세요.
+              모든 호스트의 예약을 확인하고 조정합니다. 숙박 실비는 포트원(KG이니시스) 카드·가상계좌로 결제되며
+              결제 결과는 자동 반영됩니다. 순서는 예약 확정 → 결제(7일 안) → 입실 확인 → 지급(수수료 {PAYMENT_POLICY.payoutFeeLabel} 숙소 제공자 부담)입니다.
+              결제된 예약을 취소하면 카드는 결제가 바로 취소되고, 가상계좌는 "환불 진행 중"이 되어 환불 계좌로 이체한 뒤 "환불 완료 처리"를 눌러주세요.
+              "(수동)" 버튼은 자동 반영이 안 될 때만 쓰세요.
             </p>
             {!loading && (awaitingDepositCount > 0 || refundPendingCount > 0) && (
               <p className="payout-todo">
@@ -1174,8 +1192,11 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
                       {booking.va_account_number && (
                         <p><strong>가상계좌:</strong> {booking.va_bank_name} {booking.va_account_number}{booking.deposit_due_at ? ` · 기한 ${formatDateTime(booking.deposit_due_at)}` : ''}</p>
                       )}
+                      {booking.pg_payment_id && (
+                        <p><strong>결제(포트원):</strong> {PAY_METHOD_LABEL[booking.pg_method] || '-'} · {booking.pg_status || '-'} · <code>{booking.pg_payment_id}</code></p>
+                      )}
                       {booking.depositor_name && <p><strong>입금자명:</strong> {booking.depositor_name}</p>}
-                      {booking.paid_at && <p><strong>입금 확인:</strong> {formatDateTime(booking.paid_at)}</p>}
+                      {booking.paid_at && <p><strong>결제 완료:</strong> {formatDateTime(booking.paid_at)}</p>}
                       {booking.checked_in_at && <p><strong>입실 확인:</strong> {formatDateTime(booking.checked_in_at)}</p>}
                       {booking.payment_status === 'paid' && (
                         <p>
@@ -1189,9 +1210,11 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
                       {booking.payment_status === 'refund_pending' && (
                         <p className="refund-account-line">
                           <strong>환불 계좌:</strong>{' '}
-                          {refundAccount
-                            ? `${refundAccount.bank_name} ${refundAccount.account_number} (예금주 ${refundAccount.holder_name})`
-                            : '선교사님 입력 대기'}
+                          {booking.pg_method === 'card'
+                            ? '카드 결제 취소 대상(아래 "카드 결제 취소" 버튼)'
+                            : refundAccount
+                              ? `${refundAccount.bank_name} ${refundAccount.account_number} (예금주 ${refundAccount.holder_name})`
+                              : '선교사님 입력 대기'}
                         </p>
                       )}
                       {booking.refunded_at && <p><strong>환불 완료:</strong> {formatDateTime(booking.refunded_at)}</p>}
@@ -1200,12 +1223,17 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
                       {booking.status === 'confirmed' && booking.payment_status === 'unpaid' && (
                         <>
                           <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => setVirtualAccount(booking)}>
-                            {booking.va_account_number ? '가상계좌 수정' : '가상계좌 입력'}
+                            {booking.va_account_number ? '가상계좌 수정(수동)' : '가상계좌 입력(수동)'}
                           </button>
                           <button type="button" className="btn btn-success" disabled={busy} onClick={() => markDeposited(booking)}>
-                            입금 확인 처리
+                            결제 확인 처리(수동)
                           </button>
                         </>
+                      )}
+                      {booking.payment_status === 'refund_pending' && booking.pg_method === 'card' && (
+                        <button type="button" className="btn btn-danger" disabled={busy} onClick={() => runCardRefund(booking)}>
+                          카드 결제 취소
+                        </button>
                       )}
                       {booking.status === 'confirmed' && booking.payment_status === 'paid' && !booking.checked_in_at && (
                         <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => markCheckedIn(booking)}>

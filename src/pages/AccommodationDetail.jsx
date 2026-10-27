@@ -650,8 +650,7 @@ function AccommodationDetail({ userProfile }) {
 
                   <p className="note">예약 후 호스트의 승인이 필요합니다.</p>
                   <p className="note">
-                    숙박 실비는 <b>계좌이체로만</b> 받습니다(카드 결제 없음). 예약이 확정되면 발급되는 가상계좌로
-                    {' '}{PAYMENT_POLICY.depositDays}일 안에 입금해주세요. <Link to="/how-it-works">이용 흐름 보기</Link>
+                    숙박 실비는 예약이 확정되면 <b>{PAYMENT_POLICY.depositDays}일 안에</b> 카드 또는 가상계좌로 결제해주세요. <Link to="/how-it-works">이용 흐름 보기</Link>
                   </p>
                 </>
               )}

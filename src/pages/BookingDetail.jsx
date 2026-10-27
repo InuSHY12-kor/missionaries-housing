@@ -148,7 +148,7 @@ function BookingDetail({ userProfile }) {
             <div className="booking-info-row">
               <span className="booking-info-price">₩</span>
               <div>
-                <p className="label">숙박 실비 (계좌이체)</p>
+                <p className="label">숙박 실비</p>
                 <p className="value">₩{booking.total_price?.toLocaleString()}</p>
               </div>
             </div>
@@ -174,7 +174,7 @@ function BookingDetail({ userProfile }) {
             {booking.status === 'confirmed' && booking.payment_status === 'unpaid' && booking.guest_id === userProfile?.id && (
               <Link to={`/my-bookings/${booking.id}/pay`} className="btn btn-primary booking-detail-pay-link">
                 <Landmark size={16} />
-                {booking.va_account_number ? '입금 계좌 보기' : '입금 안내 보기'}
+                {booking.va_account_number ? '입금 계좌 보기' : '결제하기'}
               </Link>
             )}
 

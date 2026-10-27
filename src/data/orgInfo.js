@@ -13,14 +13,14 @@ export const ORG_INFO = {
   email: 'wewe@wewestay.com',
   hours: '평일 10:00 ~ 17:00 (주말·공휴일 휴무)',
   privacyOfficer: '홍현지 (대표)',
-  paymentPartner: '페이플(Payple)',
+  paymentPartner: '포트원(KG이니시스)',
   kakaoChannel: 'https://pf.kakao.com/_ISXFX',
 };
 
 // 숙박 실비 입금·지급 정책 (2026-10-10). 바뀌면 여기만 고치면 안내 문구와 계산에 함께 반영됩니다.
 //   depositDays: 가상계좌 발급 후 입금 기한(일) — DB 마이그레이션 bank_transfer_flow의 7일과 같아야 합니다.
-//   payoutFeeRate: 숙소 제공자에게 지급할 때 정산지급대행 업체(페이플)가 가져가는 수수료율.
-//     페이플은 요율을 공개하지 않고 계약 때 정하므로, 계약서의 요율로 꼭 바꿔주세요.
+//   payoutFeeRate: 숙소 제공자에게 지급할 때 빼는 결제·정산지급대행 수수료율(숙소 제공자 부담).
+//     포트원·KG이니시스(지급대행) 계약 요율이 정해지면 그 요율로 꼭 바꿔주세요.
 export const PAYMENT_POLICY = {
   depositDays: 7,
   payoutFeeRate: 0.015,
