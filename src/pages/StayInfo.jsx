@@ -6,9 +6,9 @@ import { ORG_INFO, PAYMENT_POLICY } from '../data/orgInfo';
 import { MISSIONARY_TERMS, HOST_TERMS, TERMS_EFFECTIVE_DATE } from '../data/termsOfService';
 
 // WEWE STAY 공개 안내 페이지 묶음 (2026-10-10).
-// 결제대행사(페이플) 심사와 이용자 안내를 위해 로그인 없이 볼 수 있습니다.
+// 결제대행사 심사와 이용자 안내를 위해 로그인 없이 볼 수 있습니다(2026-10-27 포트원·KG이니시스 카드·가상계좌 결제로 개정).
 //   /stay/guide          서비스 안내 (서비스 소개 · 운영 단체 정보 · 연락처)
-//   /stay/how-it-works   이용 흐름 (예약 → 입금 → 입실 → 지급)
+//   /stay/how-it-works   이용 흐름 (예약 → 결제 → 입실 → 지급)
 //   /stay/terms          이용약관 (가입 화면과 같은 문구, data/termsOfService.js)
 //   /stay/privacy        개인정보처리방침
 //   /stay/refund-policy  취소·환불 규정 (RefundPolicy.jsx)
@@ -94,7 +94,7 @@ export function ServiceGuidePage() {
         <div className="si-grid">
           <div><Search size={22} /><h3>숙소 검색·예약</h3><p>지역·날짜·인원으로 숙소를 찾고 예약을 요청합니다.</p></div>
           <div><CalendarCheck size={22} /><h3>예약 확정·관리</h3><p>숙소 제공자가 예약을 확정하고 날짜를 관리합니다.</p></div>
-          <div><Landmark size={22} /><h3>실비 입금·지급</h3><p>계좌이체(가상계좌)로 입금하고, 입실 후 숙소 제공자에게 지급됩니다.</p></div>
+          <div><Landmark size={22} /><h3>실비 결제·지급</h3><p>카드 또는 가상계좌로 결제하고, 입실 후 숙소 제공자에게 지급됩니다.</p></div>
           <div><Mail size={22} /><h3>메시지·알림</h3><p>예약 관련 문의를 주고받고 이메일 알림을 받습니다.</p></div>
         </div>
       </section>
@@ -102,17 +102,16 @@ export function ServiceGuidePage() {
       <section className="si-card">
         <h2>숙박 실비 결제 방식</h2>
         <p>
-          숙박 실비는 <b>계좌이체로만</b> 받습니다(신용카드 결제 없음). 예약이 확정되면 결제대행사
-          {' '}{ORG_INFO.paymentPartner}가 예약마다 발급하는 <b>가상계좌</b>가 안내되고, 입금은 WEWE의 운영 계좌가
-          아닌 이 가상계좌로 하며, <b>발급일로부터 {PAYMENT_POLICY.depositDays}일 안에</b> 입금하지 않으면 예약이 자동으로 취소됩니다.
-          입금된 실비는 선교사님의 <b>입실이 확인된 뒤</b> {ORG_INFO.paymentPartner}
-          {' '}정산지급대행을 통해 숙소 제공자의 계좌로 지급됩니다.
+          숙박 실비는 결제대행사 {ORG_INFO.paymentPartner}를 통해 <b>신용·체크카드 또는 가상계좌</b>로 결제합니다.
+          {' '}결제는 WEWE의 운영 계좌가 아닌 결제대행사를 통해 이루어지며, 예약이 확정된 날로부터
+          {' '}<b>{PAYMENT_POLICY.depositDays}일 안에</b> 결제(가상계좌는 입금)하지 않으면 예약이 자동으로 취소됩니다.
+          결제된 실비는 선교사님의 <b>입실이 확인된 뒤</b> 정산지급대행을 통해 숙소 제공자의 계좌로 지급됩니다.
         </p>
         <div className="si-fee-box">
           <strong>수수료 안내</strong>
           <ul>
-            <li>선교사님: 표시된 숙박 실비만 입금하시면 되며, 추가 수수료는 없습니다.</li>
-            <li>숙소 제공자: 실비를 지급할 때 <b>정산지급대행 업체인 {ORG_INFO.paymentPartner}가 가져가는 수수료 {PAYMENT_POLICY.payoutFeeLabel}</b>를 부담하며, 이 수수료를 뺀 금액이 지급됩니다. (예: 실비 100,000원 → 지급액 {(100000 - Math.ceil(100000 * PAYMENT_POLICY.payoutFeeRate)).toLocaleString()}원)</li>
+            <li>선교사님: 표시된 숙박 실비만 결제하시면 되며, 추가 수수료는 없습니다.</li>
+            <li>숙소 제공자: 실비를 지급할 때 <b>결제·정산지급대행 수수료 {PAYMENT_POLICY.payoutFeeLabel}</b>를 부담하며, 이 수수료를 뺀 금액이 지급됩니다. (예: 실비 100,000원 → 지급액 {(100000 - Math.ceil(100000 * PAYMENT_POLICY.payoutFeeRate)).toLocaleString()}원)</li>
             <li>WEWE는 이 외에 중개 수수료를 받지 않습니다. 수수료율은 결제대행 계약에 따라 달라질 수 있으며, 바뀌면 미리 안내합니다.</li>
           </ul>
         </div>
@@ -143,9 +142,9 @@ const FLOW_STEPS = [
   { icon: UserCheck, title: '1. 회원가입·승인', who: '선교사 · 숙소 제공자', body: '가입 후 증빙 자료를 제출하면 WEWE가 확인하고 승인합니다. 숙소 제공자는 실비를 받을 지급 계좌도 등록합니다.' },
   { icon: Search, title: '2. 숙소 찾기·예약 요청', who: '선교사', body: '승인된 숙소 중 원하는 곳을 골라 날짜를 정해 예약을 요청합니다. 실비(1박 기준 또는 숙박 1회 정액)가 미리 표시됩니다.' },
   { icon: CalendarCheck, title: '3. 예약 확정', who: '숙소 제공자', body: '숙소 제공자가 예약 요청을 확인하고 확정합니다. 확정 전에는 언제든 비용 없이 취소할 수 있습니다.' },
-  { icon: Landmark, title: '4. 실비 입금 (계좌이체)', who: '선교사', body: `예약이 확정되면 ${ORG_INFO.paymentPartner}가 발급한 예약 전용 가상계좌가 안내됩니다. 발급일로부터 ${PAYMENT_POLICY.depositDays}일 안에 계좌이체로 입금하면, 선교사님·숙소 제공자·WEWE 모두 "입금 완료"를 확인할 수 있습니다. 기한이 지나면 예약은 자동 취소됩니다. (카드 결제는 받지 않습니다)` },
+  { icon: Landmark, title: '4. 실비 결제 (카드·가상계좌)', who: '선교사', body: `예약이 확정되면 ${PAYMENT_POLICY.depositDays}일 안에 ${ORG_INFO.paymentPartner} 결제창에서 카드로 결제하거나 예약 전용 가상계좌를 받아 입금합니다. 결제가 끝나면 숙소 제공자에게 알림이 가고, 선교사님·숙소 제공자·WEWE 모두 "결제 완료"를 확인할 수 있습니다. 기한이 지나면 예약은 자동 취소됩니다.` },
   { icon: DoorOpen, title: '5. 입실 확인', who: '숙소 제공자', body: '입실일에 선교사님이 숙소에 들어오면 숙소 제공자가 "입실 확인"을 누릅니다. 입실 전에 취소하면 취소·환불 규정에 따라 환불됩니다.' },
-  { icon: Send, title: '6. 숙소 제공자에게 지급', who: 'WEWE · 페이플', body: `입실이 확인되면 ${ORG_INFO.paymentPartner} 정산지급대행으로 숙소 제공자가 등록한 계좌에 실비가 지급됩니다. 이때 정산지급대행 업체가 가져가는 수수료(${PAYMENT_POLICY.payoutFeeLabel})는 숙소 제공자 부담으로 실비에서 빼고 지급되며, 지급 전에 예금주가 맞는지 계좌조회로 확인합니다.` },
+  { icon: Send, title: '6. 숙소 제공자에게 지급', who: 'WEWE', body: `입실이 확인되면 정산지급대행으로 숙소 제공자가 등록한 계좌에 실비가 지급됩니다. 이때 정산지급대행 업체가 가져가는 수수료(${PAYMENT_POLICY.payoutFeeLabel})는 숙소 제공자 부담으로 실비에서 빼고 지급되며, 지급 전에 예금주가 맞는지 계좌조회로 확인합니다.` },
 ];
 
 export function HowItWorksPage() {
@@ -154,19 +153,19 @@ export function HowItWorksPage() {
       active="/how-it-works"
       eyebrow="HOW IT WORKS"
       title="이용 흐름"
-      subtitle="예약부터 입금, 입실, 숙소 제공자 지급까지 한눈에 보기"
+      subtitle="예약부터 결제, 입실, 숙소 제공자 지급까지 한눈에 보기"
     >
       <section className="si-card">
         <h2>돈은 이렇게 움직입니다</h2>
         <div className="si-money">
-          <div><b>선교사님</b><span>계좌이체</span></div>
+          <div><b>선교사님</b><span>카드 · 가상계좌</span></div>
           <div className="si-arrow">→</div>
-          <div><b>{ORG_INFO.paymentPartner} 가상계좌</b><span>입금 확인 · 입실 전까지 보관</span></div>
+          <div><b>{ORG_INFO.paymentPartner}</b><span>결제 확인 · 입실 전까지 보관</span></div>
           <div className="si-arrow">→</div>
           <div><b>숙소 제공자 계좌</b><span>입실 확인 후 지급대행 (수수료 {PAYMENT_POLICY.payoutFeeLabel} 차감)</span></div>
         </div>
         <p className="si-note">
-          입금은 WEWE의 운영 계좌가 아니라 {ORG_INFO.paymentPartner}가 발급한 가상계좌로, 계좌이체로만 받습니다.
+          결제는 WEWE의 운영 계좌가 아니라 결제대행사 {ORG_INFO.paymentPartner}를 통해 카드 또는 가상계좌로 받습니다.
           지급할 때 정산지급대행 업체가 가져가는 수수료({PAYMENT_POLICY.payoutFeeLabel})는 숙소 제공자가 부담하며, WEWE는 중개 수수료를 받지 않습니다.
         </p>
       </section>
@@ -187,8 +186,8 @@ export function HowItWorksPage() {
       <section className="si-card">
         <h2>취소하면 어떻게 되나요?</h2>
         <ul>
-          <li>입금 전: 언제든 비용 없이 취소할 수 있습니다.</li>
-          <li>입금 후 입실일 전날까지 선교사님이 취소: 입금액 <b>전액 환불</b></li>
+          <li>결제 전: 언제든 비용 없이 취소할 수 있습니다.</li>
+          <li>결제 후 입실일 전날까지 선교사님이 취소: 결제액 <b>전액 환불</b> (카드는 결제 취소)</li>
           <li>입실일 당일부터: 직접 취소·환불 불가 (부득이한 사정은 WEWE에 문의)</li>
           <li>숙소 제공자 사정으로 취소: 시점과 관계없이 <b>전액 환불</b></li>
         </ul>
@@ -245,7 +244,7 @@ export function PrivacyPage() {
           <li>회원 가입·본인 확인·회원 자격 심사(선교사·숙소 제공자 승인)</li>
           <li>방문자 수·유입 경로 등 서비스 이용 통계 작성과 서비스 개선</li>
           <li>숙소 등록·검색, 예약 연결, 회원 간 메시지와 알림 발송</li>
-          <li>숙박 실비의 입금 확인, 환불, 숙소 제공자에 대한 지급(정산지급대행)</li>
+          <li>숙박 실비의 결제 확인, 환불, 숙소 제공자에 대한 지급(정산지급대행)</li>
           <li>문의·분쟁 처리, 부정 이용 방지, 법령상 의무 이행</li>
         </ul>
 
@@ -256,7 +255,7 @@ export function PrivacyPage() {
             <tr><td>모든 회원</td><td>이메일, 비밀번호(암호화 저장), 성명, 휴대전화번호</td></tr>
             <tr><td>선교사·숙소 제공자</td><td>소속 교회명·주소, 자기소개(선택), 자격 확인용 증빙 자료(사진)</td></tr>
             <tr><td>숙소 제공자</td><td>숙소 주소·위치·사진, 지급 계좌(은행, 계좌번호, 예금주명, 예금주 구분, 예금주 생년월일 6자리 또는 사업자·고유번호)</td></tr>
-            <tr><td>예약·입금</td><td>예약 일정, 가상계좌 번호, 입금자명, 입금 일시·금액, 환불 시 환불 계좌(은행, 계좌번호, 예금주명)</td></tr>
+            <tr><td>예약·결제</td><td>예약 일정, 결제 수단·결제 번호·결제 일시·금액(카드번호는 결제대행사가 처리하며 WEWE는 저장하지 않음), 가상계좌 번호, 환불 시 환불 계좌(은행, 계좌번호, 예금주명)</td></tr>
             <tr><td>후원자</td><td>이메일, 성명, 휴대전화번호(선택)</td></tr>
             <tr><td>자동 수집</td><td>접속 기록, 브라우저 종류, 로그인 유지를 위한 브라우저 저장 정보, 방문 통계 정보(방문한 페이지와 시각, 유입 경로(직전 사이트 주소·공유 링크 표시), 기기 종류, 브라우저마다 무작위로 만든 방문자 번호) — 이름·이메일·IP 주소는 통계에 저장하지 않음</td></tr>
           </tbody>
@@ -282,7 +281,7 @@ export function PrivacyPage() {
         <table className="si-table">
           <thead><tr><th>수탁자</th><th>위탁 업무</th></tr></thead>
           <tbody>
-            <tr><td>{ORG_INFO.paymentPartner}</td><td>가상계좌 발급, 입금 확인, 환불 이체, 정산지급대행, 계좌 예금주 확인</td></tr>
+            <tr><td>{ORG_INFO.paymentPartner}</td><td>카드 결제·가상계좌 발급, 결제 확인, 결제 취소·환불, 정산지급대행</td></tr>
             <tr><td>Supabase Inc.</td><td>회원·예약 정보 저장, 로그인 인증, 파일 저장 (저장 위치: 대한민국 서울 리전)</td></tr>
             <tr><td>Netlify, Inc.</td><td>웹사이트 호스팅 (접속 기록 처리)</td></tr>
             <tr><td>Google LLC</td><td>알림 이메일 발송(Gmail), 지도 표시(Google Maps)</td></tr>
