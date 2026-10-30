@@ -10,13 +10,14 @@
 .wewe-page {
   --wh-ink: #1c1c1a;
   --wh-ink-soft: #4a4a46;
-  --wh-stone: #8c8880;
+  /* (2026-10-31 Impeccable 점검) 흰 배경에서 본문 대비 4.5:1을 넘도록 회색·진한 주황을 한 단계 진하게 */
+  --wh-stone: #6f6b64;
   --wh-line: #e5e2da;
   --wh-bg: #ffffff;
   --wh-bg-soft: #faf9f6;
   --wh-teal: #146b71;
   --wh-orange: #d97b3f;
-  --wh-orange-deep: #b8622c;
+  --wh-orange-deep: #a65424;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -39,7 +40,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.18em;
-  color: var(--wh-orange);
+  color: var(--wh-orange-deep);
   margin-bottom: 0.85rem;
 }
 
@@ -67,16 +68,23 @@
   text-decoration: none;
   border: none;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.wh-btn:focus-visible {
+  outline: 3px solid var(--wh-orange);
+  outline-offset: 3px;
 }
 
 .wh-btn-primary {
   color: #fff;
-  background: linear-gradient(90deg, var(--wh-orange) 0%, var(--wh-orange-deep) 100%);
+  /* (2026-10-31) 그라데이션(밝은 쪽 흰 글씨 대비 3.3:1) 대신 진한 주황 단색 — 대비 5.4:1 */
+  background: var(--wh-orange-deep);
 }
 
 .wh-btn-primary:hover {
-  box-shadow: 0 6px 18px rgba(217, 123, 63, 0.45);
+  background: #8f461c;
+  box-shadow: 0 6px 18px rgba(166, 84, 36, 0.35);
 }
 
 .wh-btn-outline {
@@ -97,6 +105,12 @@
 .wh-btn-ghost:hover {
   border-color: var(--wh-orange);
   color: var(--wh-orange);
+}
+
+/* 브라우저 기본 표면(선택 영역)도 브랜드 색으로 (2026-10-31) */
+.wewe-page ::selection {
+  background: rgba(217, 123, 63, 0.25);
+  color: var(--wh-ink);
 }
 
 /* 하위 페이지 공용 히어로 배너 (WevePageHero) */
@@ -257,7 +271,7 @@
 }
 
 .wh-footer-copy p {
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 0.8rem;
 }
 
@@ -297,7 +311,7 @@
   stroke-linecap: round;
   stroke-dasharray: 87.9;
   stroke-dashoffset: 87.9;
-  animation: wpHeroRingFill 3.5s linear forwards;
+  animation: wpHeroRingFill var(--wp-ring-duration, 3.5s) linear forwards;
 }
 
 @keyframes wpHeroRingFill {
@@ -449,9 +463,9 @@
 .wh-live-badge {
   display: inline-block;
   margin-left: 0.4rem;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 0.15rem 0.5rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 999px;
   background: var(--wh-teal);
   color: #fff;
@@ -461,11 +475,11 @@
 .wh-progress-badge {
   display: inline-block;
   margin-left: 0.4rem;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 0.15rem 0.5rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  background: var(--wh-orange);
+  background: var(--wh-orange-deep);
   color: #fff;
   vertical-align: middle;
 }
