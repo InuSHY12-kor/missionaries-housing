@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { supabase } from '../App';
 import weweIconWhite from '../assets/wewe-icon-white.png';
+import weweIconColor from '../assets/wewe-icon.png';
 import NotificationBell from '../components/NotificationBell';
 import MessageIcon from '../components/MessageIcon';
 
@@ -31,7 +32,10 @@ const ROLE_LABELS = {
 // 위위 홈페이지에서 로그인하면 더 이상 /stay로 강제 이동하지 않고 이 헤더의 상태만
 // "로그인/가입하기" → "로그아웃"으로 바뀝니다 — 로그인한 채로 위위 홈페이지를 계속 볼 수
 // 있고, "위위 스테이"는 사용자가 원할 때 직접 눌러서 이동합니다.
-function WeweHeader() {
+// variant="light"(2026-10-31 흑백 에디토리얼 시안): 사진 배너 위에 얹히는 투명 헤더 대신
+// 흰 바탕에 고정되는 헤더. 지금은 메인(/)만 사용하고, 나머지 페이지는 기존 투명 헤더 그대로입니다.
+function WeweHeader({ variant = 'overlay' }) {
+  const isLight = variant === 'light';
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const navRef = useRef(null);
@@ -108,7 +112,7 @@ function WeweHeader() {
   };
 
   return (
-    <header className="wewe-header">
+    <header className={`wewe-header${isLight ? ' wewe-header-light' : ''}`}>
       {isLoggedIn && userProfile && (userProfile.full_name || userProfile.role) && (
         <div className="wewe-header-top-inner">
           {userProfile.role && (
@@ -123,7 +127,7 @@ function WeweHeader() {
       )}
       <div className="wewe-header-inner">
         <Link to="/" className="wewe-brand" onClick={closeMobileNav}>
-          <img src={weweIconWhite} alt="WEWE" className="wewe-brand-icon" />
+          <img src={isLight ? weweIconColor : weweIconWhite} alt="WEWE" className="wewe-brand-icon" />
           <span className="wewe-brand-text">
             <span className="wewe-brand-name">WEWE</span>
             <span className="wewe-brand-tagline">위로자의 위로자</span>
@@ -161,7 +165,7 @@ function WeweHeader() {
                 <Link to="/admin" className="wewe-nav-link" onClick={closeMobileNav}>관리</Link>
               )}
               <Link to="/profile" className="wewe-nav-link" onClick={closeMobileNav}>프로필</Link>
-              <Link to="/donate" className="wewe-nav-link" onClick={closeMobileNav}>후원하기</Link>
+              <Link to="/donate" className="wewe-nav-link wewe-nav-cta" onClick={closeMobileNav}>후원하기</Link>
               <a href="/stay" target="_blank" rel="noopener" className="wewe-nav-link" onClick={closeMobileNav}>위위 스테이</a>
               <button type="button" className="wewe-nav-link wewe-nav-logout-btn" onClick={handleLogout}>
                 <LogOut size={15} />
@@ -176,7 +180,7 @@ function WeweHeader() {
               <a href="/stay" target="_blank" rel="noopener" className="wewe-nav-link" onClick={closeMobileNav}>위위 스테이</a>
               <Link to="/login" className="wewe-nav-link" onClick={closeMobileNav}>로그인</Link>
               <Link to="/signup" className="wewe-nav-link" onClick={closeMobileNav}>가입하기</Link>
-              <Link to="/donate" className="wewe-nav-link" onClick={closeMobileNav}>후원하기</Link>
+              <Link to="/donate" className="wewe-nav-link wewe-nav-cta" onClick={closeMobileNav}>후원하기</Link>
             </>
           )}
         </nav>
@@ -429,6 +433,118 @@ function WeweHeader() {
 
           .wewe-nav-link {
             font-size: 1.05rem;
+          }
+        }
+
+        /* 흰 바탕 헤더(variant="light") — 무채색 바탕 + 가는 아래 선, 후원하기만 검정 채움 버튼 */
+        .wewe-header-light {
+          position: sticky;
+          background: #fff;
+          box-shadow: inset 0 -1px 0 #ebebeb;
+        }
+
+        .wewe-header-light .wewe-header-top-inner,
+        .wewe-header-light .wewe-header-inner {
+          max-width: 1280px;
+          padding-left: 72px;
+          padding-right: 72px;
+        }
+
+        .wewe-header-light .wewe-header-inner {
+          padding-top: 0.9rem;
+          padding-bottom: 0.9rem;
+        }
+
+        .wewe-header-light .wewe-brand-icon {
+          height: 36px;
+        }
+
+        .wewe-header-light .wewe-brand-name {
+          color: #000;
+        }
+
+        .wewe-header-light .wewe-brand-tagline,
+        .wewe-header-light .wewe-header-welcome {
+          color: #6b6b6b;
+        }
+
+        .wewe-header-light .wewe-status-badge {
+          background: #f2f2f2;
+          color: #000;
+          border-color: #d4d4d4;
+        }
+
+        .wewe-header-light .wewe-nav-link {
+          color: #424242;
+        }
+
+        .wewe-header-light .wewe-nav-link:hover {
+          color: #000;
+          text-decoration: underline;
+          text-decoration-color: #d97b3f;
+          text-decoration-thickness: 2px;
+          text-underline-offset: 6px;
+        }
+
+        .wewe-header-light .wewe-nav-cta {
+          display: inline-flex;
+          align-items: center;
+          min-height: 40px;
+          padding: 0 1rem;
+          border-radius: 6px;
+          background: #000;
+          color: #fff;
+        }
+
+        .wewe-header-light .wewe-nav-cta:hover {
+          color: #fff;
+          background: #2e2e2e;
+          text-decoration: none;
+        }
+
+        .wewe-header-light .wewe-nav-link:focus-visible {
+          outline: 2px solid #000;
+          outline-offset: 3px;
+          border-radius: 4px;
+        }
+
+        .wewe-header-light .notification-bell-btn,
+        .wewe-header-light .message-icon-btn {
+          color: #000;
+        }
+
+        .wewe-header-light .notification-bell-btn:hover,
+        .wewe-header-light .message-icon-btn:hover {
+          background: #f2f2f2;
+        }
+
+        .wewe-header-light .wewe-nav-toggle {
+          width: 44px;
+          height: 44px;
+          background: #f2f2f2;
+        }
+
+        .wewe-header-light .wewe-nav-toggle span {
+          background: #000;
+        }
+
+        @media (max-width: 1000px) {
+          .wewe-header-light .wewe-header-top-inner,
+          .wewe-header-light .wewe-header-inner {
+            padding-left: 20px;
+            padding-right: 20px;
+          }
+        }
+
+        @media (max-width: 860px) {
+          .wewe-header-light .wewe-nav {
+            background: #fff;
+            box-shadow: -1px 0 0 #ebebeb;
+          }
+
+          .wewe-header-light .wewe-nav-cta {
+            min-height: 48px;
+            padding: 0 1.25rem;
           }
         }
       `}</style>
