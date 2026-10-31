@@ -230,7 +230,7 @@ function WeweHome() {
             ))}
 
             {heroImages.length > 1 && (
-              <div className="we-hero-controls">
+              <div className={`we-hero-controls${heroPaused ? ' is-paused' : ''}`}>
                 <button
                   type="button"
                   className="we-hero-ctl"
@@ -249,7 +249,19 @@ function WeweHome() {
                     aria-label={`배너 사진 ${idx + 1}번 보기`}
                     aria-current={idx === heroSlide ? 'true' : undefined}
                   >
-                    {String(idx + 1).padStart(2, '0')}
+                    {/* (2026-10-31) 번호 대신 다른 페이지와 같은 원형 링 — 현재 사진의 링이 주황으로 채워집니다 */}
+                    <svg className="we-hero-ring" viewBox="0 0 32 32" aria-hidden="true">
+                      <circle className="we-hero-ring-track" cx="16" cy="16" r="14" />
+                      {idx === heroSlide && (
+                        <circle
+                          key={`fill-${heroSlide}`}
+                          className="we-hero-ring-fill"
+                          cx="16"
+                          cy="16"
+                          r="14"
+                        />
+                      )}
+                    </svg>
                   </button>
                 ))}
               </div>
@@ -773,9 +785,40 @@ function WeweHome() {
           background: rgba(255, 255, 255, 0.12);
         }
 
-        .we-hero-num[aria-current='true'] {
-          color: var(--we-black);
-          background: #fff;
+        .we-hero-num {
+          min-width: 32px;
+          padding: 0 6px;
+        }
+
+        .we-hero-ring {
+          width: 16px;
+          height: 16px;
+          transform: rotate(-90deg);
+        }
+
+        .we-hero-ring-track {
+          fill: none;
+          stroke: rgba(255, 255, 255, 0.45);
+          stroke-width: 3;
+        }
+
+        .we-hero-ring-fill {
+          fill: none;
+          stroke: var(--we-accent);
+          stroke-width: 3;
+          stroke-linecap: round;
+          stroke-dasharray: 87.9;
+          stroke-dashoffset: 87.9;
+          animation: weHeroRingFill ${HERO_INTERVAL_MS}ms linear forwards;
+        }
+
+        .we-hero-controls.is-paused .we-hero-ring-fill {
+          animation-play-state: paused;
+        }
+
+        @keyframes weHeroRingFill {
+          from { stroke-dashoffset: 87.9; }
+          to { stroke-dashoffset: 0; }
         }
 
         .we-hero-controls .we-hero-ctl:focus-visible {
@@ -1399,7 +1442,8 @@ function WeweHome() {
 
         @media (prefers-reduced-motion: reduce) {
           .we-hero-slide,
-          .we-news-image {
+          .we-news-image,
+          .we-hero-ring-fill {
             transition: none;
           }
         }

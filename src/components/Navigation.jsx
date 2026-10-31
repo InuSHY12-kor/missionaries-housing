@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, Home, MapPin, Calendar, Building2, CalendarClock, Star, Shield, User } from 'lucide-react';
+import { LogOut, Home, MapPin, Calendar, Building2, CalendarClock, Star, Shield, User, Info } from 'lucide-react';
 import wewelogo from '../assets/WEWE_logo_2-mark.png';
 import weweIconWhite from '../assets/wewe-icon-white.png';
 import NotificationBell from './NotificationBell';
@@ -114,6 +114,13 @@ function Navigation({ user, userProfile, onLogout }) {
                       <span className="nav-btn-label">위위</span>
                     </a>
                   </li>
+                  {/* (2026-10-31) 위위스테이 소개(/about) — 서비스 안내·이용 흐름·약관 탭이 함께 있는 안내 페이지 */}
+                  <li>
+                    <Link to="/about" className="nav-btn">
+                      <Info className="nav-btn-icon" size={18} />
+                      <span className="nav-btn-label">소개</span>
+                    </Link>
+                  </li>
                   {(userProfile.role === 'admin' || userProfile.role === 'missionary') && (
                     <li>
                       <Link to="/accommodations" className="nav-btn">
@@ -203,6 +210,7 @@ function Navigation({ user, userProfile, onLogout }) {
 
             <ul className="navbar-nav">
               <li><Link to="/" className="nav-btn">홈</Link></li>
+              <li><Link to="/about" className="nav-btn">소개</Link></li>
               <li>
                 {/* 최상위 WEWE 홈페이지로 돌아가는 링크 — 별도로 마운트된 앱이므로 일반 링크 사용 */}
                 <a href="/" target="_blank" rel="noopener" className="nav-btn">위위</a>

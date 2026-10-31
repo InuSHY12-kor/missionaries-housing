@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { UserCheck, Search, CalendarCheck, Landmark, DoorOpen, Send, Mail, Phone, MapPin } from 'lucide-react';
+import { UserCheck, Search, CalendarCheck, Landmark, DoorOpen, Send, Mail, Phone, MapPin, Home, HeartHandshake, ShieldCheck } from 'lucide-react';
 import PageHero from '../components/PageHero';
 import { ORG_INFO, PAYMENT_POLICY } from '../data/orgInfo';
 import { MISSIONARY_TERMS, HOST_TERMS, TERMS_EFFECTIVE_DATE } from '../data/termsOfService';
 
 // WEWE STAY 공개 안내 페이지 묶음 (2026-10-10).
 // 결제대행사 심사와 이용자 안내를 위해 로그인 없이 볼 수 있습니다(2026-10-27 포트원·KG이니시스 카드·가상계좌 결제로 개정).
+//   /stay/about          위위스테이 소개 (2026-10-31 — 상단 메뉴 '소개'에서 연결)
 //   /stay/guide          서비스 안내 (서비스 소개 · 운영 단체 정보 · 연락처)
 //   /stay/how-it-works   이용 흐름 (예약 → 결제 → 입실 → 지급)
 //   /stay/terms          이용약관 (가입 화면과 같은 문구, data/termsOfService.js)
@@ -19,6 +20,7 @@ const INFO_HERO_IMAGES = [
 ];
 
 export const STAY_INFO_TABS = [
+  { to: '/about', label: '위위스테이 소개' },
   { to: '/guide', label: '서비스 안내' },
   { to: '/how-it-works', label: '이용 흐름' },
   { to: '/terms', label: '이용약관' },
@@ -62,6 +64,91 @@ export function OrgInfoBox() {
         <dt>문의 시간</dt><dd>{ORG_INFO.hours}</dd>
       </dl>
     </section>
+  );
+}
+
+// ───────────────────────── 위위스테이 소개 ─────────────────────────
+// (2026-10-31) 상단 메뉴 "소개"에서 여는 위위스테이 소개 페이지. 왜 시작했는지, 누구를 위한 곳인지,
+// 어떻게 신뢰를 지키는지, 어떻게 시작하는지를 한 페이지에 모았습니다.
+const ABOUT_AUDIENCE = [
+  {
+    icon: Home,
+    title: '선교사님께',
+    body: '안식년·휴가·사역 보고 등으로 한국에 머무는 동안, 낯선 숙박업소 대신 마음 편히 쉴 수 있는 집을 찾아 드립니다. 지역과 날짜로 검색하고 예약을 요청하시면 됩니다.',
+  },
+  {
+    icon: HeartHandshake,
+    title: '숙소 제공자께',
+    body: '교회·성도·기관이 가진 빈 방이나 집을 선교사님께 내어드리는 나눔입니다. 숙박 비용은 관리비·청소비 같은 최소한의 실비로 정하거나 무료로 제공하실 수 있습니다.',
+  },
+];
+
+const ABOUT_START_STEPS = [
+  { title: '회원가입', body: '선교사 또는 숙소 제공자로 가입하고 이메일을 인증합니다.' },
+  { title: '서류 확인·승인', body: '선교사증·추천서, 신분·숙소 권한 자료를 관리자가 확인한 뒤 승인합니다.' },
+  { title: '숙소 검색·등록', body: '선교사님은 숙소를 찾아 예약을 요청하고, 숙소 제공자는 숙소를 등록합니다.' },
+];
+
+export function StayAboutPage() {
+  return (
+    <StayInfoLayout
+      active="/about"
+      eyebrow="ABOUT WEWE STAY"
+      title="위위스테이 소개"
+      subtitle="선교사님이 고국에서 편히 쉬실 수 있도록, 믿을 수 있는 집을 잇습니다"
+    >
+      <section className="si-card">
+        <h2>왜 위위스테이인가요?</h2>
+        <p>
+          위위스테이는 '위로자의 위로자'라는 뜻을 가진 비영리단체 {ORG_INFO.orgShortName}가 운영합니다.
+          사역을 위해 오랜 시간 타국에서 지내신 선교사님들이 정작 고국에 돌아와서는 머물 곳을 찾지 못해
+          낯설어하시는 모습을 보며 시작했습니다. 선교사님이 긴장을 풀고 쉬실 수 있는 정갈한 보금자리를,
+          그 쉼을 기꺼이 나누고 싶은 분들과 연결합니다.
+        </p>
+      </section>
+
+      <section className="si-card">
+        <h2>누구를 위한 곳인가요?</h2>
+        <div className="si-grid si-grid-2">
+          {ABOUT_AUDIENCE.map(({ icon: Icon, title, body }) => (
+            <div key={title}>
+              <Icon size={22} />
+              <h3>{title}</h3>
+              <p>{body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="si-card">
+        <h2><ShieldCheck size={20} className="si-h2-icon" /> 신뢰를 지키는 2단계 승인</h2>
+        <ul>
+          <li><b>회원 승인</b> — 가입하신 분의 서류를 관리자가 직접 확인한 뒤에 서비스를 이용하실 수 있습니다.</li>
+          <li><b>숙소 승인</b> — 등록된 숙소의 정보와 사진을 관리자가 확인한 뒤에 공개합니다.</li>
+          <li><b>중개 수수료 없음</b> — WEWE는 플랫폼 이용에 대한 중개 수수료를 받지 않습니다. 자세한 비용은 <Link to="/guide">서비스 안내</Link>에서 확인하실 수 있습니다.</li>
+        </ul>
+      </section>
+
+      <section className="si-card">
+        <h2>이렇게 시작하세요</h2>
+        <ol className="si-start">
+          {ABOUT_START_STEPS.map((step, idx) => (
+            <li key={step.title}>
+              <span className="si-start-no">{String(idx + 1).padStart(2, '0')}</span>
+              <div>
+                <h3>{step.title}</h3>
+                <p>{step.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div className="si-actions">
+          <Link to="/signup" className="btn btn-primary">회원가입</Link>
+          <Link to="/how-it-works" className="btn btn-secondary">이용 흐름 보기</Link>
+          <a href="/about/ministries/wewe-stay" className="btn btn-secondary">WEWE의 위위스테이 사역 보기</a>
+        </div>
+      </section>
+    </StayInfoLayout>
   );
 }
 
@@ -451,6 +538,45 @@ const STAY_INFO_CSS = `
     gap: 0.45rem;
     margin: 0.2rem 0;
     flex-wrap: wrap;
+  }
+
+  .si-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .si-h2-icon {
+    vertical-align: -3px;
+    margin-right: 0.25rem;
+  }
+
+  .si-start {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid #000;
+  }
+
+  .si-start li {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #ebebeb;
+  }
+
+  .si-start-no {
+    flex: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #a65424;
+    padding-top: 0.15rem;
+  }
+
+  .si-start h3 {
+    margin: 0 0 0.25rem;
+  }
+
+  .si-start p {
+    margin: 0;
   }
 
   .si-actions {

@@ -34,7 +34,9 @@ function Reveal({ children, as = 'div', delay = 0, className = '', style, ...res
           }
         });
       },
-      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+      // (2026-10-31) 비율(threshold 0.15) 대신 '조금이라도 걸치면'으로 바꿨습니다. 사진이 많은 긴 소식 글처럼
+      // 요소 높이가 화면의 약 7배를 넘으면 15%가 화면에 들어올 수 없어, 본문 전체가 끝까지 투명하게 남았습니다.
+      { threshold: 0, rootMargin: '0px 0px -40px 0px' }
     );
 
     observer.observe(el);

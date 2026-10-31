@@ -133,7 +133,7 @@ function MyPage() {
             </h2>
             <div className="wm-empty">
               <p>아직 후원 내역 조회 기능이 준비 중입니다. 이 자리에서 후원 이력을 확인하실 수 있도록 곧 업데이트할게요.</p>
-              <Link to="/donate" className="wh-btn wh-btn-outline">후원 안내 보기</Link>
+              <Link to="/donate" className="wh-btn wh-btn-ghost">후원 안내 보기</Link>
             </div>
           </Reveal>
 

@@ -95,7 +95,7 @@ function ResetPasswordPage() {
                 <AlertCircle size={36} />
                 <h3>유효하지 않거나 만료된 링크입니다</h3>
                 <p>비밀번호 찾기를 다시 시도해주세요.</p>
-                <Link to="/forgot-password" className="wh-btn wh-btn-outline">비밀번호 찾기로 이동</Link>
+                <Link to="/forgot-password" className="wh-btn wh-btn-ghost">비밀번호 찾기로 이동</Link>
               </div>
             ) : (
               <>

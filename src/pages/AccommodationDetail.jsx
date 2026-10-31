@@ -9,13 +9,6 @@ import AmenityIcon from '../components/AmenityIcon';
 import { AMENITY_MAP } from '../utils/amenities';
 import { totalForStay, priceBasis, isPerStay } from '../utils/price';
 import { PAYMENT_POLICY } from '../data/orgInfo';
-import PageHero from '../components/PageHero';
-
-const ACCOMMODATION_DETAIL_HERO_IMAGES = [
-  'https://images.pexels.com/photos/7746101/pexels-photo-7746101.jpeg?auto=compress&cs=tinysrgb&w=1600',
-  'https://images.pexels.com/photos/34287271/pexels-photo-34287271.jpeg?auto=compress&cs=tinysrgb&w=1600',
-  'https://images.pexels.com/photos/4170056/pexels-photo-4170056.jpeg?auto=compress&cs=tinysrgb&w=1600',
-];
 
 function rangesOverlap(aStart, aEnd, bStart, bEnd) {
   // 체크아웃일 당일은 겹치지 않는 것으로 처리 (반개구간 비교)
@@ -352,12 +345,7 @@ function AccommodationDetail({ userProfile }) {
 
   return (
     <div className="accommodation-detail">
-      <PageHero
-        images={ACCOMMODATION_DETAIL_HERO_IMAGES}
-        eyebrow="STAY DETAILS"
-        title={accommodation?.title || '숙소 상세 정보'}
-        subtitle={accommodation?.location || '위치와 이용 안내, 예약 가능 여부를 확인해보세요'}
-      />
+      {/* (2026-10-31) 상단 사진 배너(PageHero)는 숙소 사진(아래 ImageCarousel)과 헷갈려 뺐습니다. */}
       <div className="container">
         {isAdminPendingReview && (
           <div className="admin-review-banner">

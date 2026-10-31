@@ -109,6 +109,8 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
   const [deleteReasonMember, setDeleteReasonMember] = useState(null);
   const [deleteReasonText, setDeleteReasonText] = useState('');
   const [deleteFlagBusyId, setDeleteFlagBusyId] = useState(null);
+  // (2026-10-31) 삭제 대기 계정 완전 삭제 진행 중인 회원 id
+  const [purgeBusyId, setPurgeBusyId] = useState(null);
 
   const isSuperAdmin = !!userProfile?.is_super_admin;
 
@@ -284,6 +286,22 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
     }
   };
 
+  // (2026-10-31) 가입 거절 / 계정 삭제 처리를 해당 회원에게 메일로 안내합니다(send-email "account_status_notice").
+  // 사유는 서버가 DB에서 읽습니다. 메일이 실패해도 처리 자체는 이미 끝났으므로 알림만 띄웁니다.
+  const sendAccountStatusNotice = async (userId, kind) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-email', {
+        body: { type: 'account_status_notice', userId, kind }
+      });
+      if (error) throw error;
+      return !data?.skipped;
+    } catch (err) {
+      console.error('계정 상태 안내 메일 오류:', err);
+      alert('처리는 완료됐지만 안내 메일을 보내지 못했습니다. 필요하면 회원에게 직접 연락해 주세요.');
+      return false;
+    }
+  };
+
   const rejectUser = async (userId) => {
     if (!rejectionReason.trim()) {
       alert('거절 사유를 입력해주세요.');
@@ -302,6 +320,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
       setCounts(prev => ({ ...prev, users: Math.max(0, prev.users - 1) }));
       setSelectedItem(null);
       setRejectionReason('');
+      sendAccountStatusNotice(userId, 'rejected');
     } catch (error) {
       alert('오류: ' + error.message);
     }
@@ -364,7 +383,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
       alert('삭제 사유를 입력해주세요.');
       return;
     }
-    if (!window.confirm(`${deleteReasonMember.full_name}(${deleteReasonMember.email}) 계정을 삭제 처리하시겠습니까? 해당 회원이 다음 로그인 시 입력하신 사유를 확인하고 동의해야 계정이 완전히 삭제됩니다.`)) {
+    if (!window.confirm(`${deleteReasonMember.full_name}(${deleteReasonMember.email}) 계정을 삭제 처리하시겠습니까? 해당 회원에게 사유가 담긴 안내 메일이 발송되고, 회원이 다음 로그인 시 사유를 확인하고 동의하면 계정이 완전히 삭제됩니다. 14일이 지나도록 확인하지 않으면 관리자가 직접 완전히 삭제할 수 있습니다.`)) {
       return;
     }
     setDeleteFlagBusyId(deleteReasonMember.id);
@@ -376,15 +395,37 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
       if (error) throw error;
       setMembers(members.map(m => (
         m.id === deleteReasonMember.id
-          ? { ...m, status: 'deletion_pending', admin_deletion_reason: deleteReasonText.trim() }
+          ? { ...m, status: 'deletion_pending', admin_deletion_reason: deleteReasonText.trim(), deletion_flagged_at: new Date().toISOString() }
           : m
       )));
+      sendAccountStatusNotice(deleteReasonMember.id, 'deletion');
       setDeleteReasonMember(null);
       setDeleteReasonText('');
     } catch (error) {
       alert('오류: ' + error.message);
     } finally {
       setDeleteFlagBusyId(null);
+    }
+  };
+
+  // (2026-10-31) 삭제 대기 계정 완전 삭제 — 삭제 처리 후 14일이 지나도록 회원이 확인하지 않은 계정을
+  // 관리자가 직접 지웁니다(admin_purge_flagged_user). 되돌릴 수 없으므로 이메일 주소를 다시 입력받아 확인합니다.
+  const purgeFlaggedMember = async (member) => {
+    const typed = window.prompt(`${member.full_name}(${member.email}) 계정과 관련 데이터(숙소·예약·메시지 등)를 완전히 삭제합니다. 되돌릴 수 없습니다.\n\n확인을 위해 이 회원의 이메일 주소를 입력해 주세요.`);
+    if (typed === null) return;
+    if (typed.trim().toLowerCase() !== String(member.email || '').toLowerCase()) {
+      alert('이메일 주소가 일치하지 않아 삭제하지 않았습니다.');
+      return;
+    }
+    setPurgeBusyId(member.id);
+    try {
+      const { error } = await supabase.rpc('admin_purge_flagged_user', { target_user_id: member.id });
+      if (error) throw error;
+      setMembers(members.filter(m => m.id !== member.id));
+    } catch (error) {
+      alert('오류: ' + error.message);
+    } finally {
+      setPurgeBusyId(null);
     }
   };
 
@@ -1018,8 +1059,34 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
                               <p className="member-deletion-notice member-deletion-notice-danger">
                                 <strong>⛔ 관리자 삭제 처리 대기 중</strong> — 사유: {member.admin_deletion_reason || '미입력'}
                                 <br />본인이 다음 로그인 시 사유를 확인하고 동의하면 계정이 완전히 삭제됩니다.
+                                {member.deletion_flagged_at && (
+                                  <> 삭제 처리일: {new Date(member.deletion_flagged_at).toLocaleDateString()}</>
+                                )}
                               </p>
                             )}
+                            {member.status === 'deletion_pending' && !isSelf && (() => {
+                              const flaggedAt = member.deletion_flagged_at ? new Date(member.deletion_flagged_at) : null;
+                              const purgeableAt = flaggedAt ? new Date(flaggedAt.getTime() + 14 * 24 * 60 * 60 * 1000) : null;
+                              const canPurge = !purgeableAt || purgeableAt <= new Date();
+                              return (
+                                <div className="member-purge-row">
+                                  <button
+                                    type="button"
+                                    className="btn btn-danger btn-small"
+                                    onClick={() => purgeFlaggedMember(member)}
+                                    disabled={!canPurge || purgeBusyId === member.id}
+                                  >
+                                    <Trash2 size={14} />
+                                    {purgeBusyId === member.id ? '삭제 중...' : '계정 완전 삭제'}
+                                  </button>
+                                  {!canPurge && (
+                                    <span className="member-purge-hint">
+                                      {purgeableAt.toLocaleDateString()}부터 완전 삭제할 수 있습니다(삭제 처리 후 14일).
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </div>
 
                           {member.verification_docs && member.verification_docs.length > 0 && (
@@ -1904,6 +1971,19 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         .member-detail {
           padding: 0 1.5rem 1.5rem;
           border-top: 1px solid #ebebeb;
+        }
+
+        .member-purge-row {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 0.6rem;
+          margin-top: 0.6rem;
+        }
+
+        .member-purge-hint {
+          font-size: 0.85rem;
+          color: #6b6b6b;
         }
 
         .member-deletion-notice {

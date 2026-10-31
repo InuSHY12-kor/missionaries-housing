@@ -23,6 +23,7 @@ import nodemailer from "npm:nodemailer@6.9.10";
 //   6) (2026-10-13 보안) 인증 없이 부를 수 있는 관리자 대상 메일(admin_new_signup, admin_email_verified, inquiry)은
 //      DB의 "이미 보냄" 칸(users.admin_signup_emailed_at / admin_verified_emailed_at, inquiries.admin_emailed_at)을
 //      먼저 채우는 방식으로 한 번만 보냅니다(같은 ID로 반복 호출해도 메일이 다시 나가지 않음).
+//   7) (2026-10-31) 새 type "account_status_notice" — 가입 거절 / 관리자 계정 삭제 처리 시 해당 회원에게 안내 메일.
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -638,6 +639,84 @@ Deno.serve(async (req) => {
 
       const text = `${senderName}님이 보낸 답장${contextLine ? " " + contextLine : ""}:\n\n${msg.message}`;
       await sendMail({ to, subject, text, html });
+      return jsonResponse({ success: true });
+    }
+
+    // ── (2026-10-31) 회원 계정 상태 안내 — 관리자가 가입을 거절했거나(rejected), 사유를 적어 계정을
+    //    삭제 처리했을 때(deletion_pending) 해당 회원에게 메일로 알려 줍니다. 승인된 관리자만 부를 수 있고,
+    //    사유는 화면이 보낸 값이 아니라 DB(users.rejection_reason / admin_deletion_reason)에서 읽습니다.
+    //    회원의 상태가 요청한 종류와 실제로 맞을 때만 보냅니다.
+    if (type === "account_status_notice") {
+      const { userId, kind } = body;
+      if (!userId || !["rejected", "deletion"].includes(kind)) {
+        return jsonResponse({ error: "userId and kind(rejected|deletion) required" }, 400);
+      }
+
+      const jwt = getBearerJwt(req);
+      if (!jwt) return jsonResponse({ error: "Authorization required" }, 401);
+      const supabaseUser = createClient(
+        Deno.env.get("SUPABASE_URL"),
+        Deno.env.get("SUPABASE_ANON_KEY"),
+        { global: { headers: { Authorization: `Bearer ${jwt}` } } },
+      );
+      const { data: userData, error: userErr } = await supabaseUser.auth.getUser(jwt);
+      if (userErr || !userData?.user) return jsonResponse({ error: "Invalid session" }, 401);
+      const { data: caller } = await supabaseAdmin
+        .from("users")
+        .select("role, status")
+        .eq("id", userData.user.id)
+        .maybeSingle();
+      if (!caller || caller.role !== "admin" || caller.status !== "approved") {
+        return jsonResponse({ error: "Forbidden" }, 403);
+      }
+
+      const { data: target } = await supabaseAdmin
+        .from("users")
+        .select("email, full_name, status, rejection_reason, admin_deletion_reason")
+        .eq("id", userId)
+        .maybeSingle();
+      if (!target) return jsonResponse({ error: "User not found" }, 404);
+      const expectedStatus = kind === "rejected" ? "rejected" : "deletion_pending";
+      if (target.status !== expectedStatus) {
+        return jsonResponse({ success: true, skipped: `user status is ${target.status}` });
+      }
+      if (!isDeliverableEmail(target.email)) {
+        return jsonResponse({ success: true, skipped: "undeliverable address" });
+      }
+
+      const name = target.full_name ? `${target.full_name}님` : "회원님";
+      const reason = (kind === "rejected" ? target.rejection_reason : target.admin_deletion_reason) || "";
+      const reasonBlock = reason
+        ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4f0;border-radius:8px;padding:14px 16px;margin-bottom:16px;">
+            <tr><td style="font-size:13.5px;line-height:1.75;color:#4b4038;white-space:pre-wrap;"><b style="color:#20180f;">안내 사유</b><br/>${escapeHtml(reason)}</td></tr>
+          </table>`
+        : "";
+
+      let emailTitle, bodyHtml, text, ctaUrl, ctaText;
+      if (kind === "rejected") {
+        emailTitle = "가입 신청 결과를 안내드립니다";
+        bodyHtml = `
+          <p style="margin:0 0 14px;">${escapeHtml(name)}, WEWE에 관심을 가지고 가입을 신청해 주셔서 감사합니다.</p>
+          <p style="margin:0 0 14px;">신중히 검토한 결과, 아쉽게도 이번 가입 신청은 승인되지 않았습니다.</p>
+          ${reasonBlock}
+          <p style="margin:0 0 16px;font-size:13.5px;color:#4b4038;">사유와 관련해 보완하실 내용이 있거나 궁금한 점이 있으시면 wewe@wewestay.com 으로 편하게 문의해 주세요.</p>`;
+        text = `${name}, WEWE에 가입을 신청해 주셔서 감사합니다.\n신중히 검토한 결과, 아쉽게도 이번 가입 신청은 승인되지 않았습니다.${reason ? `\n\n안내 사유: ${reason}` : ""}\n\n문의: wewe@wewestay.com`;
+        ctaUrl = "";
+        ctaText = "";
+      } else {
+        emailTitle = "계정 삭제 처리 안내";
+        bodyHtml = `
+          <p style="margin:0 0 14px;">${escapeHtml(name)}, 그동안 WEWE와 함께해 주셔서 감사합니다.</p>
+          <p style="margin:0 0 14px;">관리자가 아래 사유로 회원님의 계정을 삭제 처리했습니다. 로그인하시면 사유를 확인하고 삭제에 동의하실 수 있습니다. 일정 기간 확인하지 않으시면 관리자가 계정을 완전히 삭제할 수 있습니다.</p>
+          ${reasonBlock}
+          <p style="margin:0 0 16px;font-size:13.5px;color:#4b4038;">착오라고 생각되시면 wewe@wewestay.com 으로 문의해 주세요.</p>`;
+        text = `${name}, 관리자가 회원님의 계정을 삭제 처리했습니다.${reason ? `\n\n안내 사유: ${reason}` : ""}\n\n로그인하시면 사유를 확인하고 삭제에 동의하실 수 있습니다. 일정 기간 확인하지 않으시면 관리자가 계정을 완전히 삭제할 수 있습니다.\nhttps://wewestay.com/login\n\n문의: wewe@wewestay.com`;
+        ctaUrl = "https://wewestay.com/login";
+        ctaText = "로그인해서 확인하기";
+      }
+
+      const html = buildBrandedEmailHtml({ title: emailTitle, bodyHtml, ctaUrl, ctaText, isAdmin: false, brand: "wewe" });
+      await sendMail({ to: target.email, subject: `[WEWE] ${emailTitle}`, text, html, fromName: "WEWE" });
       return jsonResponse({ success: true });
     }
 
