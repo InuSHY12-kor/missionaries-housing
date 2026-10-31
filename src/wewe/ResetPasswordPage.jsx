@@ -78,6 +78,7 @@ function ResetPasswordPage() {
       <WeweHeader />
 
       <WevePageHero
+        compact
         eyebrow="RESET PASSWORD"
         title="새 비밀번호 설정"
         subtitle="새로 사용하실 비밀번호를 입력해주세요"

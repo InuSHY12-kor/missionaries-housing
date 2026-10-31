@@ -498,7 +498,7 @@ export function PrayerLetterEditorPage() {
   };
 
   if (!checked || !isAdmin) {
-    return <div style={{ minHeight: '100vh', background: '#1c2f2c' }} aria-busy="true" />;
+    return <div style={{ minHeight: '100vh', background: '#fff' }} aria-busy="true" />;
   }
 
   return (
@@ -631,7 +631,7 @@ function PrayerStyles() {
 
       .pl-empty {
         border: 1px dashed var(--wh-line);
-        border-radius: 12px;
+        border-radius: 4px;
       }
 
       .pl-admin-bar {
@@ -642,9 +642,9 @@ function PrayerStyles() {
         flex-wrap: wrap;
         padding: 0.75rem 1rem;
         margin-bottom: 1.5rem;
-        border: 1px dashed rgba(20, 107, 113, 0.45);
-        border-radius: 10px;
-        background: rgba(20, 107, 113, 0.05);
+        border: 1px dashed var(--wh-line-strong);
+        border-radius: 4px;
+        background: var(--wh-bg-soft);
         color: var(--wh-teal);
         font-size: 0.88rem;
         font-weight: 700;
@@ -729,7 +729,7 @@ function PrayerStyles() {
         display: inline-block;
         padding: 0.1rem 0.5rem;
         border-radius: 999px;
-        background: rgba(217, 123, 63, 0.14);
+        background: var(--wh-bg-mute);
         color: var(--wh-orange-deep);
         font-size: 0.75rem;
         font-weight: 800;
@@ -746,7 +746,7 @@ function PrayerStyles() {
         min-width: 36px;
         height: 36px;
         border: 1px solid var(--wh-line);
-        border-radius: 8px;
+        border-radius: 4px;
         background: #fff;
         font-family: inherit;
         font-weight: 700;
@@ -833,7 +833,7 @@ function PrayerStyles() {
         background: var(--wh-bg-soft);
         overflow: hidden;
         cursor: zoom-in;
-        box-shadow: 0 8px 24px rgba(28, 28, 22, 0.1);
+        box-shadow: none;
       }
 
       .pl-image img {
@@ -918,7 +918,7 @@ function PrayerStyles() {
         gap: 0.35rem;
         padding: 0.45rem 0.8rem;
         border: 1px solid rgba(255, 255, 255, 0.35);
-        border-radius: 8px;
+        border-radius: 4px;
         background: rgba(255, 255, 255, 0.08);
         color: #fff;
         font-family: inherit;
@@ -985,7 +985,7 @@ function PrayerStyles() {
       .pl-editor {
         padding: 1.75rem;
         border: 1px solid var(--wh-line);
-        border-radius: 14px;
+        border-radius: 4px;
         background: var(--wh-bg-soft);
       }
 
@@ -1016,7 +1016,7 @@ function PrayerStyles() {
         box-sizing: border-box;
         padding: 0.65rem 0.8rem;
         border: 1px solid #d9d5cc;
-        border-radius: 8px;
+        border-radius: 4px;
         background: #fff;
         font-family: inherit;
         font-size: 0.98rem;
@@ -1047,7 +1047,7 @@ function PrayerStyles() {
         position: relative;
         aspect-ratio: 210 / 297;
         border: 1px solid var(--wh-line);
-        border-radius: 8px;
+        border-radius: 4px;
         background: #fff;
         overflow: hidden;
       }
@@ -1106,7 +1106,7 @@ function PrayerStyles() {
         gap: 0.45rem;
         padding: 0.7rem 1.1rem;
         border: 1.5px dashed var(--wh-teal);
-        border-radius: 10px;
+        border-radius: 4px;
         background: #fff;
         color: var(--wh-teal);
         font-weight: 800;

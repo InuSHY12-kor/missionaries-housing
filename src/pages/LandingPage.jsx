@@ -135,42 +135,39 @@ function LandingPage({ noticeBanner = null }) {
 
   return (
     <div className="landing-page">
-      {/* 히어로 섹션 — 3초마다 자동 전환되는 슬라이드쇼 */}
-      <section className="hero">
-        {hero.ready && heroImages.map((src, idx) => (
-          <div
-            key={idx}
-            className={`hero-slide ${idx === heroSlide ? 'active' : ''}`}
-            style={{ backgroundImage: `url("${src}")` }}
-          />
-        ))}
-
-        <div className="hero-content" style={{ opacity: hero.ready ? 1 : 0, transition: 'opacity 0.25s ease' }}>
-          {hero.eyebrow && <span className="hero-eyebrow">{hero.eyebrow}</span>}
-          <h1>{hero.title}</h1>
-          {hero.subtitle && <p>{renderRich(hero.subtitle)}</p>}
-          <Link to="/signup" className="link-cta">지금 시작하기</Link>
+      {/* 히어로 — (2026-10-31 흑백 에디토리얼) WEWE 메인과 같은 구성: 흰 바탕 위 큰 제목(왼쪽) +
+          라벨·설명·버튼(오른쪽), 그 아래 사진 슬라이드(3초마다 크로스페이드) */}
+      <section className="lp-hero">
+        <div className="lp-hero-top" style={{ opacity: hero.ready ? 1 : 0, transition: 'opacity 0.25s ease' }}>
+          <h1 className="lp-hero-title">{hero.title}</h1>
+          <div className="lp-hero-side">
+            {hero.eyebrow && <span className="lp-hero-eyebrow">{hero.eyebrow}</span>}
+            {hero.subtitle && <p>{renderRich(hero.subtitle)}</p>}
+            <div className="lp-hero-actions">
+              <Link to="/signup" className="lp-btn lp-btn-fill">지금 시작하기</Link>
+              <Link to="/how-it-works" className="lp-btn lp-btn-line">이용 방법 보기</Link>
+            </div>
+          </div>
         </div>
 
-        <HeroEditButton defaults={heroDefaults} />
-
-        <div className="hero-progress">
-          {heroImages.map((_, idx) => (
-            <div className="hero-dot-wrap" key={idx}>
-              <svg className="hero-ring" viewBox="0 0 36 36">
-                <circle className="hero-ring-track" cx="18" cy="18" r="15.5" />
-                {idx === heroSlide && (
-                  <circle
-                    key={`fill-${heroSlide}`}
-                    className="hero-ring-fill"
-                    cx="18"
-                    cy="18"
-                    r="15.5"
-                  />
-                )}
-              </svg>
-            </div>
+        <div className="lp-hero-media">
+          {hero.ready && heroImages.map((src, idx) => (
+            <div
+              key={idx}
+              className={`lp-hero-slide ${idx === heroSlide ? 'active' : ''}`}
+              style={{ backgroundImage: `url("${src}")` }}
+            />
           ))}
+
+          {heroImages.length > 1 && (
+            <div className="lp-hero-progress" aria-hidden="true">
+              {heroImages.map((_, idx) => (
+                <span key={idx} className={`lp-hero-dot ${idx === heroSlide ? 'active' : ''}`} />
+              ))}
+            </div>
+          )}
+
+          <HeroEditButton defaults={heroDefaults} />
         </div>
       </section>
 
@@ -482,13 +479,13 @@ function LandingPage({ noticeBanner = null }) {
 
         .landing-page {
           flex: 1;
-          --ink: #1c1c1a;
-          --ink-soft: #4a4a46;
-          --stone: #8c8880;
-          --line: #e5e2da;
+          --ink: #111111;
+          --ink-soft: #424242;
+          --stone: #6b6b6b;
+          --line: #ebebeb;
           --lp-bg: #ffffff;
-          --lp-bg-soft: #faf9f6;
-          --accent: #9c8058;
+          --lp-bg-soft: #fafafa;
+          --accent: #a65424;
         }
 
         .eyebrow {
@@ -506,86 +503,7 @@ function LandingPage({ noticeBanner = null }) {
         }
 
         /* 히어로 섹션 — 슬라이드쇼 */
-        .hero {
-          position: relative;
-          min-height: 720px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          padding: 6rem 2rem;
-          background-color: #1c1c1a;
-          overflow: hidden;
-          animation: fadeIn 0.8s ease;
-        }
-
-        .hero-slide {
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-          background-size: cover;
-          background-position: center;
-          opacity: 0;
-          transition: opacity 1.4s ease;
-        }
-
-        .hero-slide.active {
-          opacity: 1;
-        }
-
-        .hero::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-          background: linear-gradient(180deg, rgba(15,15,13,0.55) 0%, rgba(15,15,13,0.45) 45%, rgba(15,15,13,0.85) 100%);
-        }
-
-        .hero-content {
-          position: relative;
-          z-index: 2;
-          max-width: 800px;
-          margin: 0 auto;
-        }
-
         /* 슬라이드 진행 표시 — 원형 링이 3초 동안 채워지는 형태 */
-        .hero-progress {
-          position: absolute;
-          left: 50%;
-          bottom: 2rem;
-          transform: translateX(-50%);
-          z-index: 2;
-          display: flex;
-          gap: 0.85rem;
-        }
-
-        .hero-dot-wrap {
-          width: 20px;
-          height: 20px;
-        }
-
-        .hero-ring {
-          width: 20px;
-          height: 20px;
-          transform: rotate(-90deg);
-        }
-
-        .hero-ring-track {
-          fill: none;
-          stroke: rgba(255, 255, 255, 0.35);
-          stroke-width: 2.5;
-        }
-
-        .hero-ring-fill {
-          fill: none;
-          stroke: #ffffff;
-          stroke-width: 2.5;
-          stroke-linecap: round;
-          stroke-dasharray: 97.4;
-          stroke-dashoffset: 97.4;
-          animation: heroRingFill 3s linear forwards;
-        }
-
         @keyframes heroRingFill {
           from { stroke-dashoffset: 97.4; }
           to { stroke-dashoffset: 0; }
@@ -649,8 +567,8 @@ function LandingPage({ noticeBanner = null }) {
         }
 
         .link-cta-dark:hover {
-          color: #1c1c1a;
-          border-bottom-color: #1c1c1a;
+          color: #111111;
+          border-bottom-color: #111111;
         }
 
         .link-cta-block {
@@ -661,41 +579,6 @@ function LandingPage({ noticeBanner = null }) {
         .link-cta:disabled {
           opacity: 0.6;
           cursor: not-allowed;
-        }
-
-        .hero-eyebrow {
-          display: inline-block;
-          font-size: 1.05rem;
-          font-weight: 700;
-          letter-spacing: 0.22em;
-          color: #e7dcc4;
-          margin-bottom: 1.1rem;
-        }
-
-        .hero h1 {
-          color: white;
-          font-size: 3rem;
-          margin-bottom: 1rem;
-          font-weight: 700;
-          letter-spacing: -0.01em;
-        }
-
-        .hero p {
-          color: rgba(255, 255, 255, 0.92);
-          font-size: 1.15rem;
-          line-height: 1.7;
-          margin-bottom: 2rem;
-        }
-
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
         }
 
         /* 우리의 이야기 섹션 */
@@ -778,7 +661,7 @@ function LandingPage({ noticeBanner = null }) {
           padding: 1.75rem;
           background: var(--lp-bg-soft);
           border: 1px solid var(--line);
-          border-radius: 10px;
+          border-radius: 4px;
         }
 
         .brand-symbol-visual {
@@ -1132,23 +1015,6 @@ function LandingPage({ noticeBanner = null }) {
 
         /* ===== 모바일 대응 ===== */
         @media (max-width: 768px) {
-          .hero {
-            min-height: 560px;
-            /* 로그인한 사용자(특히 관리자)는 상단바가 여러 줄로 늘어날 수 있어, 상단바의
-               실제 렌더링 높이(--navbar-height, Navigation.jsx에서 계속 갱신)만큼 위쪽
-               여백을 확보해 제목 글씨가 상단바와 겹치지 않도록 합니다. */
-            padding-top: calc(var(--navbar-height, 72px) + 1rem);
-            padding-bottom: 4.5rem;
-            padding-left: 1.25rem;
-            padding-right: 1.25rem;
-          }
-
-          .hero-eyebrow {
-            font-size: 0.85rem;
-            letter-spacing: 0.14em;
-            margin-bottom: 0.85rem;
-          }
-
           .marquee-item {
             width: 180px;
             height: 120px;
@@ -1163,34 +1029,8 @@ function LandingPage({ noticeBanner = null }) {
             max-width: 100%;
           }
 
-          .hero h1 {
-            font-size: 1.75rem;
-          }
-
-          .hero p {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-          }
-
-          /* 히어로 슬라이드 진행 표시가 좁은 화면에서 서로 겹치지 않도록 간격/크기 축소 */
-          .hero-progress {
-            bottom: 1.25rem;
-            gap: 0.6rem;
-          }
-
-          .hero-dot-wrap,
-          .hero-ring {
-            width: 16px;
-            height: 16px;
-          }
-
           /* 히어로/문의 CTA 버튼은 밑줄 텍스트 스타일이라 탭 영역이 좁으므로
              상하 여백을 늘려 터치하기 편하도록 보정 */
-          .hero .link-cta {
-            padding: 0.4rem 0 0.55rem;
-          }
-
           .link-cta-block {
             padding-top: 0.9rem;
             padding-bottom: 1.1rem;
@@ -1366,31 +1206,6 @@ function LandingPage({ noticeBanner = null }) {
         }
 
         @media (max-width: 480px) {
-          .hero {
-            min-height: 480px;
-            padding-top: calc(var(--navbar-height, 56px) + 0.75rem);
-            padding-bottom: 3.5rem;
-            padding-left: 1rem;
-            padding-right: 1rem;
-          }
-
-          .hero-eyebrow {
-            font-size: 0.75rem;
-          }
-
-          .hero h1 {
-            font-size: 1.5rem;
-          }
-
-          .hero p {
-            font-size: 0.9rem;
-          }
-
-          .hero-progress {
-            bottom: 1rem;
-            gap: 0.5rem;
-          }
-
           .story,
           .features,
           .process,
@@ -1464,6 +1279,197 @@ function LandingPage({ noticeBanner = null }) {
 
           .footer-info p {
             font-size: 0.8rem;
+          }
+        }
+      
+        /* ── 히어로 (2026-10-31 흑백 에디토리얼) ── */
+        .lp-hero {
+          max-width: 1280px;
+          margin: 0 auto;
+          padding: 4.5rem 72px 0;
+        }
+
+        .lp-hero-top {
+          display: grid;
+          grid-template-columns: 1.35fr 1fr;
+          gap: 3rem;
+          align-items: end;
+          padding-bottom: 2.5rem;
+        }
+
+        .lp-hero-title {
+          margin: 0;
+          color: #000;
+          font-size: clamp(2.4rem, 5.2vw, 4.4rem);
+          font-weight: 700;
+          line-height: 1.12;
+          letter-spacing: -0.035em;
+        }
+
+        .lp-hero-side p {
+          color: var(--ink-soft);
+          font-size: 1.02rem;
+          line-height: 1.75;
+          margin: 0 0 1.75rem;
+          white-space: pre-line;
+        }
+
+        .lp-hero-eyebrow {
+          display: block;
+          font-size: 0.8rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          color: var(--ink);
+          margin-bottom: 1rem;
+        }
+
+        .lp-hero-eyebrow::before {
+          content: '';
+          display: inline-block;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #d97b3f;
+          margin-right: 0.6rem;
+          vertical-align: middle;
+          transform: translateY(-1px);
+        }
+
+        .lp-hero-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.6rem;
+        }
+
+        .lp-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 52px;
+          padding: 0 1.5rem;
+          border-radius: 6px;
+          font-size: 0.98rem;
+          font-weight: 600;
+          text-decoration: none;
+          border: 1px solid transparent;
+          transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+
+        .lp-btn-fill {
+          background: #000;
+          color: #fff;
+        }
+
+        .lp-btn-fill:hover {
+          background: #2e2e2e;
+          color: #fff;
+        }
+
+        .lp-btn-line {
+          background: #fff;
+          color: #000;
+          border-color: #d4d4d4;
+        }
+
+        .lp-btn-line:hover {
+          border-color: #000;
+          color: #000;
+        }
+
+        .lp-btn:focus-visible {
+          outline: 2px solid #000;
+          outline-offset: 3px;
+        }
+
+        .lp-hero-media {
+          position: relative;
+          aspect-ratio: 21 / 9;
+          border-radius: 4px;
+          overflow: hidden;
+          background: #f2f2f2;
+        }
+
+        .lp-hero-slide {
+          position: absolute;
+          inset: 0;
+          background-size: cover;
+          background-position: center;
+          opacity: 0;
+          transition: opacity 0.45s ease-in-out;
+        }
+
+        .lp-hero-slide.active {
+          opacity: 1;
+        }
+
+        .lp-hero-progress {
+          position: absolute;
+          right: 1rem;
+          bottom: 1rem;
+          display: flex;
+          gap: 0.4rem;
+          padding: 0.5rem 0.65rem;
+          border-radius: 6px;
+          background: rgba(0, 0, 0, 0.55);
+        }
+
+        .lp-hero-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.45);
+          transition: background-color 0.2s ease-in-out;
+        }
+
+        .lp-hero-dot.active {
+          background: #d97b3f;
+        }
+
+        /* 말씀 구절 — 옆줄 대신 위아래 가는 선 */
+        .landing-page .verse {
+          padding: 1.5rem 0;
+          background: transparent;
+          border-left: none;
+          border-top: 1px solid #000;
+          border-bottom: 1px solid var(--line);
+          font-style: normal;
+        }
+
+        /* 문의 폼 제출 버튼 — 밑줄 링크 대신 검정 채움 버튼 */
+        .landing-page .link-cta-dark {
+          min-height: 52px;
+          padding: 0 1.5rem;
+          border: none;
+          border-radius: 6px;
+          background: #000;
+          color: #fff;
+          justify-content: center;
+        }
+
+        .landing-page .link-cta-dark:hover {
+          background: #2e2e2e;
+          color: #fff;
+        }
+
+        @media (max-width: 1000px) {
+          .lp-hero {
+            padding: 2.5rem 20px 0;
+          }
+
+          .lp-hero-top {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            padding-bottom: 1.75rem;
+          }
+
+          .lp-hero-media {
+            aspect-ratio: 4 / 3;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .lp-hero-slide {
+            transition: none;
           }
         }
       `}</style>

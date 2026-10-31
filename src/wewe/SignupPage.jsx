@@ -21,6 +21,7 @@ function SignupPage() {
       <WeweHeader />
 
       <WevePageHero
+        compact
         eyebrow="GET STARTED"
         title="가입 유형을 선택해주세요"
         subtitle="회원 유형에 따라 입력하시는 정보와 이용 방법이 달라집니다."
@@ -112,7 +113,7 @@ function SignupPage() {
           padding: 2rem 1.5rem;
           background: var(--wh-bg);
           border: 2px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
           text-decoration: none;
           color: inherit;
           transition: all 0.25s ease;
@@ -120,17 +121,17 @@ function SignupPage() {
 
         .wsg-card:hover {
           border-color: var(--wh-orange);
-          background: #fdf8f1;
+          background: var(--wh-bg-soft);
           transform: translateY(-4px);
-          box-shadow: 0 8px 20px rgba(217, 123, 63, 0.15);
+          box-shadow: none;
         }
 
         .wsg-card-icon {
           width: 64px;
           height: 64px;
           border-radius: 50%;
-          background: linear-gradient(135deg, var(--wh-orange) 0%, var(--wh-orange-deep) 100%);
-          color: #fff;
+          background: var(--wh-bg-mute);
+          color: #000;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -138,7 +139,8 @@ function SignupPage() {
         }
 
         .wsg-card-supporter .wsg-card-icon {
-          background: linear-gradient(135deg, var(--wh-teal) 0%, #0d4a4f 100%);
+          background: #000;
+          color: #fff;
         }
 
         .wsg-card h2 {

@@ -61,6 +61,7 @@ function ForgotPasswordPage() {
       <WeweHeader />
 
       <WevePageHero
+        compact
         eyebrow="RESET PASSWORD"
         title="비밀번호 찾기"
         subtitle="가입한 이메일로 재설정 링크를 보내드립니다"

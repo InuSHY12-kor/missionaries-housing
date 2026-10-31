@@ -547,18 +547,18 @@ function EditModeStyles() {
         gap: 0.45rem;
         padding: 0.7rem 1.05rem;
         border: none;
-        border-radius: 999px;
-        background: #1c1c1a;
+        border-radius: 6px;
+        background: #111111;
         color: #fff;
         font-family: inherit;
         font-size: 0.9rem;
         font-weight: 700;
-        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+        box-shadow: none;
         cursor: pointer;
       }
 
       .em-toggle-on {
-        background: #146b71;
+        background: #000000;
       }
 
       .em-banner {
@@ -572,13 +572,13 @@ function EditModeStyles() {
         gap: 0.5rem;
         max-width: min(680px, calc(100vw - 220px));
         padding: 0.6rem 1rem;
-        border-radius: 10px;
-        background: #fff8ec;
+        border-radius: 4px;
+        background: #fafafa;
         border: 1px solid #f0c48f;
         color: #6b4513;
         font-size: 0.85rem;
         line-height: 1.5;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        box-shadow: none;
         word-break: keep-all;
       }
 
@@ -592,7 +592,7 @@ function EditModeStyles() {
       }
 
       .em-editable:hover {
-        background: rgba(217, 123, 63, 0.1);
+        background: rgba(0, 0, 0, 0.05);
       }
 
       .em-edited-dot {
@@ -601,7 +601,7 @@ function EditModeStyles() {
         height: 8px;
         margin-left: 6px;
         border-radius: 50%;
-        background: #146b71;
+        background: #000000;
         vertical-align: middle;
       }
 
@@ -616,14 +616,14 @@ function EditModeStyles() {
         gap: 0.4rem;
         padding: 0.6rem 0.95rem;
         border: 2px solid #fff;
-        border-radius: 999px;
+        border-radius: 6px;
         background: rgba(217, 123, 63, 0.95);
         color: #fff;
         font-family: inherit;
         font-size: 0.88rem;
         font-weight: 800;
         cursor: pointer;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        box-shadow: none;
       }
 
       .em-overlay {
@@ -642,11 +642,11 @@ function EditModeStyles() {
         max-height: calc(100vh - 2rem);
         display: flex;
         flex-direction: column;
-        border-radius: 14px;
+        border-radius: 4px;
         background: #fff;
-        color: #1c1c1a;
+        color: #111111;
         text-align: left;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        box-shadow: none;
         word-break: keep-all;
       }
 
@@ -655,14 +655,14 @@ function EditModeStyles() {
         align-items: center;
         justify-content: space-between;
         padding: 1rem 1.25rem;
-        border-bottom: 1px solid #e5e2da;
+        border-bottom: 1px solid #ebebeb;
       }
 
       .em-modal-head h3 {
         margin: 0;
         font-size: 1.1rem;
         font-weight: 800;
-        color: #1c1c1a;
+        color: #111111;
       }
 
       .em-modal-body {
@@ -676,7 +676,7 @@ function EditModeStyles() {
         gap: 0.5rem;
         flex-wrap: wrap;
         padding: 0.9rem 1.25rem;
-        border-top: 1px solid #e5e2da;
+        border-top: 1px solid #ebebeb;
       }
 
       .em-spacer {
@@ -688,9 +688,9 @@ function EditModeStyles() {
         align-items: center;
         gap: 0.35rem;
         padding: 0.55rem 0.95rem;
-        border: 1.5px solid #146b71;
-        border-radius: 8px;
-        background: #146b71;
+        border: 1.5px solid #000000;
+        border-radius: 4px;
+        background: #000000;
         color: #fff;
         font-family: inherit;
         font-size: 0.88rem;
@@ -706,7 +706,7 @@ function EditModeStyles() {
 
       .em-btn-ghost {
         background: #fff;
-        color: #146b71;
+        color: #000000;
       }
 
       .em-icon-btn {
@@ -716,10 +716,10 @@ function EditModeStyles() {
         width: 32px;
         height: 32px;
         flex-shrink: 0;
-        border: 1px solid #e5e2da;
-        border-radius: 8px;
+        border: 1px solid #ebebeb;
+        border-radius: 4px;
         background: #fff;
-        color: #4a4a46;
+        color: #424242;
         cursor: pointer;
       }
 
@@ -731,7 +731,7 @@ function EditModeStyles() {
         margin: 0 0 0.4rem;
         font-size: 0.8rem;
         font-weight: 700;
-        color: #8c8880;
+        color: #6b6b6b;
       }
 
       .em-textarea,
@@ -743,11 +743,11 @@ function EditModeStyles() {
         box-sizing: border-box;
         padding: 0.6rem 0.75rem;
         border: 1px solid #d9d5cc;
-        border-radius: 8px;
+        border-radius: 4px;
         font-family: inherit;
         font-size: 0.95rem;
         line-height: 1.6;
-        color: #1c1c1a;
+        color: #111111;
         background: #fff;
       }
 
@@ -766,7 +766,7 @@ function EditModeStyles() {
         margin-bottom: 0.35rem;
         font-size: 0.85rem;
         font-weight: 700;
-        color: #4a4a46;
+        color: #424242;
       }
 
       .em-images {
@@ -795,7 +795,7 @@ function EditModeStyles() {
         flex-shrink: 0;
         border-radius: 6px;
         background: #eee center / cover no-repeat;
-        border: 1px solid #e5e2da;
+        border: 1px solid #ebebeb;
       }
 
       .em-add-row {
@@ -817,13 +817,13 @@ function EditModeStyles() {
         margin: 0.5rem 0 0;
         font-size: 0.82rem;
         line-height: 1.6;
-        color: #6b665c;
+        color: #6b6b6b;
       }
 
       .em-default {
         margin-top: 0.75rem;
         font-size: 0.85rem;
-        color: #4a4a46;
+        color: #424242;
       }
 
       .em-default summary {
@@ -834,7 +834,7 @@ function EditModeStyles() {
       .em-default p {
         margin: 0.4rem 0 0;
         padding: 0.6rem 0.75rem;
-        border-radius: 8px;
+        border-radius: 4px;
         background: #f6f4ef;
         white-space: pre-wrap;
       }

@@ -157,24 +157,24 @@ function AnnouncementMail({ onBack }) {
 
       <style>{`
         .am-wrap { margin-top: 1.5rem; word-break: keep-all; }
-        .am-back { display: inline-flex; align-items: center; gap: 0.35rem; background: none; border: none; color: #7f8c8d; cursor: pointer; padding: 0; margin-bottom: 1rem; font-size: 0.92rem; }
-        .am-back:hover { color: #d97b3f; }
+        .am-back { display: inline-flex; align-items: center; gap: 0.35rem; background: none; border: none; color: #6b6b6b; cursor: pointer; padding: 0; margin-bottom: 1rem; font-size: 0.92rem; }
+        .am-back:hover { color: #a65424; }
         .am-title { margin: 0 0 0.4rem; font-size: 1.35rem; }
         .am-desc { color: #5f5a50; margin: 0 0 1.25rem; line-height: 1.7; font-size: 0.95rem; }
         .am-field { display: block; margin-bottom: 1.1rem; }
         .am-label { display: block; font-weight: 700; margin-bottom: 0.45rem; font-size: 0.95rem; }
         .am-audiences { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-        .am-audience { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.55rem 0.95rem; border: 1.5px solid #ddd6c8; border-radius: 999px; cursor: pointer; font-weight: 600; background: #fff; }
-        .am-audience.on { border-color: #d97b3f; background: #fff4ea; color: #a8551f; }
-        .am-subject { width: 100%; padding: 0.7rem 0.85rem; border: 1px solid #ddd6c8; border-radius: 8px; font-size: 1rem; }
-        .am-message { padding: 0.75rem 1rem; border-radius: 8px; font-weight: 600; }
+        .am-audience { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.55rem 0.95rem; border: 1.5px solid #d4d4d4; border-radius: 6px; cursor: pointer; font-weight: 600; background: #fff; }
+        .am-audience.on { border-color: #000000; background: #fafafa; color: #a8551f; }
+        .am-subject { width: 100%; padding: 0.7rem 0.85rem; border: 1px solid #d4d4d4; border-radius: 4px; font-size: 1rem; }
+        .am-message { padding: 0.75rem 1rem; border-radius: 4px; font-weight: 600; }
         .am-message.ok { background: #eef7f0; color: #2f6b45; }
         .am-message.error { background: #fdeeee; color: #8a1f1f; }
         .am-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
         .am-actions .btn { display: inline-flex; align-items: center; gap: 0.35rem; }
-        .am-preview { margin-top: 1.5rem; border: 1px solid #e5e2da; border-radius: 12px; overflow: hidden; }
-        .am-preview-head { display: flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1rem; background: #faf6ef; font-size: 0.92rem; flex-wrap: wrap; }
-        .am-preview-close { margin-left: auto; background: none; border: 1px solid #ddd6c8; border-radius: 6px; padding: 0.25rem 0.7rem; cursor: pointer; }
+        .am-preview { margin-top: 1.5rem; border: 1px solid #ebebeb; border-radius: 4px; overflow: hidden; }
+        .am-preview-head { display: flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1rem; background: #fafafa; font-size: 0.92rem; flex-wrap: wrap; }
+        .am-preview-close { margin-left: auto; background: none; border: 1px solid #d4d4d4; border-radius: 6px; padding: 0.25rem 0.7rem; cursor: pointer; }
         .am-preview iframe { width: 100%; height: 640px; border: 0; background: #eef0ee; }
       `}</style>
     </div>

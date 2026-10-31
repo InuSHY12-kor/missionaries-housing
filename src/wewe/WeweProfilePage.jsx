@@ -183,6 +183,7 @@ function WeweProfilePage() {
       <WeweHeader />
 
       <WevePageHero
+        compact
         eyebrow="MY PROFILE"
         title="나의 정보를 관리하세요"
         subtitle="위위(WEWE)와 위위 스테이 계정 정보를 각각 관리할 수 있습니다."
@@ -410,7 +411,7 @@ function WeweProfilePage() {
         .wprof-card {
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
           padding: 2rem;
         }
 
@@ -476,7 +477,7 @@ function WeweProfilePage() {
         .wprof-field textarea:focus {
           outline: none;
           border-color: var(--wh-orange);
-          box-shadow: 0 0 0 3px rgba(217, 123, 63, 0.15);
+          box-shadow: 0 0 0 1px #000;
         }
 
         .wprof-notif-list {
@@ -540,7 +541,7 @@ function WeweProfilePage() {
           flex-shrink: 0;
           width: 44px;
           height: 24px;
-          border-radius: 12px;
+          border-radius: 4px;
           border: none;
           background: #dde0e3;
           cursor: pointer;

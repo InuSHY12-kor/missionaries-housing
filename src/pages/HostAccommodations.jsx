@@ -414,7 +414,7 @@ function HostAccommodations({ userProfile }) {
       case 'approved': return '#27ae60';
       case 'pending': return '#f39c12';
       case 'rejected': return '#e74c3c';
-      default: return '#95a5a6';
+      default: return '#6b6b6b';
     }
   };
 
@@ -883,7 +883,7 @@ function HostAccommodations({ userProfile }) {
         .host-guideline-box {
           background: #fff8e6;
           border: 1px solid #f0dcb0;
-          border-radius: 8px;
+          border-radius: 4px;
           padding: 1.25rem 1.5rem;
           margin: 1rem 0 1.5rem;
         }
@@ -907,11 +907,11 @@ function HostAccommodations({ userProfile }) {
         .usage-guide-group {
           margin-top: 1.5rem;
           padding-top: 1.5rem;
-          border-top: 1px solid #f0dcc0;
+          border-top: 1px solid #ebebeb;
         }
 
         .usage-guide-hint {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.85rem;
           line-height: 1.6;
           margin: 0.25rem 0 0.75rem;
@@ -920,14 +920,14 @@ function HostAccommodations({ userProfile }) {
         .custom-amenity-input {
           margin-top: 1.25rem;
           padding-top: 1.25rem;
-          border-top: 1px dashed #dfe6e9;
+          border-top: 1px dashed #ebebeb;
         }
 
         .custom-amenity-input label {
           display: block;
           margin-bottom: 0.5rem;
           font-weight: 600;
-          color: #2c3e50;
+          color: #111111;
           font-size: 0.9rem;
         }
 
@@ -939,7 +939,7 @@ function HostAccommodations({ userProfile }) {
         .custom-amenity-row input {
           flex: 1;
           padding: 0.6rem 0.75rem;
-          border: 1px solid #dfe6e9;
+          border: 1px solid #ebebeb;
           border-radius: 6px;
           font-family: inherit;
         }
@@ -957,9 +957,9 @@ function HostAccommodations({ userProfile }) {
           gap: 0.4rem;
           padding: 0.4rem 0.7rem;
           background: white;
-          border: 1px solid #d97b3f;
-          color: #d97b3f;
-          border-radius: 20px;
+          border: 1px solid #000000;
+          color: #a65424;
+          border-radius: 6px;
           font-size: 0.85rem;
         }
 
@@ -968,7 +968,7 @@ function HostAccommodations({ userProfile }) {
           align-items: center;
           background: none;
           border: none;
-          color: #d97b3f;
+          color: #a65424;
           cursor: pointer;
           padding: 0;
         }
@@ -991,13 +991,13 @@ function HostAccommodations({ userProfile }) {
         }
 
         .admin-scope-hint {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.85rem;
           margin-top: 0.35rem;
         }
 
         .admin-host-hint {
-          color: #d97b3f;
+          color: #a65424;
           font-size: 0.82rem;
           margin-top: 0.25rem;
         }
@@ -1005,7 +1005,7 @@ function HostAccommodations({ userProfile }) {
         .form-section {
           background: white;
           padding: 2rem;
-          border-radius: 8px;
+          border-radius: 4px;
           margin-bottom: 2rem;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
@@ -1018,7 +1018,7 @@ function HostAccommodations({ userProfile }) {
 
         .help-text {
           font-size: 0.85rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin: -0.25rem 0 0.75rem;
         }
 
@@ -1059,18 +1059,18 @@ function HostAccommodations({ userProfile }) {
         }
 
         .image-upload {
-          border: 2px dashed #d97b3f;
+          border: 2px dashed #000000;
           border-radius: 6px;
           padding: 1.5rem;
           text-align: center;
           cursor: pointer;
           transition: all 0.3s;
-          background: #fdf8f1;
+          background: #fafafa;
         }
 
         .image-upload:hover {
-          background: #faf1e6;
-          border-color: #b8622c;
+          background: #f2f2f2;
+          border-color: #000000;
         }
 
         .image-upload input {
@@ -1083,20 +1083,20 @@ function HostAccommodations({ userProfile }) {
           align-items: center;
           gap: 0.5rem;
           cursor: pointer;
-          color: #d97b3f;
+          color: #a65424;
         }
 
         .amenities-picker {
           display: flex;
           flex-direction: column;
           gap: 1.25rem;
-          background: #f8f9fa;
-          border-radius: 8px;
+          background: #fafafa;
+          border-radius: 4px;
           padding: 1.25rem;
         }
 
         .amenities-picker-group h4 {
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 0.75rem;
           font-size: 0.95rem;
         }
@@ -1113,8 +1113,8 @@ function HostAccommodations({ userProfile }) {
           gap: 0.4rem;
           padding: 0.5rem 0.75rem;
           background: white;
-          border: 1px solid #dfe6e9;
-          border-radius: 20px;
+          border: 1px solid #ebebeb;
+          border-radius: 6px;
           cursor: pointer;
           font-size: 0.85rem;
           color: #555;
@@ -1126,12 +1126,12 @@ function HostAccommodations({ userProfile }) {
         }
 
         .amenity-checkbox svg {
-          color: #d97b3f;
+          color: #a65424;
         }
 
         .amenity-checkbox.active {
-          background: #d97b3f;
-          border-color: #d97b3f;
+          background: #000000;
+          border-color: #000000;
           color: white;
         }
 
@@ -1152,7 +1152,7 @@ function HostAccommodations({ userProfile }) {
 
         .empty-message {
           text-align: center;
-          color: #95a5a6;
+          color: #6b6b6b;
           padding: 2rem;
         }
 
@@ -1178,23 +1178,23 @@ function HostAccommodations({ userProfile }) {
 
         .acc-tab {
           padding: 0.5rem 0.95rem;
-          border-radius: 999px;
+          border-radius: 6px;
           border: 1.5px solid #e1dbcf;
           background: #fff;
           font-weight: 700;
           font-size: 0.9rem;
-          color: #3a3a36;
+          color: #222222;
           cursor: pointer;
         }
 
         .acc-tab span {
           margin-left: 0.2rem;
-          color: #b8622c;
+          color: #a65424;
         }
 
         .acc-tab.active {
-          background: #d97b3f;
-          border-color: #d97b3f;
+          background: #000000;
+          border-color: #000000;
           color: #fff;
         }
 
@@ -1214,8 +1214,8 @@ function HostAccommodations({ userProfile }) {
         .acc-host-filter select {
           margin-left: 0.45rem;
           padding: 0.45rem 0.6rem;
-          border: 1px solid #ddd6c8;
-          border-radius: 8px;
+          border: 1px solid #d4d4d4;
+          border-radius: 4px;
           max-width: 240px;
         }
 
@@ -1249,26 +1249,26 @@ function HostAccommodations({ userProfile }) {
           gap: 0.5rem;
           margin: 0 0 0.9rem;
           padding-bottom: 0.5rem;
-          border-bottom: 2px solid #f0dcc0;
+          border-bottom: 2px solid #ebebeb;
           font-size: 1.1rem;
         }
 
         .acc-host-group-title span {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.88rem;
           font-weight: 500;
         }
 
         .acc-host-group-title em {
           font-style: normal;
-          color: #b8622c;
+          color: #a65424;
           font-size: 0.9rem;
         }
 
         .accommodation-item {
           background: white;
           padding: 1.5rem;
-          border-radius: 8px;
+          border-radius: 4px;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
@@ -1278,22 +1278,22 @@ function HostAccommodations({ userProfile }) {
           align-items: flex-start;
           margin-bottom: 1rem;
           padding-bottom: 1rem;
-          border-bottom: 1px solid #ecf0f1;
+          border-bottom: 1px solid #ebebeb;
         }
 
         .item-header h3 {
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 0.5rem;
         }
 
         .item-header p {
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin: 0;
         }
 
         .status-badge {
           padding: 0.5rem 1rem;
-          border-radius: 20px;
+          border-radius: 6px;
           color: white;
           font-size: 0.85rem;
           font-weight: 600;
@@ -1314,7 +1314,7 @@ function HostAccommodations({ userProfile }) {
           padding: 1rem;
           margin: 1rem 0;
           border-radius: 4px;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .rejection-notice.revision-notice {
@@ -1325,7 +1325,7 @@ function HostAccommodations({ userProfile }) {
         .rejection-notice-hint {
           margin: 0.6rem 0 0;
           font-size: 0.82rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
         }
 
         .item-actions {
@@ -1345,18 +1345,18 @@ function HostAccommodations({ userProfile }) {
         .availability-manager {
           margin-top: 1.5rem;
           padding-top: 1.5rem;
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
         }
 
         .availability-hint {
           font-size: 0.85rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 0.75rem;
         }
 
         .availability-loading {
           margin-top: 1.5rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
         }
 
         @media (max-width: 768px) {

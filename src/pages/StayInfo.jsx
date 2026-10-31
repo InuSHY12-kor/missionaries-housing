@@ -357,25 +357,25 @@ const STAY_INFO_CSS = `
 
   .si-tabs a {
     padding: 0.5rem 0.95rem;
-    border-radius: 999px;
-    border: 1px solid #ddd6c8;
+    border-radius: 6px;
+    border: 1px solid #d4d4d4;
     background: #fff;
-    color: #3a3a36;
+    color: #222222;
     text-decoration: none;
     font-size: 0.92rem;
     font-weight: 600;
   }
 
   .si-tabs a.active {
-    background: #d97b3f;
-    border-color: #d97b3f;
+    background: #000000;
+    border-color: #000000;
     color: #fff;
   }
 
   .si-card {
     background: #fff;
-    border: 1px solid #e5e2da;
-    border-radius: 12px;
+    border: 1px solid #ebebeb;
+    border-radius: 4px;
     padding: 1.5rem 1.6rem;
     margin-bottom: 1rem;
     word-break: keep-all;
@@ -384,7 +384,7 @@ const STAY_INFO_CSS = `
   .si-card h2 {
     font-size: 1.15rem;
     margin: 0 0 0.75rem;
-    color: #1c1c1a;
+    color: #111111;
   }
 
   .si-policy h2 {
@@ -399,7 +399,7 @@ const STAY_INFO_CSS = `
   .si-card p,
   .si-card li,
   .si-card dd {
-    color: #3a3a36;
+    color: #222222;
     line-height: 1.8;
     font-size: 0.98rem;
   }
@@ -416,10 +416,10 @@ const STAY_INFO_CSS = `
   }
 
   .si-grid > div {
-    background: #faf6ef;
-    border-radius: 10px;
+    background: #fafafa;
+    border-radius: 4px;
     padding: 1rem;
-    color: #d97b3f;
+    color: #a65424;
   }
 
   .si-grid p {
@@ -436,7 +436,7 @@ const STAY_INFO_CSS = `
 
   .si-org dt {
     font-weight: 700;
-    color: #6b665c;
+    color: #6b6b6b;
     font-size: 0.92rem;
     line-height: 1.8;
   }
@@ -469,8 +469,8 @@ const STAY_INFO_CSS = `
 
   .si-money > div:not(.si-arrow) {
     flex: 1 1 180px;
-    background: #faf6ef;
-    border-radius: 10px;
+    background: #fafafa;
+    border-radius: 4px;
     padding: 0.9rem 1rem;
     display: flex;
     flex-direction: column;
@@ -479,13 +479,13 @@ const STAY_INFO_CSS = `
 
   .si-money span {
     font-size: 0.88rem;
-    color: #6b665c;
+    color: #6b6b6b;
   }
 
   .si-arrow {
     align-self: center;
     font-size: 1.4rem;
-    color: #d97b3f;
+    color: #a65424;
     font-weight: 700;
   }
 
@@ -501,7 +501,7 @@ const STAY_INFO_CSS = `
     height: 46px;
     border-radius: 50%;
     background: #faf0e6;
-    color: #d97b3f;
+    color: #a65424;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -513,7 +513,7 @@ const STAY_INFO_CSS = `
 
   .si-who {
     font-size: 0.86rem !important;
-    color: #d97b3f !important;
+    color: #a65424 !important;
     font-weight: 700;
     margin-bottom: 0.3rem !important;
   }
@@ -521,8 +521,8 @@ const STAY_INFO_CSS = `
   .si-fee-box {
     margin-top: 1rem;
     padding: 1rem 1.1rem;
-    border-radius: 10px;
-    background: #fff8ec;
+    border-radius: 4px;
+    background: #fafafa;
     border: 1px solid #f0c48f;
   }
 
@@ -534,7 +534,7 @@ const STAY_INFO_CSS = `
 
   .si-note {
     font-size: 0.88rem !important;
-    color: #6b665c !important;
+    color: #6b6b6b !important;
     margin: 0.75rem 0 0;
   }
 
@@ -547,16 +547,16 @@ const STAY_INFO_CSS = `
   .si-toggle button {
     flex: 1;
     padding: 0.6rem;
-    border-radius: 8px;
-    border: 1px solid #ddd6c8;
+    border-radius: 4px;
+    border: 1px solid #d4d4d4;
     background: #fff;
     font-weight: 600;
     cursor: pointer;
   }
 
   .si-toggle button.active {
-    background: #1c1c1a;
-    border-color: #1c1c1a;
+    background: #111111;
+    border-color: #111111;
     color: #fff;
   }
 
@@ -564,7 +564,7 @@ const STAY_INFO_CSS = `
     white-space: pre-wrap;
     line-height: 1.85;
     font-size: 0.95rem;
-    color: #3a3a36;
+    color: #222222;
   }
 
   .si-table {
@@ -576,7 +576,7 @@ const STAY_INFO_CSS = `
 
   .si-table th,
   .si-table td {
-    border: 1px solid #e5e2da;
+    border: 1px solid #ebebeb;
     padding: 0.6rem 0.75rem;
     text-align: left;
     vertical-align: top;
@@ -584,7 +584,7 @@ const STAY_INFO_CSS = `
   }
 
   .si-table th {
-    background: #faf6ef;
+    background: #fafafa;
   }
 
   @media (max-width: 640px) {

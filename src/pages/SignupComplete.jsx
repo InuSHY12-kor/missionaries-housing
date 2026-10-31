@@ -51,9 +51,9 @@ function SignupComplete() {
 
           .signup-complete-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 4px;
             padding: 2.25rem;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            box-shadow: none;
             max-width: 720px;
             width: 100%;
           }

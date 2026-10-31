@@ -245,7 +245,7 @@ function Profile({ userProfile }) {
                                userProfile?.status === 'pending' ? '#f39c12' : '#e74c3c',
                     color: 'white',
                     padding: '0.5rem 1rem',
-                    borderRadius: '20px',
+                    borderRadius: '6px',
                     display: 'inline-block',
                     fontSize: '0.85rem'
                   }}>
@@ -542,7 +542,7 @@ function Profile({ userProfile }) {
         .section-card {
           background: white;
           padding: 2rem;
-          border-radius: 8px;
+          border-radius: 4px;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
@@ -550,7 +550,7 @@ function Profile({ userProfile }) {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 1.5rem;
         }
 
@@ -568,12 +568,12 @@ function Profile({ userProfile }) {
 
         .info-item label {
           font-weight: 600;
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.9rem;
         }
 
         .info-item p {
-          color: #2c3e50;
+          color: #111111;
           margin: 0;
         }
 
@@ -587,14 +587,14 @@ function Profile({ userProfile }) {
           gap: 0.5rem;
           margin-bottom: 0.5rem;
           font-weight: 600;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .form-group input,
         .form-group textarea {
           width: 100%;
           padding: 0.75rem;
-          border: 2px solid #ecf0f1;
+          border: 2px solid #ebebeb;
           border-radius: 6px;
           font-family: inherit;
           transition: border-color 0.3s;
@@ -603,13 +603,13 @@ function Profile({ userProfile }) {
         .form-group input:focus,
         .form-group textarea:focus {
           outline: none;
-          border-color: #d97b3f;
+          border-color: #000000;
         }
 
         .account-deletion-footer {
           margin-top: 3rem;
           padding-top: 1rem;
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
           text-align: center;
         }
 
@@ -652,7 +652,7 @@ function Profile({ userProfile }) {
         .notif-label {
           font-size: 0.95rem;
           font-weight: 600;
-          color: #2c3e50;
+          color: #111111;
           display: flex;
           align-items: center;
           gap: 0.5rem;
@@ -660,7 +660,7 @@ function Profile({ userProfile }) {
 
         .notif-desc {
           font-size: 0.8rem;
-          color: #95a5a6;
+          color: #6b6b6b;
           line-height: 1.4;
         }
 
@@ -670,7 +670,7 @@ function Profile({ userProfile }) {
           background: #eee;
           color: #999;
           padding: 2px 7px;
-          border-radius: 10px;
+          border-radius: 4px;
           letter-spacing: 0.02em;
         }
 
@@ -679,7 +679,7 @@ function Profile({ userProfile }) {
           flex-shrink: 0;
           width: 44px;
           height: 24px;
-          border-radius: 12px;
+          border-radius: 4px;
           border: none;
           background: #dde0e3;
           cursor: pointer;
@@ -689,7 +689,7 @@ function Profile({ userProfile }) {
         }
 
         .toggle-btn.on {
-          background: #d97b3f;
+          background: #000000;
         }
 
         .toggle-btn:disabled {

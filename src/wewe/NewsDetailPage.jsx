@@ -279,7 +279,7 @@ function NewsDetailPage() {
 
         .nd-cover-image {
           width: 100%;
-          border-radius: 10px;
+          border-radius: 4px;
           margin-bottom: 2rem;
           display: block;
         }
@@ -295,7 +295,7 @@ function NewsDetailPage() {
 
         .nd-gallery-image {
           width: 100%;
-          border-radius: 10px;
+          border-radius: 4px;
           display: block;
         }
 
@@ -338,7 +338,7 @@ function NewsDetailPage() {
 
         .nd-reaction-btn.active {
           border-color: var(--wh-orange);
-          background: rgba(217, 123, 63, 0.1);
+          background: var(--wh-bg-mute);
           color: var(--wh-orange-deep);
         }
 

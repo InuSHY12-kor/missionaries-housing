@@ -55,7 +55,7 @@ function MessageIcon({ userProfile, linkBase = '' }) {
           background: none;
           border: none;
           cursor: pointer;
-          color: #2c3e50;
+          color: #111111;
           padding: 0.4rem;
           border-radius: 50%;
           transition: background 0.2s;
@@ -80,7 +80,7 @@ function MessageIcon({ userProfile, linkBase = '' }) {
           color: white;
           font-size: 0.65rem;
           font-weight: 700;
-          border-radius: 10px;
+          border-radius: 4px;
           min-width: 16px;
           height: 16px;
           display: flex;

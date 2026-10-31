@@ -25,7 +25,8 @@ const DEFAULT_IMAGES = [
 // (2026-10-09) 관리자 편집 모드 — 페이지 경로별로 저장된 배너(사진·문구)가 있으면 그것을, 없으면
 // props로 받은 기본값을 보여줍니다(src/edit/EditMode.jsx). 저장된 내용을 불러오기 전에는 사진·글씨를
 // 잠깐 숨겨, 기본 배너가 보였다가 바뀌는 깜빡임을 막습니다.
-function WevePageHero({ eyebrow, title, subtitle, children, images }) {
+// compact: 로그인·비밀번호·마이페이지처럼 폼이 주인공인 화면은 사진 없이 머리말만 보여줍니다.
+function WevePageHero({ eyebrow, title, subtitle, children, images, compact = false }) {
   const defaults = {
     eyebrow,
     title,
@@ -45,47 +46,57 @@ function WevePageHero({ eyebrow, title, subtitle, children, images }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [heroImages.length]);
 
+  // (2026-10-31 흑백 에디토리얼) 어두운 사진 배너 → 흰 바탕 머리말(왼쪽 라벨 + 오른쪽 제목·설명)과
+  // 그 아래 사진 한 장이 크로스페이드되는 구성. 서브내비(children)는 머리말 바로 아래, 사진 위에 둡니다.
   return (
     <section className="wp-hero">
-      {hero.ready && heroImages.map((src, idx) => (
-        <div
-          // eslint-disable-next-line react/no-array-index-key
-          key={`${idx}-${src}`}
-          className={`wp-hero-slide ${idx === slide ? 'active' : ''}`}
-          style={{ backgroundImage: `url("${src}")` }}
-        />
-      ))}
-
-      <div className="wp-hero-inner" style={{ opacity: hero.ready ? 1 : 0, transition: 'opacity 0.25s ease' }}>
-        {hero.eyebrow && <span className="wp-hero-eyebrow">{hero.eyebrow}</span>}
-        <h1>{hero.title}</h1>
-        {hero.subtitle && <p>{renderRich(hero.subtitle)}</p>}
-        {children}
-      </div>
-
-      <HeroEditButton defaults={defaults} />
-
-      {heroImages.length > 1 && (
-        <div className="wp-hero-progress">
-          {heroImages.map((src, idx) => (
-            // eslint-disable-next-line react/no-array-index-key
-            <div className="wp-hero-dot-wrap" key={`${idx}-${src}`}>
-              <svg className="wp-hero-ring" viewBox="0 0 32 32">
-                <circle className="wp-hero-ring-track" cx="16" cy="16" r="14" />
-                {idx === slide && (
-                  <circle
-                    key={`fill-${slide}`}
-                    className="wp-hero-ring-fill"
-                    cx="16"
-                    cy="16"
-                    r="14"
-                  />
-                )}
-              </svg>
+      <div className="wh-container">
+        <div className="wp-hero-inner" style={{ opacity: hero.ready ? 1 : 0, transition: 'opacity 0.25s ease' }}>
+          <div className="wp-hero-head">
+            <div className="wp-hero-eyebrow">{hero.eyebrow || 'WEWE'}</div>
+            <div>
+              <h1>{hero.title}</h1>
+              {hero.subtitle && <p className="wp-hero-sub">{renderRich(hero.subtitle)}</p>}
             </div>
-          ))}
+          </div>
+          {children}
         </div>
-      )}
+
+        <div className={`wp-hero-media${compact ? ' wp-hero-media-compact' : ''}`}>
+          {hero.ready && heroImages.map((src, idx) => (
+            <div
+              // eslint-disable-next-line react/no-array-index-key
+              key={`${idx}-${src}`}
+              className={`wp-hero-slide ${idx === slide ? 'active' : ''}`}
+              style={{ backgroundImage: `url("${src}")` }}
+            />
+          ))}
+
+          {heroImages.length > 1 && (
+            <div className="wp-hero-progress" aria-hidden="true">
+              {heroImages.map((src, idx) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <div className="wp-hero-dot-wrap" key={`${idx}-${src}`}>
+                  <svg className="wp-hero-ring" viewBox="0 0 32 32">
+                    <circle className="wp-hero-ring-track" cx="16" cy="16" r="14" />
+                    {idx === slide && (
+                      <circle
+                        key={`fill-${slide}`}
+                        className="wp-hero-ring-fill"
+                        cx="16"
+                        cy="16"
+                        r="14"
+                      />
+                    )}
+                  </svg>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <HeroEditButton defaults={defaults} />
+        </div>
+      </div>
     </section>
   );
 }

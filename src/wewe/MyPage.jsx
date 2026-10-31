@@ -91,6 +91,7 @@ function MyPage() {
       <WeweHeader />
 
       <WevePageHero
+        compact
         eyebrow="MY PAGE"
         title={userProfile?.full_name ? `${userProfile.full_name}님, 안녕하세요` : '마이페이지'}
         subtitle="활동 요약, 후원 내역, 받은 소식을 한 곳에서 확인하세요."
@@ -195,7 +196,7 @@ function MyPage() {
         .wm-block {
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
           padding: 2rem;
           margin-bottom: 1.5rem;
         }
@@ -223,7 +224,7 @@ function MyPage() {
           gap: 0.4rem;
           padding: 1.5rem 1rem;
           background: var(--wh-bg-soft);
-          border-radius: 10px;
+          border-radius: 4px;
         }
 
         .wm-stat-card svg {
@@ -248,7 +249,7 @@ function MyPage() {
           padding: 2rem 1rem;
           background: var(--wh-bg-soft);
           border: 1px dashed var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
         }
 
         .wm-empty p {
@@ -273,7 +274,7 @@ function MyPage() {
           padding: 0.9rem 1.1rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
           text-decoration: none;
           color: var(--wh-ink);
           transition: border-color 0.15s ease;

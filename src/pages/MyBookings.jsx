@@ -385,8 +385,8 @@ function MyBookings({ userProfile }) {
         .booking-refund-status {
           margin-top: 0.75rem;
           padding: 0.8rem 1rem;
-          border-radius: 8px;
-          background: #fff8ec;
+          border-radius: 4px;
+          background: #fafafa;
           border: 1px solid #f0c48f;
           word-break: keep-all;
         }
@@ -410,7 +410,7 @@ function MyBookings({ userProfile }) {
           display: flex;
           gap: 0.5rem;
           margin-top: 1.5rem;
-          border-bottom: 2px solid #ecf0f1;
+          border-bottom: 2px solid #ebebeb;
         }
 
         .booking-tab {
@@ -419,7 +419,7 @@ function MyBookings({ userProfile }) {
           padding: 0.75rem 1.25rem;
           font-size: 0.95rem;
           font-weight: 600;
-          color: #7f8c8d;
+          color: #6b6b6b;
           cursor: pointer;
           border-bottom: 3px solid transparent;
           margin-bottom: -2px;
@@ -430,26 +430,26 @@ function MyBookings({ userProfile }) {
         }
 
         .booking-tab:hover {
-          color: #d97b3f;
+          color: #a65424;
         }
 
         .booking-tab.active {
-          color: #d97b3f;
-          border-bottom-color: #d97b3f;
+          color: #a65424;
+          border-bottom-color: #000000;
         }
 
         .tab-count {
-          background: #ecf0f1;
-          color: #7f8c8d;
-          border-radius: 10px;
+          background: #ebebeb;
+          color: #6b6b6b;
+          border-radius: 4px;
           padding: 0.05rem 0.5rem;
           font-size: 0.78rem;
           font-weight: 600;
         }
 
         .booking-tab.active .tab-count {
-          background: #faf1e6;
-          color: #d97b3f;
+          background: #f2f2f2;
+          color: #a65424;
         }
 
         .date-filter {
@@ -458,14 +458,14 @@ function MyBookings({ userProfile }) {
           gap: 1rem;
           background: white;
           padding: 1rem 1.25rem;
-          border-radius: 8px;
+          border-radius: 4px;
           margin: 1.25rem 0;
           box-shadow: 0 2px 8px rgba(0,0,0,0.06);
           flex-wrap: wrap;
         }
 
         .date-filter > svg {
-          color: #d97b3f;
+          color: #a65424;
           margin-bottom: 0.6rem;
         }
 
@@ -477,12 +477,12 @@ function MyBookings({ userProfile }) {
 
         .date-filter-field label {
           font-size: 0.75rem;
-          color: #95a5a6;
+          color: #6b6b6b;
         }
 
         .date-filter-field input {
           padding: 0.5rem;
-          border: 1px solid #dfe6e9;
+          border: 1px solid #ebebeb;
           border-radius: 4px;
           font-size: 0.9rem;
         }
@@ -492,30 +492,30 @@ function MyBookings({ userProfile }) {
           align-items: center;
           gap: 0.35rem;
           background: none;
-          border: 1px solid #dfe6e9;
-          border-radius: 20px;
+          border: 1px solid #ebebeb;
+          border-radius: 6px;
           padding: 0.45rem 0.9rem;
           font-size: 0.82rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           cursor: pointer;
           margin-bottom: 1px;
         }
 
         .date-filter-clear:hover {
-          background: #f8f9fa;
+          background: #fafafa;
         }
 
         .empty-state {
           text-align: center;
           background: white;
           padding: 3rem 2rem;
-          border-radius: 8px;
+          border-radius: 4px;
           margin-top: 2rem;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .empty-state p {
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 1.5rem;
         }
 
@@ -539,7 +539,7 @@ function MyBookings({ userProfile }) {
         .booking-item-detail-cta {
           margin: 0;
           padding-top: 0.5rem;
-          color: #d97b3f;
+          color: #a65424;
           font-size: 0.85rem;
           font-weight: 600;
         }
@@ -550,11 +550,11 @@ function MyBookings({ userProfile }) {
           align-items: flex-start;
           gap: 1rem;
           padding-bottom: 1rem;
-          border-bottom: 1px solid #ecf0f1;
+          border-bottom: 1px solid #ebebeb;
         }
 
         .booking-item-header h3 {
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 0.5rem;
         }
 
@@ -569,7 +569,7 @@ function MyBookings({ userProfile }) {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin: 0;
           font-size: 0.9rem;
         }
@@ -591,13 +591,13 @@ function MyBookings({ userProfile }) {
 
         .total-price {
           font-weight: bold;
-          color: #d97b3f;
+          color: #a65424;
           margin: 0;
           font-size: 1.1rem;
         }
 
         .booking-item-actions {
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
           padding-top: 1rem;
           display: flex;
           gap: 0.75rem;
@@ -614,8 +614,8 @@ function MyBookings({ userProfile }) {
         .review-submitted {
           margin-top: 1rem;
           padding-top: 1rem;
-          border-top: 1px solid #ecf0f1;
-          background: #fdf8f1;
+          border-top: 1px solid #ebebeb;
+          background: #fafafa;
           border-radius: 6px;
           padding: 0.85rem 1rem;
         }
@@ -627,7 +627,7 @@ function MyBookings({ userProfile }) {
           margin: 0 0 0.4rem;
           font-size: 0.85rem;
           font-weight: 600;
-          color: #b8622c;
+          color: #a65424;
         }
 
         .review-heart-badge {
@@ -642,7 +642,7 @@ function MyBookings({ userProfile }) {
 
         .review-submitted-comment {
           margin: 0;
-          color: #2c3e50;
+          color: #111111;
           font-size: 0.92rem;
           white-space: pre-wrap;
         }
@@ -650,7 +650,7 @@ function MyBookings({ userProfile }) {
         .review-form-area {
           margin-top: 1rem;
           padding-top: 1rem;
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
         }
 
         .review-open-btn {
@@ -661,9 +661,9 @@ function MyBookings({ userProfile }) {
           width: 100%;
           padding: 0.7rem;
           background: white;
-          border: 1px dashed #d97b3f;
-          border-radius: 8px;
-          color: #d97b3f;
+          border: 1px dashed #000000;
+          border-radius: 4px;
+          color: #a65424;
           font-weight: 600;
           font-size: 0.9rem;
           cursor: pointer;
@@ -671,13 +671,13 @@ function MyBookings({ userProfile }) {
         }
 
         .review-open-btn:hover {
-          background: #faf1e6;
+          background: #f2f2f2;
         }
 
         .review-form textarea {
           width: 100%;
           padding: 0.75rem;
-          border: 1px solid #dfe6e9;
+          border: 1px solid #ebebeb;
           border-radius: 6px;
           font-family: inherit;
           font-size: 0.92rem;

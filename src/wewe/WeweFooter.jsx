@@ -1,6 +1,6 @@
 import React from 'react';
 import { Instagram } from 'lucide-react';
-import weweLogoFull from '../assets/wewe-logo-new.png';
+import weweLogoFull from '../assets/WEWE_logo_2.png';
 import { ORG_INFO } from '../data/orgInfo';
 
 // 카카오톡 채널 로고(노란 원 + 말풍선) — 외부 이미지 없이 그립니다.

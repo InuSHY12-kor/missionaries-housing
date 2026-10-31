@@ -93,7 +93,7 @@ function RefundPolicy() {
 
       <style>{`
         .rp-highlight {
-          border: 2px solid #d97b3f;
+          border: 2px solid #000000;
         }
       `}</style>
     </StayInfoLayout>

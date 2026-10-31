@@ -30,7 +30,8 @@ import { EditableText } from '../edit/EditMode';
 // 반시계 방향으로 퍼센트만큼 채워지고, 값이 작을수록 안쪽(작은) 링, 클수록 바깥쪽
 // (큰) 링이며, 값이 클수록 색이 더 어둡습니다.
 const RING_COLORS = {
-  teal: ['#5fa39d', '#146b71', '#0a3538'], // [가장 안쪽(작은 값) → 가장 바깥쪽(큰 값)]
+  // (2026-10-31 흑백 에디토리얼) 청록 3단계 → 회색 두 단계 + 가장 큰 값만 위위 주황
+  teal: ['#b5b5b5', '#6b6b6b', '#d97b3f'], // [가장 안쪽(작은 값) → 가장 바깥쪽(큰 값)]
 };
 
 // 반시계 방향 도넛 링 하나의 SVG path를 만듭니다. angleDeg는 12시 방향(0)에서
@@ -451,12 +452,12 @@ function MinistriesPage() {
 
         .wm-project-teal .wm-tag {
           color: var(--wh-teal);
-          background: rgba(20, 107, 113, 0.1);
+          background: var(--wh-bg-soft);
         }
 
         .wm-project-orange .wm-tag {
           color: var(--wh-orange-deep);
-          background: rgba(217, 123, 63, 0.1);
+          background: var(--wh-bg-mute);
         }
 
         .wm-project h2 {
@@ -476,7 +477,7 @@ function MinistriesPage() {
           margin: 0 0 2.25rem;
           padding: 1.5rem 1.75rem;
           background: rgba(0, 0, 0, 0.025);
-          border-left: 3px solid var(--wh-line);
+          border-left: 1px solid var(--wh-line);
           color: var(--wh-ink-soft);
           font-style: italic;
           line-height: 1.85;
@@ -513,7 +514,7 @@ function MinistriesPage() {
         .wm-project-photo {
           height: 220px;
           margin-bottom: 2.25rem;
-          border-radius: 12px;
+          border-radius: 4px;
           background-size: cover;
           background-position: center;
         }
@@ -542,7 +543,7 @@ function MinistriesPage() {
           padding: 1.75rem 1.75rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
         }
 
         .wm-ring-title {
@@ -615,7 +616,7 @@ function MinistriesPage() {
           padding: 1.1rem 1.1rem 1rem;
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
           font-size: 0.85rem;
           font-style: italic;
           color: var(--wh-ink-soft);
@@ -710,7 +711,7 @@ function MinistriesPage() {
           padding: 1.4rem 1.5rem;
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
         }
 
         .wm-project-orange .wm-goal-card,
@@ -743,7 +744,7 @@ function MinistriesPage() {
           width: 38px;
           height: 38px;
           border-radius: 50%;
-          background: rgba(217, 123, 63, 0.12);
+          background: var(--wh-bg-mute);
           color: var(--wh-orange-deep);
           display: flex;
           align-items: center;
@@ -783,7 +784,7 @@ function MinistriesPage() {
         .wm-outcome-photo {
           height: 200px;
           margin: 1.75rem 0 2.5rem;
-          border-radius: 12px;
+          border-radius: 4px;
           background-size: cover;
           background-position: center;
         }
@@ -800,8 +801,8 @@ function MinistriesPage() {
           background: #fff;
           border: 1px solid var(--wh-line);
           border-top: 5px solid var(--wm-outcome-accent);
-          border-radius: 12px;
-          box-shadow: 0 10px 28px rgba(28, 28, 22, 0.07);
+          border-radius: 4px;
+          box-shadow: none;
         }
 
         .wm-outcome-card-teal {
@@ -920,18 +921,17 @@ function MinistriesPage() {
           color: var(--wh-ink);
           font-size: 1rem;
           line-height: 1.9;
-          border-left-width: 4px;
-          border-radius: 0 12px 12px 0;
+          border-left: none;
+          border-top: 1px solid #000;
+          border-radius: 0;
         }
 
         .wewe-ministries-page .wm-project-teal .wm-prologue {
-          background: rgba(20, 107, 113, 0.05);
-          border-left-color: var(--wh-teal);
+          background: var(--wh-bg-soft);
         }
 
         .wewe-ministries-page .wm-project-orange .wm-prologue {
-          background: rgba(217, 123, 63, 0.06);
-          border-left-color: var(--wh-orange);
+          background: var(--wh-bg-mute);
         }
 
         .wewe-ministries-page .wm-project p {
@@ -983,7 +983,7 @@ function MinistriesPage() {
         .wewe-ministries-page .wm-goal-card,
         .wewe-ministries-page .wm-program-card {
           padding: 1.5rem 1.6rem;
-          border-radius: 12px;
+          border-radius: 4px;
         }
 
         .wewe-ministries-page .wm-goal-card h4,

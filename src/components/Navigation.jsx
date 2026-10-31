@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { LogOut, Home, MapPin, Calendar, Building2, CalendarClock, Star, Shield, User } from 'lucide-react';
-import wewelogo from '../assets/wewe-icon.png';
+import wewelogo from '../assets/WEWE_logo_2-mark.png';
 import weweIconWhite from '../assets/wewe-icon-white.png';
 import NotificationBell from './NotificationBell';
 import MessageIcon from './MessageIcon';
@@ -47,42 +47,8 @@ function Navigation({ user, userProfile, onLogout }) {
     };
   }, []);
 
-  // 상단에 사진 배너(랜딩 히어로 또는 PageHero)가 있는 페이지에서는 내비게이션을
-  // 투명 배경 + 흰 글씨로 배너 위에 오버레이합니다. 배너가 없는 페이지(예약 상세 등 배너를
-  // 넣지 않은 일부 하위 페이지)에서는 기존의 불투명 상단바를 그대로 사용합니다.
-  const location = useLocation();
-  const HERO_BANNER_ROUTES = [
-    '/', '/dashboard', '/accommodations', '/my-bookings',
-    '/my-accommodations', '/host-bookings', '/reviews', '/messages', '/profile',
-    '/login', '/signup', '/signup/missionary', '/signup/host',
-    '/signup-complete', '/verify-email', '/complete-profile'
-  ];
-  // 관리자 페이지(/admin/*), 숙소 상세 페이지(/accommodations/:id), 예약 상세 페이지
-  // (/my-bookings/:id)는 하위 경로가 동적으로 바뀌므로 접두사로 매칭합니다.
-  const isAdminRoute = location.pathname.startsWith('/admin');
-  const isAccommodationDetailRoute = location.pathname.startsWith('/accommodations/');
-  const isBookingDetailRoute = location.pathname.startsWith('/my-bookings/');
-  // 승인 대기 화면과 프로필 등록 화면은 고정된 경로 없이 "*" 라우트로 렌더링되므로
-  // (App.jsx 참고) 경로가 아니라 로그인 상태(userProfile)로 판별해야 합니다.
-  const isCompleteProfileScreen = !!user && !userProfile;
-  const isPendingApprovalScreen = !!userProfile
-    && (userProfile.status === 'pending'
-      || (userProfile.status === 'approved' && !userProfile.email_verified_at));
-  // 탈퇴 처리 완료(withdrawn) / 관리자 삭제 처리 대기(deletion_pending) 화면도 PendingApproval과
-  // 마찬가지로 "*" 라우트 + PageHero 배너로 렌더링되므로 동일하게 처리합니다.
-  const isAccountStatusScreen = !!userProfile
-    && (userProfile.status === 'withdrawn' || userProfile.status === 'deletion_pending');
-  // (Phase 6) 후원자는 App.jsx에서 "*" 라우트로 항상 SupporterHome만 렌더링하므로
-  // 실제 URL 경로와 무관하게 PageHero 배너가 있는 화면으로 취급합니다.
-  const isSupporterHomeScreen = hasFullAccess && isSupporterRole;
-  const hasHeroBanner = HERO_BANNER_ROUTES.includes(location.pathname)
-    || isAdminRoute
-    || isAccommodationDetailRoute
-    || isBookingDetailRoute
-    || isCompleteProfileScreen
-    || isPendingApprovalScreen
-    || isAccountStatusScreen
-    || isSupporterHomeScreen;
+  // (2026-10-31 흑백 에디토리얼) 사진 배너 위에 투명하게 얹히던 상단바를 없애고, 모든 화면에서
+  // 흰 바탕 상단바를 씁니다(페이지 머리말 PageHero도 흰 바탕으로 바뀌었습니다).
 
   const brand = (
     <Link to="/" className="navbar-brand">
@@ -92,7 +58,7 @@ function Navigation({ user, userProfile, onLogout }) {
   );
 
   return (
-    <nav ref={navRef} className={`navbar ${user ? 'navbar-authed' : ''} ${hasHeroBanner ? 'navbar-transparent' : ''}`}>
+    <nav ref={navRef} className={`navbar ${user ? 'navbar-authed' : ''}`}>
       <div className={`container ${user ? 'navbar-container' : 'navbar-container-single'}`}>
         {user ? (
           <>

@@ -1431,7 +1431,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           display: flex;
           gap: 1rem;
           margin: 2rem 0;
-          border-bottom: 2px solid #ecf0f1;
+          border-bottom: 2px solid #ebebeb;
         }
 
         .member-contact-row {
@@ -1472,9 +1472,9 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           padding: 1rem 0.6rem;
           background: #fff;
           border: 1.5px solid #ece7dd;
-          border-radius: 14px;
+          border-radius: 4px;
           cursor: pointer;
-          color: #b8622c;
+          color: #a65424;
           transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
         }
 
@@ -1484,13 +1484,13 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         }
 
         .admin-tile.active {
-          border-color: #d97b3f;
-          background: #fff4ea;
-          box-shadow: 0 6px 16px rgba(217, 123, 63, 0.18);
+          border-color: #000000;
+          background: #fafafa;
+          box-shadow: none;
         }
 
         .admin-tile-label {
-          color: #3a3a36;
+          color: #222222;
           font-weight: 700;
           font-size: 0.88rem;
           text-align: center;
@@ -1498,14 +1498,14 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         }
 
         .admin-tile-count {
-          color: #1c1c1a;
+          color: #111111;
           font-weight: 800;
           font-size: 1.35rem;
           line-height: 1.1;
         }
 
         .admin-tile.active .admin-tile-count {
-          color: #d97b3f;
+          color: #a65424;
         }
 
         .admin-subpage {
@@ -1518,14 +1518,14 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           gap: 0.35rem;
           background: none;
           border: none;
-          color: #7f8c8d;
+          color: #6b6b6b;
           cursor: pointer;
           padding: 0;
           font-size: 0.92rem;
         }
 
         .admin-back:hover {
-          color: #d97b3f;
+          color: #a65424;
         }
 
         .admin-subpage-title {
@@ -1554,14 +1554,14 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           padding: 1rem 1.5rem;
           cursor: pointer;
           font-size: 1rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           border-bottom: 3px solid transparent;
           transition: all 0.3s;
         }
 
         .tab.active {
-          color: #b8622c;
-          border-bottom-color: #b8622c;
+          color: #a65424;
+          border-bottom-color: #000000;
         }
 
         .review-section {
@@ -1570,7 +1570,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
 
         .payout-summary {
           margin-bottom: 1.5rem;
-          border: 2px solid #d97b3f;
+          border: 2px solid #000000;
         }
 
         .payout-summary h3 {
@@ -1607,7 +1607,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         .payout-hint {
           margin: 0;
           font-size: 0.88rem;
-          color: #6b665c;
+          color: #6b6b6b;
         }
 
         .user-card, .accommodation-card, .inquiry-card, .booking-admin-card, .post-admin-card {
@@ -1652,8 +1652,8 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         .user-info, .accommodation-info {
           flex: 1;
           padding: 1rem 0;
-          border-top: 1px solid #ecf0f1;
-          border-bottom: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
+          border-bottom: 1px solid #ebebeb;
         }
 
         .user-info p, .accommodation-info p {
@@ -1672,29 +1672,29 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           display: inline-flex;
           align-items: center;
           gap: 0.3rem;
-          background: #fdf8f1;
-          border: 1px solid #f0dcc0;
-          color: #b8622c;
+          background: #fafafa;
+          border: 1px solid #ebebeb;
+          color: #a65424;
           padding: 0.2rem 0.55rem;
-          border-radius: 999px;
+          border-radius: 6px;
           font-size: 0.82rem;
           line-height: 1.4;
         }
 
         .amenity-tag-more {
-          color: #95a5a6;
+          color: #6b6b6b;
           font-size: 0.85rem;
           align-self: center;
         }
 
         .amenity-tags-empty {
-          color: #95a5a6;
+          color: #6b6b6b;
           font-size: 0.9rem;
         }
 
         .verification-docs {
           padding: 1rem 0;
-          border-bottom: 1px solid #ecf0f1;
+          border-bottom: 1px solid #ebebeb;
         }
 
         .verification-docs h4 {
@@ -1713,9 +1713,9 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           align-items: center;
           gap: 0.5rem;
           width: 100%;
-          background: #fdf8f1;
-          border: 1px solid #f0dcc0;
-          color: #b8622c;
+          background: #fafafa;
+          border: 1px solid #ebebeb;
+          color: #a65424;
           padding: 0.6rem 0.9rem;
           border-radius: 6px;
           font-size: 0.9rem;
@@ -1733,8 +1733,8 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         }
 
         .doc-link:hover {
-          background: #faf1e6;
-          border-color: #b8622c;
+          background: #f2f2f2;
+          border-color: #000000;
         }
 
         .doc-link:disabled {
@@ -1755,7 +1755,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           flex-wrap: wrap;
           margin-top: 1rem;
           padding-top: 1rem;
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
         }
 
         .resend-btn {
@@ -1793,7 +1793,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
 
         .empty-message {
           text-align: center;
-          color: #95a5a6;
+          color: #6b6b6b;
           padding: 2rem;
         }
 
@@ -1806,23 +1806,23 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
 
         .member-filter {
           background: white;
-          border: 1px solid #dfe6e9;
-          border-radius: 20px;
+          border: 1px solid #ebebeb;
+          border-radius: 6px;
           padding: 0.5rem 1.1rem;
           font-size: 0.88rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           cursor: pointer;
           transition: all 0.2s;
         }
 
         .member-filter:hover {
-          border-color: #b8622c;
-          color: #b8622c;
+          border-color: #000000;
+          color: #a65424;
         }
 
         .member-filter.active {
-          background: #b8622c;
-          border-color: #b8622c;
+          background: #2e2e2e;
+          border-color: #000000;
           color: white;
         }
 
@@ -1858,11 +1858,11 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
 
         .member-basic h3 {
           margin: 0 0 0.25rem;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .member-email {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.85rem;
         }
 
@@ -1877,7 +1877,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           display: inline-flex;
           align-items: center;
           gap: 0.3rem;
-          background: #2c3e50;
+          background: #111111;
           color: white;
         }
 
@@ -1892,18 +1892,18 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         }
 
         .role-badge.role-missionary {
-          background: #d97b3f;
+          background: #000000;
           color: white;
         }
 
         .role-badge.role-supporter {
-          background: #146b71;
+          background: #000000;
           color: white;
         }
 
         .member-detail {
           padding: 0 1.5rem 1.5rem;
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
         }
 
         .member-deletion-notice {
@@ -1922,7 +1922,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         .member-delete-row {
           margin-top: 1rem;
           padding-top: 1rem;
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
         }
 
         .role-change-row {
@@ -1931,24 +1931,24 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           gap: 0.75rem;
           margin-top: 1rem;
           padding-top: 1rem;
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
         }
 
         .role-change-row label {
           font-weight: 600;
-          color: #2c3e50;
+          color: #111111;
           font-size: 0.9rem;
         }
 
         .role-change-row select {
           padding: 0.4rem 0.75rem;
-          border: 1px solid #dfe6e9;
+          border: 1px solid #ebebeb;
           border-radius: 6px;
         }
 
         .role-change-busy {
           font-size: 0.85rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
         }
 
         .modal-actions {

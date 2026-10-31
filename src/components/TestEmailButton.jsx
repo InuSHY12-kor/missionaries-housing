@@ -77,7 +77,7 @@ function TestEmailButton() {
       <style>{`
         .test-email { margin-top: 1rem; }
         .test-email-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-        .test-email-result { margin-top: 0.75rem; padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.9rem; line-height: 1.6; word-break: keep-all; }
+        .test-email-result { margin-top: 0.75rem; padding: 0.8rem 1rem; border-radius: 4px; font-size: 0.9rem; line-height: 1.6; word-break: keep-all; }
         .test-email-result p { margin: 0 0 0.3rem; }
         .test-email-result ul { margin: 0 0 0.4rem; padding-left: 1.1rem; word-break: break-all; }
         .test-email-result.ok { background: #eef7f0; border: 1px solid #b9dcc3; }

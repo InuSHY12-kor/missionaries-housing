@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { supabase } from '../App';
 import weweIconWhite from '../assets/wewe-icon-white.png';
-import weweIconColor from '../assets/wewe-icon.png';
+import weweIconColor from '../assets/WEWE_logo_2-mark.png';
 import NotificationBell from '../components/NotificationBell';
 import MessageIcon from '../components/MessageIcon';
 
@@ -33,8 +33,9 @@ const ROLE_LABELS = {
 // "로그인/가입하기" → "로그아웃"으로 바뀝니다 — 로그인한 채로 위위 홈페이지를 계속 볼 수
 // 있고, "위위 스테이"는 사용자가 원할 때 직접 눌러서 이동합니다.
 // variant="light"(2026-10-31 흑백 에디토리얼 시안): 사진 배너 위에 얹히는 투명 헤더 대신
-// 흰 바탕에 고정되는 헤더. 지금은 메인(/)만 사용하고, 나머지 페이지는 기존 투명 헤더 그대로입니다.
-function WeweHeader({ variant = 'overlay' }) {
+// 흰 바탕에 고정되는 헤더. (2026-10-31) 사이트 전체 디자인 통일로 모든 페이지의 기본값이 되었습니다.
+// 컬러 로고는 WEWE_logo_2.png에서 심볼만 잘라 낸 WEWE_logo_2-mark.png를 씁니다.
+function WeweHeader({ variant = 'light' }) {
   const isLight = variant === 'light';
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
@@ -456,7 +457,7 @@ function WeweHeader({ variant = 'overlay' }) {
         }
 
         .wewe-header-light .wewe-brand-icon {
-          height: 36px;
+          height: 34px;
         }
 
         .wewe-header-light .wewe-brand-name {

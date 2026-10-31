@@ -93,6 +93,7 @@ function SupporterSignup() {
       <WeweHeader />
 
       <WevePageHero
+        compact
         eyebrow="SUPPORT WEWE"
         title="후원자로 가입하기"
         subtitle="서류 심사나 관리자 승인 없이 바로 가입이 완료됩니다."
@@ -204,7 +205,7 @@ function SupporterSignup() {
         .ss-card {
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
           padding: 2.5rem;
         }
 
@@ -219,22 +220,22 @@ function SupporterSignup() {
           align-items: center;
           gap: 0.65rem;
           padding: 0.9rem 1rem;
-          border-radius: 8px;
+          border-radius: 4px;
           margin-bottom: 1.5rem;
           font-size: 0.92rem;
           line-height: 1.6;
         }
 
         .ss-alert-error {
-          background: #fdecea;
-          color: #b8452e;
-          border: 1px solid #f3c5bb;
+          background: #fdf1ef;
+          color: #a1321d;
+          border: 1px solid #f1cfc7;
         }
 
         .ss-alert-success {
-          background: #eaf5ee;
-          color: #1f6b3d;
-          border: 1px solid #bfe2cc;
+          background: var(--wh-bg-soft);
+          color: var(--wh-ink);
+          border: 1px solid var(--wh-line-strong);
         }
 
         .ss-field {
@@ -263,7 +264,7 @@ function SupporterSignup() {
         .ss-field input:focus {
           outline: none;
           border-color: var(--wh-orange);
-          box-shadow: 0 0 0 3px rgba(217, 123, 63, 0.15);
+          box-shadow: 0 0 0 1px #000;
         }
 
         .ss-terms-box {

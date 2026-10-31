@@ -98,9 +98,9 @@ function VerifyEmail() {
 
         .verify-card {
           background: white;
-          border-radius: 8px;
+          border-radius: 4px;
           padding: 3rem;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+          box-shadow: none;
           max-width: 480px;
           width: 100%;
           text-align: center;
@@ -117,8 +117,8 @@ function VerifyEmail() {
         }
 
         .verify-icon-loading {
-          background: #faf1e6;
-          color: #d97b3f;
+          background: #f2f2f2;
+          color: #a65424;
         }
 
         .verify-icon-loading svg {
@@ -141,13 +141,13 @@ function VerifyEmail() {
         }
 
         .verify-card h1 {
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 0.75rem;
           font-size: 1.4rem;
         }
 
         .verify-card p {
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 1.5rem;
           line-height: 1.6;
         }

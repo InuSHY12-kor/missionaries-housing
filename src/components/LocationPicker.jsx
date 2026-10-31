@@ -122,12 +122,12 @@ function LocationPicker({ address, lat, lng, onChange }) {
 
         .location-picker-hint {
           font-size: 0.85rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
         }
 
         .location-picker-coords {
           font-size: 0.85rem;
-          color: #d97b3f;
+          color: #a65424;
           margin: 0.25rem 0 0.5rem;
         }
 
@@ -136,7 +136,7 @@ function LocationPicker({ address, lat, lng, onChange }) {
           height: 280px;
           border-radius: 6px;
           overflow: hidden;
-          background: #ecf0f1;
+          background: #ebebeb;
         }
 
         @media (max-width: 768px) {
