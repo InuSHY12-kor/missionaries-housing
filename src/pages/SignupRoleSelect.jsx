@@ -75,8 +75,8 @@ function SignupRoleSelect() {
         .role-select-box {
           background: white;
           padding: 3rem;
-          border-radius: 8px;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+          border-radius: 4px;
+          box-shadow: none;
           max-width: 780px;
           width: 100%;
           margin: 0 auto;
@@ -89,7 +89,7 @@ function SignupRoleSelect() {
 
         .subtitle {
           text-align: center;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 2.5rem;
         }
 
@@ -106,25 +106,25 @@ function SignupRoleSelect() {
           text-align: center;
           gap: 0.5rem;
           padding: 2rem 1.5rem;
-          border: 2px solid #ecf0f1;
-          border-radius: 10px;
+          border: 2px solid #ebebeb;
+          border-radius: 4px;
           text-decoration: none;
           color: inherit;
           transition: all 0.25s;
         }
 
         .role-card:hover {
-          border-color: #d97b3f;
-          background: #fdf8f1;
+          border-color: #000000;
+          background: #fafafa;
           transform: translateY(-4px);
-          box-shadow: 0 6px 16px rgba(217, 123, 63, 0.15);
+          box-shadow: none;
         }
 
         .role-card-icon {
           width: 72px;
           height: 72px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #d97b3f 0%, #b8622c 100%);
+          background: #000;
           color: white;
           display: flex;
           align-items: center;
@@ -133,18 +133,18 @@ function SignupRoleSelect() {
         }
 
         .role-card h2 {
-          color: #2c3e50;
+          color: #111111;
           margin: 0;
         }
 
         .role-card > p:not(.role-card-desc) {
-          color: #d97b3f;
+          color: #a65424;
           font-weight: 600;
           margin: 0;
         }
 
         .role-card-desc {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.9rem;
           line-height: 1.6;
           margin: 0.5rem 0 1rem;
@@ -155,7 +155,7 @@ function SignupRoleSelect() {
           display: inline-flex;
           align-items: center;
           gap: 0.4rem;
-          color: #d97b3f;
+          color: #a65424;
           font-weight: 600;
           font-size: 0.9rem;
         }
@@ -163,11 +163,11 @@ function SignupRoleSelect() {
         .login-link {
           text-align: center;
           margin-top: 2rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
         }
 
         .login-link a {
-          color: #d97b3f;
+          color: #a65424;
           text-decoration: none;
           font-weight: 600;
         }

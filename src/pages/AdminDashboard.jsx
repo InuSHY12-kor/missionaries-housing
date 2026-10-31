@@ -109,6 +109,8 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
   const [deleteReasonMember, setDeleteReasonMember] = useState(null);
   const [deleteReasonText, setDeleteReasonText] = useState('');
   const [deleteFlagBusyId, setDeleteFlagBusyId] = useState(null);
+  // (2026-10-31) 삭제 대기 계정 완전 삭제 진행 중인 회원 id
+  const [purgeBusyId, setPurgeBusyId] = useState(null);
 
   const isSuperAdmin = !!userProfile?.is_super_admin;
 
@@ -284,6 +286,22 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
     }
   };
 
+  // (2026-10-31) 가입 거절 / 계정 삭제 처리를 해당 회원에게 메일로 안내합니다(send-email "account_status_notice").
+  // 사유는 서버가 DB에서 읽습니다. 메일이 실패해도 처리 자체는 이미 끝났으므로 알림만 띄웁니다.
+  const sendAccountStatusNotice = async (userId, kind) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-email', {
+        body: { type: 'account_status_notice', userId, kind }
+      });
+      if (error) throw error;
+      return !data?.skipped;
+    } catch (err) {
+      console.error('계정 상태 안내 메일 오류:', err);
+      alert('처리는 완료됐지만 안내 메일을 보내지 못했습니다. 필요하면 회원에게 직접 연락해 주세요.');
+      return false;
+    }
+  };
+
   const rejectUser = async (userId) => {
     if (!rejectionReason.trim()) {
       alert('거절 사유를 입력해주세요.');
@@ -302,6 +320,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
       setCounts(prev => ({ ...prev, users: Math.max(0, prev.users - 1) }));
       setSelectedItem(null);
       setRejectionReason('');
+      sendAccountStatusNotice(userId, 'rejected');
     } catch (error) {
       alert('오류: ' + error.message);
     }
@@ -364,7 +383,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
       alert('삭제 사유를 입력해주세요.');
       return;
     }
-    if (!window.confirm(`${deleteReasonMember.full_name}(${deleteReasonMember.email}) 계정을 삭제 처리하시겠습니까? 해당 회원이 다음 로그인 시 입력하신 사유를 확인하고 동의해야 계정이 완전히 삭제됩니다.`)) {
+    if (!window.confirm(`${deleteReasonMember.full_name}(${deleteReasonMember.email}) 계정을 삭제 처리하시겠습니까? 해당 회원에게 사유가 담긴 안내 메일이 발송되고, 회원이 다음 로그인 시 사유를 확인하고 동의하면 계정이 완전히 삭제됩니다. 14일이 지나도록 확인하지 않으면 관리자가 직접 완전히 삭제할 수 있습니다.`)) {
       return;
     }
     setDeleteFlagBusyId(deleteReasonMember.id);
@@ -376,15 +395,37 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
       if (error) throw error;
       setMembers(members.map(m => (
         m.id === deleteReasonMember.id
-          ? { ...m, status: 'deletion_pending', admin_deletion_reason: deleteReasonText.trim() }
+          ? { ...m, status: 'deletion_pending', admin_deletion_reason: deleteReasonText.trim(), deletion_flagged_at: new Date().toISOString() }
           : m
       )));
+      sendAccountStatusNotice(deleteReasonMember.id, 'deletion');
       setDeleteReasonMember(null);
       setDeleteReasonText('');
     } catch (error) {
       alert('오류: ' + error.message);
     } finally {
       setDeleteFlagBusyId(null);
+    }
+  };
+
+  // (2026-10-31) 삭제 대기 계정 완전 삭제 — 삭제 처리 후 14일이 지나도록 회원이 확인하지 않은 계정을
+  // 관리자가 직접 지웁니다(admin_purge_flagged_user). 되돌릴 수 없으므로 이메일 주소를 다시 입력받아 확인합니다.
+  const purgeFlaggedMember = async (member) => {
+    const typed = window.prompt(`${member.full_name}(${member.email}) 계정과 관련 데이터(숙소·예약·메시지 등)를 완전히 삭제합니다. 되돌릴 수 없습니다.\n\n확인을 위해 이 회원의 이메일 주소를 입력해 주세요.`);
+    if (typed === null) return;
+    if (typed.trim().toLowerCase() !== String(member.email || '').toLowerCase()) {
+      alert('이메일 주소가 일치하지 않아 삭제하지 않았습니다.');
+      return;
+    }
+    setPurgeBusyId(member.id);
+    try {
+      const { error } = await supabase.rpc('admin_purge_flagged_user', { target_user_id: member.id });
+      if (error) throw error;
+      setMembers(members.filter(m => m.id !== member.id));
+    } catch (error) {
+      alert('오류: ' + error.message);
+    } finally {
+      setPurgeBusyId(null);
     }
   };
 
@@ -1018,8 +1059,34 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
                               <p className="member-deletion-notice member-deletion-notice-danger">
                                 <strong>⛔ 관리자 삭제 처리 대기 중</strong> — 사유: {member.admin_deletion_reason || '미입력'}
                                 <br />본인이 다음 로그인 시 사유를 확인하고 동의하면 계정이 완전히 삭제됩니다.
+                                {member.deletion_flagged_at && (
+                                  <> 삭제 처리일: {new Date(member.deletion_flagged_at).toLocaleDateString()}</>
+                                )}
                               </p>
                             )}
+                            {member.status === 'deletion_pending' && !isSelf && (() => {
+                              const flaggedAt = member.deletion_flagged_at ? new Date(member.deletion_flagged_at) : null;
+                              const purgeableAt = flaggedAt ? new Date(flaggedAt.getTime() + 14 * 24 * 60 * 60 * 1000) : null;
+                              const canPurge = !purgeableAt || purgeableAt <= new Date();
+                              return (
+                                <div className="member-purge-row">
+                                  <button
+                                    type="button"
+                                    className="btn btn-danger btn-small"
+                                    onClick={() => purgeFlaggedMember(member)}
+                                    disabled={!canPurge || purgeBusyId === member.id}
+                                  >
+                                    <Trash2 size={14} />
+                                    {purgeBusyId === member.id ? '삭제 중...' : '계정 완전 삭제'}
+                                  </button>
+                                  {!canPurge && (
+                                    <span className="member-purge-hint">
+                                      {purgeableAt.toLocaleDateString()}부터 완전 삭제할 수 있습니다(삭제 처리 후 14일).
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </div>
 
                           {member.verification_docs && member.verification_docs.length > 0 && (
@@ -1431,7 +1498,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           display: flex;
           gap: 1rem;
           margin: 2rem 0;
-          border-bottom: 2px solid #ecf0f1;
+          border-bottom: 2px solid #ebebeb;
         }
 
         .member-contact-row {
@@ -1472,9 +1539,9 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           padding: 1rem 0.6rem;
           background: #fff;
           border: 1.5px solid #ece7dd;
-          border-radius: 14px;
+          border-radius: 4px;
           cursor: pointer;
-          color: #b8622c;
+          color: #a65424;
           transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
         }
 
@@ -1484,13 +1551,13 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         }
 
         .admin-tile.active {
-          border-color: #d97b3f;
-          background: #fff4ea;
-          box-shadow: 0 6px 16px rgba(217, 123, 63, 0.18);
+          border-color: #000000;
+          background: #fafafa;
+          box-shadow: none;
         }
 
         .admin-tile-label {
-          color: #3a3a36;
+          color: #222222;
           font-weight: 700;
           font-size: 0.88rem;
           text-align: center;
@@ -1498,14 +1565,14 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         }
 
         .admin-tile-count {
-          color: #1c1c1a;
+          color: #111111;
           font-weight: 800;
           font-size: 1.35rem;
           line-height: 1.1;
         }
 
         .admin-tile.active .admin-tile-count {
-          color: #d97b3f;
+          color: #a65424;
         }
 
         .admin-subpage {
@@ -1518,14 +1585,14 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           gap: 0.35rem;
           background: none;
           border: none;
-          color: #7f8c8d;
+          color: #6b6b6b;
           cursor: pointer;
           padding: 0;
           font-size: 0.92rem;
         }
 
         .admin-back:hover {
-          color: #d97b3f;
+          color: #a65424;
         }
 
         .admin-subpage-title {
@@ -1554,14 +1621,14 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           padding: 1rem 1.5rem;
           cursor: pointer;
           font-size: 1rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           border-bottom: 3px solid transparent;
           transition: all 0.3s;
         }
 
         .tab.active {
-          color: #b8622c;
-          border-bottom-color: #b8622c;
+          color: #a65424;
+          border-bottom-color: #000000;
         }
 
         .review-section {
@@ -1570,7 +1637,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
 
         .payout-summary {
           margin-bottom: 1.5rem;
-          border: 2px solid #d97b3f;
+          border: 2px solid #000000;
         }
 
         .payout-summary h3 {
@@ -1607,7 +1674,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         .payout-hint {
           margin: 0;
           font-size: 0.88rem;
-          color: #6b665c;
+          color: #6b6b6b;
         }
 
         .user-card, .accommodation-card, .inquiry-card, .booking-admin-card, .post-admin-card {
@@ -1652,8 +1719,8 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         .user-info, .accommodation-info {
           flex: 1;
           padding: 1rem 0;
-          border-top: 1px solid #ecf0f1;
-          border-bottom: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
+          border-bottom: 1px solid #ebebeb;
         }
 
         .user-info p, .accommodation-info p {
@@ -1672,29 +1739,29 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           display: inline-flex;
           align-items: center;
           gap: 0.3rem;
-          background: #fdf8f1;
-          border: 1px solid #f0dcc0;
-          color: #b8622c;
+          background: #fafafa;
+          border: 1px solid #ebebeb;
+          color: #a65424;
           padding: 0.2rem 0.55rem;
-          border-radius: 999px;
+          border-radius: 6px;
           font-size: 0.82rem;
           line-height: 1.4;
         }
 
         .amenity-tag-more {
-          color: #95a5a6;
+          color: #6b6b6b;
           font-size: 0.85rem;
           align-self: center;
         }
 
         .amenity-tags-empty {
-          color: #95a5a6;
+          color: #6b6b6b;
           font-size: 0.9rem;
         }
 
         .verification-docs {
           padding: 1rem 0;
-          border-bottom: 1px solid #ecf0f1;
+          border-bottom: 1px solid #ebebeb;
         }
 
         .verification-docs h4 {
@@ -1713,9 +1780,9 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           align-items: center;
           gap: 0.5rem;
           width: 100%;
-          background: #fdf8f1;
-          border: 1px solid #f0dcc0;
-          color: #b8622c;
+          background: #fafafa;
+          border: 1px solid #ebebeb;
+          color: #a65424;
           padding: 0.6rem 0.9rem;
           border-radius: 6px;
           font-size: 0.9rem;
@@ -1733,8 +1800,8 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         }
 
         .doc-link:hover {
-          background: #faf1e6;
-          border-color: #b8622c;
+          background: #f2f2f2;
+          border-color: #000000;
         }
 
         .doc-link:disabled {
@@ -1755,7 +1822,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           flex-wrap: wrap;
           margin-top: 1rem;
           padding-top: 1rem;
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
         }
 
         .resend-btn {
@@ -1793,7 +1860,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
 
         .empty-message {
           text-align: center;
-          color: #95a5a6;
+          color: #6b6b6b;
           padding: 2rem;
         }
 
@@ -1806,23 +1873,23 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
 
         .member-filter {
           background: white;
-          border: 1px solid #dfe6e9;
-          border-radius: 20px;
+          border: 1px solid #ebebeb;
+          border-radius: 6px;
           padding: 0.5rem 1.1rem;
           font-size: 0.88rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           cursor: pointer;
           transition: all 0.2s;
         }
 
         .member-filter:hover {
-          border-color: #b8622c;
-          color: #b8622c;
+          border-color: #000000;
+          color: #a65424;
         }
 
         .member-filter.active {
-          background: #b8622c;
-          border-color: #b8622c;
+          background: #2e2e2e;
+          border-color: #000000;
           color: white;
         }
 
@@ -1858,11 +1925,11 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
 
         .member-basic h3 {
           margin: 0 0 0.25rem;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .member-email {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.85rem;
         }
 
@@ -1877,7 +1944,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           display: inline-flex;
           align-items: center;
           gap: 0.3rem;
-          background: #2c3e50;
+          background: #111111;
           color: white;
         }
 
@@ -1892,18 +1959,31 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         }
 
         .role-badge.role-missionary {
-          background: #d97b3f;
+          background: #000000;
           color: white;
         }
 
         .role-badge.role-supporter {
-          background: #146b71;
+          background: #000000;
           color: white;
         }
 
         .member-detail {
           padding: 0 1.5rem 1.5rem;
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
+        }
+
+        .member-purge-row {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 0.6rem;
+          margin-top: 0.6rem;
+        }
+
+        .member-purge-hint {
+          font-size: 0.85rem;
+          color: #6b6b6b;
         }
 
         .member-deletion-notice {
@@ -1922,7 +2002,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         .member-delete-row {
           margin-top: 1rem;
           padding-top: 1rem;
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
         }
 
         .role-change-row {
@@ -1931,24 +2011,24 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
           gap: 0.75rem;
           margin-top: 1rem;
           padding-top: 1rem;
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
         }
 
         .role-change-row label {
           font-weight: 600;
-          color: #2c3e50;
+          color: #111111;
           font-size: 0.9rem;
         }
 
         .role-change-row select {
           padding: 0.4rem 0.75rem;
-          border: 1px solid #dfe6e9;
+          border: 1px solid #ebebeb;
           border-radius: 6px;
         }
 
         .role-change-busy {
           font-size: 0.85rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
         }
 
         .modal-actions {

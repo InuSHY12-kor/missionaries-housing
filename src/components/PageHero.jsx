@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useHero, HeroEditButton, renderRich } from '../edit/EditMode';
 
 /**
- * 랜딩 페이지 히어로와 동일한 느낌(자동 전환 슬라이드 + 원형 링 진행 표시)의
- * 축소판 배너입니다. 로그인 후 각 페이지 상단에 얹어 페이지별 분위기 사진을 보여줍니다.
- * 랜딩 페이지 히어로보다 높이를 절반 정도로 낮춰서 콘텐츠를 가리지 않도록 했습니다.
+ * 위위스테이 각 페이지 상단의 머리말 배너입니다.
+ * (2026-10-31 흑백 에디토리얼) 어두운 사진 위 가운데 글씨 → WEWE 하위 페이지(WevePageHero)와 같은
+ * "왼쪽 라벨 + 오른쪽 제목·설명" 흰 바탕 머리말과, 그 아래 낮은 사진 띠(자동 크로스페이드)로 바꿨습니다.
  */
 // (2026-10-09) 관리자 편집 모드 — 페이지 경로별로 저장된 배너(사진·문구)가 있으면 그것을, 없으면 props
 // 기본값을 보여줍니다(src/edit/EditMode.jsx). 저장된 내용을 불러오기 전에는 잠깐 숨겨 깜빡임을 막습니다.
@@ -20,7 +20,7 @@ function PageHero({ images: defaultImages, eyebrow: defaultEyebrow, title: defau
     if (imageCount < 2) return undefined;
     const timer = setInterval(() => {
       setSlide((prev) => (prev + 1) % imageCount);
-    }, 3000);
+    }, 3500);
     return () => clearInterval(timer);
   }, [imageCount]);
 
@@ -28,223 +28,158 @@ function PageHero({ images: defaultImages, eyebrow: defaultEyebrow, title: defau
 
   return (
     <section className="page-hero">
-      {hero.ready && images.map((src, idx) => (
-        <div
-          key={idx}
-          className={`page-hero-slide ${idx === slide ? 'active' : ''}`}
-          style={{ backgroundImage: `url("${src}")` }}
-        />
-      ))}
-
-      <div className="page-hero-overlay" />
-
-      {(eyebrow || title || subtitle) && (
-        <div className="page-hero-content" style={{ opacity: hero.ready ? 1 : 0, transition: 'opacity 0.25s ease' }}>
-          {eyebrow && <span className="page-hero-eyebrow">{eyebrow}</span>}
-          {title && <h2>{title}</h2>}
-          {subtitle && <p>{renderRich(subtitle)}</p>}
-        </div>
-      )}
-
-      <HeroEditButton defaults={defaults} />
-
-      {images.length > 1 && (
-        <div className="page-hero-progress">
-          {images.map((_, idx) => (
-            <div className="page-hero-dot-wrap" key={idx}>
-              <svg className="page-hero-ring" viewBox="0 0 36 36">
-                <circle className="page-hero-ring-track" cx="18" cy="18" r="15.5" />
-                {idx === slide && (
-                  <circle
-                    key={`fill-${slide}`}
-                    className="page-hero-ring-fill"
-                    cx="18"
-                    cy="18"
-                    r="15.5"
-                  />
-                )}
-              </svg>
+      <div className="page-hero-inner">
+        {(eyebrow || title || subtitle) && (
+          <div className="page-hero-head" style={{ opacity: hero.ready ? 1 : 0, transition: 'opacity 0.25s ease' }}>
+            <div className="page-hero-eyebrow">{eyebrow || 'WEWE STAY'}</div>
+            <div>
+              {title && <h2>{title}</h2>}
+              {subtitle && <p>{renderRich(subtitle)}</p>}
             </div>
+          </div>
+        )}
+
+        <div className="page-hero-media">
+          {hero.ready && images.map((src, idx) => (
+            <div
+              key={idx}
+              className={`page-hero-slide ${idx === slide ? 'active' : ''}`}
+              style={{ backgroundImage: `url("${src}")` }}
+            />
           ))}
+
+          {images.length > 1 && (
+            <div className="page-hero-progress" aria-hidden="true">
+              {images.map((_, idx) => (
+                <span key={idx} className={`page-hero-dot ${idx === slide ? 'active' : ''}`} />
+              ))}
+            </div>
+          )}
+
+          <HeroEditButton defaults={defaults} />
         </div>
-      )}
+      </div>
 
       <style>{`
         .page-hero {
+          background: #fff;
+          margin-bottom: 2.5rem;
+        }
+
+        .page-hero-inner {
+          max-width: 1280px;
+          margin: 0 auto;
+          padding: 3.5rem 72px 0;
+        }
+
+        .page-hero-head {
+          display: grid;
+          grid-template-columns: 1fr 2fr;
+          gap: 2rem;
+          padding-bottom: 1.75rem;
+          border-bottom: 1px solid #000;
+        }
+
+        .page-hero-eyebrow {
+          font-size: 0.8rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          color: #111;
+          padding-top: 0.5rem;
+        }
+
+        .page-hero-eyebrow::before {
+          content: '';
+          display: inline-block;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #d97b3f;
+          margin-right: 0.6rem;
+          vertical-align: middle;
+          transform: translateY(-1px);
+        }
+
+        .page-hero-head h2 {
+          color: #000;
+          font-size: clamp(1.7rem, 3.2vw, 2.5rem);
+          font-weight: 700;
+          line-height: 1.25;
+          letter-spacing: -0.03em;
+          margin: 0 0 0.6rem;
+        }
+
+        .page-hero-head p {
+          color: #424242;
+          font-size: 1rem;
+          line-height: 1.7;
+          margin: 0;
+          max-width: 620px;
+        }
+
+        .page-hero-media {
           position: relative;
-          min-height: 380px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
+          margin-top: 1.75rem;
+          aspect-ratio: 21 / 5;
+          border-radius: 4px;
           overflow: hidden;
-          background-color: #1c1c1a;
-          margin-bottom: 2rem;
+          background: #f2f2f2;
         }
 
         .page-hero-slide {
           position: absolute;
           inset: 0;
-          z-index: 0;
           background-size: cover;
           background-position: center;
           opacity: 0;
-          transition: opacity 1.4s ease;
+          transition: opacity 0.45s ease-in-out;
         }
 
         .page-hero-slide.active {
           opacity: 1;
         }
 
-        .page-hero-overlay {
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-          background: linear-gradient(180deg, rgba(15,15,13,0.42) 0%, rgba(15,15,13,0.35) 45%, rgba(15,15,13,0.62) 100%);
-        }
-
-        .page-hero-content {
-          position: relative;
-          z-index: 2;
-          max-width: 640px;
-          margin: 0 auto;
-          padding: 4rem 1.5rem 1.5rem;
-        }
-
-        .page-hero-eyebrow {
-          display: inline-block;
-          font-size: 0.8rem;
-          font-weight: 700;
-          letter-spacing: 0.2em;
-          color: #e7dcc4;
-          margin-bottom: 0.6rem;
-        }
-
-        .page-hero-content h2 {
-          color: white;
-          font-size: 1.9rem;
-          font-weight: 700;
-          margin-bottom: 0.4rem;
-          letter-spacing: -0.01em;
-        }
-
-        .page-hero-content p {
-          color: rgba(255, 255, 255, 0.88);
-          font-size: 1rem;
-          line-height: 1.6;
-          margin: 0;
-        }
-
         .page-hero-progress {
           position: absolute;
-          left: 50%;
-          bottom: 1.1rem;
-          transform: translateX(-50%);
-          z-index: 2;
+          right: 0.9rem;
+          bottom: 0.9rem;
           display: flex;
-          gap: 0.7rem;
+          gap: 0.35rem;
+          padding: 0.45rem 0.6rem;
+          border-radius: 6px;
+          background: rgba(0, 0, 0, 0.55);
         }
 
-        .page-hero-dot-wrap {
-          width: 16px;
-          height: 16px;
+        .page-hero-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.45);
+          transition: background-color 0.2s ease-in-out;
         }
 
-        .page-hero-ring {
-          width: 16px;
-          height: 16px;
-          transform: rotate(-90deg);
+        .page-hero-dot.active {
+          background: #d97b3f;
         }
 
-        .page-hero-ring-track {
-          fill: none;
-          stroke: rgba(255, 255, 255, 0.35);
-          stroke-width: 2.5;
-        }
-
-        .page-hero-ring-fill {
-          fill: none;
-          stroke: #ffffff;
-          stroke-width: 2.5;
-          stroke-linecap: round;
-          stroke-dasharray: 97.4;
-          stroke-dashoffset: 97.4;
-          animation: pageHeroRingFill 3s linear forwards;
-        }
-
-        @keyframes pageHeroRingFill {
-          from { stroke-dashoffset: 97.4; }
-          to { stroke-dashoffset: 0; }
-        }
-
-        @media (max-width: 768px) {
-          .page-hero {
-            min-height: 280px;
+        @media (max-width: 1000px) {
+          .page-hero-inner {
+            padding: 2.25rem 20px 0;
           }
 
-          .page-hero-content {
-            /* 로그인한 사용자(특히 관리자)는 상단바가 여러 줄로 늘어날 수 있어, 상단바의
-               실제 렌더링 높이(--navbar-height, Navigation.jsx에서 계속 갱신)만큼 위쪽
-               여백을 확보해 제목 글씨가 상단바와 겹치지 않도록 합니다. */
-            padding-top: calc(var(--navbar-height, 88px) + 1rem);
-            /* 상단바가 여러 줄(아이콘 그리드)로 늘어나 위쪽 여백이 커지면 이 배너 전체가
-               내용물 높이만큼 함께 늘어나는데, 아래쪽 슬라이드 진행 점은 배너 "맨 아래"
-               기준으로 고정 배치되어 있어 문구 바로 아래로 바짝 붙어버립니다(랜딩 페이지
-               히어로는 아래쪽 여백이 원래 넉넉해 이 문제가 없었습니다). 아래쪽 여백을
-               넉넉히 확보해 문구와 진행 점이 상단바 줄 수와 무관하게 항상 충분히
-               떨어지도록 합니다. */
-            padding-bottom: 4rem;
+          .page-hero-head {
+            grid-template-columns: 1fr;
+            gap: 0.6rem;
           }
 
-          .page-hero-content h2 {
-            font-size: 1.4rem;
-          }
-
-          .page-hero-content p {
-            font-size: 0.9rem;
-          }
-
-          .page-hero-progress {
-            bottom: 1.5rem;
+          .page-hero-media {
+            aspect-ratio: 16 / 6;
           }
         }
 
-        @media (max-width: 480px) {
-          .page-hero {
-            min-height: 220px;
-            margin-bottom: 1.25rem;
-          }
-
-          .page-hero-content {
-            padding-top: calc(var(--navbar-height, 76px) + 0.75rem);
-            padding-left: 1.1rem;
-            padding-right: 1.1rem;
-            /* 768px 구간과 동일한 이유로, 좁은 화면에서도 문구와 진행 점 사이 여백을
-               넉넉히 확보합니다. */
-            padding-bottom: 3rem;
-          }
-
-          .page-hero-eyebrow {
-            font-size: 0.7rem;
-          }
-
-          .page-hero-content h2 {
-            font-size: 1.2rem;
-          }
-
-          .page-hero-content p {
-            font-size: 0.85rem;
-            line-height: 1.5;
-          }
-
-          .page-hero-progress {
-            bottom: 1rem;
-          }
-
-          .page-hero-dot-wrap,
-          .page-hero-ring {
-            width: 12px;
-            height: 12px;
+        @media (prefers-reduced-motion: reduce) {
+          .page-hero-slide {
+            transition: none;
           }
         }
       `}</style>

@@ -7,7 +7,7 @@ import WevePageHero from './WevePageHero';
 import AboutSubNav from './AboutSubNav';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
-import weweLogoColor from '../assets/wewe-logo-color.png';
+import weweLogoColor from '../assets/WEWE_logo_2.png';
 import './wewe-shared.css';
 import { EditableText } from '../edit/EditMode';
 
@@ -322,7 +322,7 @@ function AboutPage() {
       <style>{`
         /* (2026-10-07) 운영·지속가능성 CTA — 위 CTA(#1c1c1a)보다 약 15% 밝은 회색. 흰 글씨 대비 약 10:1. */
         .wa-cta-soft {
-          background: #3e3e3b;
+          background: #1a1a1a;
         }
 
         .wa-cta-soft p {
@@ -335,8 +335,8 @@ function AboutPage() {
         }
 
         .wa-cta-soft-btn:hover {
-          background: #0f5a5f;
-          border-color: #0f5a5f;
+          background: #2e2e2e;
+          border-color: #2e2e2e;
         }
 
         .wa-story {
@@ -355,7 +355,8 @@ function AboutPage() {
           margin: 0 0 2rem;
           padding: 1.5rem 1.75rem;
           background: var(--wh-bg-soft);
-          border-left: 3px solid var(--wh-orange);
+          border-left: none;
+          border-top: 1px solid #000;
           color: var(--wh-ink);
           font-weight: 600;
           line-height: 1.8;
@@ -379,7 +380,7 @@ function AboutPage() {
         .wa-verse-banner-img {
           width: 100%;
           aspect-ratio: 16 / 9;
-          border-radius: 10px;
+          border-radius: 4px;
           background-size: cover;
           background-position: center;
           background-color: var(--wh-bg-soft);
@@ -402,13 +403,13 @@ function AboutPage() {
           padding: 1.75rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
         }
 
         .wa-logo-block-visual {
           width: 100%;
           height: 220px;
-          border-radius: 10px;
+          border-radius: 4px;
           background-size: cover;
           background-position: center;
         }
@@ -471,7 +472,7 @@ function AboutPage() {
           padding: 1.75rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
           text-align: center;
         }
 
@@ -508,7 +509,7 @@ function AboutPage() {
           padding: 1.5rem 1.25rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
           text-align: center;
         }
 
@@ -519,7 +520,7 @@ function AboutPage() {
           width: 46px;
           height: 46px;
           border-radius: 50%;
-          background: rgba(217, 123, 63, 0.12);
+          background: var(--wh-bg-mute);
           color: var(--wh-orange-deep);
           margin-bottom: 0.9rem;
         }
@@ -570,7 +571,7 @@ function AboutPage() {
           color: #fff;
           font-weight: 800;
           font-size: 1.15rem;
-          border-radius: 10px;
+          border-radius: 4px;
         }
 
         .wa-org-root span {
@@ -611,14 +612,14 @@ function AboutPage() {
         }
 
         .wa-org-branch-orange .wa-org-target {
-          background: var(--wh-orange);
+          background: var(--wh-orange-deep);
         }
 
         .wa-org-project {
           padding: 1.5rem;
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
         }
 
         .wa-org-branch-teal .wa-org-project {
@@ -670,7 +671,7 @@ function AboutPage() {
         .wa-target-photo-img {
           width: 100%;
           aspect-ratio: 16 / 9;
-          border-radius: 10px;
+          border-radius: 4px;
           background-size: cover;
           background-position: center;
           background-color: var(--wh-bg);
@@ -699,10 +700,12 @@ function AboutPage() {
 
         .wewe-about-page .wh-verse {
           margin: 0 0 2.25rem;
-          padding: 1.75rem 2rem;
-          background: rgba(217, 123, 63, 0.07);
-          border-left: 4px solid var(--wh-orange);
-          border-radius: 0 12px 12px 0;
+          padding: 1.75rem 0;
+          background: transparent;
+          border-bottom: 1px solid var(--wh-line-strong);
+          border-left: none;
+          border-top: 1px solid #000;
+          border-radius: 0;
           font-style: normal;
           font-size: 1.08rem;
           line-height: 1.9;
@@ -729,12 +732,12 @@ function AboutPage() {
           padding: 1.5rem 1.6rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
         }
 
         .wa-story-step-answer {
-          background: rgba(20, 107, 113, 0.06);
-          border-color: rgba(20, 107, 113, 0.25);
+          background: var(--wh-bg-soft);
+          border-color: var(--wh-line-strong);
         }
 
         .wa-story-no {
@@ -781,7 +784,7 @@ function AboutPage() {
 
         .wewe-about-page .wa-logo-block {
           padding: 2rem;
-          border-radius: 12px;
+          border-radius: 4px;
         }
 
         .wewe-about-page .wa-logo-block-text h3 {
@@ -809,8 +812,8 @@ function AboutPage() {
         .wewe-about-page .wa-mv-card {
           padding: 2rem 1.75rem;
           background: var(--wh-bg);
-          border-top: 4px solid var(--wh-orange);
-          box-shadow: 0 8px 22px rgba(28, 28, 22, 0.05);
+          border-top: 1px solid #000;
+          box-shadow: none;
         }
 
         .wewe-about-page .wa-mv-card:last-child {
@@ -870,7 +873,7 @@ function AboutPage() {
 
         .wewe-about-page .wa-org-project {
           padding: 1.6rem 1.75rem;
-          border-radius: 12px;
+          border-radius: 4px;
         }
 
         .wewe-about-page .wa-org-project strong {
@@ -936,7 +939,7 @@ function AboutPage() {
         }
 
         .wa-flow-chip-orange {
-          background: var(--wh-orange);
+          background: var(--wh-orange-deep);
         }
 
         @media (max-width: 860px) {

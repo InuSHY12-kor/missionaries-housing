@@ -231,8 +231,8 @@ function SignUp({ role }) {
         .signup-form {
           background: white;
           padding: 3rem;
-          border-radius: 8px;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+          border-radius: 4px;
+          box-shadow: none;
           max-width: 600px;
           width: 100%;
           margin: 0 auto;
@@ -252,7 +252,7 @@ function SignUp({ role }) {
 
         .subtitle {
           text-align: center;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 2rem;
         }
 
@@ -280,10 +280,10 @@ function SignUp({ role }) {
         .terms-box {
           height: 180px;
           overflow-y: auto;
-          border: 1px solid #dfe6e9;
+          border: 1px solid #ebebeb;
           border-radius: 6px;
           padding: 1rem;
-          background: #f8f9fa;
+          background: #fafafa;
           color: #555;
           font-size: 0.85rem;
           line-height: 1.7;
@@ -313,7 +313,7 @@ function SignUp({ role }) {
           display: block;
           margin-bottom: 0.5rem;
           font-weight: 600;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .form-group input {
@@ -326,14 +326,14 @@ function SignUp({ role }) {
 
         .form-group input:focus {
           outline: none;
-          border-color: #d97b3f;
-          box-shadow: 0 0 0 3px rgba(217, 123, 63, 0.1);
+          border-color: #000000;
+          box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
         }
 
         .login-link {
           text-align: center;
           margin-top: 1.5rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -342,11 +342,11 @@ function SignUp({ role }) {
         }
 
         .login-link .divider {
-          color: #dfe6e9;
+          color: #ebebeb;
         }
 
         .login-link a {
-          color: #d97b3f;
+          color: #a65424;
           text-decoration: none;
           font-weight: 600;
         }

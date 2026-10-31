@@ -221,14 +221,14 @@ function BookingDetail({ userProfile }) {
           display: inline-flex;
           align-items: center;
           gap: 0.4rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           text-decoration: none;
           font-size: 0.9rem;
           margin-bottom: 1.5rem;
         }
 
         .back-link:hover {
-          color: #d97b3f;
+          color: #a65424;
         }
 
         .booking-detail-header {
@@ -247,7 +247,7 @@ function BookingDetail({ userProfile }) {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin: 0;
         }
 
@@ -262,7 +262,7 @@ function BookingDetail({ userProfile }) {
           width: 100%;
           max-height: 360px;
           object-fit: cover;
-          border-radius: 10px;
+          border-radius: 4px;
           margin-bottom: 1.5rem;
         }
 
@@ -279,7 +279,7 @@ function BookingDetail({ userProfile }) {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          color: #2c3e50;
+          color: #111111;
           font-size: 1.1rem;
           margin: 0 0 1rem;
         }
@@ -289,7 +289,7 @@ function BookingDetail({ userProfile }) {
           align-items: flex-start;
           gap: 0.75rem;
           padding: 0.75rem 0;
-          border-top: 1px solid #f0dcc0;
+          border-top: 1px solid #ebebeb;
         }
 
         .booking-info-row:first-of-type {
@@ -299,7 +299,7 @@ function BookingDetail({ userProfile }) {
 
         .booking-info-row > svg,
         .booking-info-price {
-          color: #d97b3f;
+          color: #a65424;
           flex-shrink: 0;
           margin-top: 0.15rem;
         }
@@ -313,12 +313,12 @@ function BookingDetail({ userProfile }) {
         .booking-info-row .label {
           margin: 0 0 0.15rem;
           font-size: 0.78rem;
-          color: #95a5a6;
+          color: #6b6b6b;
         }
 
         .booking-info-row .value {
           margin: 0;
-          color: #2c3e50;
+          color: #111111;
           font-weight: 600;
         }
 
@@ -335,12 +335,12 @@ function BookingDetail({ userProfile }) {
         .usage-guide-text {
           white-space: pre-wrap;
           line-height: 1.7;
-          color: #2c3e50;
+          color: #111111;
           margin: 0;
         }
 
         .usage-guide-empty {
-          color: #95a5a6;
+          color: #6b6b6b;
           font-size: 0.9rem;
           line-height: 1.6;
           margin: 0;

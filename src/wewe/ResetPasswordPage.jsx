@@ -78,6 +78,7 @@ function ResetPasswordPage() {
       <WeweHeader />
 
       <WevePageHero
+        compact
         eyebrow="RESET PASSWORD"
         title="새 비밀번호 설정"
         subtitle="새로 사용하실 비밀번호를 입력해주세요"
@@ -94,7 +95,7 @@ function ResetPasswordPage() {
                 <AlertCircle size={36} />
                 <h3>유효하지 않거나 만료된 링크입니다</h3>
                 <p>비밀번호 찾기를 다시 시도해주세요.</p>
-                <Link to="/forgot-password" className="wh-btn wh-btn-outline">비밀번호 찾기로 이동</Link>
+                <Link to="/forgot-password" className="wh-btn wh-btn-ghost">비밀번호 찾기로 이동</Link>
               </div>
             ) : (
               <>

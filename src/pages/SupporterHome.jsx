@@ -49,9 +49,9 @@ function SupporterHome({ userProfile, onLogout }) {
 
       <style>{`
         .supporter-notice {
-          background: var(--lp-bg-soft, #faf9f6);
-          border-top: 1px solid var(--line, #e5e2da);
-          border-bottom: 1px solid var(--line, #e5e2da);
+          background: var(--lp-bg-soft, #fafafa);
+          border-top: 1px solid var(--line, #ebebeb);
+          border-bottom: 1px solid var(--line, #ebebeb);
           padding: 2.5rem 0;
         }
 
@@ -75,13 +75,13 @@ function SupporterHome({ userProfile, onLogout }) {
 
         .supporter-notice-body strong {
           display: block;
-          color: var(--ink, #1c1c1a);
+          color: var(--ink, #111111);
           font-size: 1.08rem;
           margin-bottom: 0.6rem;
         }
 
         .supporter-notice-body p {
-          color: var(--ink-soft, #4a4a46);
+          color: var(--ink-soft, #424242);
           line-height: 1.8;
           font-size: 0.98rem;
           margin: 0 0 1.25rem;
@@ -104,12 +104,12 @@ function SupporterHome({ userProfile, onLogout }) {
           font-family: inherit;
           font-size: 0.92rem;
           font-weight: 700;
-          color: var(--stone, #8c8880);
+          color: var(--stone, #6b6b6b);
           cursor: pointer;
         }
 
         .supporter-notice-logout:hover {
-          color: var(--ink, #1c1c1a);
+          color: var(--ink, #111111);
         }
 
         @media (max-width: 768px) {

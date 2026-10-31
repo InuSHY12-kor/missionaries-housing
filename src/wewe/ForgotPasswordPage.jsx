@@ -61,6 +61,7 @@ function ForgotPasswordPage() {
       <WeweHeader />
 
       <WevePageHero
+        compact
         eyebrow="RESET PASSWORD"
         title="비밀번호 찾기"
         subtitle="가입한 이메일로 재설정 링크를 보내드립니다"
@@ -78,7 +79,7 @@ function ForgotPasswordPage() {
                   <strong>{formData.email}</strong> 주소가 가입된 이메일이라면 비밀번호 재설정 링크가 도착합니다. 메일함(스팸함 포함)을 확인한 뒤
                   링크를 눌러 새 비밀번호를 설정해주세요. 메일이 오지 않으면 가입한 이메일 주소가 맞는지 확인해주세요.
                 </p>
-                <Link to="/login" className="wh-btn wh-btn-outline">로그인 페이지로 돌아가기</Link>
+                <Link to="/login" className="wh-btn wh-btn-ghost">로그인 페이지로 돌아가기</Link>
               </div>
             ) : (
               <>

@@ -286,14 +286,14 @@ function BookingCheckout({ userProfile }) {
           display: inline-flex;
           align-items: center;
           gap: 0.4rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           text-decoration: none;
           font-size: 0.9rem;
           margin-bottom: 1.5rem;
         }
 
         .back-link:hover {
-          color: #d97b3f;
+          color: #a65424;
         }
 
         .booking-checkout h1 {
@@ -301,17 +301,17 @@ function BookingCheckout({ userProfile }) {
         }
 
         .subtitle {
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 1.5rem;
         }
 
         .checkout-summary-card h2 {
           margin: 0 0 0.35rem;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .checkout-location {
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin: 0 0 1rem;
           font-size: 0.9rem;
         }
@@ -320,8 +320,8 @@ function BookingCheckout({ userProfile }) {
           display: flex;
           justify-content: space-between;
           padding: 0.6rem 0;
-          border-top: 1px solid #f0dcc0;
-          color: #2c3e50;
+          border-top: 1px solid #ebebeb;
+          color: #111111;
         }
 
         .checkout-summary-row:first-of-type {
@@ -330,7 +330,7 @@ function BookingCheckout({ userProfile }) {
 
         .checkout-summary-total {
           font-weight: 700;
-          color: #d97b3f;
+          color: #a65424;
           font-size: 1.1rem;
         }
 
@@ -340,7 +340,7 @@ function BookingCheckout({ userProfile }) {
         }
 
         .checkout-notice p {
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 1rem;
         }
 
@@ -415,18 +415,18 @@ function BookingCheckout({ userProfile }) {
         }
 
         .checkout-va-waiting,
-        .checkout-test-banner { background: #fff7e6; border: 1px solid #f0d49a; color: #7a5a12; border-radius: 10px; padding: 0.7rem 1rem; margin: 0 0 1rem; font-size: 0.92rem; }
-        .checkout-error { background: #fbe9e3; color: #a63d1f; border-radius: 10px; padding: 0.7rem 1rem; margin: 0 0 1rem; }
+        .checkout-test-banner { background: #fff7e6; border: 1px solid #f0d49a; color: #7a5a12; border-radius: 4px; padding: 0.7rem 1rem; margin: 0 0 1rem; font-size: 0.92rem; }
+        .checkout-error { background: #fbe9e3; color: #a63d1f; border-radius: 4px; padding: 0.7rem 1rem; margin: 0 0 1rem; }
         .checkout-pay-card h2 { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 1rem; font-size: 1.15rem; }
         .checkout-methods { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1.1rem; }
-        .checkout-method { display: flex; gap: 0.6rem; align-items: flex-start; border: 1.5px solid #e5e2da; border-radius: 12px; padding: 0.9rem 1rem; cursor: pointer; background: #fff; }
-        .checkout-method.is-selected { border-color: #d97b3f; background: #fff7f0; }
+        .checkout-method { display: flex; gap: 0.6rem; align-items: flex-start; border: 1.5px solid #ebebeb; border-radius: 4px; padding: 0.9rem 1rem; cursor: pointer; background: #fff; }
+        .checkout-method.is-selected { border-color: #000000; background: #fff7f0; }
         .checkout-method input { margin-top: 0.25rem; accent-color: #d97b3f; }
         .checkout-method span { display: flex; flex-direction: column; gap: 0.2rem; }
-        .checkout-method small { color: #6b665c; font-size: 0.85rem; line-height: 1.5; }
+        .checkout-method small { color: #6b6b6b; font-size: 0.85rem; line-height: 1.5; }
         .checkout-pay-btn { width: 100%; font-size: 1.05rem; padding: 0.9rem 1.5rem; font-weight: 700; }
         .checkout-receipt { display: inline-block; margin-top: 0.4rem; font-weight: 700; color: #2f7d4f; }
-        .checkout-va-note { margin: 0.8rem 0 0; color: #6b665c; font-size: 0.9rem; }
+        .checkout-va-note { margin: 0.8rem 0 0; color: #6b6b6b; font-size: 0.9rem; }
         @media (max-width: 560px) { .checkout-methods { grid-template-columns: 1fr; } }
         .checkout-paid {
           display: flex;
@@ -436,7 +436,7 @@ function BookingCheckout({ userProfile }) {
           word-break: keep-all;
         }
 
-        .checkout-va-waiting svg { color: #d97b3f; flex: 0 0 auto; }
+        .checkout-va-waiting svg { color: #a65424; flex: 0 0 auto; }
         .checkout-paid svg { color: #2f7d4f; flex: 0 0 auto; }
 
         .checkout-va-waiting p,
@@ -452,8 +452,8 @@ function BookingCheckout({ userProfile }) {
           align-items: center;
           gap: 1rem;
           flex-wrap: wrap;
-          background: #faf6ef;
-          border-radius: 10px;
+          background: #fafafa;
+          border-radius: 4px;
           padding: 1rem 1.1rem;
           margin-bottom: 0.6rem;
         }
@@ -464,9 +464,9 @@ function BookingCheckout({ userProfile }) {
           gap: 0.15rem;
         }
 
-        .checkout-va-bank { color: #6b665c; font-size: 0.92rem; }
-        .checkout-va-number { font-size: 1.35rem; font-weight: 800; letter-spacing: 0.03em; color: #1c1c1a; }
-        .checkout-va-holder { color: #6b665c; font-size: 0.88rem; }
+        .checkout-va-bank { color: #6b6b6b; font-size: 0.92rem; }
+        .checkout-va-number { font-size: 1.35rem; font-weight: 800; letter-spacing: 0.03em; color: #111111; }
+        .checkout-va-holder { color: #6b6b6b; font-size: 0.88rem; }
 
         .checkout-va-account .btn {
           display: inline-flex;
@@ -500,7 +500,7 @@ function BookingCheckout({ userProfile }) {
           min-width: 0;
           padding: 0.6rem 0.75rem;
           border: 1px solid #d8d3c8;
-          border-radius: 8px;
+          border-radius: 4px;
           font-size: 1rem;
         }
 
@@ -522,8 +522,8 @@ function BookingCheckout({ userProfile }) {
         .checkout-refund-note {
           margin: 1.5rem 0 0;
           padding: 0.9rem 1rem;
-          border-radius: 8px;
-          background: #fff8ec;
+          border-radius: 4px;
+          background: #fafafa;
           border: 1px solid #f0c48f;
           font-size: 0.92rem;
           line-height: 1.65;
@@ -542,7 +542,7 @@ function BookingCheckout({ userProfile }) {
         }
 
         .checkout-refund-note a {
-          color: #b8622c;
+          color: #a65424;
           font-weight: 700;
         }
       `}</style>

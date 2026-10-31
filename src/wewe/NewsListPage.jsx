@@ -170,7 +170,7 @@ function NewsListPage() {
           padding: 3rem;
           background: var(--wh-bg-soft);
           border: 1px dashed var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
           color: var(--wh-ink-soft);
         }
 
@@ -208,7 +208,7 @@ function NewsListPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, var(--wh-teal) 0%, var(--wh-orange) 100%);
+          background: var(--wh-bg-mute);
         }
 
         .nl-card-image-placeholder span {

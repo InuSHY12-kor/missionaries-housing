@@ -154,11 +154,11 @@ function SearchMap({ accommodations, onBoundsChange }) {
         지도를 불러올 수 없습니다: {error}
         <style>{`
           .search-map-placeholder {
-            background: #f8f9fa;
-            border-radius: 8px;
+            background: #fafafa;
+            border-radius: 4px;
             padding: 2rem;
             text-align: center;
-            color: #95a5a6;
+            color: #6b6b6b;
           }
         `}</style>
       </div>
@@ -172,9 +172,9 @@ function SearchMap({ accommodations, onBoundsChange }) {
         .search-map {
           width: 100%;
           height: 420px;
-          border-radius: 8px;
+          border-radius: 4px;
           overflow: hidden;
-          background: #ecf0f1;
+          background: #ebebeb;
         }
 
         .acc-label-pin {
@@ -186,8 +186,8 @@ function SearchMap({ accommodations, onBoundsChange }) {
         .acc-label-pin-inner {
           position: relative;
           background: white;
-          border: 1.5px solid #d97b3f;
-          border-radius: 18px;
+          border: 1.5px solid #000000;
+          border-radius: 4px;
           padding: 0.35rem 0.75rem;
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
           display: flex;
@@ -211,13 +211,13 @@ function SearchMap({ accommodations, onBoundsChange }) {
           transform: translateX(-50%);
           border-width: 6px 5px 0 5px;
           border-style: solid;
-          border-color: #d97b3f transparent transparent transparent;
+          border-color: #000000 transparent transparent transparent;
         }
 
         .acc-label-price {
           font-weight: 700;
           font-size: 0.8rem;
-          color: #d97b3f;
+          color: #a65424;
         }
 
         .acc-label-name {

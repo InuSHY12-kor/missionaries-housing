@@ -57,7 +57,7 @@ const carouselStyles = `
     position: relative;
     width: 100%;
     height: 100%;
-    background: #ecf0f1;
+    background: #ebebeb;
     overflow: hidden;
   }
 
@@ -76,7 +76,7 @@ const carouselStyles = `
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    color: #95a5a6;
+    color: #6b6b6b;
   }
 
   .carousel-arrow {
@@ -88,7 +88,7 @@ const carouselStyles = `
     border-radius: 50%;
     border: none;
     background: rgba(255, 255, 255, 0.85);
-    color: #2c3e50;
+    color: #111111;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -116,7 +116,7 @@ const carouselStyles = `
     background: rgba(0,0,0,0.55);
     color: white;
     padding: 0.2rem 0.6rem;
-    border-radius: 12px;
+    border-radius: 4px;
     font-size: 0.8rem;
   }
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Home as HomeIcon, Send, CheckCircle2, Target } from 'lucide-react';
+import { ArrowRight, Send, CheckCircle2, Pause, Play, ExternalLink } from 'lucide-react';
 import WeweHeader from './WeweHeader';
 import WeweFooter from './WeweFooter';
 import Reveal from './Reveal';
@@ -21,6 +21,9 @@ import './wewe-shared.css';
 // Phase 4에서 "사역 소식" 섹션도 실제 게시글(ministry_posts, /about/ministries의
 // 관리자가 /stay/admin에서 작성·발행)의 최신 3개를 보여주도록 바꿨습니다 — 아직 발행된
 // 글이 없으면 이전과 같은 "Coming soon" 안내를 그대로 보여줍니다.
+//
+// (2026-10-31 흑백 에디토리얼 시안) 화면 구성을 "흰 바탕 + 검정 글자·버튼 + 위위 주황은 점으로만"으로
+// 새로 짰습니다. 관리자 편집 문구(EditableText id)·배너 편집·문의 폼·사역 소식 연동은 그대로입니다.
 
 // 스토리 갤러리(3분할) 사진 (2026-09-10 교체) — 이전에는 상단 히어로 배너와 같은 사진을
 // 그대로 재사용해서 위위 스테이(숙소) 느낌이 강하다는 피드백이 있었습니다. 히어로(위쪽)와
@@ -32,12 +35,14 @@ const STORY_GALLERY = {
 };
 const MINISTRY_PHOTOS = {
   teal: 'https://images.unsplash.com/photo-1543525238-54e3d131f7ca?auto=format&fit=crop&w=700&q=80', // 기도하는 손
-  orange: 'https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?auto=format&fit=crop&w=700&q=80', // 맞잡은 두 손, 환대
+  // (2026-10-31) 이야기 갤러리 가운데 사진과 같은 사진이 두 번 나와 교체 — 고국에서의 쉼(한옥)
+  orange: 'https://images.unsplash.com/photo-1662514121891-8f3a97e5a2ea?auto=format&fit=crop&w=700&q=80',
 };
 
 // 사역 소식 그리드(2026-09-10 수정) — 인스타그램 피드처럼 한 줄에 4개씩, 최대 2줄(8개)까지만
 // 노출합니다. 글이 8개보다 적으면 남는 칸은 빈 박스로 채워 그리드 모양을 유지합니다.
 const NEWS_GRID_SIZE = 8;
+const HERO_INTERVAL_MS = 6500;
 
 const EMPTY_INQUIRY_FORM = { name: '', email: '', phone: '', message: '' };
 
@@ -118,21 +123,30 @@ function WeweHome() {
       setInquirySubmitted(true);
       setInquiryForm(EMPTY_INQUIRY_FORM);
     } catch (error) {
-      setInquiryError('오류가 발생했습니다: ' + error.message);
+      console.error('WEWE 문의 저장 오류:', error);
+      setInquiryError('문의를 보내지 못했습니다. 잠시 후 다시 시도하시거나, 아래 카카오톡 채널로 문의해 주세요.');
     } finally {
       setInquirySubmitting(false);
     }
   };
 
+  // (2026-10-31 Impeccable 점검) 3.5초 간격은 전환(1.4초)이 시간의 40%를 차지해 너무 분주했습니다.
+  // 6.5초로 늘리고, 일시정지 버튼과 누를 수 있는 원형 인디케이터를 추가했습니다(WCAG 2.2.2).
+  // 움직임 줄이기 설정을 켠 방문자에게는 처음부터 멈춘 상태로 보여줍니다.
   const heroCount = heroImages.length;
+  const [heroPaused, setHeroPaused] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
+  );
   useEffect(() => {
     setHeroSlide(0);
-    if (heroCount < 2) return undefined;
+  }, [heroCount]);
+  useEffect(() => {
+    if (heroCount < 2 || heroPaused) return undefined;
     const timer = setInterval(() => {
       setHeroSlide((prev) => (prev + 1) % heroCount);
-    }, 3500);
+    }, HERO_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [heroCount]);
+  }, [heroCount, heroPaused, heroSlide]);
 
   // 다른 페이지에서 "/#ministries"처럼 해시가 붙은 주소로 들어온 경우, 해당 섹션이
   // 화면에 그려진 뒤에 스크롤해서 보여줍니다(브라우저의 기본 해시 스크롤은 정적
@@ -164,289 +178,311 @@ function WeweHome() {
       active = false;
     };
   }, []);
+  // 히어로 제목 안의 "WEWE"만 주황으로 — 관리자가 제목을 바꿔 WEWE가 빠지면 그냥 검정 한 줄로 보입니다.
+  const heroTitleParts = hero.title ? hero.title.split(/(WEWE)/) : [];
+  const newsVisible = newsPosts.slice(0, newsPosts.length >= 4 ? newsPosts.length - (newsPosts.length % 4) : newsPosts.length);
 
   return (
     <div className="wewe-page wewe-home">
-      <WeweHeader />
+      <WeweHeader variant="light" />
 
-      {/* 히어로 — 3.5초마다 전환되는 크로스페이드 슬라이드쇼 + 원형 링 진행 인디케이터
-          (2026-09-09) WevePageHero.jsx의 하위 페이지 히어로와 동일한 효과를 홈 히어로에도 적용. */}
-      <section id="top" className="wh-hero">
-        {hero.ready && heroImages.map((src, idx) => (
-          <div
-            // eslint-disable-next-line react/no-array-index-key
-            key={`${idx}-${src}`}
-            className={`wh-hero-slide ${idx === heroSlide ? 'active' : ''}`}
-            style={{ backgroundImage: `url("${src}")` }}
-          />
-        ))}
-
-        <div className="wh-hero-content" style={{ opacity: hero.ready ? 1 : 0, transition: 'opacity 0.25s ease' }}>
-          {hero.eyebrow && <span className="wh-hero-eyebrow">{hero.eyebrow}</span>}
-          <h1>{hero.title}</h1>
-          {/* (2026-10-09) <br /> 대신 문장마다 블록으로 나눠, 모바일에서 각 문장의 줄 길이가 고르게
-              나뉘도록(text-wrap: balance) 했습니다 — 마지막 줄에 한 단어만 남지 않게. */}
-          {hero.subtitle && (
-            <p>
-              {hero.subtitle.split('\n').filter((line) => line.trim()).map((line, idx) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <span className="wh-hero-line" key={idx}>{renderRich(line)}</span>
+      {/* 히어로 (2026-10-31 흑백 에디토리얼) — 사진 위에 글자를 얹던 전면 배너 대신,
+          큰 제목·설명을 흰 바탕 위에 먼저 두고 그 아래에 넓은 사진(슬라이드)을 둡니다. */}
+      <section id="top" className="we-hero">
+        <div className="we-wrap">
+          <div className="we-hero-top" style={{ opacity: hero.ready ? 1 : 0, transition: 'opacity 0.2s ease' }}>
+            <h1 className="we-hero-title">
+              {heroTitleParts.map((part, idx) => (
+                part === 'WEWE'
+                  // eslint-disable-next-line react/no-array-index-key
+                  ? <span key={idx} className="we-accent">{part}</span>
+                  // eslint-disable-next-line react/no-array-index-key
+                  : <React.Fragment key={idx}>{part}</React.Fragment>
               ))}
-            </p>
-          )}
-          <div className="wh-hero-actions">
-            <a href="#ministries" className="wh-btn wh-btn-outline">사역 알아보기</a>
-            <a href="/stay" target="_blank" rel="noopener" className="wh-btn wh-btn-outline">위위 스테이 살펴보기</a>
-          </div>
-        </div>
-
-        {heroImages.length > 1 && (
-          <div className="wp-hero-progress">
-            {heroImages.map((src, idx) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <div className="wp-hero-dot-wrap" key={`${idx}-${src}`}>
-                <svg className="wp-hero-ring" viewBox="0 0 32 32">
-                  <circle className="wp-hero-ring-track" cx="16" cy="16" r="14" />
-                  {idx === heroSlide && (
-                    <circle key={`fill-${heroSlide}`} className="wp-hero-ring-fill" cx="16" cy="16" r="14" />
-                  )}
-                </svg>
+            </h1>
+            <div className="we-hero-side">
+              {hero.eyebrow && <span className="we-label">{hero.eyebrow}</span>}
+              {hero.subtitle && (
+                <p className="we-hero-sub">
+                  {hero.subtitle.split('\n').filter((line) => line.trim()).map((line, idx) => (
+                    // eslint-disable-next-line react/no-array-index-key
+                    <span className="we-hero-line" key={idx}>{renderRich(line)}</span>
+                  ))}
+                </p>
+              )}
+              <div className="we-actions">
+                <Link to="/donate" className="we-btn we-btn-fill">
+                  후원으로 함께하기 <ArrowRight size={18} />
+                </Link>
+                <a href="#ministries" className="we-btn we-btn-line">사역 알아보기</a>
               </div>
-            ))}
+            </div>
           </div>
-        )}
-        <HeroEditButton defaults={heroDefaults} />
-      </section>
 
-      {/* 한눈에 보는 WEWE — PPT 슬라이드 3 "SUMMARY" 요약 (2026-10-03 신규).
-          미션 한 줄 + 두 프로젝트 요약 + 운영 기반(법인화·선순환)을 카드 3개로 압축해
-          히어로 바로 아래에 배치, 홈페이지에서도 전체 그림이 한눈에 보이도록 합니다. */}
-      <section className="wh-snapshot">
-        <div className="wh-container">
-          <Reveal>
-            <EditableText id={"SUMMARY"} as="span" className="wh-eyebrow wh-eyebrow-center">SUMMARY</EditableText>
-            <EditableText id={"한눈에 보는 WEWE"} as="h2" className="wh-h2-center">한눈에 보는 WEWE</EditableText>
-            <p className="wh-snapshot-mission">
-              <Target size={16} /> 현대판 레위인인 목회자와 선교사가 다시 일어설 수 있도록, 그들의 위로자가 됩니다.
-            </p>
-          </Reveal>
+          <div className="we-hero-media">
+            {hero.ready && heroImages.map((src, idx) => (
+              <div
+                // eslint-disable-next-line react/no-array-index-key
+                key={`${idx}-${src}`}
+                className={`we-hero-slide ${idx === heroSlide ? 'active' : ''}`}
+                style={{ backgroundImage: `url("${src}")` }}
+              />
+            ))}
 
-          <Reveal as="div" className="wh-snapshot-grid" delay={80}>
-            <div className="wh-snapshot-card">
-              <span className="wh-snapshot-tag wh-snapshot-tag-teal">PROJECT 1 · 목회자</span>
-              <EditableText id={"Refresh Pastor Academy"} as="h3">Refresh Pastor Academy</EditableText>
-              <ul>
-                <li>목회자 아카데미 심포지엄</li>
-                <li>목회자 세미나 · 소진관리</li>
-                <li>개별 지원: 심리상담 · 재정 · 장학</li>
-              </ul>
-              <span className="wh-progress-badge">진행 중 · 전투복 프로젝트</span>
-            </div>
-
-            <div className="wh-snapshot-card">
-              <span className="wh-snapshot-tag wh-snapshot-tag-orange">PROJECT 2 · 선교사</span>
-              <EditableText id={"Missionary Care"} as="h3">Missionary Care</EditableText>
-              <ul>
-                <li>WEWE 스테이 (주거)</li>
-                <li>레위인의 모빌리티 (이동)</li>
-                <li>Poiema 돌봄 · WE+WE 커넥트</li>
-              </ul>
-              <span className="wh-progress-badge">10월 말 오픈 예정 · WEWE 스테이</span>
-            </div>
-
-            <div className="wh-snapshot-card wh-snapshot-card-foundation">
-              <span className="wh-snapshot-tag wh-snapshot-tag-dark">FOUNDATION · 운영 기반</span>
-              <EditableText id={"지속 가능한 돌봄 모델"} as="h3">지속 가능한 돌봄 모델</EditableText>
-              <ul>
-                <li>임의단체 → 사단법인 전환</li>
-                <li>다분야 전문가 협업 · 투명한 운영</li>
-                <li>평신도 · 교회 · 기업 후원의 선순환</li>
-              </ul>
-              <Link to="/about/sustainability" className="wh-ministry-link">
-                운영·지속가능성 보기 <ArrowRight size={14} />
-              </Link>
-            </div>
-          </Reveal>
+            {heroImages.length > 1 && (
+              <div className={`we-hero-controls${heroPaused ? ' is-paused' : ''}`}>
+                <button
+                  type="button"
+                  className="we-hero-ctl"
+                  onClick={() => setHeroPaused((prev) => !prev)}
+                  aria-label={heroPaused ? '배너 슬라이드 다시 재생' : '배너 슬라이드 일시정지'}
+                >
+                  {heroPaused ? <Play size={14} /> : <Pause size={14} />}
+                </button>
+                {heroImages.map((src, idx) => (
+                  <button
+                    type="button"
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={`${idx}-${src}`}
+                    className="we-hero-ctl we-hero-num"
+                    onClick={() => setHeroSlide(idx)}
+                    aria-label={`배너 사진 ${idx + 1}번 보기`}
+                    aria-current={idx === heroSlide ? 'true' : undefined}
+                  >
+                    {/* (2026-10-31) 번호 대신 다른 페이지와 같은 원형 링 — 현재 사진의 링이 주황으로 채워집니다 */}
+                    <svg className="we-hero-ring" viewBox="0 0 32 32" aria-hidden="true">
+                      <circle className="we-hero-ring-track" cx="16" cy="16" r="14" />
+                      {idx === heroSlide && (
+                        <circle
+                          key={`fill-${heroSlide}`}
+                          className="we-hero-ring-fill"
+                          cx="16"
+                          cy="16"
+                          r="14"
+                        />
+                      )}
+                    </svg>
+                  </button>
+                ))}
+              </div>
+            )}
+            <HeroEditButton defaults={heroDefaults} />
+          </div>
         </div>
       </section>
 
-      {/* OUR STORY (요약 — 전체 내용은 /about) */}
-      <section id="about" className="wh-about">
-        <div className="wh-container wh-container-narrow">
-          <Reveal>
-            <EditableText id={"OUR STORY"} as="span" className="wh-eyebrow wh-eyebrow-center">OUR STORY</EditableText>
-            <EditableText id={"위(WE)로자의 위(WE)로자"} as="h2" className="wh-h2-center">위(WE)로자의 위(WE)로자</EditableText>
+      {/* 이야기 (요약 — 전체 내용은 /about). 섹션마다 왼쪽에 작은 라벨, 오른쪽에 제목을 두는
+          2단 머리말을 같은 모양으로 반복합니다. 순서: 히어로 → 이야기 → 사역 → 사역 소식 → 후원 → 문의 */}
+      <section id="about" className="we-sec">
+        <div className="we-wrap">
+          <Reveal className="we-sec-head">
+            <EditableText id={"OUR STORY"} as="span" className="we-label">OUR STORY</EditableText>
+            <div>
+              <EditableText id={"위(WE)로자의 위(WE)로자"} as="h2">위(WE)로자의 위(WE)로자</EditableText>
+              <EditableText id={"WEWE는 가장 깊은 상실의 자리에서 시작되었습니다."} className="we-sec-lead">WEWE는 가장 깊은 상실의 자리에서 시작되었습니다.</EditableText>
+            </div>
+          </Reveal>
 
-            <blockquote className="wh-verse">
-              &ldquo;너희 중에 분깃이나 기업이 없는 레위인과 네 성중에 거류하는 객과 및 고아와 과부들이 와서
-              먹고 배부르게 하라 그리하면 네 하나님 여호와께서 네 손으로 하는 범사에 네게 복을 주시리라&rdquo;
-              <cite>(신명기 14:29)</cite>
-            </blockquote>
-
-            {/* (2026-10-09 가독성) 한 덩어리였던 소개 문단을 "첫 문장(크게) + 설명(핵심 구절 강조)"으로 나눔 */}
-            <div className="wh-about-intro">
-              <EditableText id={"WEWE는 가장 깊은 상실의 자리에서 시작되었습니다."} className="wh-about-intro-lead">WEWE는 가장 깊은 상실의 자리에서 시작되었습니다.</EditableText>
+          <div className="we-story">
+            <Reveal className="we-story-text">
               <p>
                 누군가의 아픔을 돌보는 이들이 정작 자신의 무너진 마음은 숨겨야만 하는 현실 속에서,
                 WEWE는 <strong>현대판 레위인인 목회자와 선교사들의 &lsquo;위로자&rsquo;</strong>가 되고자 합니다.
               </p>
-            </div>
-          </Reveal>
-
-          <Reveal as="div" className="wh-story-gallery" delay={100}>
-            <div className="side left" style={{ backgroundImage: `url(${STORY_GALLERY.left})` }} />
-            <div className="arch" style={{ backgroundImage: `url(${STORY_GALLERY.center})` }} />
-            <div className="side right" style={{ backgroundImage: `url(${STORY_GALLERY.right})` }} />
-          </Reveal>
-
-          <div className="wh-about-more">
-            <Link to="/about" className="wh-btn wh-btn-ghost">
-              WEWE 이야기 더 보기 <ArrowRight size={16} />
-            </Link>
+              <blockquote className="we-verse">
+                <p>
+                  &ldquo;너희 중에 분깃이나 기업이 없는 레위인과 네 성중에 거류하는 객과 및 고아와 과부들이 와서
+                  먹고 배부르게 하라 그리하면 네 하나님 여호와께서 네 손으로 하는 범사에 네게 복을 주시리라&rdquo;
+                </p>
+                <cite>신명기 14:29</cite>
+              </blockquote>
+              <Link to="/about" className="we-link">
+                WEWE 이야기 더 보기 <ArrowRight size={16} />
+              </Link>
+            </Reveal>
+            <Reveal className="we-story-photos" delay={80}>
+              <div className="we-photo we-story-main" style={{ backgroundImage: `url(${STORY_GALLERY.center})` }} role="img" aria-label="맞잡은 두 손" />
+              <div className="we-photo" style={{ backgroundImage: `url(${STORY_GALLERY.left})` }} role="img" aria-label="소파에 나란히 앉아 나누는 대화" />
+              <div className="we-photo" style={{ backgroundImage: `url(${STORY_GALLERY.right})` }} role="img" aria-label="마주 편 두 손바닥" />
+            </Reveal>
           </div>
         </div>
       </section>
 
-      {/* 사역 소개 (요약 — 전체 내용은 /about/ministries) */}
-      <section id="ministries" className="wh-ministries">
-        <div className="wh-container">
-          <Reveal>
-            <EditableText id={"OUR MINISTRIES"} as="span" className="wh-eyebrow wh-eyebrow-center">OUR MINISTRIES</EditableText>
-            <EditableText id={"우리가 하는 일"} as="h2" className="wh-h2-center">우리가 하는 일</EditableText>
-            <EditableText id={"Blessed Blessing, 하나님의 영광을 위해 사람을 세웁니다."} className="wh-ministries-lead">Blessed Blessing, 하나님의 영광을 위해 사람을 세웁니다.</EditableText>
+      {/* 사역 (요약 — 전체 내용은 /about/ministries) */}
+      <section id="ministries" className="we-sec we-sec-soft">
+        <div className="we-wrap">
+          <Reveal className="we-sec-head">
+            <EditableText id={"OUR MINISTRIES"} as="span" className="we-label">OUR MINISTRIES</EditableText>
+            <div>
+              <EditableText id={"우리가 하는 일"} as="h2">우리가 하는 일</EditableText>
+              <EditableText id={"현대판 레위인인 목회자와 선교사가 다시 일어설 수 있도록, 그들의 위로자가 됩니다."} className="we-sec-lead">현대판 레위인인 목회자와 선교사가 다시 일어설 수 있도록, 그들의 위로자가 됩니다.</EditableText>
+            </div>
           </Reveal>
 
-          <div className="wh-ministry-grid">
+          <div className="we-ministries">
             {/* 프로젝트 1 — 목회자 */}
-            <Reveal as="div" className="wh-ministry-card wh-ministry-teal">
-              <div
-                className="wh-ministry-photo"
-                style={{ backgroundImage: `url(${MINISTRY_PHOTOS.teal})` }}
-                role="img"
-                aria-label="기도하는 손"
-              />
-              <span className="wh-ministry-tag">PROJECT 1 · 목회자</span>
+            <Reveal as="article" className="we-ministry">
+              <div className="we-photo we-ministry-photo" style={{ backgroundImage: `url(${MINISTRY_PHOTOS.teal})` }} role="img" aria-label="기도하는 손" />
+              <span className="we-num">01 · 목회자</span>
               <EditableText id={"Refresh Pastor Academy"} as="h3">Refresh Pastor Academy</EditableText>
-              <EditableText id={"레위인의 회복 — 성도의 위로가 되어온 목회자님이, 이제는 위로받으실 시간입니다."} className="wh-ministry-desc">레위인의 회복 — 성도의 위로가 되어온 목회자님이, 이제는 위로받으실 시간입니다.</EditableText>
-              <EditableText id={"목회자 아카데미(심포지엄·세미나·소진관리)와 개별 지원(심리상담, 재정, 장학사업)으로 구성됩니다."} className="wh-ministry-summary">목회자 아카데미(심포지엄·세미나·소진관리)와 개별 지원(심리상담, 재정, 장학사업)으로 구성됩니다.</EditableText>
-              <Link to="/about/ministries" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
+              <EditableText id={"레위인의 회복 — 성도의 위로가 되어온 목회자님이, 이제는 위로받으실 시간입니다."} className="we-ministry-desc">레위인의 회복 — 성도의 위로가 되어온 목회자님이, 이제는 위로받으실 시간입니다.</EditableText>
+              <ul className="we-ministry-list">
+                <li>목회자 아카데미 · 심포지엄</li>
+                <li>목회자 세미나 · 소진관리</li>
+                <li>개별 지원: 심리상담 · 재정 · 장학</li>
+              </ul>
+              <Link to="/about/ministries/combat-uniform" className="we-status-row">
+                <span className="we-status-text">
+                  <strong>전투복 프로젝트</strong>
+                  <span>사역의 자리로 다시 나서는 목회자님께 맞춤 정장 한 벌을 선물합니다</span>
+                </span>
+                <span className="we-status">진행 중</span>
+                <ArrowRight size={18} className="we-status-arrow" aria-hidden="true" />
+              </Link>
+              <Link to="/about/ministries" className="we-link">자세히 보기 <ArrowRight size={16} /></Link>
             </Reveal>
 
             {/* 프로젝트 2 — 선교사 */}
-            <Reveal as="div" className="wh-ministry-card wh-ministry-orange" delay={100}>
-              <div
-                className="wh-ministry-photo"
-                style={{ backgroundImage: `url(${MINISTRY_PHOTOS.orange})` }}
-                role="img"
-                aria-label="맞잡은 두 손, 환대"
-              />
-              <span className="wh-ministry-tag">PROJECT 2 · 선교사</span>
+            <Reveal as="article" className="we-ministry" delay={80}>
+              <div className="we-photo we-ministry-photo" style={{ backgroundImage: `url(${MINISTRY_PHOTOS.orange})` }} role="img" aria-label="고즈넉한 한옥" />
+              <span className="we-num">02 · 선교사</span>
               <EditableText id={"Missionary Care"} as="h3">Missionary Care</EditableText>
-              <EditableText id={"선교사의 회복 — 열방의 나그네가, 고국에서는 편히 쉬실 수 있도록."} className="wh-ministry-desc">선교사의 회복 — 열방의 나그네가, 고국에서는 편히 쉬실 수 있도록.</EditableText>
-
-              <div className="wh-ministry-live">
-                <span className="wh-ministry-icon"><HomeIcon size={18} /></span>
-                <div>
-                  <strong>WEWE 스테이 <span className="wh-live-badge">10월 말 오픈</span></strong>
+              <EditableText id={"선교사의 회복 — 열방의 나그네가, 고국에서는 편히 쉬실 수 있도록."} className="we-ministry-desc">선교사의 회복 — 열방의 나그네가, 고국에서는 편히 쉬실 수 있도록.</EditableText>
+              <ul className="we-ministry-list">
+                <li>WEWE 스테이 (주거)</li>
+                <li>레위인의 모빌리티 (차량 쉐어링)</li>
+                <li>Poiema 돌봄 (힐링캠프) · WE+WE 커넥트 (멤버십)</li>
+              </ul>
+              {/* 위위 스테이는 별도 사이트라 새 창으로 열립니다 — 아이콘과 숨김 문구로 미리 알려줍니다. */}
+              <a href="/stay" target="_blank" rel="noopener" className="we-status-row">
+                <span className="we-status-text">
+                  <strong>WEWE 스테이</strong>
                   <span>선교사와 숙소 제공자를 잇는 신뢰의 공유 숙소 플랫폼</span>
-                </div>
-                <a href="/stay" target="_blank" rel="noopener" className="wh-ministry-link">바로가기 <ArrowRight size={14} /></a>
-              </div>
-
-              <EditableText id={"그 외 레위인의 모빌리티(차량 쉐어링), Poiema 돌봄(힐링캠프), WE+WE 커넥트(멤버십)도 준비하고"} className="wh-ministry-summary">그 외 레위인의 모빌리티(차량 쉐어링), Poiema 돌봄(힐링캠프), WE+WE 커넥트(멤버십)도 준비하고 있습니다.</EditableText>
-              <Link to="/about/ministries#project2" className="wh-ministry-link">자세히 보기 <ArrowRight size={14} /></Link>
+                </span>
+                <EditableText id={"오픈 준비 중"} as="span" className="we-status">오픈 준비 중</EditableText>
+                <ExternalLink size={18} className="we-status-arrow" aria-hidden="true" />
+                <span className="we-sr-only">(새 창에서 열림)</span>
+              </a>
+              <Link to="/about/ministries#project2" className="we-link">자세히 보기 <ArrowRight size={16} /></Link>
             </Reveal>
           </div>
         </div>
       </section>
 
       {/* 사역 소식 */}
-      <section id="news" className="wh-news">
-        <div className="wh-container">
-          <EditableText id={"MINISTRY NEWS"} as="span" className="wh-eyebrow wh-eyebrow-center">MINISTRY NEWS</EditableText>
-          <EditableText id={"사역 소식"} as="h2" className="wh-h2-center">사역 소식</EditableText>
+      <section id="news" className="we-sec">
+        <div className="we-wrap">
+          <div className="we-sec-head">
+            <EditableText id={"MINISTRY NEWS"} as="span" className="we-label">MINISTRY NEWS</EditableText>
+            <div className="we-sec-head-row">
+              <EditableText id={"사역 소식"} as="h2">사역 소식</EditableText>
+              {newsLoaded && newsPosts.length > 0 && (
+                <Link to="/news" className="we-link">전체 보기 <ArrowRight size={16} /></Link>
+              )}
+            </div>
+          </div>
 
           {newsLoaded && newsPosts.length > 0 ? (
-            <>
-              <div className="wh-newsgrid">
-                {newsPosts.map((post) => {
-                  const imageCount = Array.isArray(post.image_urls) ? post.image_urls.length : 0;
-                  const thumbnail = post.cover_image_url || (imageCount > 0 ? post.image_urls[0] : '');
-                  return (
-                    <Link key={post.id} to={`/news/${post.slug}`} className="wh-newsgrid-card">
+            // 4개 단위(한 줄)로 끊어서 보여줍니다(4개 미만이면 있는 만큼).
+            <div className="we-news">
+              {newsVisible.map((post) => {
+                const imageCount = Array.isArray(post.image_urls) ? post.image_urls.length : 0;
+                const thumbnail = post.cover_image_url || (imageCount > 0 ? post.image_urls[0] : '');
+                return (
+                  <Link key={post.id} to={`/news/${post.slug}`} className="we-news-card">
+                    <div className="we-news-frame">
                       {thumbnail ? (
-                        <div className="wh-newsgrid-image" style={{ backgroundImage: `url(${thumbnail})` }} />
+                        <div className="we-news-image" style={{ backgroundImage: `url(${thumbnail})` }} />
                       ) : (
-                        <div className="wh-newsgrid-image wh-newsgrid-image-placeholder">
-                          <span>WEWE</span>
-                        </div>
+                        <div className="we-news-image we-news-placeholder"><span>WEWE</span></div>
                       )}
-                      <div className="wh-newsgrid-caption">
-                        <span className="wh-newsgrid-date">
-                          {post.published_at ? new Date(post.published_at).toLocaleDateString('ko-KR') : ''}
-                        </span>
-                        <h3>{post.title}</h3>
-                      </div>
-                    </Link>
-                  );
-                })}
-                {/* 글이 8개(4×2)보다 적으면 남는 칸을 빈 박스로 채워 그리드 형태를 유지합니다. */}
-                {Array.from({ length: Math.max(0, NEWS_GRID_SIZE - newsPosts.length) }).map((_, idx) => (
-                  <div key={`wh-newsgrid-empty-${idx}`} className="wh-newsgrid-card wh-newsgrid-empty" aria-hidden="true" />
-                ))}
-              </div>
-              <div className="wh-news-more">
-                <Link to="/news" className="wh-btn wh-btn-ghost">
-                  사역 소식 전체 보기 <ArrowRight size={16} />
-                </Link>
-              </div>
-            </>
+                    </div>
+                    <span className="we-news-date">
+                      {post.published_at ? new Date(post.published_at).toLocaleDateString('ko-KR') : ''}
+                    </span>
+                    <h3>{post.title}</h3>
+                  </Link>
+                );
+              })}
+            </div>
           ) : (
-            <div className="wh-news-card">
+            <div className="we-news-empty">
               <EditableText id={"WEWE가 걸어가는 이야기와 사역 현장의 소식을 곧 이곳에서 전해드릴게요."}>WEWE가 걸어가는 이야기와 사역 현장의 소식을 곧 이곳에서 전해드릴게요.</EditableText>
-              <span className="wh-news-soon">Coming soon</span>
+              <span className="we-status">Coming soon</span>
             </div>
           )}
         </div>
       </section>
 
-      {/* WEWE 문의 섹션 (2026-09-13 이동) — 위위스테이 랜딩 페이지의 "궁금한 점이
-          있으신가요?" 아래에 있던 것을, WEWE 자체에 대한 문의이므로 이 페이지의 사역
-          소식 섹션 아래로 옮겼습니다. */}
-      <section className="wh-inquiry">
-        <div className="wh-container wh-container-narrow">
-          <Reveal>
-            <EditableText id={"CONTACT"} as="span" className="wh-eyebrow wh-eyebrow-center">CONTACT</EditableText>
-            <EditableText id={"위위(WEWE)에 대해 궁금한 점이 있으신가요?"} as="h2" className="wh-h2-center">위위(WEWE)에 대해 궁금한 점이 있으신가요?</EditableText>
-            <EditableText id={"비영리단체 WEWE, 후원, 사역 소개 등 무엇이든 편하게 문의해 주세요."} className="wh-inquiry-lead">비영리단체 WEWE, 후원, 사역 소개 등 무엇이든 편하게 문의해 주세요.</EditableText>
+      {/* 후원 — 검정 띠. 버튼은 흰 채움(검정 바탕 위의 반전 버튼), 가입하기는 로그아웃 방문자에게만 */}
+      <section className="we-give">
+        <div className="we-wrap we-give-inner">
+          <Reveal className="we-give-copy">
+            <EditableText id={"후원 띠 제목"} as="h2">아픈 위로자의 손을 함께 잡아주세요</EditableText>
+            <EditableText id={"후원 띠 설명"}>여러분의 후원은 목회자 회복 프로그램과 선교사 쉼터, 전투복 한 벌이 되어 사역의 현장으로 다시 돌아갑니다.</EditableText>
+            <div className="we-actions">
+              <Link to="/donate" className="we-btn we-btn-invert">
+                후원하기 <ArrowRight size={18} />
+              </Link>
+              {isLoggedIn === false && (
+                <Link to="/signup" className="we-btn we-btn-line-invert">WEWE 가입하기</Link>
+              )}
+            </div>
+          </Reveal>
+          <Reveal className="we-give-trust" delay={80}>
+            <EditableText id={"지속 가능한 돌봄 모델"} as="h3">지속 가능한 돌봄 모델</EditableText>
+            <ul>
+              <li>임의단체에서 사단법인으로 전환을 준비하고 있습니다</li>
+              <li>다분야 전문가가 함께하며 운영을 투명하게 공개합니다</li>
+              <li>평신도 · 교회 · 기업의 후원이 다시 돌봄으로 순환합니다</li>
+            </ul>
+            <Link to="/about/sustainability" className="we-link we-link-invert">
+              운영·지속가능성 보기 <ArrowRight size={16} />
+            </Link>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* 문의 — 왼쪽 안내, 오른쪽 폼 */}
+      <section className="we-sec">
+        <div className="we-wrap we-inquiry">
+          <Reveal className="we-inquiry-intro">
+            <EditableText id={"CONTACT"} as="span" className="we-label">CONTACT</EditableText>
+            <EditableText id={"위위(WEWE)에 대해 궁금한 점이 있으신가요?"} as="h2">위위(WEWE)에 대해 궁금한 점이 있으신가요?</EditableText>
+            <EditableText id={"비영리단체 WEWE, 후원, 사역 소개 등 무엇이든 편하게 문의해 주세요."} className="we-sec-lead">비영리단체 WEWE, 후원, 사역 소개 등 무엇이든 편하게 문의해 주세요.</EditableText>
           </Reveal>
 
-          <Reveal as="div" className="wh-inquiry-card" delay={80}>
+          <Reveal className="we-inquiry-body" delay={80}>
             {inquirySubmitted ? (
-              <div className="wh-inquiry-success">
-                <CheckCircle2 size={40} />
+              <div className="we-inquiry-success" role="status">
+                <CheckCircle2 size={36} />
                 <EditableText id={"문의가 접수되었습니다"} as="h3">문의가 접수되었습니다</EditableText>
                 <EditableText id={"남겨주신 연락처로 WEWE 팀이 곧 안내해 드리겠습니다. 감사합니다."}>남겨주신 연락처로 WEWE 팀이 곧 안내해 드리겠습니다. 감사합니다.</EditableText>
               </div>
             ) : (
-              <form className="wh-inquiry-form" onSubmit={handleInquirySubmit}>
-                <div className="wh-inquiry-form-row">
-                  <div className="wh-form-group">
-                    <label>이름 *</label>
+              <form className="we-form" onSubmit={handleInquirySubmit}>
+                <div className="we-form-row">
+                  <div className="we-field">
+                    <label htmlFor="wh-inquiry-name">이름 *</label>
                     <input
                       type="text"
+                      id="wh-inquiry-name"
                       name="name"
+                      autoComplete="name"
                       value={inquiryForm.name}
                       onChange={handleInquiryFormChange}
                       placeholder="성함을 입력해주세요"
                       required
                     />
                   </div>
-                  <div className="wh-form-group">
-                    <label>이메일 *</label>
+                  <div className="we-field">
+                    <label htmlFor="wh-inquiry-email">이메일 *</label>
                     <input
                       type="email"
+                      id="wh-inquiry-email"
                       name="email"
+                      autoComplete="email"
                       value={inquiryForm.email}
                       onChange={handleInquiryFormChange}
                       placeholder="이메일 주소를 입력해주세요"
@@ -455,11 +491,13 @@ function WeweHome() {
                   </div>
                 </div>
 
-                <div className="wh-form-group">
-                  <label>전화번호 *</label>
+                <div className="we-field">
+                  <label htmlFor="wh-inquiry-phone">전화번호 *</label>
                   <input
                     type="tel"
+                    id="wh-inquiry-phone"
                     name="phone"
+                    autoComplete="tel"
                     value={inquiryForm.phone}
                     onChange={handleInquiryFormChange}
                     placeholder="연락 가능한 전화번호를 입력해주세요"
@@ -467,20 +505,21 @@ function WeweHome() {
                   />
                 </div>
 
-                <div className="wh-form-group">
-                  <label>메시지</label>
+                <div className="we-field">
+                  <label htmlFor="wh-inquiry-message">메시지</label>
                   <textarea
+                    id="wh-inquiry-message"
                     name="message"
                     value={inquiryForm.message}
                     onChange={handleInquiryFormChange}
-                    rows="4"
+                    rows="5"
                     placeholder="궁금하신 점이나 남기고 싶은 말씀을 자유롭게 적어주세요"
                   />
                 </div>
 
-                {inquiryError && <p className="wh-form-error">{inquiryError}</p>}
+                {inquiryError && <p className="we-form-error" role="alert">{inquiryError}</p>}
 
-                <button type="submit" className="wh-btn wh-btn-primary wh-inquiry-submit" disabled={inquirySubmitting}>
+                <button type="submit" className="we-btn we-btn-fill we-form-submit" disabled={inquirySubmitting}>
                   <Send size={18} />
                   {inquirySubmitting ? '접수 중...' : '문의하기'}
                 </button>
@@ -490,742 +529,922 @@ function WeweHome() {
         </div>
       </section>
 
-      {/* WEWE CTA 밴드 (2026-09-10 수정) — 이전에는 위위 스테이 회원가입을 안내하는
-          문구/링크였는데, 여기는 위위 랜딩 페이지이므로 위위 자체 가입·로그인으로 바꿨습니다. */}
-      {isLoggedIn === false && (
-      <section className="wh-cta">
-        <div className="wh-container wh-cta-inner">
-          <div>
-            <EditableText id={"위위의 사역에 관심이 있으신가요?"} as="h2">위위의 사역에 관심이 있으신가요?</EditableText>
-            <EditableText id={"WEWE에 가입하고 위로자의 위로자 공동체와 함께해 주세요."}>WEWE에 가입하고 위로자의 위로자 공동체와 함께해 주세요.</EditableText>
-          </div>
-          <div className="wh-cta-actions">
-            <Link to="/signup" className="wh-btn wh-btn-primary">가입하기</Link>
-            <Link to="/login" className="wh-btn wh-btn-ghost">로그인</Link>
-          </div>
-        </div>
-      </section>
-      )}
-
       <WeweFooter />
 
       <style>{`
-        /* 히어로 */
-        .wh-hero {
-          position: relative;
-          min-height: 680px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          padding: 6rem 2rem;
-          background-color: #14201d;
+        /* 흑백 에디토리얼 (2026-10-31) — 무채색 바탕 + 위위 주황은 점·밑줄·강조 글자에만.
+           주 버튼은 검정 채움, 모서리는 4px(사진·입력)·6px(버튼)로 얕게, 구획은 그림자 대신 가는 선.
+           큰 제목 크기와 자간(-0.02em)은 공개된 기준이 없어 직접 정한 값입니다. */
+        .wewe-home {
+          --we-black: #000;
+          --we-ink: #222;
+          --we-ink-2: #424242;
+          --we-ink-3: #6b6b6b; /* 기준표의 #808080은 흰 바탕 작은 글자 대비 4.5:1 미달이라 한 단계 진하게 */
+          --we-line: #d4d4d4;
+          --we-line-lite: #ebebeb;
+          --we-bg-2: #fafafa;
+          --we-bg-3: #f2f2f2;
+          --we-accent: #d97b3f;
+          --we-accent-text: #a65424; /* 흰 바탕 작은 글자용 진한 주황 */
+          font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+          color: var(--we-ink);
+          word-break: keep-all;
+        }
+
+        .wewe-home h1,
+        .wewe-home h2,
+        .wewe-home h3 {
+          color: var(--we-black);
+          margin: 0;
+        }
+
+        .we-wrap {
+          max-width: 1280px;
+          margin: 0 auto;
+          padding: 0 72px;
+        }
+
+        .we-label {
+          display: inline-block;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--we-ink-3);
+        }
+
+        .we-accent {
+          color: var(--we-accent);
+        }
+
+        .we-sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
           overflow: hidden;
-        }
-
-        .wh-hero-slide {
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-          background-size: cover;
-          background-position: center;
-          opacity: 0;
-          transition: opacity 1.4s ease;
-        }
-
-        .wh-hero-slide.active {
-          opacity: 1;
-        }
-
-        .wh-hero::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-          background: linear-gradient(180deg, rgba(15,20,18,0.6) 0%, rgba(15,20,18,0.5) 45%, rgba(15,20,18,0.88) 100%);
-        }
-
-        .wh-hero-content {
-          position: relative;
-          z-index: 2;
-          max-width: 760px;
-          margin: 0 auto;
-        }
-
-        .wh-hero-eyebrow {
-          display: inline-block;
-          font-size: 1rem;
-          font-weight: 700;
-          letter-spacing: 0.16em;
-          color: #f0c9a0;
-          margin-bottom: 1.1rem;
-        }
-
-        .wh-hero h1 {
-          color: #fff;
-          font-size: 2.8rem;
-          font-weight: 800;
-          letter-spacing: -0.01em;
-          margin-bottom: 1.1rem;
-        }
-
-        .wh-hero p {
-          color: rgba(255,255,255,0.92);
-          font-size: 1.1rem;
-          line-height: 1.75;
-          margin-bottom: 2.25rem;
-        }
-
-        .wh-hero-actions {
-          display: flex;
-          justify-content: center;
-          gap: 1rem;
-          flex-wrap: wrap;
-        }
-
-        /* 한눈에 보는 WEWE (2026-10-03 신규) */
-        .wh-snapshot {
-          padding: 5rem 0 1.5rem;
-          background: var(--wh-bg);
-        }
-
-        .wh-snapshot-mission {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-          max-width: 620px;
-          margin: 0 auto;
-          text-align: center;
-          color: var(--wh-ink-soft);
-          font-weight: 600;
-          line-height: 1.7;
-        }
-
-        .wh-snapshot-mission svg {
-          flex-shrink: 0;
-          color: var(--wh-orange-deep);
-        }
-
-        .wh-snapshot-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
-          gap: 1.5rem;
-          margin-top: 2.5rem;
-        }
-
-        .wh-snapshot-card {
-          display: flex;
-          flex-direction: column;
-          padding: 1.75rem;
-          background: var(--wh-bg-soft);
-          border: 1px solid var(--wh-line);
-          border-radius: 12px;
-        }
-
-        .wh-snapshot-card-foundation {
-          background: var(--wh-ink);
-          border-color: var(--wh-ink);
-        }
-
-        .wh-snapshot-tag {
-          display: inline-block;
-          align-self: flex-start;
-          font-size: 0.7rem;
-          font-weight: 700;
-          letter-spacing: 0.06em;
-          padding: 0.3rem 0.6rem;
-          border-radius: 4px;
-          margin-bottom: 0.9rem;
-        }
-
-        .wh-snapshot-tag-teal {
-          color: var(--wh-teal);
-          background: rgba(20, 107, 113, 0.1);
-        }
-
-        .wh-snapshot-tag-orange {
-          color: var(--wh-orange-deep);
-          background: rgba(217, 123, 63, 0.1);
-        }
-
-        .wh-snapshot-tag-dark {
-          color: #f0c9a0;
-          background: rgba(255,255,255,0.1);
-        }
-
-        .wh-snapshot-card h3 {
-          color: var(--wh-ink);
-          font-size: 1.2rem;
-          margin-bottom: 0.9rem;
-        }
-
-        .wh-snapshot-card-foundation h3 {
-          color: #fff;
-        }
-
-        .wh-snapshot-card ul {
-          margin: 0 0 1.1rem;
-          padding-left: 1.1rem;
-          color: var(--wh-ink-soft);
-          font-size: 0.9rem;
-          line-height: 1.7;
-        }
-
-        .wh-snapshot-card-foundation ul {
-          color: rgba(255,255,255,0.78);
-        }
-
-        .wh-snapshot-card .wh-progress-badge {
-          align-self: flex-start;
-          margin-left: 0;
-          margin-top: auto;
-        }
-
-        .wh-snapshot-card-foundation .wh-ministry-link {
-          color: #f0c9a0;
-        }
-
-        /* OUR STORY */
-        .wh-about {
-          padding: 5.5rem 0;
-          background: var(--wh-bg);
-        }
-
-        .wh-about p {
-          color: var(--wh-ink-soft);
-          line-height: 1.9;
-          font-size: 1.02rem;
-          margin-bottom: 1.25rem;
-        }
-
-        /* (2026-10-09 가독성) 말씀 인용 — 한글 기울임꼴을 없애고 글씨를 키웠습니다(위위란? 페이지와 동일). */
-        .wh-verse {
-          margin: 0 0 2.25rem;
-          padding: 1.75rem 2rem;
-          background: rgba(217, 123, 63, 0.07);
-          border-left: 4px solid var(--wh-orange);
-          border-radius: 0 12px 12px 0;
-          color: var(--wh-ink);
-          font-weight: 600;
-          font-size: 1.08rem;
-          line-height: 1.9;
-        }
-
-        .wh-verse cite {
-          display: block;
-          margin-top: 0.75rem;
-          color: var(--wh-orange-deep);
-          font-style: normal;
-          font-weight: 800;
-          font-size: 0.9rem;
-        }
-
-        .wh-about-intro {
-          text-align: center;
-          max-width: 620px;
-          margin: 0 auto;
-        }
-
-        .wh-about .wh-about-intro p {
-          color: var(--wh-ink);
-          font-size: 1.04rem;
-          line-height: 1.9;
-          margin-bottom: 0.6rem;
-        }
-
-        .wh-about .wh-about-intro .wh-about-intro-lead {
-          font-size: 1.3rem;
-          font-weight: 800;
-          line-height: 1.5;
-          margin-bottom: 0.75rem;
-        }
-
-        .wh-about-intro strong {
-          color: var(--wh-teal);
-          font-weight: 800;
-        }
-
-        .wh-story-gallery {
-          display: grid;
-          grid-template-columns: 1fr 1.15fr 1fr;
-          align-items: end;
-          gap: 1rem;
-          margin: 2.5rem 0 1rem;
-        }
-
-        .wh-story-gallery .side,
-        .wh-story-gallery .arch {
-          background-size: cover;
-          background-position: center;
-          background-color: var(--wh-bg-soft);
-        }
-
-        .wh-story-gallery .side {
-          height: 190px;
-          border-radius: 6px;
-        }
-
-        .wh-story-gallery .arch {
-          height: 260px;
-          border-radius: 160px 160px 6px 6px;
-        }
-
-        .wh-about-more {
-          text-align: center;
-          margin-top: 1.5rem;
-        }
-
-        /* 사역 소개 */
-        .wh-ministries {
-          padding: 5.5rem 0;
-          background: var(--wh-bg-soft);
-        }
-
-        .wh-ministries-lead {
-          text-align: center;
-          color: var(--wh-ink-soft);
-          font-weight: 600;
-          margin: -1rem 0 2.5rem;
-        }
-
-        .wh-ministry-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1.75rem;
-        }
-
-        .wh-ministry-card {
-          background: var(--wh-bg);
-          border: 1px solid var(--wh-line);
-          border-radius: 12px;
-          padding: 2rem;
-          border-top: 4px solid transparent;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .wh-ministry-photo {
-          height: 140px;
-          margin: -2rem -2rem 1.25rem;
-          border-radius: 8px 8px 0 0;
-          background-size: cover;
-          background-position: center;
-        }
-
-        .wh-ministry-teal {
-          border-top-color: var(--wh-teal);
-        }
-
-        .wh-ministry-orange {
-          border-top-color: var(--wh-orange);
-        }
-
-        .wh-ministry-tag {
-          display: inline-block;
-          font-size: 0.72rem;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          padding: 0.3rem 0.6rem;
-          border-radius: 4px;
-          margin-bottom: 0.9rem;
-        }
-
-        .wh-ministry-teal .wh-ministry-tag {
-          color: var(--wh-teal);
-          background: rgba(20, 107, 113, 0.1);
-        }
-
-        .wh-ministry-orange .wh-ministry-tag {
-          color: var(--wh-orange-deep);
-          background: rgba(217, 123, 63, 0.1);
-        }
-
-        .wh-ministry-card h3 {
-          color: var(--wh-ink);
-          font-size: 1.4rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .wh-ministry-desc {
-          color: var(--wh-ink-soft);
-          margin-bottom: 1rem;
-          line-height: 1.7;
-        }
-
-        .wh-ministry-summary {
-          color: var(--wh-stone);
-          font-size: 0.88rem;
-          line-height: 1.6;
-          margin-bottom: 1rem;
-        }
-
-        .wh-ministry-live {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          flex-wrap: wrap;
-          padding: 1rem 0;
-          margin-bottom: 0.5rem;
-          border-top: 1px solid var(--wh-line);
-          border-bottom: 1px solid var(--wh-line);
-        }
-
-        .wh-ministry-live > strong {
-          display: block;
-          color: var(--wh-ink);
-          font-size: 0.98rem;
-          margin-bottom: 0.15rem;
-        }
-
-        .wh-ministry-live > div > span {
-          display: block;
-          color: var(--wh-stone);
-          font-size: 0.87rem;
-          line-height: 1.5;
-        }
-
-        .wh-ministry-icon {
-          flex-shrink: 0;
-          width: 34px;
-          height: 34px;
-          border-radius: 50%;
-          background: rgba(217, 123, 63, 0.1);
-          color: var(--wh-orange-deep);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .wh-ministry-link {
-          margin-top: auto;
-          display: inline-flex;
-          align-items: center;
-          gap: 0.3rem;
-          font-size: 0.85rem;
-          font-weight: 700;
-          color: var(--wh-orange-deep);
-          text-decoration: none;
+          clip: rect(0 0 0 0);
           white-space: nowrap;
         }
 
-        .wh-ministry-live .wh-ministry-link {
-          margin-top: 0;
-          margin-left: auto;
+        /* 버튼 — 검정 채움 / 가는 선 / 검정 바탕 위 반전 */
+        .we-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
         }
 
-        .wh-ministry-link:hover {
-          text-decoration: underline;
-        }
-
-        /* 사역 소식 */
-        .wh-news {
-          padding: 5rem 0;
-          background: var(--wh-bg);
-        }
-
-        .wh-news-card {
-          max-width: 640px;
-          margin: 0 auto;
-          text-align: center;
-          padding: 2.5rem;
-          background: var(--wh-bg-soft);
-          border: 1px dashed var(--wh-line);
-          border-radius: 10px;
-        }
-
-        .wh-news-card p {
-          color: var(--wh-ink-soft);
-          margin-bottom: 0.9rem;
-          font-size: 1rem;
-        }
-
-        .wh-news-soon {
-          display: inline-block;
-          font-size: 0.75rem;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          color: var(--wh-stone);
-          border: 1px solid var(--wh-line);
-          border-radius: 999px;
-          padding: 0.3rem 0.9rem;
-        }
-
-        /* 인스타그램 피드처럼 한 줄에 4개, 최대 2줄(8개)까지만 노출 (2026-09-10) —
-           NewsListPage.jsx의 정사각형 사진 카드 그리드와 같은 느낌으로 맞췄습니다. */
-        .wh-newsgrid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 0.5rem;
-        }
-
-        .wh-newsgrid-card {
-          position: relative;
-          display: block;
-          aspect-ratio: 1;
-          overflow: hidden;
+        .we-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          min-height: 52px;
+          padding: 0 24px;
           border-radius: 6px;
-          background: var(--wh-bg-soft);
+          border: 1px solid transparent;
+          font: inherit;
+          font-size: 1rem;
+          font-weight: 600;
           text-decoration: none;
+          cursor: pointer;
+          transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
         }
 
-        .wh-newsgrid-image {
+        .we-btn:focus-visible,
+        .we-link:focus-visible,
+        .we-status-row:focus-visible,
+        .we-news-card:focus-visible,
+        .we-hero-ctl:focus-visible {
+          outline: 2px solid var(--we-black);
+          outline-offset: 3px;
+        }
+
+        .we-btn-fill {
+          background: var(--we-black);
+          color: #fff;
+        }
+
+        .we-btn-fill:hover {
+          background: #2e2e2e;
+        }
+
+        .we-btn-fill:disabled {
+          background: var(--we-line);
+          color: #fff;
+          cursor: not-allowed;
+        }
+
+        .we-btn-line {
+          background: #fff;
+          color: var(--we-black);
+          border-color: var(--we-line);
+        }
+
+        .we-btn-line:hover {
+          border-color: var(--we-black);
+        }
+
+        .we-btn-invert {
+          background: #fff;
+          color: var(--we-black);
+        }
+
+        .we-btn-invert:hover {
+          background: var(--we-bg-3);
+        }
+
+        .we-btn-line-invert {
+          background: transparent;
+          color: #fff;
+          border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .we-btn-line-invert:hover {
+          border-color: #fff;
+        }
+
+        .we-give .we-btn:focus-visible,
+        .we-give .we-link:focus-visible {
+          outline-color: #fff;
+        }
+
+        /* 글자 링크 — 평소엔 검정, 올리면 주황 밑줄 */
+        .we-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          min-height: 44px;
+          color: var(--we-black);
+          font-weight: 600;
+          font-size: 0.95rem;
+          text-decoration: underline;
+          text-decoration-color: var(--we-line);
+          text-decoration-thickness: 1px;
+          text-underline-offset: 6px;
+          transition: text-decoration-color 0.2s ease-in-out;
+        }
+
+        .we-link:hover {
+          text-decoration-color: var(--we-accent);
+          text-decoration-thickness: 2px;
+        }
+
+        .we-link-invert {
+          color: #fff;
+          text-decoration-color: rgba(255, 255, 255, 0.35);
+        }
+
+        /* 히어로 */
+        .we-hero {
+          padding: 88px 0 0;
+        }
+
+        .we-hero-top {
+          display: grid;
+          grid-template-columns: 1.35fr 1fr;
+          gap: 56px;
+          align-items: end;
+        }
+
+        .we-hero-title {
+          font-size: clamp(2.5rem, 5.2vw, 4.25rem);
+          line-height: 1.2;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          text-wrap: balance;
+        }
+
+        .we-hero-side .we-label {
+          margin-bottom: 14px;
+        }
+
+        .we-hero-sub {
+          margin: 0 0 28px;
+          font-size: 1.0625rem;
+          line-height: 1.75;
+          color: var(--we-ink-2);
+        }
+
+        .we-hero-line {
+          display: block;
+          text-wrap: pretty;
+        }
+
+        .we-hero-media {
+          position: relative;
+          margin-top: 56px;
+          height: clamp(280px, 38vw, 480px);
+          border-radius: 4px;
+          overflow: hidden;
+          background: var(--we-bg-3);
+        }
+
+        .we-hero-slide {
           position: absolute;
           inset: 0;
           background-size: cover;
           background-position: center;
-          background-color: var(--wh-bg-soft);
-          transition: transform 0.35s ease;
+          opacity: 0;
+          transition: opacity 0.45s ease-in-out;
         }
 
-        .wh-newsgrid-card:hover .wh-newsgrid-image {
-          transform: scale(1.05);
+        .we-hero-slide.active {
+          opacity: 1;
         }
 
-        .wh-newsgrid-image-placeholder {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: linear-gradient(135deg, var(--wh-teal) 0%, var(--wh-orange) 100%);
-        }
-
-        .wh-newsgrid-image-placeholder span {
-          color: rgba(255,255,255,0.9);
-          font-weight: 800;
-          font-size: 0.95rem;
-          letter-spacing: 0.06em;
-        }
-
-        .wh-newsgrid-caption {
+        .we-hero-controls {
           position: absolute;
-          inset: auto 0 0 0;
-          padding: 1.4rem 0.7rem 0.55rem;
-          background: linear-gradient(0deg, rgba(10,10,9,0.85) 0%, rgba(10,10,9,0.5) 55%, rgba(10,10,9,0) 100%);
-        }
-
-        .wh-newsgrid-date {
-          display: block;
-          font-size: 0.64rem;
-          font-weight: 700;
-          color: rgba(255,255,255,0.75);
-          margin-bottom: 0.15rem;
-        }
-
-        .wh-newsgrid-caption h3 {
-          color: #fff;
-          font-size: 0.82rem;
-          line-height: 1.4;
-          margin: 0;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-        }
-
-        .wh-newsgrid-empty {
-          border: 1px dashed var(--wh-line);
-          background: var(--wh-bg-soft);
-        }
-
-        .wh-news-more {
-          text-align: center;
-          margin-top: 1.75rem;
-        }
-
-        /* WEWE 문의 섹션 (2026-09-13 이동) */
-        .wh-inquiry {
-          padding: 5rem 0;
-          background: var(--wh-bg-soft);
-        }
-
-        .wh-inquiry-lead {
-          text-align: center;
-          color: var(--wh-ink-soft);
-          margin: 0.75rem 0 0;
-        }
-
-        .wh-inquiry-card {
-          max-width: 640px;
-          margin: 2.25rem auto 0;
-          padding: 2.25rem;
-          background: var(--wh-bg);
-          border: 1px solid var(--wh-line);
-          border-radius: 14px;
-        }
-
-        .wh-inquiry-form-row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1.25rem;
-        }
-
-        .wh-form-group {
-          margin-bottom: 1.25rem;
-        }
-
-        .wh-form-group label {
-          display: block;
-          margin-bottom: 0.5rem;
-          font-weight: 700;
-          color: var(--wh-ink);
-          font-size: 0.9rem;
-        }
-
-        .wh-form-group input,
-        .wh-form-group textarea {
-          width: 100%;
-          padding: 0.75rem 0.9rem;
-          border: 1px solid var(--wh-line);
+          right: 16px;
+          bottom: 16px;
+          z-index: 2;
+          display: flex;
+          gap: 2px;
+          padding: 4px;
           border-radius: 6px;
-          font-size: 1rem;
-          font-family: inherit;
-          background: var(--wh-bg);
-          color: var(--wh-ink);
-          resize: vertical;
+          background: rgba(0, 0, 0, 0.62);
         }
 
-        .wh-form-group input:focus,
-        .wh-form-group textarea:focus {
-          outline: none;
-          border-color: var(--wh-orange);
-          box-shadow: 0 0 0 3px rgba(217, 123, 63, 0.15);
-        }
-
-        .wh-form-error {
-          color: #c0392b;
-          font-size: 0.88rem;
-          margin: -0.5rem 0 1.25rem;
-        }
-
-        .wh-inquiry-submit {
+        .we-hero-ctl {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 0.5rem;
-          width: 100%;
+          min-width: 40px;
+          height: 40px;
+          padding: 0 8px;
           border: none;
+          border-radius: 4px;
+          background: transparent;
+          color: rgba(255, 255, 255, 0.75);
+          font: inherit;
+          font-size: 0.8125rem;
+          font-weight: 600;
+          font-variant-numeric: tabular-nums;
           cursor: pointer;
         }
 
-        .wh-inquiry-submit:disabled {
-          opacity: 0.7;
-          cursor: default;
+        .we-hero-ctl:hover {
+          color: #fff;
+          background: rgba(255, 255, 255, 0.12);
         }
 
-        .wh-inquiry-success {
-          text-align: center;
-          padding: 1.5rem 0;
-          color: var(--wh-ink-soft);
+        .we-hero-num {
+          min-width: 32px;
+          padding: 0 6px;
         }
 
-        .wh-inquiry-success svg {
-          color: var(--wh-orange-deep);
-          margin-bottom: 0.75rem;
+        .we-hero-ring {
+          width: 16px;
+          height: 16px;
+          transform: rotate(-90deg);
         }
 
-        .wh-inquiry-success h3 {
-          color: var(--wh-ink);
-          margin-bottom: 0.5rem;
+        .we-hero-ring-track {
+          fill: none;
+          stroke: rgba(255, 255, 255, 0.45);
+          stroke-width: 3;
         }
 
-        /* CTA 밴드 */
-        .wh-cta {
-          padding: 4rem 0;
-          background: var(--wh-ink);
+        .we-hero-ring-fill {
+          fill: none;
+          stroke: var(--we-accent);
+          stroke-width: 3;
+          stroke-linecap: round;
+          stroke-dasharray: 87.9;
+          stroke-dashoffset: 87.9;
+          animation: weHeroRingFill ${HERO_INTERVAL_MS}ms linear forwards;
         }
 
-        .wh-cta-inner {
+        .we-hero-controls.is-paused .we-hero-ring-fill {
+          animation-play-state: paused;
+        }
+
+        @keyframes weHeroRingFill {
+          from { stroke-dashoffset: 87.9; }
+          to { stroke-dashoffset: 0; }
+        }
+
+        .we-hero-controls .we-hero-ctl:focus-visible {
+          outline-color: #fff;
+          outline-offset: 1px;
+        }
+
+        /* 섹션 공통 — 왼쪽 라벨 + 오른쪽 제목, 아래 검정 1px 선 */
+        .we-sec {
+          padding: 112px 0;
+        }
+
+        .we-sec-soft {
+          background: var(--we-bg-2);
+          box-shadow: inset 0 1px 0 var(--we-line-lite), inset 0 -1px 0 var(--we-line-lite);
+        }
+
+        .we-sec-head {
+          display: grid;
+          grid-template-columns: 1fr 2fr;
+          gap: 48px;
+          padding-bottom: 32px;
+          margin-bottom: 48px;
+          border-bottom: 1px solid var(--we-black);
+        }
+
+        .we-sec-head .we-label {
+          padding-top: 10px;
+        }
+
+        .we-sec-head h2,
+        .we-inquiry-intro h2 {
+          font-size: clamp(1.75rem, 2.8vw, 2.25rem);
+          line-height: 1.35;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          text-wrap: balance;
+        }
+
+        .we-sec-head-row {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 24px;
+        }
+
+        .we-sec-lead {
+          margin: 12px 0 0;
+          font-size: 1.0625rem;
+          line-height: 1.7;
+          color: var(--we-ink-2);
+          max-width: 36em;
+        }
+
+        /* 이야기 */
+        .we-story {
+          display: grid;
+          grid-template-columns: 1fr 2fr;
+          gap: 48px;
+          align-items: start;
+        }
+
+        .we-story-text > p {
+          margin: 0 0 32px;
+          font-size: 1.0625rem;
+          line-height: 1.8;
+          color: var(--we-ink-2);
+        }
+
+        .we-story-text strong {
+          color: var(--we-black);
+          font-weight: 600;
+        }
+
+        .we-verse {
+          margin: 0 0 24px;
+          padding: 24px 0;
+          border-top: 1px solid var(--we-line);
+          border-bottom: 1px solid var(--we-line);
+        }
+
+        .we-verse p {
+          margin: 0 0 12px;
+          font-size: 0.975rem;
+          line-height: 1.8;
+          color: var(--we-ink-2);
+        }
+
+        .we-verse cite {
+          font-style: normal;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--we-accent-text);
+        }
+
+        .we-story-photos {
+          display: grid;
+          grid-template-columns: 1.6fr 1fr;
+          grid-template-rows: 1fr 1fr;
+          gap: 8px;
+          height: 520px;
+        }
+
+        .we-photo {
+          border-radius: 4px;
+          background-color: var(--we-bg-3);
+          background-size: cover;
+          background-position: center;
+        }
+
+        .we-story-main {
+          grid-row: 1 / 3;
+        }
+
+        /* 사역 — 두 칸을 가는 세로선으로 나눕니다 */
+        .we-ministries {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .we-ministry {
+          display: flex;
+          flex-direction: column;
+          padding-right: 48px;
+        }
+
+        .we-ministry + .we-ministry {
+          padding-right: 0;
+          padding-left: 48px;
+          border-left: 1px solid var(--we-line);
+        }
+
+        .we-ministry-photo {
+          aspect-ratio: 16 / 10;
+          margin-bottom: 28px;
+        }
+
+        .we-num {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--we-ink-3);
+          font-variant-numeric: tabular-nums;
+        }
+
+        .we-ministry h3 {
+          margin: 8px 0 12px;
+          font-size: 1.625rem;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+        }
+
+        .we-ministry-desc {
+          margin: 0 0 16px;
+          font-size: 1rem;
+          line-height: 1.75;
+          color: var(--we-ink-2);
+        }
+
+        .we-ministry-list {
+          margin: 0 0 28px;
+          padding: 0;
+          list-style: none;
+          font-size: 0.95rem;
+          line-height: 1.6;
+          color: var(--we-ink-2);
+        }
+
+        .we-ministry-list li {
+          padding: 10px 0;
+          border-top: 1px solid var(--we-line-lite);
+        }
+
+        .we-ministry-list li:last-child {
+          border-bottom: 1px solid var(--we-line-lite);
+        }
+
+        /* 진행 상태 줄 — 줄 전체가 링크, 주황 점으로 상태 표시 */
+        .we-status-row {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 18px 20px;
+          margin-bottom: 12px;
+          border: 1px solid var(--we-line);
+          border-radius: 4px;
+          background: #fff;
+          color: inherit;
+          text-decoration: none;
+          transition: border-color 0.2s ease-in-out;
+        }
+
+        .we-status-row:hover {
+          border-color: var(--we-black);
+        }
+
+        .we-status-text {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .we-status-text strong {
+          display: block;
+          margin-bottom: 4px;
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--we-black);
+        }
+
+        .we-status-text span {
+          font-size: 0.9rem;
+          line-height: 1.55;
+          color: var(--we-ink-3);
+        }
+
+        .we-status {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          flex-shrink: 0;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--we-black);
+          white-space: nowrap;
+        }
+
+        .we-status::before {
+          content: '';
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--we-accent);
+        }
+
+        .we-status-arrow {
+          flex-shrink: 0;
+          color: var(--we-ink-3);
+        }
+
+        .we-status-row:hover .we-status-arrow {
+          color: var(--we-black);
+        }
+
+        .we-ministry > .we-link {
+          align-self: flex-start;
+          margin-top: auto;
+        }
+
+        /* 사역 소식 — 4열 */
+        .we-news {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 40px 24px;
+        }
+
+        .we-news-card {
+          display: block;
+          color: inherit;
+          text-decoration: none;
+        }
+
+        .we-news-frame {
+          aspect-ratio: 1;
+          margin-bottom: 14px;
+          border-radius: 4px;
+          overflow: hidden;
+          background: var(--we-bg-3);
+        }
+
+        .we-news-image {
+          width: 100%;
+          height: 100%;
+          background-size: cover;
+          background-position: center;
+          transition: transform 0.45s cubic-bezier(.165, .84, .44, 1);
+        }
+
+        .we-news-card:hover .we-news-image {
+          transform: scale(1.03);
+        }
+
+        .we-news-placeholder {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .we-news-placeholder span {
+          font-weight: 700;
+          color: var(--we-ink-3);
+        }
+
+        .we-news-date {
+          display: block;
+          margin-bottom: 6px;
+          font-size: 0.8125rem;
+          font-weight: 600;
+          color: var(--we-ink-3);
+          font-variant-numeric: tabular-nums;
+        }
+
+        .we-news-card h3 {
+          font-size: 1rem;
+          line-height: 1.5;
+          font-weight: 600;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .we-news-card:hover h3 {
+          text-decoration: underline;
+          text-decoration-color: var(--we-accent);
+          text-decoration-thickness: 2px;
+          text-underline-offset: 4px;
+        }
+
+        .we-news-empty {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 2rem;
-          flex-wrap: wrap;
+          gap: 24px;
+          padding: 32px 0;
+          border-bottom: 1px solid var(--we-line);
+          font-size: 1.0625rem;
+          line-height: 1.7;
+          color: var(--we-ink-2);
         }
 
-        .wh-cta h2 {
-          color: #fff;
-          font-size: 1.5rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .wh-cta p {
-          color: rgba(255,255,255,0.72);
+        .we-news-empty p {
           margin: 0;
         }
 
-        .wh-cta-actions {
+        /* 후원 — 검정 띠 */
+        .we-give {
+          padding: 104px 0;
+          background: var(--we-black);
+          color: #fff;
+        }
+
+        .we-give-inner {
+          display: grid;
+          grid-template-columns: 1.4fr 1fr;
+          gap: 72px;
+          align-items: end;
+        }
+
+        .we-give h2 {
+          color: #fff;
+          font-size: clamp(2rem, 3.6vw, 2.75rem);
+          line-height: 1.3;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          text-wrap: balance;
+        }
+
+        .we-give-copy p {
+          margin: 16px 0 32px;
+          max-width: 34em;
+          font-size: 1.0625rem;
+          line-height: 1.75;
+          color: #bdbdbd;
+        }
+
+        .we-give-trust {
+          padding-top: 24px;
+          border-top: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .we-give-trust h3 {
+          color: #fff;
+          font-size: 1.0625rem;
+          font-weight: 600;
+          margin-bottom: 12px;
+        }
+
+        .we-give-trust ul {
+          margin: 0 0 12px;
+          padding: 0;
+          list-style: none;
+        }
+
+        .we-give-trust li {
+          position: relative;
+          padding: 6px 0 6px 16px;
+          font-size: 0.95rem;
+          line-height: 1.6;
+          color: #d4d4d4;
+        }
+
+        .we-give-trust li::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0.95em;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--we-accent);
+        }
+
+        /* 문의 */
+        .we-inquiry {
+          display: grid;
+          grid-template-columns: 1fr 1.4fr;
+          gap: 72px;
+          align-items: start;
+        }
+
+        .we-inquiry-intro .we-label {
+          margin-bottom: 14px;
+        }
+
+        .we-form {
           display: flex;
-          gap: 0.85rem;
-          flex-shrink: 0;
+          flex-direction: column;
+          gap: 20px;
         }
 
-        .wh-cta .wh-btn-ghost {
-          color: #fff;
-          border-color: rgba(255,255,255,0.35);
+        .we-form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
         }
 
-        .wh-cta .wh-btn-ghost:hover {
-          border-color: #fff;
-          color: #fff;
-          background: rgba(255,255,255,0.08);
+        .we-field label {
+          display: block;
+          margin-bottom: 8px;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--we-ink-2);
         }
 
-        /* 모바일 */
-        @media (max-width: 860px) {
-          .wh-hero {
-            /* (2026-09-13) 모바일에서 히어로 버튼과 원형 슬라이드 인디케이터가 거의
-               겹칠 만큼 여백이 부족했던 문제 — 하단 여백을 넉넉히 늘렸습니다. 상단 여백도
-               로그인 시 헤더 위에 뜨는 "안녕하세요 ○○님" 줄까지 겹치지 않도록 늘렸습니다. */
-            min-height: 560px;
-            padding: 8.25rem 1.25rem 5rem;
+        .we-field input,
+        .we-field textarea {
+          width: 100%;
+          box-sizing: border-box;
+          padding: 14px 16px;
+          border: 1px solid transparent;
+          border-radius: 4px;
+          background: var(--we-bg-3);
+          color: var(--we-black);
+          font: inherit;
+          font-size: 1rem;
+          transition: border-color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+        }
+
+        .we-field input {
+          height: 52px;
+        }
+
+        .we-field textarea {
+          resize: vertical;
+          min-height: 140px;
+          line-height: 1.6;
+        }
+
+        .we-field input::placeholder,
+        .we-field textarea::placeholder {
+          color: #808080;
+        }
+
+        .we-field input:focus,
+        .we-field textarea:focus {
+          outline: none;
+          border-color: var(--we-black);
+          background: #fff;
+        }
+
+        .we-form-error {
+          margin: 0;
+          font-size: 0.925rem;
+          font-weight: 600;
+          color: #c62828;
+        }
+
+        .we-form-submit {
+          align-self: flex-start;
+          min-width: 160px;
+        }
+
+        .we-inquiry-success {
+          padding: 40px 0;
+          border-top: 1px solid var(--we-black);
+          color: var(--we-ink-2);
+          line-height: 1.7;
+        }
+
+        .we-inquiry-success svg {
+          color: var(--we-accent);
+          margin-bottom: 12px;
+        }
+
+        .we-inquiry-success h3 {
+          font-size: 1.375rem;
+          margin-bottom: 8px;
+        }
+
+        .we-inquiry-success p {
+          margin: 0;
+        }
+
+        /* 1000px 이하 — 2단을 1단으로 */
+        @media (max-width: 1000px) {
+          .we-wrap {
+            padding: 0 20px;
           }
 
-          .wh-hero h1 {
-            font-size: 1.9rem;
+          .we-hero {
+            padding-top: 48px;
           }
 
-          .wh-hero p {
-            font-size: 0.95rem;
-          }
-
-          .wh-ministry-grid,
-          .wh-snapshot-grid {
+          .we-hero-top,
+          .we-sec-head,
+          .we-story,
+          .we-give-inner,
+          .we-inquiry {
             grid-template-columns: 1fr;
+            gap: 24px;
           }
 
-          .wh-snapshot {
-            padding: 3.5rem 0 0.5rem;
+          .we-hero-media {
+            margin-top: 40px;
           }
 
-          .wh-newsgrid {
+          .we-sec {
+            padding: 72px 0;
+          }
+
+          .we-sec-head {
+            gap: 8px;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+          }
+
+          .we-sec-head .we-label {
+            padding-top: 0;
+          }
+
+          .we-story-photos {
+            height: 380px;
+          }
+
+          .we-news {
             grid-template-columns: repeat(2, 1fr);
+            gap: 32px 16px;
           }
 
-          .wh-story-gallery {
-            grid-template-columns: 1fr 1fr;
+          .we-give {
+            padding: 72px 0;
           }
 
-          .wh-story-gallery .right {
-            display: none;
+          .we-give-inner {
+            gap: 40px;
           }
 
-          .wh-about, .wh-ministries, .wh-news, .wh-inquiry {
-            padding: 3.5rem 0;
+          .we-inquiry {
+            gap: 32px;
           }
+        }
 
-          .wh-inquiry-card {
-            padding: 1.5rem;
-          }
-
-          .wh-inquiry-form-row {
+        /* 768px 미만 — 휴대폰 */
+        @media (max-width: 767px) {
+          .we-ministries {
             grid-template-columns: 1fr;
           }
 
-          .wh-cta-inner {
+          .we-ministry,
+          .we-ministry + .we-ministry {
+            padding: 0;
+            border-left: none;
+          }
+
+          .we-ministry + .we-ministry {
+            margin-top: 48px;
+            padding-top: 48px;
+            border-top: 1px solid var(--we-line);
+          }
+
+          .we-story-photos {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 220px 140px;
+            height: auto;
+          }
+
+          .we-story-main {
+            grid-row: auto;
+            grid-column: 1 / 3;
+          }
+
+          .we-status-row {
+            flex-wrap: wrap;
+            gap: 8px 12px;
+          }
+
+          .we-status-text {
+            flex-basis: 100%;
+          }
+
+          .we-status-arrow {
+            margin-left: auto;
+          }
+
+          .we-form-row {
+            grid-template-columns: 1fr;
+          }
+
+          .we-form-submit {
+            align-self: stretch;
+          }
+
+          .we-actions .we-btn {
+            flex: 1 1 auto;
+          }
+
+          .we-news-empty {
             flex-direction: column;
             align-items: flex-start;
-            text-align: left;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .we-hero-slide,
+          .we-news-image,
+          .we-hero-ring-fill {
+            transition: none;
           }
         }
       `}</style>

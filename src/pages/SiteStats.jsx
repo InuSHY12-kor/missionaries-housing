@@ -281,40 +281,40 @@ function SiteStats({ defaultSite = 'all' }) {
       <style>{`
         .site-stats { margin-top: 1.5rem; word-break: keep-all; }
         .ss-toolbar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-bottom: 1.25rem; }
-        .ss-seg { display: inline-flex; border: 1px solid #ddd6c8; border-radius: 999px; overflow: hidden; background: #fff; }
-        .ss-seg button { border: 0; background: transparent; padding: 0.5rem 0.9rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; color: #3a3a36; }
-        .ss-seg button.active { background: #d97b3f; color: #fff; }
+        .ss-seg { display: inline-flex; border: 1px solid #d4d4d4; border-radius: 6px; overflow: hidden; background: #fff; }
+        .ss-seg button { border: 0; background: transparent; padding: 0.5rem 0.9rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; color: #222222; }
+        .ss-seg button.active { background: #000000; color: #fff; }
         .ss-range { display: inline-flex; align-items: center; gap: 0.4rem; }
-        .ss-range input { padding: 0.45rem 0.55rem; border: 1px solid #ddd6c8; border-radius: 8px; font-size: 0.9rem; }
+        .ss-range input { padding: 0.45rem 0.55rem; border: 1px solid #d4d4d4; border-radius: 4px; font-size: 0.9rem; }
         .ss-error { color: #b3261e; font-weight: 600; }
         .ss-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.9rem; margin-bottom: 1rem; }
-        .ss-card { background: #fff; border: 1px solid #e5e2da; border-radius: 12px; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.25rem; }
-        .ss-card span { color: #6b665c; font-size: 0.88rem; font-weight: 600; }
-        .ss-card strong { font-size: 1.9rem; color: #1c1c1a; line-height: 1.2; }
-        .ss-card em { font-style: normal; color: #6b665c; font-size: 0.85rem; }
-        .ss-card-accent { border: 2px solid #d97b3f; }
-        .ss-card-accent strong { color: #d97b3f; }
-        .ss-panel { background: #fff; border: 1px solid #e5e2da; border-radius: 12px; padding: 1.1rem 1.2rem; margin-bottom: 1rem; min-width: 0; }
+        .ss-card { background: #fff; border: 1px solid #ebebeb; border-radius: 4px; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.25rem; }
+        .ss-card span { color: #6b6b6b; font-size: 0.88rem; font-weight: 600; }
+        .ss-card strong { font-size: 1.9rem; color: #111111; line-height: 1.2; }
+        .ss-card em { font-style: normal; color: #6b6b6b; font-size: 0.85rem; }
+        .ss-card-accent { border: 2px solid #000000; }
+        .ss-card-accent strong { color: #a65424; }
+        .ss-panel { background: #fff; border: 1px solid #ebebeb; border-radius: 4px; padding: 1.1rem 1.2rem; margin-bottom: 1rem; min-width: 0; }
         .ss-panel h3 { margin: 0 0 0.5rem; font-size: 1.02rem; }
-        .ss-hint { color: #6b665c; font-size: 0.85rem; margin: 0 0 0.6rem; line-height: 1.6; }
-        .ss-empty { color: #8a857b; font-size: 0.9rem; margin: 0.4rem 0 0; }
+        .ss-hint { color: #6b6b6b; font-size: 0.85rem; margin: 0 0 0.6rem; line-height: 1.6; }
+        .ss-empty { color: #6b6b6b; font-size: 0.9rem; margin: 0.4rem 0 0; }
         .ss-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 1rem; }
         .ss-chart { display: flex; align-items: flex-end; gap: 3px; height: 200px; padding-top: 1.2rem; overflow-x: auto; }
         .ss-bar-col { flex: 1 0 14px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 14px; }
         .ss-bar { width: 100%; max-width: 34px; background: #e9a06d; border-radius: 4px 4px 0 0; min-height: 2px; }
-        .ss-bar-col:hover .ss-bar { background: #d97b3f; }
-        .ss-bar-value { font-size: 0.7rem; color: #6b665c; margin-bottom: 2px; }
-        .ss-bar-label { font-size: 0.66rem; color: #8a857b; margin-top: 4px; white-space: nowrap; }
+        .ss-bar-col:hover .ss-bar { background: #000000; }
+        .ss-bar-value { font-size: 0.7rem; color: #6b6b6b; margin-bottom: 2px; }
+        .ss-bar-label { font-size: 0.66rem; color: #6b6b6b; margin-top: 4px; white-space: nowrap; }
         .ss-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         .ss-table th, .ss-table td { text-align: left; padding: 0.45rem 0.4rem; border-bottom: 1px solid #f0ece4; }
-        .ss-table th { color: #6b665c; font-weight: 600; font-size: 0.82rem; }
+        .ss-table th { color: #6b6b6b; font-weight: 600; font-size: 0.82rem; }
         .ss-table td:not(:first-child), .ss-table th:not(:first-child) { text-align: right; white-space: nowrap; }
         .ss-path { word-break: break-all; }
         .ss-linkmaker-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.7rem; }
         .ss-linkmaker label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.86rem; font-weight: 600; }
-        .ss-linkmaker input { padding: 0.55rem 0.65rem; border: 1px solid #ddd6c8; border-radius: 8px; font-size: 0.92rem; font-weight: 400; min-width: 0; }
+        .ss-linkmaker input { padding: 0.55rem 0.65rem; border: 1px solid #d4d4d4; border-radius: 4px; font-size: 0.92rem; font-weight: 400; min-width: 0; }
         .ss-linkmaker-result { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.8rem; flex-wrap: wrap; }
-        .ss-linkmaker-result code { flex: 1; min-width: 0; background: #faf6ef; padding: 0.6rem 0.75rem; border-radius: 8px; word-break: break-all; font-size: 0.85rem; }
+        .ss-linkmaker-result code { flex: 1; min-width: 0; background: #fafafa; padding: 0.6rem 0.75rem; border-radius: 4px; word-break: break-all; font-size: 0.85rem; }
         .ss-privacy { margin-top: 0.5rem; }
         @media (max-width: 760px) {
           .ss-grid, .ss-linkmaker-fields { grid-template-columns: 1fr; }

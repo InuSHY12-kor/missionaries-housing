@@ -140,14 +140,14 @@ function Reviews({ userProfile }) {
         }
 
         .subtitle {
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-top: -1rem;
           margin-bottom: 2rem;
         }
 
         .empty-message {
           text-align: center;
-          color: #95a5a6;
+          color: #6b6b6b;
           padding: 2rem;
         }
 
@@ -167,11 +167,11 @@ function Reviews({ userProfile }) {
           align-items: flex-start;
           gap: 1rem;
           padding-bottom: 1rem;
-          border-bottom: 1px solid #ecf0f1;
+          border-bottom: 1px solid #ebebeb;
         }
 
         .review-card-header h3 {
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 0.5rem;
         }
 
@@ -179,7 +179,7 @@ function Reviews({ userProfile }) {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin: 0;
           font-size: 0.9rem;
         }
@@ -191,7 +191,7 @@ function Reviews({ userProfile }) {
           width: 42px;
           height: 42px;
           border-radius: 50%;
-          border: 1px solid #dfe6e9;
+          border: 1px solid #ebebeb;
           background: white;
           color: #e74c3c;
           cursor: pointer;
@@ -219,13 +219,13 @@ function Reviews({ userProfile }) {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.85rem;
           margin: 1rem 0 0;
         }
 
         .review-comment {
-          color: #2c3e50;
+          color: #111111;
           font-size: 1rem;
           line-height: 1.6;
           margin: 0.75rem 0;
@@ -237,14 +237,14 @@ function Reviews({ userProfile }) {
           justify-content: space-between;
           align-items: center;
           padding-top: 1rem;
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
           font-size: 0.85rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
         }
 
         .guest-name {
           font-weight: 600;
-          color: #2c3e50;
+          color: #111111;
         }
 
         @media (max-width: 768px) {

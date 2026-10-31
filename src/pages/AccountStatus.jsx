@@ -148,9 +148,9 @@ function AccountStatus({ userProfile, onLogout }) {
 
           .account-status-card {
             background: white;
-            border-radius: 8px;
+            border-radius: 4px;
             padding: 3rem;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            box-shadow: none;
             max-width: 620px;
             width: 100%;
             text-align: center;
@@ -167,8 +167,8 @@ function AccountStatus({ userProfile, onLogout }) {
           }
 
           .account-status-icon-neutral {
-            background: #f0dcc0;
-            color: #b8622c;
+            background: #ebebeb;
+            color: #a65424;
           }
 
           .account-status-icon-danger {
@@ -177,12 +177,12 @@ function AccountStatus({ userProfile, onLogout }) {
           }
 
           .account-status-card h1 {
-            color: #2c3e50;
+            color: #111111;
             margin-bottom: 1rem;
           }
 
           .account-status-card > p {
-            color: #7f8c8d;
+            color: #6b6b6b;
             margin-bottom: 1.5rem;
             font-size: 1.05rem;
             line-height: 1.6;
@@ -190,7 +190,7 @@ function AccountStatus({ userProfile, onLogout }) {
 
           .account-status-info-box,
           .account-status-reason-box {
-            background: #f8f9fa;
+            background: #fafafa;
             padding: 1.5rem;
             border-radius: 6px;
             margin: 1.5rem 0;
@@ -209,21 +209,21 @@ function AccountStatus({ userProfile, onLogout }) {
           }
 
           .account-status-reason-box p {
-            color: #2c3e50;
+            color: #111111;
             white-space: pre-wrap;
             margin: 0;
           }
 
           .account-status-info-box p {
-            color: #2c3e50;
+            color: #111111;
             margin: 0.35rem 0;
           }
 
           .account-status-info-note {
             margin-top: 0.75rem !important;
             padding-top: 0.75rem;
-            border-top: 1px solid #ecf0f1;
-            color: #7f8c8d !important;
+            border-top: 1px solid #ebebeb;
+            color: #6b6b6b !important;
             font-size: 0.9rem;
             line-height: 1.6;
           }
@@ -234,12 +234,12 @@ function AccountStatus({ userProfile, onLogout }) {
             gap: 0.6rem;
             text-align: left;
             background: #fff8f0;
-            border: 1px solid #f0dcc0;
+            border: 1px solid #ebebeb;
             border-radius: 6px;
             padding: 1rem;
             margin: 1.5rem 0;
             font-size: 0.92rem;
-            color: #2c3e50;
+            color: #111111;
             cursor: pointer;
           }
 

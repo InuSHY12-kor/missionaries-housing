@@ -372,15 +372,15 @@ function SustainabilityPage() {
           font-weight: 700;
           padding: 0.2rem 0.55rem;
           border-radius: 999px;
-          background: rgba(217, 123, 63, 0.12);
+          background: var(--wh-bg-mute);
           color: var(--wh-orange-deep);
         }
 
         .ws-limit-box {
           padding: 1.25rem 1.5rem;
           background: rgba(0, 0, 0, 0.03);
-          border-left: 3px solid var(--wh-stone);
-          border-radius: 8px;
+          border-left: 1px solid var(--wh-line-strong);
+          border-radius: 4px;
           margin-bottom: 2rem;
         }
 
@@ -410,7 +410,7 @@ function SustainabilityPage() {
           padding: 1.5rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
           text-align: center;
         }
 
@@ -450,7 +450,7 @@ function SustainabilityPage() {
           padding: 1.4rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
         }
 
         .ws-foundation-icon {
@@ -460,7 +460,7 @@ function SustainabilityPage() {
           width: 38px;
           height: 38px;
           border-radius: 50%;
-          background: rgba(20, 107, 113, 0.1);
+          background: var(--wh-bg-soft);
           color: var(--wh-teal);
           margin-bottom: 0.75rem;
         }
@@ -487,12 +487,12 @@ function SustainabilityPage() {
           height: 52px;
           margin: 0 auto 0.7rem;
           border-radius: 50%;
-          background: rgba(217, 123, 63, 0.12);
+          background: var(--wh-bg-mute);
           color: var(--wh-orange-deep);
         }
 
         .ws-stage-card-final .ws-stage-icon {
-          background: rgba(20, 107, 113, 0.12);
+          background: var(--wh-bg-soft);
           color: var(--wh-teal);
         }
 
@@ -504,8 +504,8 @@ function SustainabilityPage() {
         .ws-why-card {
           display: grid;
           grid-template-columns: 240px 1fr;
-          background: rgba(217, 123, 63, 0.08);
-          border-radius: 12px;
+          background: var(--wh-bg-mute);
+          border-radius: 4px;
           overflow: hidden;
         }
 
@@ -566,7 +566,7 @@ function SustainabilityPage() {
           padding: 1.5rem 1.25rem;
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
           text-align: center;
           position: relative;
         }
@@ -607,7 +607,7 @@ function SustainabilityPage() {
           padding: 1.5rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
         }
 
         .ws-funding-icon {
@@ -617,7 +617,7 @@ function SustainabilityPage() {
           width: 38px;
           height: 38px;
           border-radius: 50%;
-          background: rgba(217, 123, 63, 0.12);
+          background: var(--wh-bg-mute);
           color: var(--wh-orange-deep);
           margin-bottom: 0.75rem;
         }
@@ -666,7 +666,7 @@ function SustainabilityPage() {
         .ws-table-wrap {
           overflow-x: auto;
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
         }
 
         .ws-table {
@@ -716,7 +716,7 @@ function SustainabilityPage() {
           padding: 1.5rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
         }
 
         .ws-outcome-icon {
@@ -726,7 +726,7 @@ function SustainabilityPage() {
           width: 34px;
           height: 34px;
           border-radius: 50%;
-          background: rgba(20, 107, 113, 0.1);
+          background: var(--wh-bg-soft);
           color: var(--wh-teal);
           margin-bottom: 0.75rem;
         }

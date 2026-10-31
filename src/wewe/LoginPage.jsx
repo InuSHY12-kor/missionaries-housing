@@ -77,6 +77,7 @@ function LoginPage() {
       <WeweHeader />
 
       <WevePageHero
+        compact
         eyebrow="WELCOME BACK"
         title="다시 만나 반가워요"
         subtitle="로그인하고 위위와 함께 이어가세요"

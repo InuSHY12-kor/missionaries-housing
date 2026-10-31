@@ -474,8 +474,8 @@ function CompleteProfile() {
 
       <style>{`
         .payout-signup {
-          border: 1px solid #e5e2da;
-          border-radius: 10px;
+          border: 1px solid #ebebeb;
+          border-radius: 4px;
           padding: 1rem 1.1rem;
           background: #fcfaf6;
         }
@@ -497,8 +497,8 @@ function CompleteProfile() {
         .signup-form {
           background: white;
           padding: 3rem;
-          border-radius: 8px;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+          border-radius: 4px;
+          box-shadow: none;
           max-width: 600px;
           width: 100%;
           margin: 0 auto;
@@ -511,7 +511,7 @@ function CompleteProfile() {
 
         .subtitle {
           text-align: center;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 2rem;
         }
 
@@ -532,32 +532,32 @@ function CompleteProfile() {
 
         .role-readonly {
           padding: 0.85rem 1rem;
-          border: 2px solid #ecf0f1;
+          border: 2px solid #ebebeb;
           border-radius: 6px;
-          background: #f8f9fa;
-          color: #2c3e50;
+          background: #fafafa;
+          color: #111111;
           font-weight: 600;
         }
 
         .help-text {
           font-size: 0.9rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-top: 0.5rem;
         }
 
         .file-upload {
-          border: 2px dashed #d97b3f;
+          border: 2px dashed #000000;
           border-radius: 6px;
           padding: 2rem;
           text-align: center;
           cursor: pointer;
           transition: all 0.3s;
-          background: #fdf8f1;
+          background: #fafafa;
         }
 
         .file-upload:hover {
-          background: #faf1e6;
-          border-color: #b8622c;
+          background: #f2f2f2;
+          border-color: #000000;
         }
 
         .file-upload input {
@@ -570,7 +570,7 @@ function CompleteProfile() {
           align-items: center;
           gap: 0.5rem;
           cursor: pointer;
-          color: #d97b3f;
+          color: #a65424;
         }
 
         .file-list {
@@ -579,7 +579,7 @@ function CompleteProfile() {
 
         .file-list h4 {
           margin-bottom: 0.75rem;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .file-list ul {
@@ -591,7 +591,7 @@ function CompleteProfile() {
           justify-content: space-between;
           align-items: center;
           padding: 0.75rem;
-          background: #f8f9fa;
+          background: #fafafa;
           border-radius: 4px;
           margin-bottom: 0.5rem;
         }

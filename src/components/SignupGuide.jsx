@@ -180,12 +180,12 @@ function SignupGuideStyles() {
     <style>{`
       .sg-overview,
       .sg-complete {
-        --sg-ink: #1c1c1a;
-        --sg-ink-soft: #4a4a46;
-        --sg-line: #e5e2da;
-        --sg-teal: #146b71;
+        --sg-ink: #111111;
+        --sg-ink-soft: #424242;
+        --sg-line: #ebebeb;
+        --sg-teal: #000000;
         --sg-orange: #d97b3f;
-        --sg-orange-deep: #b8622c;
+        --sg-orange-deep: #a65424;
         text-align: left;
         word-break: keep-all;
         overflow-wrap: break-word;
@@ -196,7 +196,7 @@ function SignupGuideStyles() {
         margin: 0 0 2rem;
         padding: 1.5rem 1.6rem;
         border: 1px solid var(--sg-line);
-        border-radius: 14px;
+        border-radius: 4px;
         background: #fff;
       }
 
@@ -217,15 +217,15 @@ function SignupGuideStyles() {
         display: inline-block;
         margin-bottom: 0.6rem;
         padding: 0.2rem 0.7rem;
-        border-radius: 999px;
-        background: rgba(217, 123, 63, 0.12);
+        border-radius: 6px;
+        background: #f2f2f2;
         color: var(--sg-orange-deep);
         font-size: 0.82rem;
         font-weight: 800;
       }
 
       .sg-flow-supporter .sg-flow-role {
-        background: rgba(20, 107, 113, 0.1);
+        background: #f2f2f2;
         color: var(--sg-teal);
       }
 
@@ -244,7 +244,7 @@ function SignupGuideStyles() {
         align-items: center;
         gap: 0.35rem;
         padding: 0.4rem 0.75rem;
-        border-radius: 8px;
+        border-radius: 4px;
         background: #f6f4ef;
         color: var(--sg-ink);
         font-size: 0.93rem;
@@ -261,7 +261,7 @@ function SignupGuideStyles() {
       .sg-flow-steps li.sg-flow-key {
         background: #fff1e4;
         color: var(--sg-orange-deep);
-        box-shadow: inset 0 0 0 1.5px rgba(217, 123, 63, 0.55);
+        box-shadow: inset 0 0 0 1px #000;
       }
 
       .sg-flow-no {
@@ -278,7 +278,7 @@ function SignupGuideStyles() {
       }
 
       .sg-flow-key .sg-flow-no {
-        background: var(--sg-orange);
+        background: var(--sg-orange-deep);
       }
 
       .sg-flow-note {
@@ -305,7 +305,7 @@ function SignupGuideStyles() {
       .sg-alert {
         margin: 0 0 2rem;
         padding: 1.4rem 1.5rem;
-        border-radius: 14px;
+        border-radius: 4px;
         background: #fff4e8;
         border: 2px solid var(--sg-orange);
       }
@@ -346,7 +346,7 @@ function SignupGuideStyles() {
         width: 30px;
         height: 30px;
         border-radius: 50%;
-        background: var(--sg-orange);
+        background: var(--sg-orange-deep);
         color: #fff;
         font-weight: 800;
       }
@@ -407,7 +407,7 @@ function SignupGuideStyles() {
         gap: 0.8rem;
         align-items: start;
         padding: 0.9rem 1rem;
-        border-radius: 12px;
+        border-radius: 4px;
         border: 1px solid var(--sg-line);
         background: #fff;
       }
@@ -420,11 +420,11 @@ function SignupGuideStyles() {
         height: 40px;
         border-radius: 50%;
         background: #f1efe9;
-        color: #8c8880;
+        color: #6b6b6b;
       }
 
       .sg-step-done .sg-step-icon {
-        background: rgba(20, 107, 113, 0.12);
+        background: #f2f2f2;
         color: var(--sg-teal);
       }
 
@@ -434,7 +434,7 @@ function SignupGuideStyles() {
       }
 
       .sg-step-now .sg-step-icon {
-        background: var(--sg-orange);
+        background: var(--sg-orange-deep);
         color: #fff;
       }
 
@@ -444,7 +444,7 @@ function SignupGuideStyles() {
         font-size: 0.75rem;
         font-weight: 800;
         letter-spacing: 0.04em;
-        color: #8c8880;
+        color: #6b6b6b;
       }
 
       .sg-step-done .sg-step-state {

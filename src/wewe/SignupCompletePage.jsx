@@ -25,6 +25,7 @@ function SignupCompletePage() {
       <WeweHeader />
 
       <WevePageHero
+        compact
         eyebrow={isSupporter ? 'WELCOME' : 'ONE MORE STEP'}
         title={isSupporter ? '후원자 가입이 완료되었습니다' : '가입 신청이 접수되었습니다'}
         subtitle={

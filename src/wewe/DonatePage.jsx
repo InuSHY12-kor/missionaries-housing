@@ -283,7 +283,8 @@ function DonatePage() {
           margin: 0 0 2rem;
           padding: 1.5rem 1.75rem;
           background: var(--wh-bg-soft);
-          border-left: 3px solid var(--wh-orange);
+          border-left: none;
+          border-top: 1px solid #000;
           color: var(--wh-ink);
           font-weight: 600;
           line-height: 1.8;
@@ -309,7 +310,7 @@ function DonatePage() {
         .wd-section-photo {
           height: 220px;
           margin: 2rem 0 2.25rem;
-          border-radius: 12px;
+          border-radius: 4px;
           background-size: cover;
           background-position: center;
         }
@@ -344,7 +345,7 @@ function DonatePage() {
           padding: 1.6rem 1.4rem;
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
-          border-radius: 14px;
+          border-radius: 4px;
           word-break: keep-all;
         }
 
@@ -352,8 +353,8 @@ function DonatePage() {
           width: 56px;
           height: 56px;
           border-radius: 50%;
-          background: #f6c343;
-          color: #1c1c1a;
+          background: var(--wh-bg-mute);
+          color: #000;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -381,8 +382,9 @@ function DonatePage() {
         .wd-impact-outcomes {
           margin-top: 1.25rem;
           padding: 1.25rem 1.5rem;
-          border-radius: 14px;
-          background: #fdf3cf;
+          border-radius: 4px;
+          background: var(--wh-bg-soft);
+          border: 1px solid var(--wh-line);
           text-align: center;
           font-weight: 800;
           color: var(--wh-ink);
@@ -393,7 +395,7 @@ function DonatePage() {
 
         .wd-impact-dot {
           margin: 0 0.7rem;
-          color: #c9971a;
+          color: var(--wh-orange);
         }
 
         @media (max-width: 1080px) {
@@ -428,7 +430,7 @@ function DonatePage() {
           padding: 1.75rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 14px;
+          border-radius: 4px;
         }
 
         .wd-method-head h3 {
@@ -448,8 +450,8 @@ function DonatePage() {
         }
 
         .wd-method-missionfund {
-          background: linear-gradient(160deg, #fff 0%, #f2f8f7 100%);
-          border-color: #bfe0dc;
+          background: #fff;
+          border-color: #000;
         }
 
         .wd-account-card {
@@ -457,7 +459,7 @@ function DonatePage() {
           padding: 1.5rem 1.75rem;
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
         }
 
         .wd-account-row {
@@ -527,8 +529,8 @@ function DonatePage() {
           gap: 0.9rem;
           padding: 1.5rem 1.75rem;
           background: var(--wh-bg);
-          border: 1px solid #bfe0dc;
-          border-radius: 12px;
+          border: 1px solid var(--wh-line-strong);
+          border-radius: 4px;
         }
 
         .wd-missionfund-logo {
@@ -545,7 +547,7 @@ function DonatePage() {
         }
 
         .wd-missionfund-btn {
-          background: linear-gradient(90deg, var(--wh-teal) 0%, #0d4a4f 100%);
+          background: #000;
         }
 
         .wd-contact {
@@ -567,7 +569,7 @@ function DonatePage() {
         }
 
         .wd-contact-btn:hover {
-          background: rgba(217, 123, 63, 0.08);
+          background: var(--wh-bg-mute);
         }
 
         .wa-cta {
@@ -615,9 +617,10 @@ function DonatePage() {
           font-size: 1.08rem;
           line-height: 1.9;
           padding: 1.75rem 2rem;
-          background: rgba(217, 123, 63, 0.07);
-          border-left: 4px solid var(--wh-orange);
-          border-radius: 0 12px 12px 0;
+          background: var(--wh-bg-mute);
+          border-left: none;
+          border-top: 1px solid #000;
+          border-radius: 0;
         }
 
         .wewe-donate-page .wh-verse cite {
@@ -648,9 +651,10 @@ function DonatePage() {
 
         .wewe-donate-page .wd-why .wd-why-highlight {
           padding: 1.1rem 1.4rem;
-          border-radius: 12px;
-          background: rgba(20, 107, 113, 0.07);
-          border-left: 4px solid var(--wh-teal);
+          border-radius: 4px;
+          background: var(--wh-bg-soft);
+          border-left: none;
+          border-top: 1px solid #000;
           font-weight: 700;
         }
 

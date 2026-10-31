@@ -289,8 +289,8 @@ function HostBookings({ userProfile }) {
         .host-fee-notice {
           margin: 0 0 1.5rem;
           padding: 1rem 1.1rem;
-          border-radius: 10px;
-          background: #fff8ec;
+          border-radius: 4px;
+          background: #fafafa;
           border: 1px solid #f0c48f;
           word-break: keep-all;
         }
@@ -311,15 +311,15 @@ function HostBookings({ userProfile }) {
         .host-payment-info {
           margin: 0.6rem 0;
           padding: 0.7rem 0.9rem;
-          border-radius: 8px;
-          background: #faf6ef;
+          border-radius: 4px;
+          background: #fafafa;
           word-break: keep-all;
         }
 
         .host-payment-info p {
           margin: 0.15rem 0;
           font-size: 0.9rem;
-          color: #3a3a36;
+          color: #222222;
           line-height: 1.6;
         }
 
@@ -333,14 +333,14 @@ function HostBookings({ userProfile }) {
         }
 
         .subtitle {
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-top: -1rem;
           margin-bottom: 2rem;
         }
 
         .empty-message {
           text-align: center;
-          color: #95a5a6;
+          color: #6b6b6b;
           padding: 2rem;
         }
 
@@ -349,7 +349,7 @@ function HostBookings({ userProfile }) {
         }
 
         .booking-section-title {
-          color: #2c3e50;
+          color: #111111;
           font-size: 1.1rem;
           margin-bottom: 1rem;
         }
@@ -368,9 +368,9 @@ function HostBookings({ userProfile }) {
           margin-top: 1rem;
           padding: 0.75rem;
           background: white;
-          border: 1px dashed #dfe6e9;
-          border-radius: 8px;
-          color: #d97b3f;
+          border: 1px dashed #ebebeb;
+          border-radius: 4px;
+          color: #a65424;
           font-weight: 600;
           font-size: 0.9rem;
           cursor: pointer;
@@ -378,8 +378,8 @@ function HostBookings({ userProfile }) {
         }
 
         .see-more-btn:hover {
-          background: #faf1e6;
-          border-color: #d97b3f;
+          background: #f2f2f2;
+          border-color: #000000;
         }
 
         .booking-item {
@@ -393,11 +393,11 @@ function HostBookings({ userProfile }) {
           align-items: flex-start;
           gap: 1rem;
           padding-bottom: 1rem;
-          border-bottom: 1px solid #ecf0f1;
+          border-bottom: 1px solid #ebebeb;
         }
 
         .booking-item-header h3 {
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 0.5rem;
         }
 
@@ -412,7 +412,7 @@ function HostBookings({ userProfile }) {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin: 0;
           font-size: 0.9rem;
         }
@@ -434,13 +434,13 @@ function HostBookings({ userProfile }) {
 
         .total-price {
           font-weight: bold;
-          color: #d97b3f;
+          color: #a65424;
           margin: 0;
           font-size: 1.1rem;
         }
 
         .guest-info {
-          background: #f8f9fa;
+          background: #fafafa;
           padding: 1rem;
           border-radius: 6px;
           margin-bottom: 1rem;

@@ -112,29 +112,29 @@ function AdminOverview({ counts, onOpen }) {
 
       <style>{`
         .ao-wrap { margin-top: 1.5rem; display: grid; gap: 1rem; word-break: keep-all; }
-        .ao-card { background: #fff; border: 1px solid #e5e2da; border-radius: 14px; padding: 1.3rem 1.4rem; }
+        .ao-card { background: #fff; border: 1px solid #ebebeb; border-radius: 4px; padding: 1.3rem 1.4rem; }
         .ao-card-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
-        .ao-title { display: flex; align-items: center; gap: 0.45rem; margin: 0 0 1rem; font-size: 1.1rem; color: #1c1c1a; }
+        .ao-title { display: flex; align-items: center; gap: 0.45rem; margin: 0 0 1rem; font-size: 1.1rem; color: #111111; }
         .ao-card-head .ao-title { margin-bottom: 0.9rem; }
-        .ao-muted { color: #6b665c; margin: 0; font-size: 0.92rem; line-height: 1.6; }
+        .ao-muted { color: #6b6b6b; margin: 0; font-size: 0.92rem; line-height: 1.6; }
         .ao-todos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; }
-        .ao-todo { display: flex; flex-direction: column; align-items: flex-start; gap: 0.35rem; padding: 0.95rem 1rem; border: 1px solid #ece7dd; border-radius: 12px; background: #faf8f4; cursor: pointer; text-align: left; color: #6b665c; }
-        .ao-todo:hover { border-color: #d97b3f; }
-        .ao-todo.has { background: #fff4ea; border-color: #f0c9a0; color: #a8551f; }
-        .ao-todo-label { font-weight: 600; font-size: 0.9rem; color: #3a3a36; }
+        .ao-todo { display: flex; flex-direction: column; align-items: flex-start; gap: 0.35rem; padding: 0.95rem 1rem; border: 1px solid #ece7dd; border-radius: 4px; background: #fafafa; cursor: pointer; text-align: left; color: #6b6b6b; }
+        .ao-todo:hover { border-color: #000000; }
+        .ao-todo.has { background: #fafafa; border-color: #f0c9a0; color: #a8551f; }
+        .ao-todo-label { font-weight: 600; font-size: 0.9rem; color: #222222; }
         .ao-todo-count { font-size: 1.6rem; font-weight: 800; color: inherit; line-height: 1.1; }
-        .ao-more { display: inline-flex; align-items: center; gap: 0.3rem; background: none; border: 1px solid #ddd6c8; border-radius: 999px; padding: 0.4rem 0.85rem; cursor: pointer; font-weight: 600; color: #3a3a36; white-space: nowrap; }
-        .ao-more:hover { border-color: #d97b3f; color: #a8551f; }
+        .ao-more { display: inline-flex; align-items: center; gap: 0.3rem; background: none; border: 1px solid #d4d4d4; border-radius: 6px; padding: 0.4rem 0.85rem; cursor: pointer; font-weight: 600; color: #222222; white-space: nowrap; }
+        .ao-more:hover { border-color: #000000; color: #a8551f; }
         .ao-stats-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 1.25rem; align-items: end; }
         .ao-stat-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
-        .ao-stat-nums div { background: #faf8f4; border-radius: 10px; padding: 0.8rem 0.9rem; display: flex; flex-direction: column; gap: 0.2rem; }
-        .ao-stat-nums span { color: #6b665c; font-size: 0.82rem; font-weight: 600; }
-        .ao-stat-nums strong { font-size: 1.5rem; color: #1c1c1a; }
-        .ao-stat-nums div:first-child strong { color: #d97b3f; }
+        .ao-stat-nums div { background: #fafafa; border-radius: 4px; padding: 0.8rem 0.9rem; display: flex; flex-direction: column; gap: 0.2rem; }
+        .ao-stat-nums span { color: #6b6b6b; font-size: 0.82rem; font-weight: 600; }
+        .ao-stat-nums strong { font-size: 1.5rem; color: #111111; }
+        .ao-stat-nums div:first-child strong { color: #a65424; }
         .ao-mini-chart { display: flex; align-items: flex-end; gap: 6px; height: 110px; }
         .ao-mini-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
         .ao-mini-bar { width: 100%; max-width: 30px; background: #e9a06d; border-radius: 4px 4px 0 0; min-height: 2px; }
-        .ao-mini-col span { font-size: 0.7rem; color: #8a857b; margin-top: 4px; }
+        .ao-mini-col span { font-size: 0.7rem; color: #6b6b6b; margin-top: 4px; }
         .ao-mail { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; background: #fffaf3; }
         .ao-mail .ao-title { margin-bottom: 0.35rem; }
         .ao-mail-btn, .ao-house-btn { display: inline-flex; align-items: center; gap: 0.4rem; }

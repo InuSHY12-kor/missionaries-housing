@@ -598,9 +598,10 @@ function CombatUniformPage() {
         .wcu-intro-quote {
           margin: 0 0 2.25rem;
           padding: 1.75rem 2rem;
-          background: rgba(20, 107, 113, 0.06);
-          border-left: 4px solid var(--wh-teal);
-          border-radius: 0 12px 12px 0;
+          background: var(--wh-bg-soft);
+          border-left: none;
+          border-top: 1px solid #000;
+          border-radius: 0;
         }
 
         .wcu-intro-quote p {
@@ -645,7 +646,7 @@ function CombatUniformPage() {
           flex-shrink: 0;
           width: 64px;
           height: 84px;
-          border-radius: 8px;
+          border-radius: 4px;
           background: #24302a;
           display: flex;
           align-items: center;
@@ -670,7 +671,7 @@ function CombatUniformPage() {
           padding: 1.75rem 1.5rem;
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
           text-align: center;
         }
 
@@ -716,7 +717,7 @@ function CombatUniformPage() {
 
         .wcu-partner {
           margin: 0 0 2.25rem;
-          border-radius: 12px;
+          border-radius: 4px;
           overflow: hidden;
           background: #24302a;
         }
@@ -762,7 +763,7 @@ function CombatUniformPage() {
           padding: 1.4rem 1rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
           text-align: center;
         }
 
@@ -810,7 +811,7 @@ function CombatUniformPage() {
           padding: 1.4rem 1.5rem;
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
         }
 
         .wcu-process-icon {
@@ -818,7 +819,7 @@ function CombatUniformPage() {
           width: 42px;
           height: 42px;
           border-radius: 50%;
-          background: rgba(217, 123, 63, 0.12);
+          background: var(--wh-bg-mute);
           color: var(--wh-orange-deep);
           display: flex;
           align-items: center;
@@ -868,7 +869,7 @@ function CombatUniformPage() {
           padding: 1.6rem 1rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
           text-align: center;
         }
 
@@ -898,7 +899,7 @@ function CombatUniformPage() {
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
           border-top: 4px solid var(--wh-teal);
-          border-radius: 12px;
+          border-radius: 4px;
         }
 
         .wcu-roadmap-stage {
@@ -961,9 +962,9 @@ function CombatUniformPage() {
           flex-wrap: wrap;
           padding: 0.85rem 1.1rem;
           margin-bottom: 1.75rem;
-          border: 1px dashed rgba(20, 107, 113, 0.45);
-          border-radius: 10px;
-          background: rgba(20, 107, 113, 0.05);
+          border: 1px dashed var(--wh-line-strong);
+          border-radius: 4px;
+          background: var(--wh-bg-soft);
           color: var(--wh-teal);
           font-size: 0.88rem;
           font-weight: 600;
@@ -975,7 +976,7 @@ function CombatUniformPage() {
           gap: 0.4rem;
           padding: 0.55rem 1rem;
           border: 1.5px solid var(--wh-teal);
-          border-radius: 8px;
+          border-radius: 4px;
           background: var(--wh-teal);
           color: #fff;
           font-family: inherit;
@@ -1005,7 +1006,7 @@ function CombatUniformPage() {
         .wcu-editor {
           padding: 1.75rem;
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
           background: var(--wh-bg-soft);
         }
 
@@ -1014,7 +1015,7 @@ function CombatUniformPage() {
           width: 100%;
           padding: 0.6rem 0.75rem;
           border: 1px solid var(--wh-line);
-          border-radius: 8px;
+          border-radius: 4px;
           background: #fff;
           font-family: inherit;
           font-size: 0.92rem;
@@ -1062,7 +1063,7 @@ function CombatUniformPage() {
           width: 36px;
           height: 36px;
           border: 1px solid var(--wh-line);
-          border-radius: 8px;
+          border-radius: 4px;
           background: #fff;
           color: #b3261e;
           cursor: pointer;
@@ -1077,7 +1078,7 @@ function CombatUniformPage() {
         .wcu-editor-stage {
           padding: 0.9rem;
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
           background: #fff;
         }
 
@@ -1092,7 +1093,7 @@ function CombatUniformPage() {
           margin-top: 0.4rem;
           padding: 0.45rem 0.85rem;
           border: 1px dashed var(--wh-stone);
-          border-radius: 8px;
+          border-radius: 4px;
           background: transparent;
           color: var(--wh-ink-soft);
           font-family: inherit;

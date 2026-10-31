@@ -316,7 +316,7 @@ function Accommodations() {
         .filter-section {
           background: white;
           padding: 2rem;
-          border-radius: 8px;
+          border-radius: 4px;
           margin: 2rem 0;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
@@ -340,7 +340,7 @@ function Accommodations() {
         .filter-card span {
           display: block;
           margin-top: 0.5rem;
-          color: #d97b3f;
+          color: #a65424;
           font-weight: 600;
         }
 
@@ -351,10 +351,10 @@ function Accommodations() {
         }
 
         .date-hint {
-          color: #d97b3f;
+          color: #a65424;
           font-size: 0.85rem;
           margin: 1rem 0 0;
-          background: #faf1e6;
+          background: #f2f2f2;
           padding: 0.6rem 0.9rem;
           border-radius: 6px;
         }
@@ -362,7 +362,7 @@ function Accommodations() {
         .map-search-section {
           background: white;
           padding: 2rem;
-          border-radius: 8px;
+          border-radius: 4px;
           margin-bottom: 2rem;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
@@ -372,25 +372,25 @@ function Accommodations() {
         }
 
         .map-search-header h2 {
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 0.35rem;
         }
 
         .map-search-hint {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.9rem;
           margin: 0;
         }
 
         .empty-message {
           text-align: center;
-          color: #95a5a6;
+          color: #6b6b6b;
           padding: 2rem;
         }
 
         .accommodation-card {
           background: white;
-          border-radius: 8px;
+          border-radius: 4px;
           overflow: hidden;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
           transition: all 0.3s;
@@ -402,13 +402,13 @@ function Accommodations() {
 
         .accommodation-card:hover {
           transform: translateY(-4px);
-          box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+          box-shadow: none;
         }
 
         .accommodation-image {
           width: 100%;
           height: 200px;
-          background: #ecf0f1;
+          background: #ebebeb;
           overflow: hidden;
         }
 
@@ -423,7 +423,7 @@ function Accommodations() {
           align-items: center;
           justify-content: center;
           height: 100%;
-          color: #95a5a6;
+          color: #6b6b6b;
         }
 
         .accommodation-details {
@@ -435,14 +435,14 @@ function Accommodations() {
 
         .accommodation-details h3 {
           margin-bottom: 0.75rem;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .location {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 0.75rem;
         }
 
@@ -456,7 +456,7 @@ function Accommodations() {
         .info-row {
           display: flex;
           gap: 1rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.9rem;
           margin-bottom: 1rem;
         }
@@ -468,19 +468,19 @@ function Accommodations() {
         }
 
         .footer {
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
           padding-top: 1rem;
         }
 
         .price {
           font-size: 1.3rem;
           font-weight: bold;
-          color: #d97b3f;
+          color: #a65424;
           margin: 0 0 0.5rem;
         }
 
         .host {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.9rem;
           margin: 0;
         }
@@ -553,7 +553,7 @@ function Accommodations() {
           .map-search-section {
             padding: 0.9rem;
             margin: 1rem 0;
-            border-radius: 10px;
+            border-radius: 4px;
           }
 
           .filter-card {

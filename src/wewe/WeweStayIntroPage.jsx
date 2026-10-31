@@ -385,9 +385,10 @@ function WeweStayIntroPage() {
         .wsi-intro-quote {
           margin: 0 0 2.25rem;
           padding: 1.75rem 2rem;
-          background: rgba(217, 123, 63, 0.07);
-          border-left: 4px solid var(--wh-orange);
-          border-radius: 0 12px 12px 0;
+          background: var(--wh-bg-mute);
+          border-left: none;
+          border-top: 1px solid #000;
+          border-radius: 0;
         }
 
         .wsi-intro-quote p {
@@ -481,9 +482,10 @@ function WeweStayIntroPage() {
           padding: 1.6rem 1.75rem;
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
-          border-left: 5px solid var(--wh-orange);
-          border-radius: 12px;
-          box-shadow: 0 8px 22px rgba(28, 28, 22, 0.05);
+          border-left: none;
+          border-top: 1px solid #000;
+          border-radius: 4px;
+          box-shadow: none;
         }
 
         .wsi-model-head {
@@ -503,7 +505,7 @@ function WeweStayIntroPage() {
           width: 46px;
           height: 46px;
           border-radius: 50%;
-          background: rgba(217, 123, 63, 0.12);
+          background: var(--wh-bg-mute);
           color: var(--wh-orange-deep);
         }
 
@@ -554,8 +556,8 @@ function WeweStayIntroPage() {
         .wsi-model-value {
           margin: 0;
           padding: 0.9rem 1rem;
-          background: rgba(217, 123, 63, 0.07);
-          border-radius: 10px;
+          background: var(--wh-bg-mute);
+          border-radius: 4px;
           font-size: 0.92rem;
           color: var(--wh-ink-soft);
           line-height: 1.65;
@@ -605,8 +607,8 @@ function WeweStayIntroPage() {
           padding: 1.3rem 0.9rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-top: 4px solid var(--wh-orange);
-          border-radius: 10px;
+          border-top: 1px solid #000;
+          border-radius: 4px;
           text-align: center;
         }
 
@@ -621,7 +623,7 @@ function WeweStayIntroPage() {
           width: 28px;
           height: 28px;
           border-radius: 50%;
-          background: var(--wh-orange);
+          background: #000;
           color: #fff;
           font-size: 0.82rem;
           font-weight: 800;
@@ -629,7 +631,9 @@ function WeweStayIntroPage() {
         }
 
         .wsi-journey-card-host .wsi-journey-no {
-          background: var(--wh-teal);
+          background: #fff;
+          color: #000;
+          box-shadow: inset 0 0 0 1px #000;
         }
 
         .wsi-journey-card h5 {
@@ -649,8 +653,8 @@ function WeweStayIntroPage() {
         .wsi-kit-card {
           display: grid;
           grid-template-columns: 240px 1fr;
-          background: rgba(217, 123, 63, 0.07);
-          border-radius: 12px;
+          background: var(--wh-bg-mute);
+          border-radius: 4px;
           overflow: hidden;
           margin-top: 0.5rem;
         }
@@ -722,11 +726,11 @@ function WeweStayIntroPage() {
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
           border-top: 4px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
         }
 
         .wsi-roadmap-card-done {
-          border-color: rgba(20, 107, 113, 0.35);
+          border-color: var(--wh-line-strong);
           border-top-color: var(--wh-teal);
         }
 
@@ -807,7 +811,7 @@ function WeweStayIntroPage() {
           padding: 1.6rem 1.5rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
         }
 
         .wsi-risk-icon {
@@ -817,7 +821,7 @@ function WeweStayIntroPage() {
           width: 42px;
           height: 42px;
           border-radius: 50%;
-          background: rgba(20, 107, 113, 0.1);
+          background: var(--wh-bg-soft);
           color: var(--wh-teal);
           margin-bottom: 0.85rem;
         }

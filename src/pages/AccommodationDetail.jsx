@@ -9,13 +9,6 @@ import AmenityIcon from '../components/AmenityIcon';
 import { AMENITY_MAP } from '../utils/amenities';
 import { totalForStay, priceBasis, isPerStay } from '../utils/price';
 import { PAYMENT_POLICY } from '../data/orgInfo';
-import PageHero from '../components/PageHero';
-
-const ACCOMMODATION_DETAIL_HERO_IMAGES = [
-  'https://images.pexels.com/photos/7746101/pexels-photo-7746101.jpeg?auto=compress&cs=tinysrgb&w=1600',
-  'https://images.pexels.com/photos/34287271/pexels-photo-34287271.jpeg?auto=compress&cs=tinysrgb&w=1600',
-  'https://images.pexels.com/photos/4170056/pexels-photo-4170056.jpeg?auto=compress&cs=tinysrgb&w=1600',
-];
 
 function rangesOverlap(aStart, aEnd, bStart, bEnd) {
   // 체크아웃일 당일은 겹치지 않는 것으로 처리 (반개구간 비교)
@@ -352,12 +345,7 @@ function AccommodationDetail({ userProfile }) {
 
   return (
     <div className="accommodation-detail">
-      <PageHero
-        images={ACCOMMODATION_DETAIL_HERO_IMAGES}
-        eyebrow="STAY DETAILS"
-        title={accommodation?.title || '숙소 상세 정보'}
-        subtitle={accommodation?.location || '위치와 이용 안내, 예약 가능 여부를 확인해보세요'}
-      />
+      {/* (2026-10-31) 상단 사진 배너(PageHero)는 숙소 사진(아래 ImageCarousel)과 헷갈려 뺐습니다. */}
       <div className="container">
         {isAdminPendingReview && (
           <div className="admin-review-banner">
@@ -672,7 +660,7 @@ function AccommodationDetail({ userProfile }) {
           background: #fff8e6;
           color: #8a5a12;
           border: 1px solid #f0dcb0;
-          border-radius: 8px;
+          border-radius: 4px;
           padding: 0.9rem 1.1rem;
           margin-top: 1.5rem;
           font-size: 0.92rem;
@@ -684,10 +672,10 @@ function AccommodationDetail({ userProfile }) {
         }
 
         .admin-notice-banner {
-          background: #faf1e6;
-          color: #b8622c;
-          border: 1px solid #f0dcc0;
-          border-radius: 8px;
+          background: #f2f2f2;
+          color: #a65424;
+          border: 1px solid #ebebeb;
+          border-radius: 4px;
           padding: 0.75rem 1.1rem;
           margin-top: 0.75rem;
           font-size: 0.9rem;
@@ -695,13 +683,13 @@ function AccommodationDetail({ userProfile }) {
         }
 
         .admin-review-card h3 {
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 1rem;
         }
 
         .admin-review-hint {
           font-size: 0.85rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           line-height: 1.6;
           margin-bottom: 1.25rem;
         }
@@ -740,14 +728,14 @@ function AccommodationDetail({ userProfile }) {
           display: block;
           margin-bottom: 0.5rem;
           font-weight: 600;
-          color: #2c3e50;
+          color: #111111;
           font-size: 0.9rem;
         }
 
         .admin-reason-form textarea {
           width: 100%;
           padding: 0.75rem;
-          border: 2px solid #ecf0f1;
+          border: 2px solid #ebebeb;
           border-radius: 6px;
           font-family: inherit;
           resize: vertical;
@@ -755,7 +743,7 @@ function AccommodationDetail({ userProfile }) {
 
         .admin-reason-form textarea:focus {
           outline: none;
-          border-color: #d97b3f;
+          border-color: #000000;
         }
 
         .admin-review-actions {
@@ -779,8 +767,8 @@ function AccommodationDetail({ userProfile }) {
           text-align: center;
           margin-top: 1.5rem;
           padding-top: 1rem;
-          border-top: 1px solid #ecf0f1;
-          color: #d97b3f;
+          border-top: 1px solid #ebebeb;
+          color: #a65424;
           font-size: 0.85rem;
           text-decoration: none;
         }
@@ -791,10 +779,10 @@ function AccommodationDetail({ userProfile }) {
 
         .gallery {
           margin: 2rem 0;
-          border-radius: 8px;
+          border-radius: 4px;
           overflow: hidden;
           height: 400px;
-          background: #ecf0f1;
+          background: #ebebeb;
         }
 
         .detail-content {
@@ -812,7 +800,7 @@ function AccommodationDetail({ userProfile }) {
         }
 
         .info-section h1 {
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 1rem;
         }
 
@@ -828,7 +816,7 @@ function AccommodationDetail({ userProfile }) {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 1.5rem;
           font-size: 1.1rem;
         }
@@ -839,7 +827,7 @@ function AccommodationDetail({ userProfile }) {
           gap: 1rem;
           margin-bottom: 2rem;
           padding: 1rem;
-          background: #f8f9fa;
+          background: #fafafa;
           border-radius: 6px;
         }
 
@@ -855,7 +843,7 @@ function AccommodationDetail({ userProfile }) {
         }
 
         .description h3, .amenities-section h3, .host-info h3, .map-section h3 {
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 1rem;
         }
 
@@ -872,8 +860,8 @@ function AccommodationDetail({ userProfile }) {
           display: flex;
           flex-wrap: wrap;
           gap: 0.75rem 1.5rem;
-          background: #f8f9fa;
-          border-radius: 8px;
+          background: #fafafa;
+          border-radius: 4px;
           padding: 1.25rem 1.5rem;
         }
 
@@ -887,35 +875,35 @@ function AccommodationDetail({ userProfile }) {
         }
 
         .amenity-chip svg {
-          color: #d97b3f;
+          color: #a65424;
           flex-shrink: 0;
         }
 
         .map-section {
           margin-top: 2rem;
           padding-top: 2rem;
-          border-top: 2px solid #ecf0f1;
+          border-top: 2px solid #ebebeb;
         }
 
         .host-info {
           margin-top: 2rem;
           padding-top: 2rem;
-          border-top: 2px solid #ecf0f1;
+          border-top: 2px solid #ebebeb;
         }
 
         .host-card {
-          background: #f8f9fa;
+          background: #fafafa;
           padding: 1.5rem;
           border-radius: 6px;
         }
 
         .host-details h4 {
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 0.5rem;
         }
 
         .host-details p {
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 1rem;
         }
 
@@ -926,7 +914,7 @@ function AccommodationDetail({ userProfile }) {
         }
 
         .contact-success-msg {
-          color: #d97b3f;
+          color: #a65424;
           font-weight: 600;
           margin-bottom: 0.75rem !important;
         }
@@ -935,14 +923,14 @@ function AccommodationDetail({ userProfile }) {
           display: block;
           margin-bottom: 0.5rem;
           font-weight: 600;
-          color: #2c3e50;
+          color: #111111;
           font-size: 0.9rem;
         }
 
         .contact-inline-form textarea {
           width: 100%;
           padding: 0.75rem;
-          border: 2px solid #ecf0f1;
+          border: 2px solid #ebebeb;
           border-radius: 6px;
           font-family: inherit;
           resize: vertical;
@@ -951,7 +939,7 @@ function AccommodationDetail({ userProfile }) {
 
         .contact-inline-form textarea:focus {
           outline: none;
-          border-color: #d97b3f;
+          border-color: #000000;
         }
 
         .contact-form-actions {
@@ -968,10 +956,10 @@ function AccommodationDetail({ userProfile }) {
 
         .booking-card {
           background: white;
-          border: 2px solid #ecf0f1;
-          border-radius: 8px;
+          border: 2px solid #ebebeb;
+          border-radius: 4px;
           padding: 1.5rem;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          box-shadow: none;
         }
 
         .owner-notice-card {
@@ -981,15 +969,15 @@ function AccommodationDetail({ userProfile }) {
         .owner-notice-card h3 {
           margin: 0 0 1rem;
           font-size: 1.1rem;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .owner-notice-text {
-          background: #fdf8f1;
-          border: 1px solid #f0dcc0;
+          background: #fafafa;
+          border: 1px solid #ebebeb;
           border-radius: 6px;
           padding: 0.9rem 1rem;
-          color: #b8622c;
+          color: #a65424;
           font-size: 0.9rem;
           margin: 0;
           line-height: 1.5;
@@ -1006,18 +994,18 @@ function AccommodationDetail({ userProfile }) {
           text-align: center;
           margin-bottom: 1.5rem;
           padding-bottom: 1.5rem;
-          border-bottom: 1px solid #ecf0f1;
+          border-bottom: 1px solid #ebebeb;
         }
 
         .price {
           font-size: 2rem;
           font-weight: bold;
-          color: #d97b3f;
+          color: #a65424;
           margin: 0;
         }
 
         .per-night {
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin: 0;
           font-size: 0.9rem;
         }
@@ -1030,7 +1018,7 @@ function AccommodationDetail({ userProfile }) {
         }
 
         .date-box {
-          border: 1px solid #dfe6e9;
+          border: 1px solid #ebebeb;
           border-radius: 6px;
           padding: 0.6rem 0.75rem;
         }
@@ -1038,26 +1026,26 @@ function AccommodationDetail({ userProfile }) {
         .date-box label {
           display: block;
           font-size: 0.75rem;
-          color: #95a5a6;
+          color: #6b6b6b;
           margin-bottom: 0.2rem;
         }
 
         .date-box p {
           margin: 0;
           font-weight: 600;
-          color: #2c3e50;
+          color: #111111;
           font-size: 0.9rem;
         }
 
         .calendar-hint {
           font-size: 0.8rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 0.75rem;
           line-height: 1.5;
         }
 
         .price-summary {
-          background: #f8f9fa;
+          background: #fafafa;
           padding: 1rem;
           border-radius: 6px;
           margin: 1rem 0;
@@ -1072,8 +1060,8 @@ function AccommodationDetail({ userProfile }) {
 
         .summary-total {
           font-weight: bold;
-          color: #2c3e50;
-          border-top: 1px solid #ecf0f1;
+          color: #111111;
+          border-top: 1px solid #ebebeb;
           padding-top: 0.5rem;
           margin-top: 0.5rem;
         }
@@ -1086,7 +1074,7 @@ function AccommodationDetail({ userProfile }) {
 
         .note {
           font-size: 0.85rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           text-align: center;
           margin-top: 1rem;
         }
@@ -1103,17 +1091,17 @@ function AccommodationDetail({ userProfile }) {
         }
 
         .booking-success svg {
-          color: #d97b3f;
+          color: #a65424;
           margin-bottom: 0.75rem;
         }
 
         .booking-success h4 {
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 0.5rem;
         }
 
         .booking-success p {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.9rem;
           line-height: 1.6;
           margin-bottom: 1rem;

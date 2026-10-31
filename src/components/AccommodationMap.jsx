@@ -37,11 +37,11 @@ function AccommodationMap({ lat, lng, title }) {
         아직 이 숙소의 지도 위치가 등록되지 않았습니다.
         <style>{`
           .accommodation-map-placeholder {
-            background: #f8f9fa;
+            background: #fafafa;
             border-radius: 6px;
             padding: 1.5rem;
             text-align: center;
-            color: #95a5a6;
+            color: #6b6b6b;
             font-size: 0.9rem;
           }
         `}</style>
@@ -55,11 +55,11 @@ function AccommodationMap({ lat, lng, title }) {
         지도를 불러올 수 없습니다.
         <style>{`
           .accommodation-map-placeholder {
-            background: #f8f9fa;
+            background: #fafafa;
             border-radius: 6px;
             padding: 1.5rem;
             text-align: center;
-            color: #95a5a6;
+            color: #6b6b6b;
             font-size: 0.9rem;
           }
         `}</style>
@@ -74,9 +74,9 @@ function AccommodationMap({ lat, lng, title }) {
         .accommodation-map {
           width: 100%;
           height: 300px;
-          border-radius: 8px;
+          border-radius: 4px;
           overflow: hidden;
-          background: #ecf0f1;
+          background: #ebebeb;
         }
 
         @media (max-width: 768px) {

@@ -215,7 +215,7 @@ function Dashboard({ userProfile }) {
         }
 
         .welcome {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 1.1rem;
           margin-bottom: 2rem;
         }
@@ -230,7 +230,7 @@ function Dashboard({ userProfile }) {
         .stat-card {
           background: white;
           padding: 2rem;
-          border-radius: 8px;
+          border-radius: 4px;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
           text-align: center;
           transition: transform 0.3s;
@@ -248,16 +248,16 @@ function Dashboard({ userProfile }) {
         }
 
         .stat-card-link:hover {
-          box-shadow: 0 4px 16px rgba(217, 123, 63, 0.2);
+          box-shadow: none;
         }
 
         .stat-card svg {
-          color: #d97b3f;
+          color: #a65424;
           margin-bottom: 1rem;
         }
 
         .stat-card h3 {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.95rem;
           margin-bottom: 0.5rem;
         }
@@ -265,7 +265,7 @@ function Dashboard({ userProfile }) {
         .stat-number {
           font-size: 2rem;
           font-weight: bold;
-          color: #d97b3f;
+          color: #a65424;
           margin: 0;
         }
 
@@ -280,7 +280,7 @@ function Dashboard({ userProfile }) {
         .quick-link-card {
           background: white;
           padding: 2rem;
-          border-radius: 8px;
+          border-radius: 4px;
           text-decoration: none;
           text-align: center;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -293,20 +293,20 @@ function Dashboard({ userProfile }) {
 
         .quick-link-card:hover {
           transform: translateY(-4px);
-          box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+          box-shadow: none;
         }
 
         .quick-link-card svg {
-          color: #d97b3f;
+          color: #a65424;
         }
 
         .quick-link-card h3 {
-          color: #2c3e50;
+          color: #111111;
           margin: 0;
         }
 
         .quick-link-card p {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.9rem;
           margin: 0;
         }
@@ -314,7 +314,7 @@ function Dashboard({ userProfile }) {
         .recent-section {
           background: white;
           padding: 2rem;
-          border-radius: 8px;
+          border-radius: 4px;
           margin: 2rem 0;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
@@ -335,7 +335,7 @@ function Dashboard({ userProfile }) {
           align-items: center;
           gap: 0.2rem;
           font-size: 0.85rem;
-          color: #d97b3f;
+          color: #a65424;
           text-decoration: none;
           font-weight: 600;
         }
@@ -356,26 +356,26 @@ function Dashboard({ userProfile }) {
         .booking-table th {
           text-align: left;
           padding: 1rem;
-          border-bottom: 2px solid #ecf0f1;
-          color: #2c3e50;
+          border-bottom: 2px solid #ebebeb;
+          color: #111111;
           font-weight: 600;
         }
 
         .booking-table td {
           padding: 1rem;
-          border-bottom: 1px solid #ecf0f1;
+          border-bottom: 1px solid #ebebeb;
           color: #555;
         }
 
         .booking-table tr:hover {
-          background: #f8f9fa;
+          background: #fafafa;
         }
 
         .info-banner {
-          background: linear-gradient(135deg, #d97b3f 0%, #b8622c 100%);
+          background: #000;
           color: white;
           padding: 2rem;
-          border-radius: 8px;
+          border-radius: 4px;
           margin: 2rem 0;
         }
 

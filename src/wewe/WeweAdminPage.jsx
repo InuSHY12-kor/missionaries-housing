@@ -80,7 +80,7 @@ function WeweAdminPage({ mode = 'dashboard' }) {
 
   // 권한이 확인되기 전에는 관리자 관련 문구·화면을 전혀 보여주지 않습니다.
   if (checking) {
-    return <div style={{ minHeight: '100vh', background: '#1c2f2c' }} aria-busy="true" />;
+    return <div style={{ minHeight: '100vh', background: '#fff' }} aria-busy="true" />;
   }
 
   return (
@@ -95,7 +95,7 @@ function WeweAdminPage({ mode = 'dashboard' }) {
 
       <style>{`
         .wewe-admin-page {
-          background: #f7f6f2;
+          background: #fafafa;
           min-height: 100vh;
         }
 

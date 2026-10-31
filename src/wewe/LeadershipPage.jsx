@@ -8,7 +8,7 @@ import AboutSubNav from './AboutSubNav';
 import Reveal from './Reveal';
 import HERO_IMAGE_SETS from './heroImages';
 import weweRepresentative from '../assets/wewe-representative.jpg';
-import weweLogoNew from '../assets/wewe-logo-new.png';
+import weweLogoNew from '../assets/WEWE_logo_2.png';
 import './wewe-shared.css';
 import { EditableText } from '../edit/EditMode';
 
@@ -140,9 +140,9 @@ function LeadershipPage() {
           aspect-ratio: 3 / 4;
           object-fit: cover;
           object-position: center top;
-          border-radius: 14px;
+          border-radius: 4px;
           display: block;
-          box-shadow: 0 18px 40px rgba(28, 28, 26, 0.14);
+          box-shadow: none;
         }
 
         .wl-greeting-photo figcaption {
@@ -166,7 +166,8 @@ function LeadershipPage() {
           color: var(--wh-ink);
           margin: 0 0 1.6rem;
           padding-left: 1rem;
-          border-left: 4px solid var(--wh-orange);
+          border-left: none;
+          border-top: 1px solid #000;
         }
 
         .wl-greeting-letter p {
@@ -190,7 +191,7 @@ function LeadershipPage() {
           padding: 2rem 2.25rem;
           background: var(--wh-bg-soft);
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
         }
 
         .wl-leader-title {
@@ -252,13 +253,13 @@ function LeadershipPage() {
           padding: 2rem;
           background: var(--wh-bg-soft);
           border: 1px dashed var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
         }
 
         .wl-board-logo-wrap {
           width: 100%;
           aspect-ratio: 2 / 3;
-          border-radius: 10px;
+          border-radius: 4px;
           background: var(--wh-bg);
           border: 1px solid var(--wh-line);
           display: flex;
@@ -304,7 +305,7 @@ function LeadershipPage() {
           flex-wrap: wrap;
           padding: 1.75rem 2rem;
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
           background: var(--wh-bg-soft);
         }
 

@@ -189,7 +189,7 @@ function NotificationBell({ userProfile, linkBase = '' }) {
           background: none;
           border: none;
           cursor: pointer;
-          color: #2c3e50;
+          color: #111111;
           padding: 0.4rem;
           border-radius: 50%;
           transition: background 0.2s;
@@ -214,7 +214,7 @@ function NotificationBell({ userProfile, linkBase = '' }) {
           color: white;
           font-size: 0.65rem;
           font-weight: 700;
-          border-radius: 10px;
+          border-radius: 4px;
           min-width: 16px;
           height: 16px;
           display: flex;
@@ -237,8 +237,8 @@ function NotificationBell({ userProfile, linkBase = '' }) {
           width: min(320px, calc(100vw - 16px));
           max-width: calc(100vw - 16px);
           background: white;
-          border-radius: 10px;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+          border-radius: 4px;
+          box-shadow: none;
           z-index: 1000;
           overflow: hidden;
         }
@@ -248,15 +248,15 @@ function NotificationBell({ userProfile, linkBase = '' }) {
           justify-content: space-between;
           align-items: center;
           padding: 0.9rem 1rem;
-          border-bottom: 1px solid #ecf0f1;
+          border-bottom: 1px solid #ebebeb;
           font-weight: 700;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .notification-mark-all {
           background: none;
           border: none;
-          color: #d97b3f;
+          color: #a65424;
           font-size: 0.8rem;
           font-weight: 600;
           cursor: pointer;
@@ -274,7 +274,7 @@ function NotificationBell({ userProfile, linkBase = '' }) {
         .notification-empty {
           padding: 2rem 1rem;
           text-align: center;
-          color: #95a5a6;
+          color: #6b6b6b;
           font-size: 0.9rem;
         }
 
@@ -291,21 +291,21 @@ function NotificationBell({ userProfile, linkBase = '' }) {
         }
 
         .notification-item:hover {
-          background: #f8f9fa;
+          background: #fafafa;
         }
 
         .notification-item.unread {
-          background: #fdf8f1;
+          background: #fafafa;
         }
 
         .notification-item.unread:hover {
-          background: #faf1e6;
+          background: #f2f2f2;
         }
 
         .notification-item-title {
           font-size: 0.88rem;
           font-weight: 700;
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 0.2rem;
         }
 
@@ -315,13 +315,13 @@ function NotificationBell({ userProfile, linkBase = '' }) {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #d97b3f;
+          background: #000000;
           margin-right: 0.4rem;
         }
 
         .notification-item-body {
           font-size: 0.82rem;
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 0.3rem;
           white-space: pre-wrap;
         }

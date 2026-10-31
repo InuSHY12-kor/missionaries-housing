@@ -154,9 +154,9 @@ function PendingApproval({ userProfile }) {
 
         .pending-card {
           background: white;
-          border-radius: 8px;
+          border-radius: 4px;
           padding: 3rem;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+          box-shadow: none;
           max-width: 600px;
           width: 100%;
           text-align: center;
@@ -221,18 +221,18 @@ function PendingApproval({ userProfile }) {
         }
 
         .pending-card h1 {
-          color: #2c3e50;
+          color: #111111;
           margin-bottom: 1rem;
         }
 
         .pending-card > p {
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-bottom: 2rem;
           font-size: 1.1rem;
         }
 
         .info-box {
-          background: #f8f9fa;
+          background: #fafafa;
           padding: 1.5rem;
           border-radius: 6px;
           margin: 2rem 0;
@@ -241,7 +241,7 @@ function PendingApproval({ userProfile }) {
 
         .info-box h3 {
           margin-bottom: 1rem;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .info-box ul {
@@ -250,7 +250,7 @@ function PendingApproval({ userProfile }) {
 
         .info-box li {
           padding: 0.5rem 0;
-          border-bottom: 1px solid #ecf0f1;
+          border-bottom: 1px solid #ebebeb;
           color: #555;
         }
 
@@ -259,13 +259,13 @@ function PendingApproval({ userProfile }) {
         }
 
         .info-box strong {
-          color: #2c3e50;
+          color: #111111;
           margin-right: 0.5rem;
         }
 
         .waiting-message {
-          background: #faf1e6;
-          border-left: 4px solid #b8622c;
+          background: #f2f2f2;
+          border-left: 4px solid #000000;
           padding: 1rem;
           border-radius: 4px;
           margin: 2rem 0;
@@ -274,7 +274,7 @@ function PendingApproval({ userProfile }) {
 
         .waiting-message p {
           margin: 0.5rem 0;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .rejection-box {
@@ -288,7 +288,7 @@ function PendingApproval({ userProfile }) {
 
         .rejection-box p {
           margin: 0.5rem 0;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .rejection-box strong {

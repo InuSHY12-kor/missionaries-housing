@@ -491,8 +491,8 @@ function AdminPostEditor({ userProfile, site = 'stay' }) {
         .admin-post-editor {
           background: white;
           padding: 2.5rem;
-          border-radius: 8px;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+          border-radius: 4px;
+          box-shadow: none;
           max-width: 720px;
           margin: 0 auto;
         }
@@ -522,7 +522,7 @@ function AdminPostEditor({ userProfile, site = 'stay' }) {
           align-items: center;
           gap: 0.5rem;
           cursor: pointer;
-          color: #d97b3f;
+          color: #a65424;
         }
 
         .field-hint {
@@ -574,7 +574,7 @@ function AdminPostEditor({ userProfile, site = 'stay' }) {
         .post-image-item {
           position: relative;
           aspect-ratio: 1;
-          border-radius: 8px;
+          border-radius: 4px;
           overflow: hidden;
           background: #f2f0eb;
         }
@@ -591,7 +591,7 @@ function AdminPostEditor({ userProfile, site = 'stay' }) {
           top: 6px;
           left: 6px;
           padding: 0.15rem 0.5rem;
-          border-radius: 999px;
+          border-radius: 6px;
           background: rgba(217, 123, 63, 0.92);
           color: #fff;
           font-size: 0.65rem;
@@ -620,7 +620,7 @@ function AdminPostEditor({ userProfile, site = 'stay' }) {
           border-radius: 50%;
           border: none;
           background: rgba(255,255,255,0.92);
-          color: #1c1c1a;
+          color: #111111;
           display: flex;
           align-items: center;
           justify-content: center;

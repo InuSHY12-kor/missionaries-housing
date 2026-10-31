@@ -329,14 +329,14 @@ function Messages({ userProfile }) {
         }
 
         .subtitle {
-          color: #7f8c8d;
+          color: #6b6b6b;
           margin-top: -1rem;
           margin-bottom: 2rem;
         }
 
         .empty-message {
           text-align: center;
-          color: #95a5a6;
+          color: #6b6b6b;
           padding: 2rem;
         }
 
@@ -351,12 +351,12 @@ function Messages({ userProfile }) {
         }
 
         .message-card.unread {
-          border-left: 4px solid #d97b3f;
-          background: #fdf8f1;
+          border-left: 4px solid #000000;
+          background: #fafafa;
         }
 
         .message-card:hover {
-          box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+          box-shadow: none;
         }
 
         .message-card-header {
@@ -372,12 +372,12 @@ function Messages({ userProfile }) {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          color: #2c3e50;
+          color: #111111;
           flex-wrap: wrap;
         }
 
         .message-sender svg {
-          color: #d97b3f;
+          color: #a65424;
           flex-shrink: 0;
         }
 
@@ -386,7 +386,7 @@ function Messages({ userProfile }) {
         }
 
         .sender-church {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.9rem;
           font-weight: 400;
         }
@@ -396,7 +396,7 @@ function Messages({ userProfile }) {
         }
 
         .message-context {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.85rem;
           margin: 0 0 0.5rem;
         }
@@ -429,17 +429,17 @@ function Messages({ userProfile }) {
           width: 36px;
           height: 36px;
           border-radius: 50%;
-          border: 1px solid #dfe6e9;
+          border: 1px solid #ebebeb;
           background: white;
-          color: #2c3e50;
+          color: #111111;
           cursor: pointer;
           transition: background 0.2s, border-color 0.2s;
         }
 
         .page-btn:hover:not(:disabled) {
-          background: #fdf8f1;
-          border-color: #d97b3f;
-          color: #d97b3f;
+          background: #fafafa;
+          border-color: #000000;
+          color: #a65424;
         }
 
         .page-btn:disabled {
@@ -448,7 +448,7 @@ function Messages({ userProfile }) {
         }
 
         .page-indicator {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.9rem;
           font-variant-numeric: tabular-nums;
         }
@@ -460,7 +460,7 @@ function Messages({ userProfile }) {
           gap: 0.4rem;
           background: none;
           border: none;
-          color: #b8622c;
+          color: #a65424;
           font-weight: 600;
           cursor: pointer;
           padding: 0.5rem 0;
@@ -476,7 +476,7 @@ function Messages({ userProfile }) {
         }
 
         .thread-context {
-          color: #7f8c8d;
+          color: #6b6b6b;
           font-size: 0.9rem;
         }
 
@@ -502,7 +502,7 @@ function Messages({ userProfile }) {
         .thread-bubble {
           max-width: 72%;
           padding: 0.85rem 1.1rem;
-          border-radius: 14px;
+          border-radius: 4px;
           background: #f5f6f7;
         }
 
@@ -512,7 +512,7 @@ function Messages({ userProfile }) {
 
         .bubble-text {
           margin: 0 0 0.35rem;
-          color: #2c3e50;
+          color: #111111;
           line-height: 1.6;
           white-space: pre-wrap;
         }
@@ -524,7 +524,7 @@ function Messages({ userProfile }) {
         }
 
         .reply-form {
-          border-top: 1px solid #ecf0f1;
+          border-top: 1px solid #ebebeb;
           padding-top: 1.25rem;
         }
 
@@ -540,8 +540,8 @@ function Messages({ userProfile }) {
 
         .reply-form textarea:focus {
           outline: none;
-          border-color: #d97b3f;
-          box-shadow: 0 0 0 3px rgba(217, 123, 63, 0.1);
+          border-color: #000000;
+          box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
         }
 
         .reply-error {

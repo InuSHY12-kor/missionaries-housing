@@ -38,8 +38,8 @@ function MemberContactModal({ member, mode, adminProfile, onClose }) {
       let note = '쪽지를 보냈습니다. 받는 분에게 종 알림이 표시됩니다.';
       if (alsoEmail) {
         const html = `<p style="margin:0 0 14px;">${escapeHtml(member.full_name || '')}님, WEWE 관리자가 쪽지를 보냈습니다.</p>
-<div style="background:#f7f4f0;border-radius:8px;padding:16px;margin:0 0 16px;white-space:pre-wrap;">${escapeHtml(body)}</div>
-<p style="margin:0;"><a href="https://wewestay.com/stay/messages" style="color:#b8622c;font-weight:700;">위위스테이 쪽지함에서 답장하기 →</a></p>`;
+<div style="background:#f7f4f0;border-radius: 4px;padding:16px;margin:0 0 16px;white-space:pre-wrap;">${escapeHtml(body)}</div>
+<p style="margin:0;"><a href="https://wewestay.com/stay/messages" style="color:#a65424;font-weight:700;">위위스테이 쪽지함에서 답장하기 →</a></p>`;
         await invokeAnnouncement({ userIds: [member.id], subject: 'WEWE 관리자의 쪽지가 도착했습니다', html });
         note += ' 메일로도 알려드렸습니다.';
       }
@@ -118,14 +118,14 @@ function MemberContactModal({ member, mode, adminProfile, onClose }) {
 
       <style>{`
         .mcm-overlay { position: fixed; inset: 0; background: rgba(20, 20, 18, 0.55); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 2000; }
-        .mcm-box { background: #fff; border-radius: 14px; padding: 1.5rem; width: 100%; max-width: 620px; max-height: calc(100vh - 32px); overflow-y: auto; word-break: keep-all; text-align: left; }
+        .mcm-box { background: #fff; border-radius: 4px; padding: 1.5rem; width: 100%; max-width: 620px; max-height: calc(100vh - 32px); overflow-y: auto; word-break: keep-all; text-align: left; }
         .mcm-box h2 { margin: 0 0 0.4rem; font-size: 1.25rem; }
         .mcm-to { margin: 0 0 1rem; color: #5f5a50; font-size: 0.95rem; overflow-wrap: anywhere; }
         .mcm-field { display: block; margin-bottom: 0.9rem; }
         .mcm-field > span { display: block; font-weight: 700; font-size: 0.92rem; margin-bottom: 0.4rem; }
-        .mcm-field input, .mcm-field textarea { width: 100%; padding: 0.65rem 0.8rem; border: 1px solid #ddd6c8; border-radius: 8px; font-size: 1rem; font-family: inherit; }
+        .mcm-field input, .mcm-field textarea { width: 100%; padding: 0.65rem 0.8rem; border: 1px solid #d4d4d4; border-radius: 4px; font-size: 1rem; font-family: inherit; }
         .mcm-check { display: flex; align-items: center; gap: 0.45rem; font-size: 0.92rem; margin-bottom: 0.8rem; cursor: pointer; }
-        .mcm-result { padding: 0.7rem 0.9rem; border-radius: 8px; font-weight: 600; font-size: 0.92rem; }
+        .mcm-result { padding: 0.7rem 0.9rem; border-radius: 4px; font-weight: 600; font-size: 0.92rem; }
         .mcm-result.ok { background: #eef7f0; color: #2f6b45; }
         .mcm-result.error { background: #fdeeee; color: #8a1f1f; }
         .mcm-actions { display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }

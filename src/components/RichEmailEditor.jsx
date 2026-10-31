@@ -62,7 +62,7 @@ const RichEmailEditor = forwardRef(function RichEmailEditor({ placeholder, minHe
       const { error } = await supabase.storage.from('site-assets').upload(path, file, { contentType: contentTypeFor(file) });
       if (error) throw error;
       const { data } = supabase.storage.from('site-assets').getPublicUrl(path);
-      exec('insertHTML', `<img src="${data.publicUrl}" alt="" style="max-width:100%;height:auto;border-radius:8px;" />`);
+      exec('insertHTML', `<img src="${data.publicUrl}" alt="" style="max-width:100%;height:auto;border-radius: 4px;" />`);
     } catch (err) {
       onError?.('이미지를 올리지 못했습니다: ' + err.message);
     } finally {
@@ -115,21 +115,21 @@ const RichEmailEditor = forwardRef(function RichEmailEditor({ placeholder, minHe
       />
       {uploading && <p className="am-hint">이미지를 올리는 중...</p>}
       <style>{`
-        .am-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; padding: 0.45rem; border: 1px solid #ddd6c8; border-bottom: none; border-radius: 8px 8px 0 0; background: #faf8f4; }
-        .am-toolbar button { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: none; background: transparent; border-radius: 6px; cursor: pointer; color: #3a3a36; }
+        .am-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; padding: 0.45rem; border: 1px solid #d4d4d4; border-bottom: none; border-radius: 4px 8px 0 0; background: #fafafa; }
+        .am-toolbar button { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: none; background: transparent; border-radius: 6px; cursor: pointer; color: #222222; }
         .am-toolbar button:hover { background: #efe9df; }
-        .am-toolbar select { height: 34px; border: 1px solid #ddd6c8; border-radius: 6px; padding: 0 0.4rem; background: #fff; }
+        .am-toolbar select { height: 34px; border: 1px solid #d4d4d4; border-radius: 6px; padding: 0 0.4rem; background: #fff; }
         .am-color { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 6px; cursor: pointer; font-weight: 800; }
         .am-color:hover { background: #efe9df; }
-        .am-color span { border-bottom: 3px solid #d97b3f; line-height: 1.1; }
+        .am-color span { border-bottom: 3px solid #000000; line-height: 1.1; }
         .am-color .am-hilite { background: #fdf3cf; border-bottom: none; padding: 0 3px; }
         .am-color input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-        .am-sep { width: 1px; height: 22px; background: #ddd6c8; margin: 0 0.25rem; }
-        .am-editor { padding: 1rem 1.1rem; border: 1px solid #ddd6c8; border-radius: 0 0 8px 8px; background: #fff; line-height: 1.75; font-size: 0.98rem; outline: none; overflow-wrap: anywhere; text-align: left; }
-        .am-editor:focus { border-color: #d97b3f; }
+        .am-sep { width: 1px; height: 22px; background: #d4d4d4; margin: 0 0.25rem; }
+        .am-editor { padding: 1rem 1.1rem; border: 1px solid #d4d4d4; border-radius: 0 0 8px 8px; background: #fff; line-height: 1.75; font-size: 0.98rem; outline: none; overflow-wrap: anywhere; text-align: left; }
+        .am-editor:focus { border-color: #000000; }
         .am-editor:empty::before { content: attr(data-placeholder); color: #a8a296; }
         .am-editor img { max-width: 100%; height: auto; }
-        .am-hint { color: #7f8c8d; font-size: 0.88rem; margin: 0.4rem 0 0; }
+        .am-hint { color: #6b6b6b; font-size: 0.88rem; margin: 0.4rem 0 0; }
       `}</style>
     </div>
   );

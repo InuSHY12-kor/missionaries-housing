@@ -85,7 +85,7 @@ function RefundAccountModal({ mode = 'cancel', amount, onSubmit, onClose }) {
 
         .ram-box {
           background: #fff;
-          border-radius: 14px;
+          border-radius: 4px;
           padding: 1.6rem;
           width: 100%;
           max-width: 440px;
@@ -119,7 +119,7 @@ function RefundAccountModal({ mode = 'cancel', amount, onSubmit, onClose }) {
         .ram-box input {
           padding: 0.65rem 0.75rem;
           border: 1px solid #d8d3c8;
-          border-radius: 8px;
+          border-radius: 4px;
           font-size: 1rem;
           font-weight: 400;
         }

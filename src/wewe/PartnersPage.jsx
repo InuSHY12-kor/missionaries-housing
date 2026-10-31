@@ -481,14 +481,14 @@ function PartnersPage() {
           align-items: center;
           padding: 2.25rem 2.5rem;
           border: 2px dashed var(--wh-line);
-          border-radius: 14px;
+          border-radius: 4px;
           background: var(--wh-bg-soft);
         }
 
         .wpp-thanks-mark {
           width: 150px;
           aspect-ratio: 1 / 1;
-          border-radius: 14px;
+          border-radius: 4px;
           background: #fff;
           border: 1px solid var(--wh-line);
           display: flex;
@@ -548,14 +548,14 @@ function PartnersPage() {
           height: 120px;
           padding: 1rem 1.25rem;
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
           box-sizing: border-box;
           transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
 
         a.wpp-org-card:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(28, 28, 22, 0.12);
+          box-shadow: none;
         }
 
         .wpp-org-logo {
@@ -595,7 +595,7 @@ function PartnersPage() {
           min-height: 64px;
           padding: 0.75rem 1rem;
           border: 1px solid var(--wh-line);
-          border-radius: 8px;
+          border-radius: 4px;
           background: #fff;
           color: var(--wh-ink);
           font-size: 1rem;
@@ -610,7 +610,7 @@ function PartnersPage() {
           font-size: 0.98rem;
           padding: 2rem 1rem;
           border: 1px dashed var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
           margin: 0;
         }
 
@@ -623,9 +623,9 @@ function PartnersPage() {
           flex-wrap: wrap;
           padding: 0.85rem 1.1rem;
           margin-bottom: 1.75rem;
-          border: 1px dashed rgba(20, 107, 113, 0.45);
-          border-radius: 10px;
-          background: rgba(20, 107, 113, 0.05);
+          border: 1px dashed var(--wh-line-strong);
+          border-radius: 4px;
+          background: var(--wh-bg-soft);
           color: var(--wh-teal);
           font-size: 0.88rem;
           font-weight: 600;
@@ -637,7 +637,7 @@ function PartnersPage() {
           gap: 0.4rem;
           padding: 0.55rem 1rem;
           border: 1.5px solid var(--wh-teal);
-          border-radius: 8px;
+          border-radius: 4px;
           background: var(--wh-teal);
           color: #fff;
           font-family: inherit;
@@ -667,7 +667,7 @@ function PartnersPage() {
         .wpp-editor {
           padding: 1.75rem;
           border: 1px solid var(--wh-line);
-          border-radius: 12px;
+          border-radius: 4px;
           background: var(--wh-bg-soft);
         }
 
@@ -678,7 +678,7 @@ function PartnersPage() {
           width: 100%;
           padding: 0.6rem 0.75rem;
           border: 1px solid var(--wh-line);
-          border-radius: 8px;
+          border-radius: 4px;
           background: #fff;
           font-family: inherit;
           font-size: 0.92rem;
@@ -711,13 +711,13 @@ function PartnersPage() {
           padding: 0.9rem;
           margin-bottom: 0.7rem;
           border: 1px solid var(--wh-line);
-          border-radius: 10px;
+          border-radius: 4px;
           background: #fff;
         }
 
         .wpp-editor-preview {
           height: 80px;
-          border-radius: 8px;
+          border-radius: 4px;
           border: 1px solid var(--wh-line);
           display: flex;
           align-items: center;
@@ -759,7 +759,7 @@ function PartnersPage() {
           gap: 0.35rem;
           padding: 0.45rem 0.7rem;
           border: 1px solid var(--wh-line);
-          border-radius: 8px;
+          border-radius: 4px;
           background: #fff;
           font-size: 0.82rem;
           font-weight: 600;
@@ -810,7 +810,7 @@ function PartnersPage() {
           gap: 0.35rem;
           padding: 0.45rem 0.85rem;
           border: 1px dashed var(--wh-stone);
-          border-radius: 8px;
+          border-radius: 4px;
           background: transparent;
           color: var(--wh-ink-soft);
           font-family: inherit;
@@ -822,8 +822,8 @@ function PartnersPage() {
         .wpp-editor-help {
           margin: 0.6rem 0 0;
           padding: 0.75rem 0.95rem;
-          border-radius: 8px;
-          background: rgba(20, 107, 113, 0.06);
+          border-radius: 4px;
+          background: var(--wh-bg-soft);
           color: var(--wh-ink-soft);
           font-size: 0.88rem;
           line-height: 1.7;

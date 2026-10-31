@@ -102,8 +102,8 @@ function Calendar({ isDisabled, isSelected, isInRange, onDayClick }) {
       <style>{`
         .wewe-calendar {
           background: white;
-          border: 1px solid #ecf0f1;
-          border-radius: 8px;
+          border: 1px solid #ebebeb;
+          border-radius: 4px;
           padding: 1rem;
         }
 
@@ -116,12 +116,12 @@ function Calendar({ isDisabled, isSelected, isInRange, onDayClick }) {
 
         .cal-title {
           font-weight: 600;
-          color: #2c3e50;
+          color: #111111;
         }
 
         .cal-nav-btn {
           background: none;
-          border: 1px solid #ecf0f1;
+          border: 1px solid #ebebeb;
           border-radius: 6px;
           width: 32px;
           height: 32px;
@@ -129,12 +129,12 @@ function Calendar({ isDisabled, isSelected, isInRange, onDayClick }) {
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          color: #2c3e50;
+          color: #111111;
           transition: background 0.2s;
         }
 
         .cal-nav-btn:hover {
-          background: #fdf8f1;
+          background: #fafafa;
         }
 
         .cal-weekdays {
@@ -146,7 +146,7 @@ function Calendar({ isDisabled, isSelected, isInRange, onDayClick }) {
         .cal-weekday {
           text-align: center;
           font-size: 0.8rem;
-          color: #95a5a6;
+          color: #6b6b6b;
           padding: 0.25rem 0;
         }
 
@@ -173,12 +173,12 @@ function Calendar({ isDisabled, isSelected, isInRange, onDayClick }) {
           border-radius: 6px;
           cursor: pointer;
           font-size: 0.9rem;
-          color: #2c3e50;
+          color: #111111;
           transition: background 0.15s, color 0.15s;
         }
 
         .cal-day:hover:not(.disabled) {
-          background: #faf1e6;
+          background: #f2f2f2;
         }
 
         .cal-day.disabled {
@@ -189,12 +189,12 @@ function Calendar({ isDisabled, isSelected, isInRange, onDayClick }) {
         }
 
         .cal-day.in-range {
-          background: #f0dcc0;
+          background: #ebebeb;
           border-radius: 0;
         }
 
         .cal-day.selected {
-          background: #d97b3f;
+          background: #000000;
           color: white;
           font-weight: 600;
         }
