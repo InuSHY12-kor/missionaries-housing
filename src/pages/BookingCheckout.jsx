@@ -92,16 +92,20 @@ function BookingCheckout({ userProfile }) {
     }
   };
 
-  // 가상계좌를 받았지만 입금 전에 카드 등 다른 방법으로 바꾸고 싶을 때 — 발급된 계좌는 닫혀 더 이상 입금되지 않습니다.
+  // 가상계좌를 받았지만 입금 전에 카드 등 다른 방법으로 바꾸고 싶을 때 — 가능하면 발급된 계좌를 닫습니다.
+  // 결제대행사가 말소를 거절하면(KG이니시스) 옛 계좌가 입금 기한까지 남으므로 그 계좌로 입금하지 않도록 안내합니다.
   const switchPaymentMethod = async () => {
-    if (!window.confirm('발급된 가상계좌를 닫고 결제 수단을 다시 선택합니다. 닫힌 계좌로는 입금할 수 없습니다. 이미 입금하셨다면 취소를 눌러주세요.\n\n결제 수단을 변경하시겠습니까?')) return;
+    if (!window.confirm('발급된 가상계좌 대신 다른 결제 수단을 다시 선택합니다. 변경한 뒤에는 이 가상계좌로 입금하지 마세요. 이미 입금하셨다면 취소를 눌러주세요.\n\n결제 수단을 변경하시겠습니까?')) return;
+    const oldAccount = `${booking.va_bank_name || ''} ${booking.va_account_number || ''}`.trim();
     setPaying(true);
     setPayError('');
     setNotice('');
     try {
-      await changePaymentMethod(booking.id);
+      const r = await changePaymentMethod(booking.id);
       setMethod('card');
-      setNotice('가상계좌를 닫았습니다. 결제 수단을 다시 선택해주세요.');
+      setNotice(r?.closed === false
+        ? `결제 수단을 다시 선택해주세요. 결제대행사 사정으로 기존 가상계좌(${oldAccount})는 입금 기한까지 남아 있으니, 그 계좌로는 입금하지 마세요.`
+        : '가상계좌를 닫았습니다. 결제 수단을 다시 선택해주세요.');
     } catch (e) {
       setPayError(e.message);
     } finally {
