@@ -226,7 +226,7 @@ function AdminDashboard({ userProfile, site = 'stay' }) {
         // 문제가 생겼을 때 관리자가 직접 확인/조정할 수 있도록 모든 예약을 조회.
         const { data } = await supabase
           .from('bookings')
-          .select('*, accommodations(id, title, location, host_id, users(full_name)), users(full_name, church_name)')
+          .select('*, accommodations(id, title, location, host_id, users(full_name)), users!bookings_guest_id_fkey(full_name, church_name)')
           .order('created_at', { ascending: false });
         // (보안 점검 B6) 이메일·전화는 연락처 함수로 따로 받아 붙입니다.
         const contacts = await fetchMemberContacts(supabase, (data || []).flatMap(b => [b.guest_id, b.accommodations?.host_id]));

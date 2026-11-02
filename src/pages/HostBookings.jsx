@@ -54,7 +54,7 @@ function HostBookings({ userProfile }) {
       // host_id로 명시적으로 필터링합니다. (전체 예약 현황은 관리 탭 > 전체 예약에서 확인)
       const { data, error } = await supabase
         .from('bookings')
-        .select('*, accommodations!inner(title, location, host_id), users(full_name, church_name)')
+        .select('*, accommodations!inner(title, location, host_id), users!bookings_guest_id_fkey(full_name, church_name)')
         .eq('accommodations.host_id', userProfile.id)
         .order('created_at', { ascending: false });
 
