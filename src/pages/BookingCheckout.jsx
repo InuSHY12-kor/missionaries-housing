@@ -5,7 +5,7 @@ import { ArrowLeft, Landmark, Copy, CheckCircle, CreditCard } from 'lucide-react
 import PageHero from '../components/PageHero';
 import { ORG_INFO, PAYMENT_POLICY } from '../data/orgInfo';
 import { PAYMENT_STATUS_LABEL, formatDateTime } from '../utils/bankTransfer';
-import { payBooking, completePayment, PAY_METHOD_LABEL, PORTONE_CONFIG } from '../utils/portonePayment';
+import { payBooking, completePayment, changePaymentMethod, PAY_METHOD_LABEL, PORTONE_CONFIG } from '../utils/portonePayment';
 
 // 결제 페이지 상단 슬라이드 배너 사진 (다른 상세 페이지들과 동일한 테마 적용)
 const BOOKING_CHECKOUT_HERO_IMAGES = [
@@ -84,6 +84,24 @@ function BookingCheckout({ userProfile }) {
     try {
       const r = await payBooking(booking, method);
       setNotice(r?.status === 'VIRTUAL_ACCOUNT_ISSUED' ? '가상계좌가 발급되었습니다. 아래 계좌로 입금해주세요.' : '결제가 완료되었습니다.');
+    } catch (e) {
+      setPayError(e.message);
+    } finally {
+      setPaying(false);
+      fetchBooking();
+    }
+  };
+
+  // 가상계좌를 받았지만 입금 전에 카드 등 다른 방법으로 바꾸고 싶을 때 — 발급된 계좌는 닫혀 더 이상 입금되지 않습니다.
+  const switchPaymentMethod = async () => {
+    if (!window.confirm('발급된 가상계좌를 닫고 결제 수단을 다시 선택합니다. 닫힌 계좌로는 입금할 수 없습니다. 이미 입금하셨다면 취소를 눌러주세요.\n\n결제 수단을 변경하시겠습니까?')) return;
+    setPaying(true);
+    setPayError('');
+    setNotice('');
+    try {
+      await changePaymentMethod(booking.id);
+      setMethod('card');
+      setNotice('가상계좌를 닫았습니다. 결제 수단을 다시 선택해주세요.');
     } catch (e) {
       setPayError(e.message);
     } finally {
@@ -260,6 +278,12 @@ function BookingCheckout({ userProfile }) {
               </div>
             )}
             <p className="checkout-va-note">입금하시면 자동으로 확인되어 결제 완료로 바뀝니다. 입금자명은 상관없습니다.</p>
+            <div className="checkout-va-switch">
+              <p>입금 전이라면 카드 결제 등 다른 방법으로 바꿀 수 있습니다.</p>
+              <button type="button" className="btn btn-secondary" onClick={switchPaymentMethod} disabled={paying}>
+                <CreditCard size={16} /> {paying ? '변경 중...' : '결제 수단 변경'}
+              </button>
+            </div>
           </div>
         )}
 
@@ -427,6 +451,9 @@ function BookingCheckout({ userProfile }) {
         .checkout-pay-btn { width: 100%; font-size: 1.05rem; padding: 0.9rem 1.5rem; font-weight: 700; }
         .checkout-receipt { display: inline-block; margin-top: 0.4rem; font-weight: 700; color: #2f7d4f; }
         .checkout-va-note { margin: 0.8rem 0 0; color: #6b6b6b; font-size: 0.9rem; }
+        .checkout-va-switch { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.6rem 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ebebeb; }
+        .checkout-va-switch p { margin: 0; color: #424242; font-size: 0.9rem; word-break: keep-all; }
+        .checkout-va-switch .btn { display: inline-flex; align-items: center; gap: 0.4rem; }
         @media (max-width: 560px) { .checkout-methods { grid-template-columns: 1fr; } }
         .checkout-paid {
           display: flex;

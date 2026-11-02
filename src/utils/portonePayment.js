@@ -30,6 +30,11 @@ export function completePayment(paymentId) {
   return invoke({ action: 'complete', paymentId });
 }
 
+// 입금 전 가상계좌를 닫고(포트원 말소) 결제 수단을 다시 고를 수 있게 합니다(2026-11-02).
+export function changePaymentMethod(bookingId) {
+  return invoke({ action: 'change_method', bookingId });
+}
+
 export function refundCardPayment(bookingId, reason) {
   return invoke({ action: 'refund', bookingId, reason });
 }

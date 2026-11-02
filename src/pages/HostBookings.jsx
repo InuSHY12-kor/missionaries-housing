@@ -3,7 +3,7 @@ import { supabase } from '../App';
 import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_BADGE_CLASS, cancelPaidBooking, todayKst, formatDateTime } from '../utils/bankTransfer';
 import { payoutFee, payoutNet } from '../utils/price';
 import { ORG_INFO, PAYMENT_POLICY } from '../data/orgInfo';
-import { MapPin, Calendar, Phone, CheckCircle, XCircle, ChevronDown, DoorOpen } from 'lucide-react';
+import { MapPin, Calendar, Phone, CheckCircle, XCircle, DoorOpen, RotateCcw } from 'lucide-react';
 import PageHero from '../components/PageHero';
 import { fetchMemberContacts, withContact } from '../utils/memberContacts';
 
@@ -35,10 +35,49 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+// (2026-11-02) 예약 관리 탭 — 확인할 예약 / 확정된 예약 / 지난·취소된 예약으로 나눠 봅니다.
+const BOOKING_TABS = [
+  { key: 'pending', label: '미확인 예약' },
+  { key: 'confirmed', label: '확인된 예약' },
+  { key: 'past', label: '이전 예약' }
+];
+
+// 기간 빠른 선택. 기간은 숙박일 기준으로, 시작일 이후에 퇴실하는(= 아직 남았거나 최근에 끝난) 예약을 봅니다.
+const PERIOD_PRESETS = [
+  { key: '3m', label: '최근 3개월', months: 3 },
+  { key: '6m', label: '최근 6개월', months: 6 },
+  { key: '1y', label: '최근 1년', months: 12 },
+  { key: 'all', label: '전체', months: null }
+];
+
+// 오늘(한국 시간)에서 n개월 전 날짜(YYYY-MM-DD)
+function monthsAgoKst(months) {
+  const d = new Date();
+  d.setMonth(d.getMonth() - months);
+  return new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Seoul' }).format(d);
+}
+
+// 예약이 어느 탭에 속하는지 정합니다. 퇴실일이 지났거나 취소된 예약은 "이전 예약"이지만,
+// 결제됐는데 아직 입실 확인을 하지 않은 확정 예약은 입실 확인을 누를 수 있도록 "확인된 예약"에 남겨 둡니다.
+function bookingTab(booking, today) {
+  if (booking.status === 'cancelled') return 'past';
+  if (booking.status === 'pending') return booking.check_out >= today ? 'pending' : 'past';
+  if (booking.status === 'confirmed') {
+    const needsCheckIn = booking.payment_status === 'paid' && !booking.checked_in_at;
+    return booking.check_out >= today || needsCheckIn ? 'confirmed' : 'past';
+  }
+  return 'past';
+}
+
 function HostBookings({ userProfile }) {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showHistory, setShowHistory] = useState(false);
+  const [activeTab, setActiveTab] = useState('pending');
+  // 처음에는 최근 3개월(숙박일 기준) 예약만 보여 줍니다.
+  const [periodPreset, setPeriodPreset] = useState('3m');
+  const [fromDate, setFromDate] = useState(() => monthsAgoKst(3));
+  const [toDate, setToDate] = useState('');
+  const [accommodationFilter, setAccommodationFilter] = useState('all');
 
   const fetchBookings = useCallback(async () => {
     if (!userProfile?.id) {
@@ -115,11 +154,43 @@ function HostBookings({ userProfile }) {
     }
   };
 
-  // 확인이 필요한(대기 중) 예약은 전부 보여주고, 이미 처리된(확정/거절) 지난 예약은
-  // 가장 최근 1건만 기본 노출 — "더보기"를 눌러야 나머지 지난 예약이 펼쳐집니다.
-  const pendingBookings = bookings.filter(b => b.status === 'pending');
-  const historyBookings = bookings.filter(b => b.status !== 'pending');
-  const visibleHistory = showHistory ? historyBookings : historyBookings.slice(0, 1);
+  const selectPreset = (preset) => {
+    setPeriodPreset(preset.key);
+    setFromDate(preset.months ? monthsAgoKst(preset.months) : '');
+    setToDate('');
+  };
+
+  const resetFilters = () => {
+    selectPreset(PERIOD_PRESETS[0]);
+    setAccommodationFilter('all');
+  };
+
+  // 검색 조건의 숙소 목록 — 예약이 들어온 내 숙소들
+  const accommodationOptions = [...new Map(
+    bookings.map(b => [b.accommodation_id, b.accommodations?.title || '삭제된 숙소'])
+  ).entries()].sort((a, b) => a[1].localeCompare(b[1], 'ko'));
+
+  // 기간: 숙박 기간이 [시작일, 종료일]과 겹치는 예약. 숙소: 선택한 숙소의 예약.
+  const today = todayKst();
+  const filteredBookings = bookings.filter(b =>
+    (!fromDate || b.check_out >= fromDate) &&
+    (!toDate || b.check_in <= toDate) &&
+    (accommodationFilter === 'all' || b.accommodation_id === accommodationFilter)
+  );
+  const bookingsByTab = { pending: [], confirmed: [], past: [] };
+  filteredBookings.forEach(b => bookingsByTab[bookingTab(b, today)].push(b));
+  // 미확인·확인된 예약은 입실일이 가까운 순, 이전 예약은 최근 순으로 보여 줍니다.
+  bookingsByTab.pending.sort((a, b) => a.check_in.localeCompare(b.check_in));
+  bookingsByTab.confirmed.sort((a, b) => a.check_in.localeCompare(b.check_in));
+  bookingsByTab.past.sort((a, b) => b.check_in.localeCompare(a.check_in));
+  const visibleBookings = bookingsByTab[activeTab];
+  const filtersChanged = periodPreset !== '3m' || accommodationFilter !== 'all';
+
+  const TAB_EMPTY_MESSAGE = {
+    pending: '확인이 필요한 예약이 없습니다.',
+    confirmed: '확정된 예약이 없습니다.',
+    past: '이전 예약이 없습니다.'
+  };
 
   const renderBookingCard = (booking) => (
     <div key={booking.id} className="card booking-item">
@@ -250,37 +321,89 @@ function HostBookings({ userProfile }) {
           <p className="empty-message">아직 들어온 예약이 없습니다.</p>
         ) : (
           <>
-            {pendingBookings.length > 0 && (
-              <section className="booking-section">
-                <h2 className="booking-section-title">확인이 필요한 예약 ({pendingBookings.length})</h2>
-                <div className="bookings-list">
-                  {pendingBookings.map(renderBookingCard)}
+            <div className="hb-filters" role="search" aria-label="예약 검색 조건">
+              <div className="hb-filter-group">
+                <span className="hb-filter-label">기간 (숙박일 기준)</span>
+                <div className="hb-presets">
+                  {PERIOD_PRESETS.map(preset => (
+                    <button
+                      key={preset.key}
+                      type="button"
+                      className={`hb-chip${periodPreset === preset.key ? ' active' : ''}`}
+                      aria-pressed={periodPreset === preset.key}
+                      onClick={() => selectPreset(preset)}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
                 </div>
-              </section>
-            )}
-
-            {historyBookings.length > 0 && (
-              <section className="booking-section">
-                <h2 className="booking-section-title">지난 예약</h2>
-                <div className="bookings-list">
-                  {visibleHistory.map(renderBookingCard)}
+                <div className="hb-dates">
+                  <input
+                    type="date"
+                    aria-label="시작일"
+                    value={fromDate}
+                    max={toDate || undefined}
+                    onChange={(e) => { setFromDate(e.target.value); setPeriodPreset('custom'); }}
+                  />
+                  <span>~</span>
+                  <input
+                    type="date"
+                    aria-label="종료일"
+                    value={toDate}
+                    min={fromDate || undefined}
+                    onChange={(e) => { setToDate(e.target.value); setPeriodPreset('custom'); }}
+                  />
                 </div>
-                {historyBookings.length > visibleHistory.length && (
-                  <button className="see-more-btn" onClick={() => setShowHistory(true)}>
-                    더보기 ({historyBookings.length - visibleHistory.length}건 더) <ChevronDown size={16} />
-                  </button>
-                )}
-                {showHistory && historyBookings.length > 1 && (
-                  <button className="see-more-btn" onClick={() => setShowHistory(false)}>
-                    접기
-                  </button>
-                )}
-              </section>
-            )}
+              </div>
+              <div className="hb-filter-group">
+                <label className="hb-filter-label" htmlFor="hb-accommodation">숙소</label>
+                <select
+                  id="hb-accommodation"
+                  value={accommodationFilter}
+                  onChange={(e) => setAccommodationFilter(e.target.value)}
+                >
+                  <option value="all">전체 숙소</option>
+                  {accommodationOptions.map(([id, title]) => (
+                    <option key={id} value={id}>{title}</option>
+                  ))}
+                </select>
+              </div>
+              {filtersChanged && (
+                <button type="button" className="hb-reset" onClick={resetFilters}>
+                  <RotateCcw size={14} />
+                  조건 초기화
+                </button>
+              )}
+            </div>
 
-            {pendingBookings.length === 0 && historyBookings.length === 0 && (
-              <p className="empty-message">아직 들어온 예약이 없습니다.</p>
-            )}
+            <div className="hb-tabs" role="tablist" aria-label="예약 분류">
+              {BOOKING_TABS.map(tab => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab.key}
+                  className={`hb-tab${activeTab === tab.key ? ' active' : ''}`}
+                  onClick={() => setActiveTab(tab.key)}
+                >
+                  {tab.label}
+                  <span className="hb-tab-count">{bookingsByTab[tab.key].length}</span>
+                </button>
+              ))}
+            </div>
+
+            <section className="booking-section" role="tabpanel">
+              {visibleBookings.length > 0 ? (
+                <div className="bookings-list">
+                  {visibleBookings.map(renderBookingCard)}
+                </div>
+              ) : (
+                <p className="empty-message">
+                  {TAB_EMPTY_MESSAGE[activeTab]}
+                  {periodPreset !== 'all' && <><br />기간을 넓히면 더 오래된 예약도 볼 수 있습니다.</>}
+                </p>
+              )}
+            </section>
           </>
         )}
       </div>
@@ -359,27 +482,134 @@ function HostBookings({ userProfile }) {
           gap: 1.5rem;
         }
 
-        .see-more-btn {
+        .hb-filters {
           display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.4rem;
-          width: 100%;
-          margin-top: 1rem;
-          padding: 0.75rem;
-          background: white;
-          border: 1px dashed #ebebeb;
+          flex-wrap: wrap;
+          align-items: flex-end;
+          gap: 1rem 1.5rem;
+          padding: 1rem 1.1rem;
+          margin-bottom: 1.5rem;
+          border: 1px solid #ebebeb;
           border-radius: 4px;
-          color: #a65424;
-          font-weight: 600;
-          font-size: 0.9rem;
-          cursor: pointer;
-          transition: background 0.2s, border-color 0.2s;
+          background: #fff;
         }
 
-        .see-more-btn:hover {
-          background: #f2f2f2;
+        .hb-filter-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.45rem;
+          min-width: 0;
+        }
+
+        .hb-filter-label {
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: #6b6b6b;
+        }
+
+        .hb-presets {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.35rem;
+        }
+
+        .hb-chip {
+          padding: 0.4rem 0.8rem;
+          border: 1px solid #d4d4d4;
+          border-radius: 6px;
+          background: #fff;
+          color: #222222;
+          font-size: 0.85rem;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .hb-chip.active {
+          background: #000000;
           border-color: #000000;
+          color: #fff;
+        }
+
+        .hb-dates {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          color: #6b6b6b;
+        }
+
+        .hb-dates input,
+        .hb-filters select {
+          padding: 0.45rem 0.6rem;
+          border: 1px solid #d4d4d4;
+          border-radius: 6px;
+          background: #fff;
+          color: #111111;
+          font: inherit;
+          font-size: 0.88rem;
+          min-width: 0;
+        }
+
+        .hb-filters select {
+          min-width: 12rem;
+          max-width: 100%;
+        }
+
+        .hb-reset {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          padding: 0.45rem 0.2rem;
+          border: none;
+          background: none;
+          color: #a65424;
+          font-size: 0.85rem;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .hb-tabs {
+          display: flex;
+          gap: 1.5rem;
+          border-bottom: 1px solid #d4d4d4;
+          margin-bottom: 1.5rem;
+          overflow-x: auto;
+          overflow-y: hidden;
+        }
+
+        .hb-tab {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.45rem;
+          padding: 0.75rem 0;
+          margin-bottom: -1px;
+          border: none;
+          border-bottom: 2px solid transparent;
+          background: none;
+          color: #6b6b6b;
+          font-size: 0.98rem;
+          font-weight: 600;
+          white-space: nowrap;
+          cursor: pointer;
+        }
+
+        .hb-tab.active {
+          color: #111111;
+          border-bottom-color: #000000;
+        }
+
+        .hb-tab-count {
+          min-width: 1.4rem;
+          padding: 0.05rem 0.4rem;
+          border-radius: 6px;
+          background: #f2f2f2;
+          color: #424242;
+          font-size: 0.78rem;
+          text-align: center;
+        }
+
+        .hb-tab.active .hb-tab-count {
+          background: #d97b3f;
+          color: #fff;
         }
 
         .booking-item {
@@ -552,9 +782,29 @@ function HostBookings({ userProfile }) {
             font-size: 0.82rem;
           }
 
-          .host-bookings .see-more-btn {
-            padding: 0.65rem;
-            font-size: 0.85rem;
+          .host-bookings .hb-filters {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .host-bookings .hb-dates input {
+            flex: 1;
+          }
+
+          .host-bookings .hb-filters select {
+            width: 100%;
+            min-width: 0;
+          }
+
+          .host-bookings .hb-tabs {
+            gap: 0;
+          }
+
+          .host-bookings .hb-tab {
+            flex: 1;
+            justify-content: center;
+            gap: 0.3rem;
+            font-size: 0.88rem;
           }
         }
       `}</style>

@@ -6,6 +6,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 //   POST { action: "ping" }                         서버 연결 점검(값은 돌려주지 않음)
 //   POST { action: "prepare", bookingId, method }   선교사 본인: 결제 ID 발급(금액은 DB에서) → 화면이 결제창을 엶
 //   POST { action: "complete", paymentId }          선교사 본인·관리자: 포트원에 직접 조회해 예약에 반영
+//   POST { action: "change_method", bookingId }     선교사 본인: 입금 전 가상계좌를 말소하고 결제 수단을 다시 고르게 함
 //   POST { action: "refund", bookingId, reason }    카드 결제 전액 취소 — 관리자, 또는 환불 진행 중인 자기 예약의 선교사·숙소 제공자
 //                                                   (가상계좌는 환불 계좌로 이체 후 관리자가 "환불 완료 처리")
 //   포트원 웹훅(헤더 webhook-signature)              서명 확인 후 해당 결제를 다시 조회해 반영
@@ -82,6 +83,17 @@ async function syncPayment(sb, paymentId) {
       .eq("id", bookingId).maybeSingle());
   }
   if (!booking) return { ok: false, error: "결제에 연결된 예약을 찾을 수 없습니다." };
+
+  // (2026-11-02) 예약의 현재 결제 ID가 아닌 결제(가상계좌를 말소하고 카드로 바꾼 뒤의 옛 결제 등)는
+  // 예약의 결제 정보를 덮어쓰지 않습니다. 옛 결제가 그래도 입금 완료된 경우만 따로 처리합니다.
+  if (booking.pg_payment_id !== paymentId) {
+    if (p.status !== "PAID") return { ok: true, status: p.status, bookingId: booking.id, superseded: true };
+    if (booking.payment_status !== "unpaid") {
+      console.error("superseded payment PAID on already-paid booking — 관리자 확인 필요", paymentId, booking.id);
+      return { ok: false, error: "이미 결제된 예약에 대한 중복 결제입니다. 관리자 확인이 필요합니다.", bookingId: booking.id };
+    }
+    // 예약이 아직 미결제면 들어온 결제를 그대로 반영합니다(아래 PAID 처리).
+  }
 
   const isVa = p.method?.type === "PaymentMethodVirtualAccount";
   const base = { pg_payment_id: paymentId, pg_status: p.status, pg_method: isVa ? "virtual_account" : (p.method ? "card" : null) };
@@ -212,7 +224,7 @@ Deno.serve(async (req) => {
       if (b.payment_status !== "unpaid") return json({ error: "이미 결제가 완료된 예약입니다." }, 400);
       if (b.deposit_due_at && new Date(b.deposit_due_at) < new Date()) return json({ error: "결제 기한이 지났습니다." }, 400);
       if (b.pg_method === "virtual_account" && b.pg_status === "VIRTUAL_ACCOUNT_ISSUED" && b.va_account_number) {
-        return json({ error: "이미 발급된 가상계좌가 있습니다. 안내된 계좌로 입금해주세요." }, 400);
+        return json({ error: "이미 발급된 가상계좌가 있습니다. 안내된 계좌로 입금하시거나, '결제 수단 변경'을 눌러 다른 방법으로 결제해주세요." }, 400);
       }
 
       // 40자 이내 주문번호: wb + 예약 ID 앞 16자 + 시각(36진수)
@@ -242,6 +254,39 @@ Deno.serve(async (req) => {
       if (!b || (b.guest_id !== caller.id && !caller.isAdmin)) return json({ error: "결제 정보를 찾을 수 없습니다." }, 404);
       const result = await syncPayment(sb, paymentId);
       return json(result, result.ok ? 200 : 400);
+    }
+
+    if (action === "change_method") {
+      // (2026-11-02) 가상계좌를 발급받고 입금하기 전에 결제 수단을 바꾸려는 경우: 발급된 가상계좌를 포트원에서
+      // 말소(더 이상 입금되지 않게)한 뒤 예약의 결제 정보를 비워, 결제 수단을 다시 고를 수 있게 합니다.
+      const { bookingId } = body;
+      const { data: b } = await sb.from("bookings")
+        .select("id, guest_id, status, payment_status, pg_method, pg_status, pg_payment_id")
+        .eq("id", bookingId).maybeSingle();
+      if (!b || b.guest_id !== caller.id) return json({ error: "예약을 찾을 수 없습니다." }, 404);
+      if (b.status !== "confirmed" || b.payment_status !== "unpaid") return json({ error: "결제 대기 중인 예약만 결제 수단을 바꿀 수 있습니다." }, 400);
+      if (b.pg_method !== "virtual_account" || !b.pg_payment_id) return json({ error: "발급된 가상계좌가 없습니다." }, 400);
+
+      // 그사이 입금됐는지 먼저 포트원에 확인합니다.
+      const synced = await syncPayment(sb, b.pg_payment_id);
+      if (synced.status === "PAID") return json({ error: "이미 입금이 확인되어 결제가 완료되었습니다.", status: "PAID" }, 400);
+
+      if (synced.status === "VIRTUAL_ACCOUNT_ISSUED") {
+        const c = await portone(`/payments/${encodeURIComponent(b.pg_payment_id)}/virtual-account/close?storeId=${encodeURIComponent(STORE_ID)}`, {
+          method: "POST",
+          body: JSON.stringify({}),
+        });
+        if (!c.ok) {
+          console.error("virtual-account close failed", b.pg_payment_id, c.status, JSON.stringify(c.body));
+          return json({ error: `가상계좌를 닫지 못했습니다(${c.body?.message || c.status}). 잠시 후 다시 시도하거나 WEWE에 문의해주세요.` }, 400);
+        }
+      }
+
+      await sb.from("bookings").update({
+        pg_payment_id: null, pg_method: null, pg_status: null,
+        va_bank_name: null, va_account_number: null, va_holder_name: null, va_issued_at: null,
+      }).eq("id", b.id).eq("payment_status", "unpaid");
+      return json({ ok: true });
     }
 
     if (action === "refund") {
