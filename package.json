@@ -7,7 +7,7 @@
     "@portone/browser-sdk": "0.1.13",
     "@stripe/react-stripe-js": "^2.6.0",
     "@stripe/stripe-js": "^3.0.0",
-    "@supabase/supabase-js": "^2.38.0",
+    "@supabase/supabase-js": "^2.118.0",
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
     "lucide-react": "^0.294.0",
