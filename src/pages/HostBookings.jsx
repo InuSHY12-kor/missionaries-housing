@@ -573,6 +573,7 @@ function HostBookings({ userProfile }) {
           border-bottom: 1px solid #d4d4d4;
           margin-bottom: 1.5rem;
           overflow-x: auto;
+          overflow-y: hidden;
         }
 
         .hb-tab {
@@ -796,11 +797,14 @@ function HostBookings({ userProfile }) {
           }
 
           .host-bookings .hb-tabs {
-            gap: 1rem;
+            gap: 0;
           }
 
           .host-bookings .hb-tab {
-            font-size: 0.9rem;
+            flex: 1;
+            justify-content: center;
+            gap: 0.3rem;
+            font-size: 0.88rem;
           }
         }
       `}</style>
