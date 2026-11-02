@@ -43,7 +43,7 @@ function Dashboard({ userProfile }) {
       // 최근 예약 1건만 대시보드에 표시 (나머지는 "더보기"로 예약 관리 페이지에서 확인)
       const { data: recentBookings } = await supabase
         .from('bookings')
-        .select('*, accommodations(title), users(full_name)')
+        .select('*, accommodations(title), users!bookings_guest_id_fkey(full_name)')
         .order('created_at', { ascending: false })
         .limit(1);
 
