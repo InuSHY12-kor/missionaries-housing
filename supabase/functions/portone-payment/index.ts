@@ -90,6 +90,17 @@ async function syncPayment(sb, paymentId) {
     if (p.status !== "PAID") return { ok: true, status: p.status, bookingId: booking.id, superseded: true };
     if (booking.payment_status !== "unpaid") {
       console.error("superseded payment PAID on already-paid booking — 관리자 확인 필요", paymentId, booking.id);
+      // 결제 수단을 바꾼 뒤 닫히지 않은 옛 가상계좌로도 입금된 경우 등 — 관리자가 환불할 수 있도록 알립니다.
+      const { data: admins } = await sb.from("users").select("id").eq("role", "admin").eq("status", "approved");
+      if (admins?.length) {
+        await sb.from("notifications").insert(admins.map((a) => ({
+          recipient_id: a.id,
+          type: "payment_duplicate",
+          title: "중복 결제 확인 필요",
+          body: `이미 결제된 예약에 다른 결제(${paymentId}, ₩${Number(p.amount?.total || 0).toLocaleString()})가 들어왔습니다. 포트원 콘솔에서 확인 후 환불해주세요.`,
+          link: "/admin",
+        })));
+      }
       return { ok: false, error: "이미 결제된 예약에 대한 중복 결제입니다. 관리자 확인이 필요합니다.", bookingId: booking.id };
     }
     // 예약이 아직 미결제면 들어온 결제를 그대로 반영합니다(아래 PAID 처리).
@@ -271,6 +282,10 @@ Deno.serve(async (req) => {
       const synced = await syncPayment(sb, b.pg_payment_id);
       if (synced.status === "PAID") return json({ error: "이미 입금이 확인되어 결제가 완료되었습니다.", status: "PAID" }, 400);
 
+      // KG이니시스는 가상계좌 말소를 거절할 수 있습니다(PG_PROVIDER "취소불가능 거래"). 그때는 옛 계좌가 입금 기한까지
+      // 남지만 결제 수단 변경은 진행합니다. 옛 계좌로 입금되면 syncPayment가 미결제 예약엔 반영하고,
+      // 이미 다른 방법으로 결제된 예약이면 관리자에게 중복 결제 알림을 보냅니다.
+      let closed = true;
       if (synced.status === "VIRTUAL_ACCOUNT_ISSUED") {
         const c = await portone(`/payments/${encodeURIComponent(b.pg_payment_id)}/virtual-account/close?storeId=${encodeURIComponent(STORE_ID)}`, {
           method: "POST",
@@ -278,7 +293,10 @@ Deno.serve(async (req) => {
         });
         if (!c.ok) {
           console.error("virtual-account close failed", b.pg_payment_id, c.status, JSON.stringify(c.body));
-          return json({ error: `가상계좌를 닫지 못했습니다(${c.body?.message || c.status}). 잠시 후 다시 시도하거나 WEWE에 문의해주세요.` }, 400);
+          if (c.body?.type !== "PG_PROVIDER") {
+            return json({ error: `가상계좌를 닫지 못했습니다(${c.body?.message || c.status}). 잠시 후 다시 시도하거나 WEWE에 문의해주세요.` }, 400);
+          }
+          closed = false;
         }
       }
 
@@ -286,7 +304,7 @@ Deno.serve(async (req) => {
         pg_payment_id: null, pg_method: null, pg_status: null,
         va_bank_name: null, va_account_number: null, va_holder_name: null, va_issued_at: null,
       }).eq("id", b.id).eq("payment_status", "unpaid");
-      return json({ ok: true });
+      return json({ ok: true, closed });
     }
 
     if (action === "refund") {
